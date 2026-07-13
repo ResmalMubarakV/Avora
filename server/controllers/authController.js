@@ -8,26 +8,56 @@ const generateToken = require("../utils/generateToken");
 
 const registerUser = async (req, res) => {
     try {
-        const {name, email , password } = req.body;
+        const {name, email , password , username } = req.body;
 
         //validate input 
-        if(!name || !email || !password) {
+        if(!name || !email || !password || !username) {
             return res.status(400).json({message : "Please Fill All Fields"});
+        }
+
+        const reservedUsernames = [
+            "login",
+            "register",
+            "dashboard",
+            "admin",
+            "api",
+            "settings",
+            "profile",
+            "about",
+            "contact",
+            "privacy",
+            "terms"
+        ];
+
+        if (reservedUsernames.includes(username.toLowerCase())) {
+            return res.status(400).json({
+                message: "Username is not available"
+            });
         }
 
         // Check exisiting User
         const existingUser = await User.findOne({email});
-        if(existingUser) {
-            return res.status(400).json({
-                message : "User already exists"});
-        }
 
+        const existingUsername = await User.findOne({username});
+        
+        if (existingUser) {
+                return res.status(400).json({
+                    message: "Email already exists"
+                });
+            }
+
+            if (existingUsername) {
+                return res.status(400).json({
+                    message: "Username already exists"
+                });
+            }
         // Hash Password
         const hashedPassword = await bcrypt.hash(password, 10);
 
          // Create User
          const user = await User.create({
             name,
+            username,
             email,
             password : hashedPassword,
          })
@@ -38,6 +68,12 @@ const registerUser = async (req, res) => {
             _id : user._id,
             name : user.name,
             email : user.email,
+            username : user.username,
+            profileImage : user.profileImage,
+            profileImagePublicId : user.profileImagePublicId,
+            bio : user.bio,
+            location : user.location,
+
             token : generateToken(user._id),
          })
 
@@ -77,6 +113,11 @@ const loginUser = async (req , res) => {
             _id: user._id,
             name: user.name,
             email : user.email,
+            username : user.username,
+            profileImage : user.profileImage,
+            profileImagePublicId : user.profileImagePublicId,
+            bio : user.bio,
+            location : user.location,
             token : generateToken(user._id),
         });
     } catch (error) {

@@ -1,6 +1,15 @@
 const mongoose = require("mongoose");
 const Memory = require("../models/Memory");
 const cloudinary = require("../config/cloudinary");
+const fs = require("fs");
+
+const generateSlug = (title) => {
+    return title
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, "-");
+};
 
 const createMemory = async (req , res) => {
    try {
@@ -11,20 +20,74 @@ const createMemory = async (req , res) => {
         startDate,
         endDate,
         modeOfTravel,
-        coverImage,
-        coverImagePublicId,
-        images,
+        isPublic,
     } = req.body;
 
+    
     if( !title || 
         !description || 
         !location || 
         !startDate || 
         !endDate || 
-        !modeOfTravel || 
-        !coverImage || 
-        !coverImagePublicId ) {
-        return res.status(400).json({message : "Please fill all the required fields"});
+        !modeOfTravel 
+      ) {
+            return res.status(400).json({message : "Please fill all the required fields"});
+        }
+
+    if(!req.files|| !req.files.coverImage || req.files.coverImage.length === 0){
+        return res.status(400).json({
+            message : "Cover Image Is Required"
+        });
+    }
+
+    const coverImageFile = req.files.coverImage[0];
+    const mediaFiles = req.files.media || [];
+    const uploadedMedia = [];
+
+    const coverUpload = await cloudinary.uploader.upload(
+        coverImageFile.path ,{
+            folder : "avora/covers",
+            resource_type : "image"
+        } 
+    );
+    try {
+          await fs.promises.unlink(coverImageFile.path);
+        } catch (error) {
+            console.error("Cover Cleanup Error:", error.message);
+        }
+
+    for (const file of mediaFiles) {
+        try {
+            const upload = await cloudinary.uploader.upload(file.path, {
+                resource_type: "auto",
+                folder: "avora/media",
+            });
+
+            uploadedMedia.push({
+                url: upload.secure_url,
+                publicId: upload.public_id,
+                type: file.mimetype.startsWith("image/")
+                    ? "image"
+                    : "video",
+            });
+        } finally {
+            await fs.promises.unlink(file.path).catch(() => {});
+        }
+    }
+        
+    const slug = generateSlug(title);
+
+    let finalSlug = slug;
+    let counter = 2;
+
+    while (
+        await Memory.findOne({
+            user : req.user._id,
+            slug : finalSlug
+        })
+    ) {
+        finalSlug = `${slug}-${counter}`;
+        counter++;
     }
 
     const memory = await Memory.create({
@@ -34,9 +97,11 @@ const createMemory = async (req , res) => {
         startDate,
         endDate,
         modeOfTravel,
-        coverImage,
-        coverImagePublicId,
-        images,
+        coverImage : coverUpload.secure_url,
+        coverImagePublicId : coverUpload.public_id,
+        isPublic,
+        media : uploadedMedia,
+        slug: finalSlug,
         user : req.user._id
     })
     return res.status(201).json(memory);
@@ -67,14 +132,16 @@ const getMemoryById = async (req, res) => {
             });
         }
         
-        const memory = await Memory.findById(id);
+        const memory = await Memory.findOne({
+            _id: id,
+            user: req.user._id,
+        });
 
         if(!memory) {
-            return res.status(404).json({message : "Memory not Found"});
-        }
-        if(memory.user.toString() !== req.user._id.toString()) {
-            return res.status(403).json({message : "Not Authorized"});
-        }
+            return res.status(404).json({
+                message : "Memory not found"
+            });
+        } 
             return res.status(200).json(memory);
     } catch (error) {
         console.error("Get Memory By Id Error", error.message);
@@ -92,7 +159,10 @@ const updateMemory = async (req, res) => {
             });
         }
 
-       const memory = await Memory.findById(id);
+       const memory = await Memory.findOne({
+            _id: id,
+            user: req.user._id,
+        });
 
         if(!memory) {
             return res.status(404).json({
@@ -100,11 +170,6 @@ const updateMemory = async (req, res) => {
             });
         } 
 
-        if(memory.user.toString() !== req.user._id.toString()){
-            return res.status(403).json({
-                message : "You are not authorized to update this memory"
-            });
-        }
         if(Object.keys(req.body).length === 0) {
             return res.status(400).json
             ({message : "Please provide data to update"});
@@ -112,6 +177,25 @@ const updateMemory = async (req, res) => {
 
         if(req.body.coverImagePublicId){
             await cloudinary.uploader.destroy(memory.coverImagePublicId);
+        }
+
+        if (req.body.title) {
+            const baseSlug = generateSlug(req.body.title);
+            let finalSlug = baseSlug;
+            let counter = 2;
+
+            while (
+                await Memory.findOne({
+                    user: req.user._id,
+                    slug: finalSlug,
+                    _id: { $ne: id }
+                })
+            ) {
+                finalSlug = `${baseSlug}-${counter}`;
+                counter++;
+            }
+
+            req.body.slug = finalSlug;
         }
 
         const updatedMemory = await Memory.findByIdAndUpdate
@@ -138,15 +222,33 @@ const deleteMemory = async (req, res) => {
             });
         }
 
-        const memory = await Memory.findById(id);
+        const memory = await Memory.findOne({
+            _id: id,
+            user: req.user._id,
+        });
 
         if(!memory) {
-            return res.status(404).json({message : "Memory not found"});
-        }
-        if(memory.user.toString() !== req.user._id.toString()) {
-            return res.status(403).json({message : "You are not authorized to delete this memory"});
-        }
-        await cloudinary.uploader.destroy(memory.coverImagePublicId);
+            return res.status(404).json({
+                message : "Memory not found"
+            });
+        } 
+        
+        try {
+                await cloudinary.uploader.destroy(memory.coverImagePublicId);
+            } catch (err) {
+                console.error("Cover Cleanup Error:", err.message);
+            }
+
+            for (const item of memory.media || []) {
+                try {
+                    await cloudinary.uploader.destroy(item.publicId, {
+                        resource_type:
+                            item.type === "video" ? "video" : "image",
+                    });
+                } catch (err) {
+                    console.error(`Media Cleanup Error (${item.publicId}):`, err.message);
+                }
+            }
 
         await memory.deleteOne();
 

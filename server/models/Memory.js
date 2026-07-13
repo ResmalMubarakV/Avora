@@ -37,8 +37,35 @@ const memorySchema = new mongoose.Schema(
             type : String,
             required : true,
         },
-        images : {
-            type : [String],
+        isPublic : {
+            type : Boolean,
+            default : false
+        },
+        slug : {
+            type : String,
+            required : true,
+            trim : true,
+            lowercase : true
+        },
+        media : {
+            type : [ 
+                {
+                    url : {
+                    type : String,
+                    required : true
+                },
+                publicId : {
+                    type : String,
+                    required : true
+                },
+                type : {
+                    type : String,
+                    enum : ["image" , "video"],
+                    required : true
+                }
+                }
+            ],
+            default : [],
         },
         user : {
             type : mongoose.Schema.Types.ObjectId,

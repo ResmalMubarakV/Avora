@@ -2,7 +2,7 @@ const mongoose = require ("mongoose");
 
 const userSchema = new mongoose.Schema(
     {
-        name: {
+        name : {
             type : String,
             required : true,
             trim : true,
@@ -17,6 +17,31 @@ const userSchema = new mongoose.Schema(
             type : String,
             required : true,
             minlength : 6,
+        },
+        username: {
+            type : String,
+            required : true,
+            trim : true,
+            unique : true,
+            lowercase : true,
+        },
+        profileImage : {
+            type : String,
+            default : "",
+        },
+        profileImagePublicId : {
+            type : String,
+            default : "",
+        },
+        bio : {
+            type : String,
+            default : "",
+            maxLength : 200,
+        },
+        location : {
+            type : String,
+            default : "",
+            trim : true,
         },
     },
     {
