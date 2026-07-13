@@ -1,0 +1,15 @@
+# Dependencies
+server/node_modules/
+client/node_modules/
+
+# Environment files
+server/.env
+client/.env
+
+# Temporary uploads
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Logs
+*.log
+npm-debug.log*
