@@ -34,3 +34,37 @@ Backend
 Backend ✅ Completed
 
 Frontend 🚧 In Progress
+
+## Installation
+
+```bash
+git clone https://github.com/ResmalMubarakV/Avora.git
+
+cd server
+npm install
+
+cd ../client
+npm install
+```
+
+## Environment Variables
+
+Create a `.env` file in `server/`:
+
+```
+MONGO_URI=
+JWT_SECRET=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+## Run
+
+```bash
+cd server
+npm run dev
+
+cd client
+npm run dev
+```
