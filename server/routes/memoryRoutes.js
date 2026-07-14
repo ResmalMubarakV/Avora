@@ -6,7 +6,8 @@ const {getMemories ,
     createMemory,
     getMemoryById,
     updateMemory,
-    deleteMemory} = require("../controllers/memoryController");
+    deleteMemory,
+    deleteMedia} = require("../controllers/memoryController");
     
 const {protect} = require("../middleware/authMiddleware");
 
@@ -23,9 +24,25 @@ router.post("/",
         }
     ]),
     createMemory);
+
 router.get("/", protect , getMemories);
 router.get("/:id", protect , getMemoryById);
-router.put("/:id", protect , updateMemory);
+
+router.put("/:id"
+    , protect ,
+    upload.fields([
+        {
+            name : "coverImage",
+            maxCount : 1
+        },
+        {
+            name : "media",
+            maxCount : 20
+        }
+    ]),
+    updateMemory);
+
 router.delete("/:id", protect , deleteMemory);
+router.delete("/:id/media", protect , deleteMedia)
 
 module.exports = router;

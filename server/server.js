@@ -9,6 +9,8 @@ const authRoutes = require("./routes/authRoutes");
 const memoryRoutes = require("./routes/memoryRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const userRoutes = require("./routes/userRoutes");
+const publicRoutes = require("./routes/publicRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 
 const app = express();
 connectDB();
@@ -19,6 +21,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/memories", memoryRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/public" , publicRoutes);
+app.use("/api/ai" , aiRoutes);
 
 app.get("/", (req, res) => {
 

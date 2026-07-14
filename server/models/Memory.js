@@ -54,11 +54,11 @@ const memorySchema = new mongoose.Schema(
                     type : String,
                     required : true
                 },
-                publicId : {
+                    publicId : {
                     type : String,
                     required : true
                 },
-                type : {
+                    type : {
                     type : String,
                     enum : ["image" , "video"],
                     required : true
