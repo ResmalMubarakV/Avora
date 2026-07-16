@@ -1,6 +1,7 @@
 const cloudinary = require("../config/cloudinary");
 const fs = require("fs");
 const User = require("../models/User");
+const {reservedUsernames} = require("../constants/reservedUsernames")
 
 const userResponse = (user) => ({
     _id: user._id,
@@ -12,6 +13,44 @@ const userResponse = (user) => ({
     location: user.location
 });
 
+const checkUsername = async (req, res) => {
+    try {
+        const {username} = req.query;
+
+
+        if(!username) { 
+            return res.status(400).json({
+                message : "Username is required"
+            })
+        }
+
+        if(reservedUsernames.includes(username.toLowerCase())) {
+            return res.status(200).json({
+                available: false
+            });
+        }
+
+        const existingUser = await User.findOne({
+            username: username.toLowerCase()
+        });
+
+        if (existingUser) {
+            return res.status(200).json({
+                available: false
+            });
+        }
+
+        return res.status(200).json({
+            available: true
+        })
+    } catch (error) {
+        console.error("Check Username Error", error.message);
+
+        return res.status(500).json({
+            message: "Server Error"
+        });
+    }
+}
 
 const getMyProfile = async (req , res) => {
     try {
@@ -45,48 +84,36 @@ const updateProfile = async (req, res) => {
             })
         }
 
-        if (username) {
-            const reservedUsernames = [
-            "login",
-            "register",
-            "dashboard",
-            "admin",
-            "api",
-            "settings",
-            "profile",
-            "about",
-            "contact",
-            "privacy",
-            "terms"
-    ];
-
-    if (reservedUsernames.includes(username.toLowerCase())) {
-        return res.status(400).json({
-            message: "Username is not available"
-        });
-    }
-}
-
+        // Find current user first
         const user = await User.findById(req.user._id);
 
-        if(!user) 
+        if (!user) {
             return res.status(404).json({
-                message : "User Not Found"
-            })
-
-        if(username){
-
-            const existingUsername = await User.findOne ({
-            username,
-            _id : {$ne : req.user ._id }
-        })
-            if(existingUsername){
-                return res.status(400).json({ 
-                message : "User Already Exists"
-            })
-            }
+                message: "User Not Found"
+            });
         }
 
+        if (username) {
+
+            // Check reserved usernames
+            if (reservedUsernames.includes(username.toLowerCase())) {
+                return res.status(400).json({
+                    message: "Username is not available"
+                });
+            }
+
+            // Check existing username
+            const existingUsername = await User.findOne({
+                username,
+                _id: { $ne: req.user._id }
+            });
+
+            if (existingUsername) {
+                return res.status(400).json({
+                    message: "Username already exists"
+                });
+            }
+        }
 
         user.name = name || user.name;
         user.username = username || user.username;
@@ -154,5 +181,6 @@ const updateProfileImage = async (req, res) => {
 module.exports = {
     getMyProfile,
     updateProfile,
-    updateProfileImage
+    updateProfileImage,
+    checkUsername
 }

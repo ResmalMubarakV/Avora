@@ -171,7 +171,36 @@ const createMemory = async (req , res) => {
 
 const getMemories = async (req, res) => {
     try {
-       const memories = await Memory.find({user : req.user._id}).sort({createdAt : -1});
+       const {search} = req.query;
+
+       const query = {
+        user : req.user._id
+       }
+
+       if(search) {
+        query.$or = [
+            {
+                title: {
+                    $regex: search,
+                    $options: "i"
+                },
+            },
+            {
+                description: {
+                    $regex: search,
+                    $options: "i"
+                },
+            },
+            {
+                location: {
+                    $regex: search,
+                    $options: "i"
+                }
+            }
+        ]
+       }
+
+       const memories = await Memory.find(query).sort({createdAt : -1});
        return res.status(200).json(memories);
     } catch (error) {
         console.error("Get Memories Error" , error.message);

@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const generateToken = require("../utils/generateToken");
+const {reservedUsernames} = require("../constants/reservedUsernames")
 
 // @desc Register User
 // @route POST /api/auth/register
@@ -14,20 +15,6 @@ const registerUser = async (req, res) => {
         if(!name || !email || !password || !username) {
             return res.status(400).json({message : "Please Fill All Fields"});
         }
-
-        const reservedUsernames = [
-            "login",
-            "register",
-            "dashboard",
-            "admin",
-            "api",
-            "settings",
-            "profile",
-            "about",
-            "contact",
-            "privacy",
-            "terms"
-        ];
 
         if (reservedUsernames.includes(username.toLowerCase())) {
             return res.status(400).json({
@@ -54,28 +41,18 @@ const registerUser = async (req, res) => {
         // Hash Password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-         // Create User
-         const user = await User.create({
-            name,
-            username,
+        // Create User 
+        await User.create
+        ({  name, 
+            username, 
             email,
-            password : hashedPassword,
-         })
+            password : hashedPassword, 
+        })
 
          // Response 
-
-         return res.status(201).json({
-            _id : user._id,
-            name : user.name,
-            email : user.email,
-            username : user.username,
-            profileImage : user.profileImage,
-            profileImagePublicId : user.profileImagePublicId,
-            bio : user.bio,
-            location : user.location,
-
-            token : generateToken(user._id),
-         })
+            return res.status(201).json({
+                 message : "Registration successful. Your account is awaiting admin approval"
+            })
 
     } catch (error) {
         console.error("Register User " ,error.message);
@@ -108,8 +85,18 @@ const loginUser = async (req , res) => {
             ({message : "Invalid Credentials"});
         }
 
-        //Response 
-        return res.status(200).json({
+        if(user.status === "pending"){
+            return res.status(403).json
+                ({message : "Your account is awaiting admin approval."})
+        } 
+        else if (user.status === "rejected"){
+                return res.status(403).json({
+                    message : "Your registration request was rejected"
+                })
+            }
+
+        else if(user.status === "approved"){
+            return res.status(200).json({
             _id: user._id,
             name: user.name,
             email : user.email,
@@ -118,8 +105,15 @@ const loginUser = async (req , res) => {
             profileImagePublicId : user.profileImagePublicId,
             bio : user.bio,
             location : user.location,
-            token : generateToken(user._id),
+            token : generateToken(user._id)
         });
+        }
+
+        else {
+            return res.status(500).json({
+                message : "Invalid account status"
+            })
+        }
     } catch (error) {
         console.error("Login Error" , error.message);
         return res.status(500).json({message : "Server Error"});
@@ -130,4 +124,5 @@ module.exports = {
     registerUser , 
     loginUser
 };
+
 
