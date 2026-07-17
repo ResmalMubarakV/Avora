@@ -1,12 +1,15 @@
-import Navbar from "../components/layout/Navbar";
-import Sidebar from "../components/layout/Sidebar";
+import { Outlet } from "react-router-dom"
+import Navbar from "../components/layouts/Navbar";
+import Sidebar from "../components/layouts/Sidebar";
 
 const DashboardLayout = ({ children }) => {
+    return (
     <>
         <Navbar />
         <Sidebar />
-        {children}
+        <Outlet />
     </>
+    )
 }
 
 export default DashboardLayout;
