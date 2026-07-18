@@ -8,6 +8,7 @@ import Register from "./pages/auth/Register";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Profile from "./pages/profile/Profile"
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import PublicProfile from "./pages/profile/PublicProfile"
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
        <Route element ={<AuthLayout />}>
           <Route index element ={<Login/>} />
           <Route path = "register" element ={<Register/>} />
+          <Route path="/:username" element={<PublicProfile />} />
        </Route>
 
         {/* Protected Routes */} 

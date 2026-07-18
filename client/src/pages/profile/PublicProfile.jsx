@@ -1,15 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect  } from "react";
+import { useParams } from "react-router-dom";
 import api from "../../api/axios";
 
-const Profile = () => {
+const PublicProfile = () => {
+   const { username } = useParams();
    const [user, setUser] = useState(null);
+   const [memories, setMemories] = useState([]);
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState("");
 
    const fetchProfile = async () => {
     try {
-      const {data} = await api.get("/api/users/profile");
-      setUser(data);
+      const {data} = await api.get(`/api/public/${username}`);
+      setUser(data.user);
+      setMemories(data.memories)
     } catch (error) {
       console.error(error.message)
       setError(error.message);
@@ -20,7 +24,7 @@ const Profile = () => {
 
    useEffect(() => {
       fetchProfile();
-   }, []);
+   }, [username]);
 
   if(loading) {
      return <h1>Loading...</h1>;
@@ -33,4 +37,4 @@ const Profile = () => {
   )
 };
 
-export default Profile;
+export default PublicProfile;
