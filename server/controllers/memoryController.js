@@ -548,6 +548,50 @@ const deleteMedia = async (req, res) => {
     }
 }
 
+const downloadMedia = async (req, res) => {
+    try {
+
+        const { memoryId, mediaId } = req.params;
+
+        // Validate Memory ID
+        if (!mongoose.Types.ObjectId.isValid(memoryId)) {
+            return res.status(400).json({
+                message: "Invalid Memory ID",
+            });
+        }
+
+        // Find Memory
+        const memory = await Memory.findOne({
+            _id: memoryId,
+            user: req.user._id,
+        });
+
+        if (!memory) {
+            return res.status(404).json({
+                message: "Memory not found",
+            });
+        }
+
+        // Find Media
+        const media = memory.media.id(mediaId);
+
+        if (!media) {
+            return res.status(404).json({
+                message: "Media not found",
+            });
+        }
+
+    } catch (error) {
+
+        console.error("Download Media Error:", error.message);
+
+        return res.status(500).json({
+            message: "Server Error",
+        });
+
+    }
+};
+
 
 module.exports = {
     createMemory,
@@ -555,5 +599,6 @@ module.exports = {
     getMemoryById,
     updateMemory,
     deleteMemory,
-    deleteMedia
+    deleteMedia,
+    downloadMedia
 };

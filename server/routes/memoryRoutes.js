@@ -6,6 +6,7 @@ const {getMemories ,
     createMemory,
     getMemoryById,
     updateMemory,
+    downloadMedia,
     deleteMemory,
     deleteMedia} = require("../controllers/memoryController");
     
@@ -41,6 +42,12 @@ router.put("/:id"
         }
     ]),
     updateMemory);
+
+router.get(
+    "/download/:memoryId/:mediaId",
+    protect,
+    downloadMedia
+);
 
 router.delete("/:id", protect , deleteMemory);
 router.delete("/:id/media", protect , deleteMedia)

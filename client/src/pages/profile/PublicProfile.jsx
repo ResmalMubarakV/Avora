@@ -1,6 +1,8 @@
 import { useState, useEffect  } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../api/axios";
+import ProfileHeader from "../../components/profile/ProfileHeader";
+import MemoryCard from "../../components/memory/MemoryCard";
 
 const PublicProfile = () => {
    const { username } = useParams();
@@ -13,7 +15,7 @@ const PublicProfile = () => {
     try {
       const {data} = await api.get(`/api/public/${username}`);
       setUser(data.user);
-      setMemories(data.memories)
+      setMemories(data.memories);
     } catch (error) {
       console.error(error.message)
       setError(error.message);
@@ -32,9 +34,24 @@ const PublicProfile = () => {
   if(error){
     return <h1>{error}</h1>;
   }
-  return (
-    <h1>{user.name}</h1>
-  )
+return (
+     <div>
+    <ProfileHeader
+      user={user}
+      memoryCount={memories.length}
+    />
+
+    <div className="max-w-6xl mx-auto px-6 py-10 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      {memories.map((memory) => (
+        <MemoryCard
+          key={memory._id}
+          memory={memory}
+          username={user.username}
+        />
+      ))}
+    </div>
+  </div>
+);
 };
 
 export default PublicProfile;

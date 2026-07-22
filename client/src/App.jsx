@@ -9,6 +9,7 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import Profile from "./pages/profile/Profile"
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicProfile from "./pages/profile/PublicProfile"
+import PublicMemory from "./components/profile/PublicMemory";
 
 function App() {
   return (
@@ -19,6 +20,8 @@ function App() {
           <Route index element ={<Login/>} />
           <Route path = "register" element ={<Register/>} />
           <Route path="/:username" element={<PublicProfile />} />
+          <Route path="/:username/:slug" element={<PublicMemory />}
+/>
        </Route>
 
         {/* Protected Routes */} 

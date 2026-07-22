@@ -9,11 +9,22 @@ const {reservedUsernames} = require("../constants/reservedUsernames")
 
 const registerUser = async (req, res) => {
     try {
-        const {name, email , password , username } = req.body;
+        const {name, password  } = req.body;
+        const username = req.body.username.trim().toLowerCase();
+        const email = req.body.email.trim().toLowerCase();
+
+        const usernameRegex = /^[a-zA-Z0-9._]{3,30}$/;
 
         //validate input 
         if(!name || !email || !password || !username) {
             return res.status(400).json({message : "Please Fill All Fields"});
+        }
+
+        if (!usernameRegex.test(username)) {
+            return res.status(400).json({
+                message:
+                    "Username must be 3-30 characters and can only contain letters, numbers, dots (.) and underscores (_)."
+            });
         }
 
         if (reservedUsernames.includes(username.toLowerCase())) {
