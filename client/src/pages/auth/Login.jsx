@@ -1,6 +1,8 @@
 import { useState } from "react";
 import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
+import AuthLayout from "../../layouts/AuthLayout";
+
 
 const Login = () => {
     
@@ -31,41 +33,13 @@ const Login = () => {
     };
 
     // UI
-  return (
-    <div>
-      <h1>Login</h1>
+return (
+    <AuthLayout>
 
-      <form onSubmit={handleSubmit}>
-        
-        <div>
-          <label>Email</label>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            required
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
+        Login Card
 
-
-        <div>
-          <label>Password</label>
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            required
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-
-        <button type="submit">
-          Login
-        </button>
-      </form>
-    </div>
-  );
+    </AuthLayout>
+);
 };
 
 export default Login;

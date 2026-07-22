@@ -1,5 +1,11 @@
+import AuthLayout from "../../layouts/AuthLayout";
+
 const Register = () => {
-  return <h1>Register Page</h1>;
+    return (
+        <AuthLayout>
+            Register Card
+        </AuthLayout>
+    );
 };
 
 export default Register;
