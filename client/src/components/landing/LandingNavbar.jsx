@@ -1,5 +1,5 @@
-import avoraLogo from "../../assets/images/avoraLogo.png";
 import { Link } from "react-router-dom";
+import Logo from "../common/Logo";
 
 const Navbar = () => {
     return (
@@ -7,21 +7,7 @@ const Navbar = () => {
             <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-5 md:px-8 md:py-6">
 
                 {/* Logo */}
-                <Link
-                    to="/"
-                    className="flex items-center gap-1.5 sm:gap-2 md:gap-3"
-                >
-                    <img
-                        src={avoraLogo}
-                        alt="Avora Logo"
-                        className="h-9 w-auto select-none sm:h-10 md:h-16"
-                        draggable="false"
-                    />
-
-                    <span className="text-xl font-light uppercase tracking-[0.12em] text-slate-900 sm:text-2xl md:text-[42px] md:tracking-[0.16em]">
-                        AVORA
-                    </span>
-                </Link>
+                <Logo to="/" size="lg" />
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 sm:gap-3 md:gap-5">

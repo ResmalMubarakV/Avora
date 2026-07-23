@@ -12,6 +12,7 @@ const userRoutes = require("./routes/userRoutes");
 const publicRoutes = require("./routes/publicRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const searchRoutes = require("./routes/searchRoutes");
 
 const app = express();
 connectDB();
@@ -25,6 +26,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/public" , publicRoutes);
 app.use("/api/ai" , aiRoutes);
 app.use("/api/admin" , adminRoutes);
+app.use("/api/search", searchRoutes);
 
 app.get("/", (req, res) => {
 

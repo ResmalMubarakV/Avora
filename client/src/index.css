@@ -17,3 +17,14 @@ body {
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
+
+/* Hide horizontal scrollbar */
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}

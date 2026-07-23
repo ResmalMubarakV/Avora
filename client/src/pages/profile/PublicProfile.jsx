@@ -1,8 +1,9 @@
 import { useState, useEffect  } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../api/axios";
-import ProfileHeader from "../../components/profile/ProfileHeader";
-import MemoryCard from "../../components/memory/MemoryCard";
+import ProfileHero from "../../components/public/profile/ProfileHero";
+import MemoriesSection from "../../components/public/profile/MemoriesSection";
+import AppHeader from "../../components/navigation/AppHeader";
 
 const PublicProfile = () => {
    const { username } = useParams();
@@ -35,22 +36,18 @@ const PublicProfile = () => {
     return <h1>{error}</h1>;
   }
 return (
-     <div>
-    <ProfileHeader
-      user={user}
-      memoryCount={memories.length}
-    />
+    <main className="min-h-screen bg-slate-50">
 
-    <div className="max-w-6xl mx-auto px-6 py-10 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-      {memories.map((memory) => (
-        <MemoryCard
-          key={memory._id}
-          memory={memory}
-          username={user.username}
+       <AppHeader />
+
+        <ProfileHero user={user} />
+
+        <MemoriesSection
+            memories={memories}
+            username={user.username}
         />
-      ))}
-    </div>
-  </div>
+
+    </main>
 );
 };
 

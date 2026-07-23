@@ -2,24 +2,54 @@ import loginImage from "../assets/images/loginImage.png";
 
 const AuthLayout = ({ children }) => {
     return (
-        <section className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-white">
+        <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-white">
+            {/* Background Illustration */}
+            <img
+                src={loginImage}
+                alt="Avora Authentication"
+                draggable={false}
+                className="
+                    absolute
+                    inset-0
+                    hidden
+                    md:block
+                    h-full
+                    w-full
+                    object-cover
+                    scale-105
+                    select-none
+                "
+            />
 
-            <div className="mx-auto flex min-h-screen max-w-7xl items-center justify-between px-6 py-10">
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-white/20 md:bg-transparent" />
 
-                {/* Left Side */}
-                <div className="hidden md:flex md:w-[45%] lg:w-1/2 items-center justify-center">
+            {/* Content */}
+            <div
+                className="
+                    relative
+                    z-10
+                    flex
+                    min-h-screen
+                    items-center
+                    justify-center
+                    px-5
+                    py-8
+                    sm:px-6
+                    lg:px-10
+                "
+            >
 
-                    <img
-                        src={loginImage}
-                        alt="Avora Authentication"
-                        draggable="false"
-                        className="w-full max-w-md lg:max-w-2xl select-none"
-                    />
-
-                </div>
-
-                {/* Right Side */}
-                <div className="flex w-full justify-center lg:w-1/2">
+                <div
+                    className="
+                        w-full
+                        max-w-md
+                        md:ml-auto
+                        md:mr-10
+                        lg:mr-20
+                        xl:mr-28
+                    "
+                >
 
                     {children}
 

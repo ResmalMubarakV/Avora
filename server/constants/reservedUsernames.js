@@ -1,15 +1,38 @@
-const reservedUsernames = [
-            "login",
-            "register",
-            "dashboard",
-            "admin",
-            "api",
-            "settings",
-            "profile",
-            "about",
-            "contact",
-            "privacy",
-            "terms"
-];
+const reservedUsernames = new Set([
+    "admin",
+    "administrator",
+    "login",
+    "register",
+    "dashboard",
+    "api",
+    "settings",
+    "profile",
+    "about",
+    "contact",
+    "privacy",
+    "terms",
+
+    "explore",
+    "discover",
+    "search",
+    "memories",
+    "memory",
+    "notifications",
+    "messages",
+    "chat",
+    "saved",
+    "favorites",
+    "bookmarks",
+    "support",
+    "help",
+    "pricing",
+    "features",
+    "careers",
+    "jobs",
+    "status",
+    "docs",
+    "robots.txt",
+    "favicon.ico"
+]);
 
 module.exports = {reservedUsernames};

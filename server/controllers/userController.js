@@ -24,7 +24,7 @@ const checkUsername = async (req, res) => {
             })
         }
 
-        if(reservedUsernames.includes(username.toLowerCase())) {
+        if (reservedUsernames.has(username.toLowerCase())) {
             return res.status(200).json({
                 available: false
             });
@@ -96,7 +96,7 @@ const updateProfile = async (req, res) => {
         if (username) {
 
             // Check reserved usernames
-            if (reservedUsernames.includes(username.toLowerCase())) {
+            if (reservedUsernames.has(username.toLowerCase())) {
                 return res.status(400).json({
                     message: "Username is not available"
                 });

@@ -7,7 +7,7 @@ const getPublicProfile = async ( req , res) => {
 
         const user = await User.findOne({username}).select("-password");
 
-        if(!user) {
+        if(!user || user.username === "admin") {
             return res.status(404).json({
                 message : "User not found"
             })

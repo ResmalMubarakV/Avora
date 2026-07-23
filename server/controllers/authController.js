@@ -27,7 +27,7 @@ const registerUser = async (req, res) => {
             });
         }
 
-        if (reservedUsernames.includes(username.toLowerCase())) {
+        if (reservedUsernames.has(username.toLowerCase())) {
             return res.status(400).json({
                 message: "Username is not available"
             });
