@@ -5,7 +5,7 @@ const getUsers = async (req ,res ) => {
     try {
         const status = req.query.status;
 
-        const validStatuses = ["pending" , "approved" , "rejected"];
+        const validStatuses = ["pending" , "approved" , "suspended"];
 
         // validate status if provided
         if(status && !validStatuses.includes((status))){
@@ -78,7 +78,7 @@ const approveUser = async (req , res) => {
     }
 }
 
-const rejectUser = async (req , res) => {
+const suspendUser = async (req , res) => {
     try {
         const {id} = req.params;
 
@@ -96,18 +96,18 @@ const rejectUser = async (req , res) => {
             })
         }
 
-        if(user.status === "rejected") {
+        if(user.status === "suspended") {
             return res.status(400).json({
-                message : "User is already rejected"
+                message : "User is already suspended"
             })
         }
 
-         user.status = "rejected";
+         user.status = "suspended";
 
          await user.save();
 
          return res.status(200).json({
-            message : "User rejected successfully",
+            message : "User suspended successfully",
             "user" : user
          });
 
@@ -123,6 +123,6 @@ const rejectUser = async (req , res) => {
 module.exports = {
     getUsers,
     approveUser,
-    rejectUser
+    suspendUser
 };
 

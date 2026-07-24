@@ -10,44 +10,184 @@ const LandingFooter = () => {
     };
 
     return (
-        <footer className="bg-transparent">
 
-            <div className="mx-auto max-w-7xl px-5 py-14 md:px-8">
+        <footer
+            className="
+                relative
+                overflow-hidden
+                border-t
+                border-slate-200
+                bg-gradient-to-br
+                from-white
+                via-[#F8FAFC]
+                to-[#EEF4FF]
+            "
+        >
 
-                <div className="flex flex-col items-center gap-6 text-center md:flex-row md:justify-center md:gap-12 md:text-left">
+            {/* Background */}
+
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+
+                {/* Left Glow */}
+
+                <div
+                    className="
+                        absolute
+                        left-0
+                        top-0
+                        h-full
+                        w-80
+                        bg-gradient-to-r
+                        from-[#1E3A8A]/12
+                        via-[#1E3A8A]/5
+                        to-transparent
+                    "
+                />
+
+                {/* Right Glow */}
+
+                <div
+                    className="
+                        absolute
+                        right-0
+                        top-0
+                        h-full
+                        w-80
+                        bg-gradient-to-l
+                        from-[#3559D4]/12
+                        via-[#3559D4]/5
+                        to-transparent
+                    "
+                />
+
+                {/* Top Highlight */}
+
+                <div
+                    className="
+                        absolute
+                        inset-x-0
+                        top-0
+                        h-32
+                        bg-gradient-to-b
+                        from-white
+                        via-white/70
+                        to-transparent
+                    "
+                />
+
+                {/* Bottom Highlight */}
+
+                <div
+                    className="
+                        absolute
+                        inset-x-0
+                        bottom-0
+                        h-32
+                        bg-gradient-to-t
+                        from-[#1E3A8A]/6
+                        to-transparent
+                    "
+                />
+
+                {/* Center Ambient Glow */}
+
+                <div
+                    className="
+                        absolute
+                        left-1/2
+                        top-1/2
+                        h-[500px]
+                        w-[500px]
+                        -translate-x-1/2
+                        -translate-y-1/2
+                        rounded-full
+                        bg-[#1E3A8A]/6
+                        blur-[120px]
+                    "
+                />
+
+            </div>
+
+            {/* Content */}
+
+            <div className="relative z-10 mx-auto max-w-7xl px-5 py-16 md:px-8">
+
+                <div className="flex flex-col items-center gap-8 text-center md:flex-row md:justify-center md:gap-14 md:text-left">
 
                     <button
                         onClick={scrollToTop}
                         aria-label="Back to top"
-                        className="cursor-pointer rounded-xl transition duration-300 hover:scale-105"
+                        className="
+                            rounded-2xl
+                            transition-all
+                            duration-300
+                            hover:scale-105
+                        "
                     >
+
                         <img
                             src={avoraLogo}
                             alt="Avora Logo"
-                            className="h-20 w-auto sm:h-24 md:h-28"
                             draggable="false"
+                            className="
+                                h-20
+                                w-auto
+                                drop-shadow-lg
+                                sm:h-24
+                                md:h-28
+                            "
                         />
+
                     </button>
 
                     <div>
-                        <p className="max-w-xs text-base leading-7 text-slate-600 sm:text-lg">
+
+                        <p
+                            className="
+                                max-w-sm
+                                text-base
+                                leading-8
+                                text-slate-700
+                                sm:text-lg
+                            "
+                        >
                             Every adventure deserves
                             <br />
                             a place to be remembered.
                         </p>
+
                     </div>
 
                 </div>
 
-                <div className="mx-auto mt-10 h-px w-72 bg-slate-300" />
+                <div
+                    className="
+                        mx-auto
+                        mt-12
+                        h-px
+                        w-80
+                        bg-gradient-to-r
+                        from-transparent
+                        via-[#1E3A8A]/25
+                        to-transparent
+                    "
+                />
 
-                <p className="mt-8 text-center text-sm text-slate-500">
+                <p
+                    className="
+                        mt-8
+                        text-center
+                        text-sm
+                        text-slate-500
+                    "
+                >
                     © 2026 Avora. All rights reserved.
                 </p>
 
             </div>
 
         </footer>
+
     );
 };
 

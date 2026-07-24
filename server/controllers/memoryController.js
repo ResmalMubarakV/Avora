@@ -200,7 +200,9 @@ const getMemories = async (req, res) => {
         ]
        }
 
-       const memories = await Memory.find(query).sort({createdAt : -1});
+       const memories = await Memory.find(query)
+        .populate("user", "username")
+        .sort({ createdAt: -1 });
        return res.status(200).json(memories);
     } catch (error) {
         console.error("Get Memories Error" , error.message);

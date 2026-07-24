@@ -11,6 +11,9 @@ import PublicProfile from "./pages/profile/PublicProfile";
 import PublicMemory from "./pages/public/PublicMemory";
 import Landing from "./pages/public/Landing";
 import PendingApproval from "./pages/onboarding/PendingApproval";
+import Suspended from "./pages/auth/Suspended";
+import NotFound from "./pages/errors/NotFound";
+import Forbidden from "./pages/errors/Forbidden";
 
 
 function App() {
@@ -20,6 +23,7 @@ function App() {
             {/* Landing */}
             <Route index element={<Landing />} />
             <Route path="/pending-approval" element={<PendingApproval />} />
+            <Route path="/suspended" element={<Suspended />} />
 
             {/* Authentication */}
             <Route path="/login" element={<Login />} />
@@ -36,6 +40,13 @@ function App() {
                     <Route path="/profile" element={<OwnerProfile />} />
                 </Route>
             </Route>
+
+            {/* Error Pages */}
+            <Route path="/404" element={<NotFound />} />
+            <Route path="/403" element={<Forbidden />} />
+
+            {/* Catch-all */}
+            <Route path="*" element={<NotFound />} />
 
         </Routes>
     );

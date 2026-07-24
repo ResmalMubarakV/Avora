@@ -97,13 +97,16 @@ const loginUser = async (req , res) => {
         }
 
         if(user.status === "pending"){
-            return res.status(403).json
-                ({message : "Your account is awaiting admin approval."})
+            return res.status(403).json({
+                        code: "ACCOUNT_PENDING",
+                        message: "Your account is awaiting admin approval."
+                    });
         } 
-        else if (user.status === "rejected"){
+        else if (user.status === "suspended"){
                 return res.status(403).json({
-                    message : "Your registration request was rejected"
-                })
+                        code: "ACCOUNT_SUSPENDED",
+                        message: "Your account has been suspended."
+                    });
             }
 
         else if(user.status === "approved"){
@@ -116,6 +119,7 @@ const loginUser = async (req , res) => {
             profileImagePublicId : user.profileImagePublicId,
             bio : user.bio,
             location : user.location,
+            status: user.status,
             token : generateToken(user._id)
         });
         }

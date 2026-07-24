@@ -1,5 +1,6 @@
 import { useState, useEffect  } from "react";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import ProfileHero from "../../components/public/profile/ProfileHero";
 import MemoriesSection from "../../components/public/profile/MemoriesSection";
@@ -10,7 +11,7 @@ const PublicProfile = () => {
    const [user, setUser] = useState(null);
    const [memories, setMemories] = useState([]);
    const [loading, setLoading] = useState(true);
-   const [error, setError] = useState("");
+   const navigate = useNavigate();
 
    const fetchProfile = async () => {
     try {
@@ -18,8 +19,17 @@ const PublicProfile = () => {
       setUser(data.user);
       setMemories(data.memories);
     } catch (error) {
-      console.error(error.message)
-      setError(error.message);
+
+      if (error.response?.status === 403) {
+        navigate("/403", { replace: true });
+        return;
+    }
+
+      if (error.response?.status === 404) {
+        navigate("/404", { replace: true });
+        return;
+    }
+    console.error(error);
     } finally {
       setLoading(false);
     }
@@ -27,14 +37,12 @@ const PublicProfile = () => {
 
    useEffect(() => {
       fetchProfile();
-   }, [username]);
+   }, [username, navigate]);
 
   if(loading) {
      return <h1>Loading...</h1>;
   }
-  if(error){
-    return <h1>{error}</h1>;
-  }
+
 return (
     <main className="min-h-screen bg-slate-50">
 

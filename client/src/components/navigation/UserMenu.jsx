@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import useCurrentUser from "../../hooks/useCurrentUser";
 
 const UserMenu = () => {
     const navigate = useNavigate();
@@ -8,12 +9,10 @@ const UserMenu = () => {
 
     const menuRef = useRef(null);
 
-    // Temporary user (replace with context later)
-    const user = {
-        name: "Resmal",
-        username: "resmal._",
-        profileImage: "",
-    };
+    const {
+        user,
+        loading,
+    } = useCurrentUser();
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -27,11 +26,12 @@ const UserMenu = () => {
 
         document.addEventListener("mousedown", handleClickOutside);
 
-        return () =>
+        return () => {
             document.removeEventListener(
                 "mousedown",
                 handleClickOutside
             );
+        };
     }, []);
 
     const handleLogout = () => {
@@ -42,6 +42,13 @@ const UserMenu = () => {
             replace: true,
         });
     };
+
+    // Prevent rendering until the user has been fetched
+    if (loading || !user) {
+        return (
+            <div className="h-10 w-10 rounded-full bg-slate-200 animate-pulse" />
+        );
+    }
 
     return (
         <div

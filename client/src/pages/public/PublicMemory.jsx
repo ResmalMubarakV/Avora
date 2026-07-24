@@ -4,15 +4,16 @@ import api from "../../api/axios";
 import MemoryHero from "../../components/memory/MemoryHero";
 import { Compass } from "lucide-react";
 import Lightbox from "../../components/memory/Lightbox";
+import { useNavigate } from "react-router-dom";
 
 
 const PublicMemory = () => {
+    const navigate = useNavigate();
 
     const { username, slug } = useParams();
 
     const [memory, setMemory] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
     const [isOpen, setIsOpen] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -59,10 +60,19 @@ const PublicMemory = () => {
 
             } catch (error) {
 
-                setError(
-                    error.response?.data?.message ||
-                    "Something went wrong"
-                );
+                if (error.response?.status === 403) {
+                    navigate("/403", { replace: true });
+                    return;
+                }
+
+
+               if (error.response?.status === 404) {
+                    navigate("/404", { replace: true });
+                    return;
+                }
+
+                console.error(error);
+
 
             } finally {
 
@@ -74,11 +84,10 @@ const PublicMemory = () => {
 
         fetchMemory();
 
-    }, [username, slug]);
+    }, [username, slug, navigate]);
 
     if (loading) return <h1>Loading...</h1>;
 
-    if (error) return <h1>{error}</h1>;
 
     return (
         <main className="max-w-[1440px] mx-auto px-8 lg:px-12 py-12">

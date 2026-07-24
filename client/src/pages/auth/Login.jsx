@@ -48,10 +48,19 @@ const Login = () => {
 
         } catch (error) {
 
-            setError(
-                error.response?.data?.message ||
-                "Unable to sign in. Please check your credentials."
-            );
+            const { code, message } = error.response?.data || {};
+
+                if (code === "ACCOUNT_PENDING") {
+                    navigate("/pending", { replace: true });
+                    return;
+                }
+
+                if (code === "ACCOUNT_SUSPENDED") {
+                    navigate("/suspended", { replace: true });
+                    return;
+                }
+
+                setError(message || "Unable to sign in.");
 
         } finally {
 

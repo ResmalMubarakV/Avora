@@ -28,3 +28,41 @@ body {
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* -----------------------------
+   Avora Flight Animation
+------------------------------ */
+
+
+.plane-animation {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: avoraFlight 4s ease-in-out infinite;
+}
+
+@keyframes avoraFlight {
+
+    0% {
+        transform: translate(0px, 0px) rotate(-8deg);
+    }
+
+    50% {
+        transform: translate(18px, -10px) rotate(2deg);
+    }
+
+    100% {
+        transform: translate(0px, 0px) rotate(-8deg);
+    }
+
+}
