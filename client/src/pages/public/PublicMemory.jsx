@@ -1,52 +1,127 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import api from "../../api/axios";
-import MemoryHero from "../../components/memory/MemoryHero";
-import { Compass } from "lucide-react";
-import Lightbox from "../../components/memory/Lightbox";
-import { useNavigate } from "react-router-dom";
+import { getMyProfile } from "../../api/userApi";
+import {
+    useNavigate,
+    useParams,
+    useSearchParams,
+} from "react-router-dom";
 
+import api from "../../api/axios";
+
+import MemoryHero from "../../components/memory/MemoryHero";
+import Lightbox from "../../components/memory/Lightbox";
+
+import { Compass } from "lucide-react";
 
 const PublicMemory = () => {
     const navigate = useNavigate();
 
     const { username, slug } = useParams();
 
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [currentUser, setCurrentUser] = useState(null);
     const [memory, setMemory] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [isOpen, setIsOpen] = useState(false);
-    const [selectedIndex, setSelectedIndex] = useState(0);
+
+    const imageParam = searchParams.get("image");
+
+    const [isOpen, setIsOpen] = useState(imageParam !== null);
+
+    const [selectedIndex, setSelectedIndex] = useState(
+        imageParam ? Number(imageParam) : 0
+    );
 
     const openGallery = (index) => {
-    setSelectedIndex(index);
-    setIsOpen(true);
+        setSelectedIndex(index);
+        setIsOpen(true);
+
+        setSearchParams(
+            {
+                image: index.toString(),
+            },
+            {
+                replace: false,
+            }
+        );
     };
 
     const goToImage = (index) => {
-    setSelectedIndex(index);
+        setSelectedIndex(index);
+
+        setSearchParams(
+            {
+                image: index.toString(),
+            },
+            {
+                replace: false,
+            }
+        );
     };
 
     const nextImage = () => {
         setSelectedIndex((prev) => {
-            if (prev === memory.media.length - 1) {
-                return 0;
-            }
+            const next =
+                prev === memory.media.length - 1
+                    ? 0
+                    : prev + 1;
 
-            return prev + 1;
+            setSearchParams(
+                {
+                    image: next.toString(),
+                },
+                {
+                    replace: false,
+                }
+            );
+
+            return next;
         });
     };
 
     const previousImage = () => {
         setSelectedIndex((prev) => {
-            if (prev === 0) {
-                return memory.media.length - 1;
-            }
+            const previous =
+                prev === 0
+                    ? memory.media.length - 1
+                    : prev - 1;
 
-            return prev - 1;
+            setSearchParams(
+                {
+                    image: previous.toString(),
+                },
+                {
+                    replace: false,
+                }
+            );
+
+            return previous;
         });
     };
 
-    useEffect(() => {
+        useEffect(() => {
+
+    const fetchCurrentUser = async () => {
+
+            try {
+
+                const user = await getMyProfile();
+
+                setCurrentUser(user);
+
+            } catch {
+
+                // Visitor is not logged in
+                setCurrentUser(null);
+
+            }
+
+        };
+
+        fetchCurrentUser();
+
+    }, []);
+
+        useEffect(() => {
 
         const fetchMemory = async () => {
 
@@ -65,14 +140,12 @@ const PublicMemory = () => {
                     return;
                 }
 
-
-               if (error.response?.status === 404) {
+                if (error.response?.status === 404) {
                     navigate("/404", { replace: true });
                     return;
                 }
 
                 console.error(error);
-
 
             } finally {
 
@@ -86,10 +159,67 @@ const PublicMemory = () => {
 
     }, [username, slug, navigate]);
 
-    if (loading) return <h1>Loading...</h1>;
+
+    const isOwner =
+    currentUser?._id === memory?.user;
 
 
-    return (
+    useEffect(() => {
+
+        if (!memory) return;
+
+        const image = searchParams.get("image");
+
+        if (image === null) {
+
+            setIsOpen(false);
+
+            return;
+
+        }
+        
+
+        const index = Number(image);
+
+        if (
+            Number.isNaN(index) ||
+            index < 0 ||
+            index >= memory.media.length
+        ) {
+
+            setSearchParams({}, { replace: true });
+
+            return;
+
+        }
+
+        setSelectedIndex(index);
+
+        setIsOpen(true);
+
+    }, [memory, searchParams, setSearchParams]);
+
+
+
+    if (loading) {
+
+        return (
+            <h1 className="text-center mt-20 text-lg">
+                Loading...
+            </h1>
+        );
+
+    }
+
+
+
+    if (!memory) {
+
+        return null;
+
+    }
+
+        return (
         <main className="max-w-[1440px] mx-auto px-8 lg:px-12 py-12">
 
             <MemoryHero
@@ -99,15 +229,25 @@ const PublicMemory = () => {
             />
 
             {isOpen && (
-            <Lightbox
-                media={memory.media}
-                selectedIndex={selectedIndex}
-                onClose={() => setIsOpen(false)}
-                nextImage={nextImage}
-                goToImage={goToImage}
-                previousImage={previousImage}
-            />
-        )}
+                <Lightbox
+                    media={memory.media}
+                    selectedIndex={selectedIndex}
+                    nextImage={nextImage}
+                    previousImage={previousImage}
+                    goToImage={goToImage}
+                    canDownload={isOwner}
+                    memoryTitle={memory.title}
+                    onClose={() => {
+
+                        setIsOpen(false);
+
+                        setSearchParams({}, {
+                            replace: false,
+                        });
+
+                    }}
+                />
+            )}
 
             <section className="mt-10">
 
@@ -118,19 +258,34 @@ const PublicMemory = () => {
                         className="text-amber-500"
                     />
 
-                    <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+                    <h2
+                        className="
+                            text-3xl
+                            font-bold
+                            tracking-tight
+                            text-gray-900
+                        "
+                    >
                         Journey Story
                     </h2>
 
                 </div>
 
-
                 <div className="mt-6 mb-10 border-t border-gray-100" />
 
                 <div className="mt-5">
-                    <p className="text-lg leading-10 text-gray-700 whitespace-pre-line">
+
+                    <p
+                        className="
+                            text-lg
+                            leading-10
+                            text-gray-700
+                            whitespace-pre-line
+                        "
+                    >
                         {memory.description}
                     </p>
+
                 </div>
 
             </section>

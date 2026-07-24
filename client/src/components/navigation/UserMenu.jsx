@@ -1,133 +1,89 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import useCurrentUser from "../../hooks/useCurrentUser";
 
 const UserMenu = () => {
-    const navigate = useNavigate();
+    const { user, loading } = useCurrentUser();
 
-    const [open, setOpen] = useState(false);
-
-    const menuRef = useRef(null);
-
-    const {
-        user,
-        loading,
-    } = useCurrentUser();
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (
-                menuRef.current &&
-                !menuRef.current.contains(event.target)
-            ) {
-                setOpen(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-
-        return () => {
-            document.removeEventListener(
-                "mousedown",
-                handleClickOutside
-            );
-        };
-    }, []);
-
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        sessionStorage.removeItem("token");
-
-        navigate("/login", {
-            replace: true,
-        });
-    };
-
-    // Prevent rendering until the user has been fetched
     if (loading || !user) {
         return (
-            <div className="h-10 w-10 rounded-full bg-slate-200 animate-pulse" />
+            <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-slate-200 animate-pulse" />
+
+                <div className="hidden md:block space-y-2">
+                    <div className="h-3 w-28 rounded bg-slate-200 animate-pulse" />
+                    <div className="h-3 w-20 rounded bg-slate-200 animate-pulse" />
+                </div>
+            </div>
         );
     }
 
     return (
-        <div
-            ref={menuRef}
-            className="relative ml-4"
+        <Link
+            to={`/${user.username}`}
+            className="
+                group
+                flex
+                items-center
+                gap-3
+                rounded-2xl
+                px-2
+                py-1
+                transition-all
+                duration-300
+                hover:bg-slate-100
+            "
         >
-            <button
-                onClick={() => setOpen(!open)}
-                className="flex items-center gap-3 rounded-full px-2 py-1 transition hover:bg-slate-100"
-            >
-                {user.profileImage ? (
-                    <img
-                        src={user.profileImage}
-                        alt={user.name}
-                        className="h-10 w-10 rounded-full object-cover"
-                    />
-                ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 font-semibold text-white">
-                        {user.name.charAt(0).toUpperCase()}
-                    </div>
-                )}
-
-                <div className="hidden text-left md:block">
-                    <p className="text-sm font-semibold text-slate-800">
-                        {user.name}
-                    </p>
-
-                    <p className="text-xs text-slate-500">
-                        @{user.username}
-                    </p>
-                </div>
-
-                <svg
-                    className={`hidden h-4 w-4 text-slate-500 transition md:block ${
-                        open ? "rotate-180" : ""
-                    }`}
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+            {user.profileImage ? (
+                <img
+                    src={user.profileImage}
+                    alt={user.name}
+                    className="
+                        h-10
+                        w-10
+                        rounded-full
+                        object-cover
+                        ring-2
+                        ring-transparent
+                        transition-all
+                        duration-300
+                        group-hover:ring-sky-400/40
+                        group-hover:scale-105
+                    "
+                />
+            ) : (
+                <div
+                    className="
+                        flex
+                        h-10
+                        w-10
+                        items-center
+                        justify-center
+                        rounded-full
+                        bg-sky-600
+                        font-semibold
+                        text-white
+                        ring-2
+                        ring-transparent
+                        transition-all
+                        duration-300
+                        group-hover:ring-sky-400/40
+                        group-hover:scale-105
+                    "
                 >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                    />
-                </svg>
-            </button>
-
-            {open && (
-                <div className="absolute right-0 mt-3 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-                    <div className="border-b border-slate-100 px-4 py-3">
-                        <p className="font-semibold text-slate-900">
-                            {user.name}
-                        </p>
-
-                        <p className="text-sm text-slate-500">
-                            @{user.username}
-                        </p>
-                    </div>
-
-                    <Link
-                        to="/profile"
-                        onClick={() => setOpen(false)}
-                        className="block px-4 py-3 text-sm text-slate-700 transition hover:bg-slate-50"
-                    >
-                        👤 My Profile
-                    </Link>
-
-                    <button
-                        onClick={handleLogout}
-                        className="w-full px-4 py-3 text-left text-sm text-red-600 transition hover:bg-red-50"
-                    >
-                        🚪 Logout
-                    </button>
+                    {user.name.charAt(0).toUpperCase()}
                 </div>
             )}
-        </div>
+
+            <div className="hidden text-left md:block">
+                <p className="text-sm font-semibold text-slate-800 transition-colors group-hover:text-sky-600">
+                    {user.name}
+                </p>
+
+                <p className="text-xs text-slate-500">
+                    @{user.username}
+                </p>
+            </div>
+        </Link>
     );
 };
 

@@ -1,6 +1,17 @@
 import heroImage from "../../../assets/images/pending-bg.png";
 
 const PendingHero = () => {
+    const handleExploreProfiles = () => {
+        const section = document.getElementById("featured-travelers");
+
+        if (section) {
+            section.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        }
+    };
+
     return (
         <section className="relative min-h-screen overflow-hidden">
             {/* Background */}
@@ -35,10 +46,11 @@ const PendingHero = () => {
                     px-5
                     py-24
                     sm:px-8
-                    lg:px-12"
+                    lg:px-12
+                "
             >
                 <div className="mx-auto max-w-3xl text-center">
-                   <p className="mb-5 text-xs font-semibold uppercase tracking-[0.35em] text-sky-300 sm:text-sm">
+                    <p className="mb-5 text-xs font-semibold uppercase tracking-[0.35em] text-sky-300 sm:text-sm">
                         WELCOME TO AVORA
                     </p>
 
@@ -59,18 +71,19 @@ const PendingHero = () => {
                         Has Begun
                     </h1>
 
-                    <p className="
-                                mx-auto
-                                mt-8
-                                max-w-2xl
-                                text-base
-                                leading-7
-                                text-slate-300
-                                sm:mt-10
-                                sm:text-lg
-                                sm:leading-8
-                            "
-                        >
+                    <p
+                        className="
+                            mx-auto
+                            mt-8
+                            max-w-2xl
+                            text-base
+                            leading-7
+                            text-slate-300
+                            sm:mt-10
+                            sm:text-lg
+                            sm:leading-8
+                        "
+                    >
                         Your account has been successfully created and is
                         currently awaiting approval.
                         <br />
@@ -79,25 +92,25 @@ const PendingHero = () => {
                         travel stories shared by explorers from around the world.
                     </p>
 
-                    <div className="
-                                mt-10
-                                flex
-                                flex-col
-                                items-center
-                                justify-center
-                                gap-5
-                                sm:mt-12
-                                sm:flex-row
-                            "
-                        >
+                    <div
+                        className="
+                            mt-10
+                            flex
+                            flex-col
+                            items-center
+                            justify-center
+                            gap-5
+                            sm:mt-12
+                            sm:flex-row
+                        "
+                    >
                         <button
+                            onClick={handleExploreProfiles}
                             className="
                                 rounded-full
                                 bg-sky-500
-                                px-8 
-                                py-3.5 
-                                sm:px-10 
-                                sm:py-4
+                                px-8
+                                py-3.5
                                 text-sm
                                 font-semibold
                                 text-white
@@ -109,18 +122,19 @@ const PendingHero = () => {
                                 hover:shadow-xl
                                 hover:shadow-sky-500/30
                                 active:scale-95
+                                sm:px-10
+                                sm:py-4
                             "
                         >
-                            Explore Stories
+                            Explore Profiles
                         </button>
 
                         <div
                             className="
                                 flex
                                 w-full
-                                justify-center
-                                sm:w-auto
                                 items-center
+                                justify-center
                                 gap-3
                                 rounded-full
                                 border
@@ -129,6 +143,7 @@ const PendingHero = () => {
                                 px-5
                                 py-3
                                 backdrop-blur-md
+                                sm:w-auto
                             "
                         >
                             <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-amber-400" />
@@ -145,13 +160,13 @@ const PendingHero = () => {
             <div
                 className="
                     absolute
-                    bottom-6 
-                    sm:bottom-8
+                    bottom-6
                     left-1/2
                     z-20
                     -translate-x-1/2
                     text-center
                     text-slate-400
+                    sm:bottom-8
                 "
             >
                 <p className="mb-2 text-xs uppercase tracking-[0.35em]">

@@ -1,39 +1,38 @@
+import { useEffect, useState } from "react";
+
 import TravelerCard from "./TravelerCard";
-
-import avatar1 from "../../../assets/public/travelers/resmal.jpg";
-import avatar2 from "../../../assets/public/travelers/sophia.jpg";
-import avatar3 from "../../../assets/public/travelers/lucas.jpg";
-
-const travelers = [
-    {
-        id: 1,
-        name: "Resmal Mubarak V",
-        username: "resmal._",
-        location: "Kerala, India",
-        avatar: avatar1,
-    },
-    {
-        id: 2,
-        name: "Sophia",
-        username: "sophia",
-        location: "Zermatt, Switzerland",
-        avatar: avatar2,
-    },
-    {
-        id: 3,
-        name: "Lucas",
-        username: "lucas",
-        location: "Santorini, Greece",
-        avatar: avatar3,
-    },
-];
+import { getFeaturedTravelers } from "../../../api/publicApi";
 
 const FeaturedTravelers = () => {
+    const [travelers, setTravelers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        const fetchTravelers = async () => {
+            try {
+                setLoading(true);
+
+                const data = await getFeaturedTravelers();
+
+                setTravelers(data);
+            } catch (err) {
+                console.error(err);
+                setError("Unable to load travelers.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTravelers();
+    }, []);
+
     return (
-        <section className="bg-transparent py-16 sm:py-20 lg:py-24">
-
+        <section
+            id="featured-travelers"
+            className="bg-transparent py-16 sm:py-20 lg:py-24"
+        >
             <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-
                 <div className="mx-auto mb-12 max-w-3xl text-center sm:mb-16">
                     <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-400 sm:text-sm">
                         PUBLIC PROFILES
@@ -44,58 +43,84 @@ const FeaturedTravelers = () => {
                     </h2>
 
                     <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-400 sm:text-lg sm:leading-8">
-                        Explore public travel profiles, discover unique adventures, and get inspired
-                        by stories shared from every corner of the world.
+                        Explore public travel profiles, discover unique
+                        adventures, and get inspired by stories shared from every
+                        corner of the world.
                     </p>
-
                 </div>
 
-                <div className="mb-8 flex items-center justify-center lg:hidden">
-                    <span className="rounded-full border border-slate-700 bg-slate-900/50 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-400 backdrop-blur">
-                        ← Swipe to explore →
-                    </span>
-                </div>
+                {loading && (
+                    <div className="flex justify-center">
+                        <div className="rounded-2xl border border-slate-700 bg-slate-900 px-8 py-6 text-slate-300">
+                            Loading travelers...
+                        </div>
+                    </div>
+                )}
 
-               {/* Mobile & Tablet Carousel */}
-                <div
-                    className="
-                        no-scrollbar
-                        flex
-                        gap-5
-                        overflow-x-auto
-                        snap-x
-                        snap-mandatory
-                        pb-4
-                        lg:hidden
-                    "
-                >
-                    {travelers.map((traveler) => (
+                {!loading && error && (
+                    <div className="flex justify-center">
+                        <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-8 py-6 text-red-300">
+                            {error}
+                        </div>
+                    </div>
+                )}
+
+                {!loading && !error && travelers.length === 0 && (
+                    <div className="flex justify-center">
+                        <div className="rounded-2xl border border-slate-700 bg-slate-900 px-8 py-6 text-slate-300">
+                            No public travelers found.
+                        </div>
+                    </div>
+                )}
+
+                {!loading && !error && travelers.length > 0 && (
+                    <>
+                        <div className="mb-8 flex items-center justify-center lg:hidden">
+                            <span className="rounded-full border border-slate-700 bg-slate-900/50 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-400 backdrop-blur">
+                                ← Swipe to explore →
+                            </span>
+                        </div>
+
+                        {/* Mobile & Tablet Carousel */}
                         <div
-                            key={traveler.id}
                             className="
-                                w-[320px]
-                                max-w-[85vw]
-                                shrink-0
-                                snap-center
+                                no-scrollbar
+                                flex
+                                gap-5
+                                overflow-x-auto
+                                snap-x
+                                snap-mandatory
+                                pb-4
+                                lg:hidden
                             "
                         >
-                            <TravelerCard traveler={traveler} />
+                            {travelers.map((traveler) => (
+                                <div
+                                    key={traveler._id}
+                                    className="
+                                        w-[320px]
+                                        max-w-[85vw]
+                                        shrink-0
+                                        snap-center
+                                    "
+                                >
+                                    <TravelerCard traveler={traveler} />
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
 
-                {/* Desktop Grid */}
-                <div className="hidden lg:grid lg:grid-cols-3 gap-6">
-                    {travelers.map((traveler) => (
-                        <TravelerCard
-                            key={traveler.id}
-                            traveler={traveler}
-                        />
-                    ))}
-                </div>
-
+                        {/* Desktop Grid */}
+                        <div className="hidden gap-6 lg:grid lg:grid-cols-3">
+                            {travelers.map((traveler) => (
+                                <TravelerCard
+                                    key={traveler._id}
+                                    traveler={traveler}
+                                />
+                            ))}
+                        </div>
+                    </>
+                )}
             </div>
-
         </section>
     );
 };

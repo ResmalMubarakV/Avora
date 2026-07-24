@@ -1,70 +1,129 @@
 const User = require("../models/User");
 const Memory = require("../models/Memory");
 
-const getPublicProfile = async ( req , res) => {
+/**
+ * GET /api/public/travelers
+ * Returns approved users that have at least one public memory.
+ */
+const getFeaturedTravelers = async (req, res) => {
     try {
-        const {username} = req.params;
+        const users = await User.find({
+            role: "user",
+            status: "approved",
+        })
+            .select("-password -email")
+            .sort({ createdAt: -1 });
 
-        const user = await User.findOne({username}).select("-password");
+        const travelers = [];
 
-        if(!user || user.username === "admin") {
+        for (const user of users) {
+            const publicMemoryCount = await Memory.countDocuments({
+                user: user._id,
+                isPublic: true,
+            });
+
+            if (publicMemoryCount === 0) continue;
+
+            travelers.push({
+                _id: user._id,
+                name: user.name,
+                username: user.username,
+                profileImage: user.profileImage,
+                location: user.location,
+                bio: user.bio,
+            });
+        }
+
+        return res.status(200).json(travelers);
+    } catch (error) {
+        console.error("Featured Travelers Error:", error.message);
+
+        return res.status(500).json({
+            message: "Server Error",
+        });
+    }
+};
+
+/**
+ * GET /api/public/:username
+ */
+const getPublicProfile = async (req, res) => {
+    try {
+        const { username } = req.params;
+
+        const user = await User.findOne({
+            username,
+            role: "user",
+            status: "approved",
+        }).select("-password");
+
+        if (!user) {
             return res.status(404).json({
-                message : "User not found"
-            })
+                message: "User not found",
+            });
         }
 
         const memories = await Memory.find({
-            user : user._id,
-            isPublic : true
-        }).sort({createdAt : -1});
+            user: user._id,
+            isPublic: true,
+        }).sort({ createdAt: -1 });
 
         return res.status(200).json({
             user,
-            memories
-        })
+            memories,
+        });
     } catch (error) {
-        console.error("Public Profile Error ", error.message)
+        console.error("Public Profile Error:", error.message);
 
         return res.status(500).json({
-            message : "Server Error"
+            message: "Server Error",
+        });
+    }
+};
+
+/**
+ * GET /api/public/:username/:slug
+ */
+const getPublicMemory = async (req, res) => {
+    try {
+        const { username, slug } = req.params;
+
+        const user = await User.findOne({
+            username,
+            role: "user",
+            status: "approved",
         });
 
-    }
-}
-
-const getPublicMemory = async (req , res) => {
-    try {
-        const {username , slug} = req.params;
-
-        const user = await User.findOne({username});
-
-        if(!user) {
+        if (!user) {
             return res.status(404).json({
-                message : "User not found"
-            })
+                message: "User not found",
+            });
         }
 
         const memory = await Memory.findOne({
-            user : user._id,
-            slug ,
-            isPublic : true
+            user: user._id,
+            slug,
+            isPublic: true,
+        });
 
-        })
-
-        if(!memory) {
+        if (!memory) {
             return res.status(404).json({
-                message : "Memory not found"
-            })
+                message: "Memory not found",
+            });
         }
 
-        return res.status(200).json(memory)
-
+        return res.status(200).json(memory);
     } catch (error) {
-        console.error("Public memory error" , error.message);
-        return res.status(500).json({
-            message : "Server Error"
-        })
-    }
-}
+        console.error("Public Memory Error:", error.message);
 
-module.exports= {getPublicProfile,getPublicMemory};
+        return res.status(500).json({
+            message: "Server Error",
+        });
+    }
+};
+
+module.exports = {
+    getFeaturedTravelers,
+    getPublicProfile,
+    getPublicMemory,
+};

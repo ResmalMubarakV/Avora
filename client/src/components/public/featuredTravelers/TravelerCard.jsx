@@ -24,8 +24,12 @@ const TravelerCard = ({ traveler }) => {
             {/* Avatar */}
             <div className="flex justify-center">
                 <img
-                    src={traveler.avatar}
-                    alt={traveler.name}
+                        src={
+                            traveler.profileImage ||
+                            "https://ui-avatars.com/api/?background=0f172a&color=ffffff&name=" +
+                                encodeURIComponent(traveler.name)
+                        }
+                        alt={traveler.name}
                     className="
                         h-20
                         w-20
