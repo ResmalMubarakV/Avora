@@ -5,8 +5,6 @@ const RecentMemories = ({ memories }) => {
 
     const navigate = useNavigate();
 
-    const recentMemories = memories.slice(0, 4);
-
     return (
 
         <section>
@@ -47,16 +45,25 @@ const RecentMemories = ({ memories }) => {
             </div>
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-
-                {recentMemories.map((memory) => (
-
-                    <MemoryCard
+                {memories.slice(0, 8).map((memory, index) => (
+                    <div
                         key={memory._id}
-                        memory={memory}
-                    />
-
+                        className={`
+                            ${
+                                index >= 4 && index < 6
+                                    ? "hidden md:block"
+                                    : ""
+                            }
+                            ${
+                                index >= 6
+                                    ? "hidden xl:block"
+                                    : ""
+                            }
+                        `}
+                    >
+                        <MemoryCard memory={memory} />
+                    </div>
                 ))}
-
             </div>
 
         </section>
