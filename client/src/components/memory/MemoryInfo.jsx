@@ -4,8 +4,6 @@ import {
     ArrowLeft,
     MapPin,
     CalendarDays,
-    Camera,
-    Video,
     Globe,
     Bike,
     Car,
@@ -14,7 +12,7 @@ import {
     Bus,
     Ship,
     Footprints,
-    Compass
+    Compass,
 } from "lucide-react";
 
 const MemoryInfo = ({ username, memory }) => {
@@ -32,12 +30,12 @@ const MemoryInfo = ({ username, memory }) => {
     const TravelIcon =
         travelIcons[memory.modeOfTravel?.toLowerCase()] || Compass;
 
-    const totalVideos = memory.media.filter(
-        item => item.type === "video"
+    const totalPhotos = memory.media.filter(
+        media => media.type === "image"
     ).length;
 
-    const totalPhotos = memory.media.filter(
-        item => item.type === "image"
+    const totalVideos = memory.media.filter(
+        media => media.type === "video"
     ).length;
 
     const totalDays =
@@ -49,164 +47,371 @@ const MemoryInfo = ({ username, memory }) => {
             (1000 * 60 * 60 * 24)
         ) + 1;
 
-    return (
+    const startDate = new Date(memory.startDate).toLocaleDateString(
+        "en-IN",
+        {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        }
+    );
 
-        <div className="flex flex-col h-full">
+    const endDate = new Date(memory.endDate).toLocaleDateString(
+        "en-IN",
+        {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        }
+    );
 
-            {/* Back */}
+return (
 
-            <Link
-                to={`/${username}`}
-                className="
-                    inline-flex
-                    items-center
-                    gap-2
-                    w-fit
-                    rounded-full
-                    bg-gray-50
-                    px-4
-                    py-2
-                    text-sm
-                    text-gray-600
-                    transition
-                    hover:bg-gray-100
-                    mb-10
-                "
-            >
-                <ArrowLeft size={18} />
-                Back to Profile
-            </Link>
+    <div className="flex flex-col">
 
-            {/* Title */}
+        {/* Back Button */}
 
-            <h1 className="text-[56px] leading-none font-bold tracking-tight text-gray-900">
-                {memory.title}
-            </h1>
+        <Link
+            to={`/${username}`}
+            className="
+                inline-flex
+                w-fit
+                items-center
+                gap-2
+                rounded-full
+                border
+                border-slate-200
+                bg-white
+                px-4
+                py-2
+                text-xs
+                sm:text-sm
+                font-medium
+                text-slate-800
+                shadow-sm
+                transition-all
+                duration-300
+                hover:bg-slate-50
+                hover:shadow-md
+            "
+        >
+            <ArrowLeft size={16} />
 
-            {/* Basic Info */}
+            Back to Profile
 
-            <div className="mt-10 space-y-5">
+        </Link>
 
-                <div className="flex items-center gap-3">
+        {/* Badge */}
 
-                    <MapPin
-                        size={20}
-                        className=""
-                    />
+        <div
+            className="
+                mt-7
+                inline-flex
+                w-fit
+                rounded-full
+                border
+                border-sky-200
+                bg-sky-50
+                px-3
+                py-1.5
+                text-[11px]
+                font-bold
+                uppercase
+                tracking-[0.22em]
+                text-sky-600
+            "
+        >
+            Travel Memory
+        </div>
 
-                    <span className="text-gray-700">
+        {/* Title */}
+
+        <h1
+            className="
+                mt-5
+                text-3xl
+                sm:text-4xl
+                lg:text-5xl
+                font-black
+                tracking-tight
+                leading-tight
+                text-slate-900
+            "
+        >
+            {memory.title}
+        </h1>
+
+        {/* Divider */}
+
+        <div className="mt-8 h-px bg-slate-200" />
+
+        {/* Details */}
+
+        <div className="mt-8 space-y-6">
+
+            {/* Destination */}
+
+            <div className="flex items-start gap-4">
+
+                <div
+                    className="
+                        flex
+                        h-11
+                        w-11
+                        items-center
+                        justify-center
+                        rounded-xl
+                        bg-sky-100
+                        text-sky-600
+                    "
+                >
+                    <MapPin size={20} />
+                </div>
+
+                <div>
+
+                    <p
+                        className="
+                            text-[10px]
+                            sm:text-xs
+                            font-semibold
+                            uppercase
+                            tracking-[0.15em]
+                            text-slate-500
+                        "
+                    >
+                        Destination
+                    </p>
+
+                    <p
+                        className="
+                            mt-1
+                            text-base
+                            sm:text-lg
+                            font-semibold
+                            text-slate-900
+                        "
+                    >
                         {memory.location}
-                    </span>
-
-                </div>
-
-                <div className="flex items-center gap-3">
-
-                    <CalendarDays
-                        size={20}
-                        className=""
-                    />
-
-                    <span className="text-gray-700">
-
-                        {new Date(memory.startDate).toLocaleDateString()}
-                        {" - "}
-                        {new Date(memory.endDate).toLocaleDateString()}
-
-                    </span>
-
-                </div>
-
-                <div className="flex items-center gap-3">
-
-                    <TravelIcon
-                        size={20}
-                        className=""
-                    />
-
-                    <span className="text-gray-700 capitalize">
-                        {memory.modeOfTravel}
-                    </span>
+                    </p>
 
                 </div>
 
             </div>
 
-            {/* Divider */}
+            {/* Travel Dates */}
 
-            <div className="my-10 h-px " />
+            <div className="flex items-start gap-4">
 
-            {/* Journey Stats */}
+                <div
+                    className="
+                        flex
+                        h-11
+                        w-11
+                        items-center
+                        justify-center
+                        rounded-xl
+                        bg-sky-100
+                        text-sky-600
+                    "
+                >
+                    <CalendarDays size={20} />
+                </div>
 
-            <div className="space-y-5">
+                <div>
 
-                <div className="flex items-center gap-3">
+                    <p
+                        className="
+                            text-[10px]
+                            sm:text-xs
+                            font-semibold
+                            uppercase
+                            tracking-[0.15em]
+                            text-slate-500
+                        "
+                    >
+                        Travel Dates
+                    </p>
 
-                    <Camera
-                        size={20}
-                        className=""
-                    />
-
-                    <span className="text-gray-700">
-
-                        <strong>{totalPhotos}</strong> Photos
-
-                    </span>
+                    <p
+                        className="
+                            mt-1
+                            text-base
+                            sm:text-lg
+                            font-semibold
+                            text-slate-900
+                        "
+                    >
+                        {startDate} — {endDate}
+                    </p>
 
                 </div>
 
-                <div className="flex items-center gap-3">
+            </div>
 
-                    <Video
-                        size={20}
-                        className=""
-                    />
+            {/* Mode */}
 
-                    <span className="text-gray-700">
+            <div className="flex items-start gap-4">
 
-                        <strong>{totalVideos}</strong> Videos
-
-                    </span>
-
+                <div
+                    className="
+                        flex
+                        h-11
+                        w-11
+                        items-center
+                        justify-center
+                        rounded-xl
+                        bg-sky-100
+                        text-sky-600
+                    "
+                >
+                    <TravelIcon size={20} />
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div>
 
-                    <CalendarDays
-                        size={20}
-                        className=""
-                    />
+                    <p
+                        className="
+                            text-[10px]
+                            sm:text-xs
+                            font-semibold
+                            uppercase
+                            tracking-[0.15em]
+                            text-slate-500
+                        "
+                    >
+                        Mode of Travel
+                    </p>
 
-                    <span className="">
-
-                        <strong>{totalDays}</strong> Days
-
-                    </span>
-
-                </div>
-
-                <div className="flex items-center gap-3">
-
-                    <Globe
-                        size={20}
-                        className=""
-                    />
-
-                    <span className="text-gray-700">
-
-                        {memory.isPublic
-                            ? "Public Memory"
-                            : "Private Memory"}
-
-                    </span>
+                    <p
+                        className="
+                            mt-1
+                            text-base
+                            sm:text-lg
+                            font-semibold
+                            capitalize
+                            text-slate-900
+                        "
+                    >
+                        {memory.modeOfTravel}
+                    </p>
 
                 </div>
 
             </div>
 
         </div>
+                {/* Divider */}
 
-    );
+        <div className="my-8 h-px bg-slate-200" />
+
+        {/* Journey Summary */}
+
+<div
+    className="
+        flex
+        flex-nowrap
+        items-center
+        justify-between
+        gap-2
+        overflow-x-auto
+        scrollbar-hide
+    "
+>
+
+    <span
+        className="
+            inline-flex
+            shrink-0
+            items-center
+            rounded-full
+            border
+            border-slate-200
+            bg-slate-50
+            px-2.5
+            py-1.5
+            text-[10px]
+            sm:px-4
+            sm:py-2
+            sm:text-sm
+            font-medium
+            text-slate-700
+        "
+    >
+        📷 {totalPhotos}
+    </span>
+
+    <span
+        className="
+            inline-flex
+            shrink-0
+            items-center
+            rounded-full
+            border
+            border-slate-200
+            bg-slate-50
+            px-2.5
+            py-1.5
+            text-[10px]
+            sm:px-4
+            sm:py-2
+            sm:text-sm
+            font-medium
+            text-slate-700
+        "
+    >
+        🎥 {totalVideos}
+    </span>
+
+    <span
+        className="
+            inline-flex
+            shrink-0
+            items-center
+            rounded-full
+            border
+            border-slate-200
+            bg-slate-50
+            px-2.5
+            py-1.5
+            text-[10px]
+            sm:px-4
+            sm:py-2
+            sm:text-sm
+            font-medium
+            text-slate-700
+        "
+    >
+        🗓 {totalDays} Days
+    </span>
+
+    <span
+        className={`
+            inline-flex
+            shrink-0
+            items-center
+            rounded-full
+            border
+            px-2.5
+            py-1.5
+            text-[10px]
+            sm:px-4
+            sm:py-2
+            sm:text-sm
+            font-medium
+            ${
+                memory.isPublic
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-slate-200 bg-slate-50 text-slate-700"
+            }
+        `}
+    >
+        🌍 {memory.isPublic ? "Public" : "Private"}
+    </span>
+
+    </div>
+</div>
+);
 
 };
 

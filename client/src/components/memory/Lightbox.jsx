@@ -29,31 +29,183 @@ const Lightbox = ({
     const videoRef = useRef(null);
     const lightboxRef = useRef(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const isDragging = useRef(false);
+    const dragStartX = useRef(0);
+    const dragEndX = useRef(0);
 
-    const handleKeyDown = (event) => {
-        if (event.key === "ArrowRight") {
-            nextImage();
-        }
+    // Pinch-to-zoom / pan
+    const [scale, setScale] = useState(1);
+    const [translate, setTranslate] = useState({ x: 0, y: 0 });
+    const [isInteractingZoom, setIsInteractingZoom] = useState(false);
+    const pinchStartDistance = useRef(null);
+    const pinchStartScale = useRef(1);
+    const isPanning = useRef(false);
+    const panStart = useRef({ x: 0, y: 0 });
+    const translateStart = useRef({ x: 0, y: 0 });
 
-        if (event.key === "ArrowLeft") {
-            previousImage();
-        }
+    // Double-tap-to-zoom
+    const hadMultiTouch = useRef(false);
+    const tapStartPos = useRef({ x: 0, y: 0 });
+    const lastTapTime = useRef(0);
 
-        if (event.key === "Escape") {
-            onClose();
-        }
+    // One-time swipe hint for first-time mobile users
+    const [showSwipeHint, setShowSwipeHint] = useState(false);
+
+    const MIN_SCALE = 1;
+    const MAX_SCALE = 4;
+    const DOUBLE_TAP_ZOOM = 2.5;
+
+    const getTouchDistance = (touches) => {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.hypot(dx, dy);
     };
+
     const handleTouchStart = (event) => {
+
+    // Two fingers -> start pinch-to-zoom
+    if (event.touches.length === 2) {
+        hadMultiTouch.current = true;
+        pinchStartDistance.current = getTouchDistance(event.touches);
+        pinchStartScale.current = scale;
+        setIsInteractingZoom(true);
+        return;
+    }
+
+    if (event.touches.length === 1) {
+
+        // Fresh single-finger gesture — reset tap tracking
+        hadMultiTouch.current = false;
+        tapStartPos.current = {
+            x: event.touches[0].clientX,
+            y: event.touches[0].clientY,
+        };
+
+        // One finger while zoomed in -> pan instead of swipe/navigate
+        if (scale > 1) {
+            isPanning.current = true;
+            setIsInteractingZoom(true);
+            panStart.current = {
+                x: event.touches[0].clientX,
+                y: event.touches[0].clientY,
+            };
+            translateStart.current = { ...translate };
+            return;
+        }
+
+        if (selectedMedia.type === "video") return;
+
         touchStartX.current = event.touches[0].clientX;
         touchStartY.current = event.touches[0].clientY;
-    };
+
+    }
+
+};
 
     const handleTouchMove = (event) => {
+
+        // Pinch zooming
+        if (event.touches.length === 2 && pinchStartDistance.current) {
+
+            const newDistance = getTouchDistance(event.touches);
+
+            const ratio = newDistance / pinchStartDistance.current;
+
+            const newScale = Math.min(
+                Math.max(pinchStartScale.current * ratio, MIN_SCALE),
+                MAX_SCALE
+            );
+
+            setScale(newScale);
+
+            return;
+
+        }
+
+        // Panning while zoomed in
+        if (event.touches.length === 1 && isPanning.current) {
+
+            const dx = event.touches[0].clientX - panStart.current.x;
+            const dy = event.touches[0].clientY - panStart.current.y;
+
+            setTranslate({
+                x: translateStart.current.x + dx,
+                y: translateStart.current.y + dy,
+            });
+
+            return;
+
+        }
+
         touchEndX.current = event.touches[0].clientX;
         touchEndY.current = event.touches[0].clientY;
     };
 
-    const handleTouchEnd = () => {
+    const handleTouchEnd = (event) => {
+
+        // Still has a finger down (e.g. pinch releasing to a single finger)
+        if (event.touches.length > 0) {
+            return;
+        }
+
+        const wasPinching = pinchStartDistance.current !== null;
+        const wasPanning = isPanning.current;
+
+        pinchStartDistance.current = null;
+        isPanning.current = false;
+        setIsInteractingZoom(false);
+
+        // Double-tap-to-zoom: only for a clean single-finger tap (no pinch involved)
+        if (!hadMultiTouch.current && !wasPinching) {
+
+            const endTouch = event.changedTouches && event.changedTouches[0];
+
+            if (endTouch) {
+
+                const movedX = Math.abs(endTouch.clientX - tapStartPos.current.x);
+                const movedY = Math.abs(endTouch.clientY - tapStartPos.current.y);
+                const TAP_MOVE_THRESHOLD = 10;
+
+                if (movedX < TAP_MOVE_THRESHOLD && movedY < TAP_MOVE_THRESHOLD) {
+
+                    const now = Date.now();
+                    const DOUBLE_TAP_WINDOW = 350;
+
+                    if (now - lastTapTime.current < DOUBLE_TAP_WINDOW) {
+
+                        lastTapTime.current = 0;
+
+                        if (scale > 1) {
+                            setScale(1);
+                            setTranslate({ x: 0, y: 0 });
+                        } else if (selectedMedia.type === "image") {
+                            setScale(DOUBLE_TAP_ZOOM);
+                        }
+
+                        return;
+
+                    }
+
+                    lastTapTime.current = now;
+
+                }
+
+            }
+
+        }
+
+        // Snap back if zoomed out past 1x
+        if (scale <= 1) {
+            setScale(1);
+            setTranslate({ x: 0, y: 0 });
+            return;
+        }
+
+        // Don't trigger swipe navigation while zoomed in or just finished panning
+        if (scale > 1 || wasPanning) {
+            return;
+        }
+
         const deltaX = touchStartX.current - touchEndX.current;
         const deltaY = touchStartY.current - touchEndY.current;
 
@@ -152,6 +304,40 @@ const Lightbox = ({
 
 };
 
+    const handleMouseDown = (e) => {
+
+        if (selectedMedia.type === "video") return;
+
+        if (scale > 1) return;
+
+        isDragging.current = true;
+        dragStartX.current = e.clientX;
+
+    };
+
+const handleMouseMove = (e) => {
+    if (!isDragging.current) return;
+    dragEndX.current = e.clientX;
+};
+
+const handleMouseUp = () => {
+    if (!isDragging.current) return;
+
+    isDragging.current = false;
+
+    const delta = dragStartX.current - dragEndX.current;
+
+    const DRAG_DISTANCE = 80;
+
+    if (Math.abs(delta) < DRAG_DISTANCE) return;
+
+    if (delta > 0) {
+        nextImage();
+    } else {
+        previousImage();
+    }
+};
+
     useEffect(() => {
 
         const handleFullscreenChange = () => {
@@ -184,16 +370,56 @@ const Lightbox = ({
         };
     }, []);
 
+    // Focus the dialog on open so keyboard users start inside it
+    useEffect(() => {
+        if (lightboxRef.current) {
+            lightboxRef.current.focus();
+        }
+    }, []);
+
+    // Show a brief one-time nudge on touch devices so people discover swipe
+    useEffect(() => {
+
+        if (typeof window === "undefined") return;
+
+        const isTouchDevice =
+            window.matchMedia &&
+            window.matchMedia("(pointer: coarse)").matches;
+
+        if (!isTouchDevice || media.length <= 1) return;
+
+        setShowSwipeHint(true);
+
+        const timer = setTimeout(() => {
+            setShowSwipeHint(false);
+        }, 1400);
+
+        return () => clearTimeout(timer);
+
+    }, []);
 
     useEffect(() => {
+
+        setImageLoading(true);
+
+        if (selectedMedia.type !== "image") {
+
+            setImageLoading(false);
+            return;
+
+        }
+
         const img = new Image();
+
+        img.onload = () => setImageLoading(false);
+
+        img.onerror = () => setImageLoading(false);
 
         img.src = selectedMedia.url;
 
-        if (img.complete) {
-            setImageLoading(false);
-        }
     }, [selectedMedia]);
+
+
 
 useEffect(() => {
 
@@ -202,11 +428,11 @@ useEffect(() => {
         switch (event.key) {
 
             case "ArrowRight":
-                if (!isFullscreen) nextImage();
+                nextImage();
                 break;
 
             case "ArrowLeft":
-                if (!isFullscreen) previousImage();
+                previousImage();
                 break;
 
             case "Escape":
@@ -229,6 +455,33 @@ useEffect(() => {
                 toggleFullscreen();
 
                 break;
+
+            case "Tab": {
+
+                const focusableSelector =
+                    'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+                const focusable = lightboxRef.current
+                    ? lightboxRef.current.querySelectorAll(focusableSelector)
+                    : [];
+
+                if (!focusable || focusable.length === 0) break;
+
+                const list = Array.from(focusable);
+                const first = list[0];
+                const last = list[list.length - 1];
+
+                if (event.shiftKey && document.activeElement === first) {
+                    event.preventDefault();
+                    last.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                    event.preventDefault();
+                    first.focus();
+                }
+
+                break;
+
+            }
 
             default:
                 break;
@@ -255,52 +508,69 @@ useEffect(() => {
     isFullscreen,
 ]);
 
-        useEffect(() => {
+useEffect(() => {
 
-        thumbnailRefs.current[selectedIndex]?.scrollIntoView({
+    const selected = thumbnailRefs.current[selectedIndex];
 
-            behavior: "smooth",
+    if (!selected) return;
 
-            block: "center",
+    const container = selected.parentElement;
 
-            inline: "center",
+    container.scrollTo({
+        top:
+            selected.offsetTop -
+            container.clientHeight / 2 +
+            selected.clientHeight / 2,
+        behavior: "smooth",
+    });
 
-        });
-
-    }, [selectedIndex]);
+}, [selectedIndex]);
 
     useEffect(() => {
         if (videoRef.current) {
             videoRef.current.pause();
             videoRef.current.currentTime = 0;
         }
+        setScale(1);
+        setTranslate({ x: 0, y: 0 });
     }, [selectedIndex]);
 
-    useEffect(() => {
-        const previousIndex =
-            (selectedIndex - 1 + media.length) % media.length;
+useEffect(() => {
 
-        const nextIndex =
-            (selectedIndex + 1) % media.length;
+    if (selectedIndex > 0) {
 
-        const previous = media[previousIndex];
+        const previous = media[selectedIndex - 1];
 
-    if (previous.type === "image") {
-        const img = new Image();
-        img.src = previous.url;
+        if (previous.type === "image") {
+
+            const img = new Image();
+            img.src = previous.url;
+
+        }
+
     }
 
-    const next = media[nextIndex];
+    if (selectedIndex < media.length - 1) {
 
-    if (next.type === "image") {
-        const img = new Image();
-        img.src = next.url;
+        const next = media[selectedIndex + 1];
+
+        if (next.type === "image") {
+
+            const img = new Image();
+            img.src = next.url;
+
+        }
+
     }
 
-    }, [selectedIndex, media]);
+}, [selectedIndex, media]);
 
     return (
         <div ref={lightboxRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={memoryTitle ? `${memoryTitle} — media viewer` : "Media viewer"}
+            tabIndex={-1}
             className="
                     fixed
                     inset-0
@@ -308,6 +578,7 @@ useEffect(() => {
                     bg-black/96
                     flex
                     flex-col
+                    outline-none
             "
         >
 
@@ -316,8 +587,13 @@ useEffect(() => {
                 {canDownload && (
                     <button
                         onClick={downloadMedia}
+                        aria-label="Download media"
                         className="
                             text-white
+                            p-2
+                            rounded-full
+                            cursor-pointer
+                            hover:bg-white/10
                             hover:opacity-80
                             transition
                         "
@@ -329,7 +605,20 @@ useEffect(() => {
 
                 <button
                     onClick={toggleFullscreen}
-                    className="text-white hover:opacity-80 transition"
+                    aria-label={
+                        isFullscreen
+                            ? "Exit fullscreen"
+                            : "Enter fullscreen"
+                    }
+                    className="
+                        text-white
+                        p-2
+                        rounded-full
+                        cursor-pointer
+                        hover:bg-white/10
+                        hover:opacity-80
+                        transition
+                    "
                     title={
                         isFullscreen
                             ? "Exit Fullscreen"
@@ -345,9 +634,15 @@ useEffect(() => {
 
                 <button
                     onClick={handleClose}
+                    aria-label="Close media viewer"
                     className="
                         text-white
+                        p-2
+                        rounded-full
+                        cursor-pointer
+                        hover:bg-white/10
                         hover:opacity-80
+                        transition
                     "
                 >
                     <X size={32} />
@@ -360,15 +655,19 @@ useEffect(() => {
             <div
                 className="
                     flex-1
+                    min-h-0
                     flex
                     items-center
                     justify-center
                     px-4
-                    pb-6
                 "
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
             >
 
                 <div
@@ -388,13 +687,13 @@ useEffect(() => {
                     <div
                         className="
                             hidden
-                            lg:flex
+                            xl:flex
                             flex-col
                             items-center
                             pl-8
                             pr-6
                             py-2
-                            h-[88vh]
+                            h-[calc(100vh-120px)]
                         "
                     >
 
@@ -405,8 +704,12 @@ useEffect(() => {
                                 flex-1
                                 flex
                                 flex-col
-                                gap-6
+                                gap-5
                                 overflow-y-auto
+                                overflow-x-visible
+                                py-3
+                                px-3
+                                scroll-smooth
                                 scrollbar-hide
                             "
                         >
@@ -417,7 +720,10 @@ useEffect(() => {
                                         (thumbnailRefs.current[index] = el)
                                     }
                                     src={item.url}
-                                    alt={`Thumbnail ${index + 1}`}
+                                    alt={`Thumbnail ${index + 1} of ${media.length}`}
+                                    aria-label={`Go to media ${index + 1}`}
+                                    role="button"
+                                    decoding="async"
                                     onClick={() => goToImage(index)}
                                     className={`
                                         w-24
@@ -431,19 +737,8 @@ useEffect(() => {
 
                                         ${
                                             selectedIndex === index
-                                                ? `
-                                                    border-white
-                                                    opacity-100
-                                                    scale-105
-                                                    shadow-[0_0_18px_rgba(255,255,255,0.25)]
-                                                `
-                                                : `
-                                                    border-transparent
-                                                    opacity-45
-                                                    hover:opacity-100
-                                                    hover:border-white/40
-                                                    hover:scale-105
-                                                `
+                                                ? "border-white opacity-100 scale-105"
+                                                : "border-transparent opacity-45 hover:opacity-100 hover:border-white/40 hover:scale-105"
                                         }
                                     `}
                                 />
@@ -469,225 +764,227 @@ useEffect(() => {
 
                     {/* Main Media */}
 
-                    <div
-                        className="
-                            flex-1
-                            flex
-                            items-center
-                            justify-center
-                            relative
-                        "
-                    >
+<div
+    className="
+        relative
+        flex-1
+        flex
+        flex-col
+        items-center
+        justify-center
+        h-full
+    "
+>
 
-                        {imageLoading && (
-                            <div
-                                className="
-                                    absolute
-                                    inset-0
-                                    flex
-                                    items-center
-                                    justify-center
-                                "
-                            >
-                                <div
-                                    className="
-                                        h-10
-                                        w-10
-                                        animate-spin
-                                        rounded-full
-                                        border-4
-                                        border-white/30
-                                        border-t-white
-                                    "
-                                />
-                            </div>
-                        )}
+    {/* Media */}
 
-                        {selectedMedia.type === "image" ? (
-                            <img
-                                key={selectedMedia.url}
-                                src={selectedMedia.url}
-                                alt="Memory"
-                                onDoubleClick={toggleFullscreen}
-                                onLoad={() => setImageLoading(false)}
-                                onError={() => setImageLoading(false)}
-                                className={`
-                                    max-h-[94vh]
-                                    max-w-full
-                                    object-contain
-                                    transition-opacity
-                                    duration-300
-                                    ${
-                                        imageLoading
-                                            ? "opacity-0"
-                                            : "opacity-100"
-                                    }
-                                `}
-                            />
-                        ) : (
-                            <video
-                                ref={videoRef}
-                                key={selectedMedia.url}
-                                src={selectedMedia.url}
-                                controls
-                                autoPlay
-                                playsInline
-                                preload="metadata"
-                                onDoubleClick={toggleFullscreen}
-                                onLoadedData={() => setImageLoading(false)}
-                                onWaiting={() => setImageLoading(true)}
-                                onPlaying={() => setImageLoading(false)}
-                                className="
-                                    max-h-[94vh]
-                                    max-w-full
-                                    object-contain
-                                    rounded-lg
-                                "
-                            />
-                        )}
+    <div
+        className={`
+            relative
+            flex
+            items-center
+            justify-center
+            w-full
+            overflow-hidden
+            ${
+                showSwipeHint
+                    ? "animate-[lightboxSwipeHint_1.3s_ease-in-out_1]"
+                    : ""
+            }
+        `}
+        style={{ touchAction: "none" }}
+    >
 
-                        {/* Previous Button - Mobile & Tablet Only */}
+        {showSwipeHint && (
+            <style>{`
+                @keyframes lightboxSwipeHint {
+                    0% { transform: translateX(0); }
+                    25% { transform: translateX(-14px); }
+                    50% { transform: translateX(0); }
+                    75% { transform: translateX(14px); }
+                    100% { transform: translateX(0); }
+                }
+            `}</style>
+        )}
 
-                        {!isFullscreen && (
-                            <button
-                                onClick={previousImage}
-                                className="
-                                    lg:hidden
-                                    absolute
-                                    left-2
-                                    sm:left-6
-                                    top-1/2
-                                    -translate-y-1/2
-                                    rounded-full
-                                    bg-white/15
-                                    backdrop-blur-md
-                                    p-3
-                                    sm:p-4
-                                    text-white
-                                    hover:bg-white/25
-                                    transition
-                                "
-                            >
-                                <ChevronLeft className="h-6 w-6 sm:h-8 sm:w-8" />
-                            </button>
-                        )}
-
-                                {/* Next Button - Mobile & Tablet Only */}
-
-                            {!isFullscreen && (
-                                <button
-                                    onClick={nextImage}
-                                    className="
-                                        lg:hidden
-                                        absolute
-                                        right-2
-                                        sm:right-6
-                                        top-1/2
-                                        -translate-y-1/2
-                                        rounded-full
-                                        bg-white/15
-                                        backdrop-blur-md
-                                        p-3
-                                        sm:p-4
-                                        text-white
-                                        hover:bg-white/25
-                                        transition
-                                    "
-                                >
-                                    <ChevronRight className="h-6 w-6 sm:h-8 sm:w-8" />
-                                </button>
-                            )}
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            {!isFullscreen && (
+        {imageLoading && (
+            <div
+                className="
+                    absolute
+                    inset-0
+                    flex
+                    items-center
+                    justify-center
+                "
+            >
                 <div
                     className="
-                        hidden
-                        lg:flex
-                        flex-col
-                        items-center
-                        gap-4
-                        pl-8
-                        pr-6
+                        h-10
+                        w-10
+                        animate-spin
+                        rounded-full
+                        border-4
+                        border-white/30
+                        border-t-white
                     "
-                >
+                />
+            </div>
+        )}
 
-                    <div
-                        className="
-                            flex
-                            flex-col
-                            gap-4
-                            overflow-y-auto
-                            max-h-[82vh]
-                            scrollbar-hide
-                        "
+        <div
+            style={{
+                transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
+                transition: isInteractingZoom
+                    ? "none"
+                    : "transform 0.2s ease-out",
+                touchAction: "none",
+            }}
+        >
+
+        {selectedMedia.type === "image" ? (
+            <img
+                key={selectedMedia.url}
+                src={selectedMedia.url}
+                alt={
+                    memoryTitle
+                        ? `${memoryTitle} — photo ${selectedIndex + 1} of ${media.length}`
+                        : `Photo ${selectedIndex + 1} of ${media.length}`
+                }
+                decoding="async"
+                onDoubleClick={toggleFullscreen}
+                onLoad={() => setImageLoading(false)}
+                onError={() => setImageLoading(false)}
+                draggable={false}
+                className={`
+                    max-h-[calc(100vh-170px)]
+                    max-w-full
+                    object-contain
+                    transition-opacity
+                    duration-300
+                    ${
+                        imageLoading
+                            ? "opacity-0"
+                            : "opacity-100"
+                    }
+                `}
+            />
+        ) : (
+            <video
+                ref={videoRef}
+                key={selectedMedia.url}
+                src={selectedMedia.url}
+                controls
+                controlsList="nodownload"
+                autoPlay
+                muted
+                playsInline
+                preload="metadata"
+                onLoadedData={() => setImageLoading(false)}
+                onWaiting={() => setImageLoading(true)}
+                onPlaying={() => setImageLoading(false)}
+                onError={() => setImageLoading(false)}
+                className="
+                    max-h-[calc(100vh-170px)]
+                    max-w-full
+                    object-contain
+                    rounded-lg
+                "
+            />
+        )}
+
+        </div>
+
+    </div>
+
+    {/* Bottom Navigation — hidden in fullscreen so nothing but the media,
+        exit-fullscreen, download, and close buttons are visible.
+        Swipe and arrow-key navigation still work in fullscreen,
+        this only hides the on-screen arrows/counter. */}
+
+    {!isFullscreen && (
+        <div
+            className="
+                absolute
+                bottom-0
+                left-0
+                right-0
+                z-10
+                flex
+                flex-col
+                items-center
+                gap-3
+                pb-4
+                sm:pb-0
+                pointer-events-none
+            "
+        >
+
+            {selectedMedia.type !== "video" && (
+                <div className="flex items-center justify-center gap-12 sm:gap-16 md:gap-20 pointer-events-auto">
+
+                    <button
+                        onClick={previousImage}
+                        disabled={selectedIndex === 0}
+                        aria-label="Previous media"
+                        className={`
+                            transition
+                            duration-200
+                            ${
+                                selectedIndex === 0
+                                    ? "opacity-30 cursor-not-allowed"
+                                    : "text-white hover:text-white/70"
+                            }
+                        `}
                     >
-                        {media.map((item, index) => (
-                            <img
-                                key={index}
-                                ref={(el) =>
-                                    (thumbnailRefs.current[index] = el)
-                                }
-                                src={item.url}
-                                alt={`Thumbnail ${index + 1}`}
-                                onClick={() => goToImage(index)}
-                                className={`
-                                    w-24
-                                    h-24
-                                    rounded-xl
-                                    object-cover
-                                    cursor-pointer
-                                    border-2
-                                    transition-all
-                                    duration-300
+                        <ChevronLeft className="w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10" />
+                    </button>
 
-                                    ${
-                                        selectedIndex === index
-                                            ? `
-                                                border-white
-                                                opacity-100
-                                                scale-105
-                                                shadow-[0_0_18px_rgba(255,255,255,0.25)]
-                                            `
-                                            : `
-                                                border-transparent
-                                                opacity-45
-                                                hover:opacity-100
-                                                hover:border-white/40
-                                                hover:scale-105
-                                            `
-                                    }
-                                `}
-                            />
-                        ))}
-                    </div>
+                    <button
+                        onClick={nextImage}
+                        disabled={selectedIndex === media.length - 1}
+                        aria-label="Next media"
+                        className={`
+                            transition
+                            duration-200
+                            ${
+                                selectedIndex === media.length - 1
+                                    ? "opacity-30 cursor-not-allowed"
+                                    : "text-white hover:text-white/70"
+                            }
+                        `}
+                    >
+                        <ChevronRight className="w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10" />
+                    </button>
 
                 </div>
             )}
 
-            {/* Counter */}
+            <div
+                className="
+                    rounded-full
+                    border
+                    border-white/20
+                    bg-white/10
+                    px-5
+                    py-1.5
+                    text-sm
+                    font-medium
+                    text-white
+                    backdrop-blur-sm
+                    pointer-events-auto
+                "
+            >
+                {selectedIndex + 1} / {media.length}
+            </div>
 
-            {!isFullscreen && (
-                <div className="pb-6 flex justify-center">
-                    <div
-                        className="
-                            rounded-full
-                            bg-black/60
-                            px-4
-                            py-1
-                            text-xs
-                            text-white
-                        "
-                    >
-                        {selectedIndex + 1} / {media.length}
-                    </div>
+        </div>
+    )}
+
+</div>
+
                 </div>
-            )}
+            </div>
+
         </div>
     );
 };

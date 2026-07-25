@@ -45,58 +45,60 @@ const PublicMemory = () => {
         );
     };
 
-    const goToImage = (index) => {
-        setSelectedIndex(index);
+const goToImage = (index) => {
+    setSelectedIndex(index);
+
+    setSearchParams(
+        {
+            image: index.toString(),
+        },
+        {
+            replace: false,
+        }
+    );
+};
+
+const nextImage = () => {
+    setSelectedIndex((prev) => {
+        if (prev >= memory.media.length - 1) {
+            return prev;
+        }
+
+        const next = prev + 1;
 
         setSearchParams(
             {
-                image: index.toString(),
+                image: next.toString(),
             },
             {
                 replace: false,
             }
         );
-    };
 
-    const nextImage = () => {
-        setSelectedIndex((prev) => {
-            const next =
-                prev === memory.media.length - 1
-                    ? 0
-                    : prev + 1;
+        return next;
+    });
+};
 
-            setSearchParams(
-                {
-                    image: next.toString(),
-                },
-                {
-                    replace: false,
-                }
-            );
+const previousImage = () => {
+    setSelectedIndex((prev) => {
+        if (prev <= 0) {
+            return prev;
+        }
 
-            return next;
-        });
-    };
+        const previous = prev - 1;
 
-    const previousImage = () => {
-        setSelectedIndex((prev) => {
-            const previous =
-                prev === 0
-                    ? memory.media.length - 1
-                    : prev - 1;
+        setSearchParams(
+            {
+                image: previous.toString(),
+            },
+            {
+                replace: false,
+            }
+        );
 
-            setSearchParams(
-                {
-                    image: previous.toString(),
-                },
-                {
-                    replace: false,
-                }
-            );
-
-            return previous;
-        });
-    };
+        return previous;
+    });
+};
 
         useEffect(() => {
 
@@ -219,79 +221,234 @@ const PublicMemory = () => {
 
     }
 
-        return (
-        <main className="max-w-[1440px] mx-auto px-8 lg:px-12 py-12">
+return (
+    <main className="min-h-screen bg-[#F8FBFF]">
 
-            <MemoryHero
-                memory={memory}
-                username={username}
-                openGallery={openGallery}
-            />
+        {/* Hero */}
 
-            {isOpen && (
-                <Lightbox
-                    media={memory.media}
-                    selectedIndex={selectedIndex}
-                    nextImage={nextImage}
-                    previousImage={previousImage}
-                    goToImage={goToImage}
-                    canDownload={isOwner}
-                    memoryTitle={memory.title}
-                    onClose={() => {
+        <section className="relative overflow-hidden">
 
-                        setIsOpen(false);
+            {/* Soft Background */}
 
-                        setSearchParams({}, {
-                            replace: false,
-                        });
+            <div className="absolute inset-0 pointer-events-none">
 
-                    }}
+                {/* Top Blue Tint */}
+
+                <div
+                    className="
+                        absolute
+                        inset-x-0
+                        top-0
+                        h-[360px]
+                        bg-gradient-to-b
+                        from-sky-100
+                        via-blue-50
+                        to-transparent
+                    "
                 />
-            )}
 
-            <section className="mt-10">
+                {/* Left Glow */}
 
-                <div className="flex items-center gap-3 mb-6">
+                <div
+                    className="
+                        absolute
+                        -left-32
+                        top-0
+                        h-72
+                        w-72
+                        rounded-full
+                        bg-sky-300/20
+                        blur-[140px]
+                    "
+                />
 
-                    <Compass
-                        size={24}
-                        className="text-amber-500"
+                {/* Right Glow */}
+
+                <div
+                    className="
+                        absolute
+                        right-0
+                        top-0
+                        h-80
+                        w-80
+                        rounded-full
+                        bg-cyan-200/30
+                        blur-[170px]
+                    "
+                />
+
+            </div>
+
+            {/* Hero Content */}
+
+            <div
+                className="
+                    relative
+                    mx-auto
+                    max-w-[1500px]
+                    px-5
+                    sm:px-8
+                    lg:px-10
+                    xl:px-14
+                    pt-8
+                    lg:pt-12
+                    pb-12
+                "
+            >
+
+                <MemoryHero
+                    memory={memory}
+                    username={username}
+                    openGallery={openGallery}
+                />
+
+            </div>
+
+        </section>
+
+        {/* Story Section */}
+
+        <section
+            className="
+                mx-auto
+                max-w-[1500px]
+                px-5
+                sm:px-8
+                lg:px-10
+                xl:px-14
+                pb-24
+            "
+        >
+
+            <div
+                className="
+                    overflow-hidden
+                    rounded-[32px]
+                    border
+                    border-slate-200
+                    bg-white
+                    shadow-xl
+                "
+            >
+
+                <div
+                    className="
+                        px-6
+                        py-8
+                        sm:px-10
+                        sm:py-10
+                        lg:px-14
+                        lg:py-14
+                    "
+                >
+
+                    {/* Heading */}
+
+                    <div className="flex items-center gap-4">
+
+                        <div
+                            className="
+                                flex
+                                h-14
+                                w-14
+                                items-center
+                                justify-center
+                                rounded-2xl
+                                bg-gradient-to-br
+                                from-sky-500
+                                to-blue-600
+                                text-white
+                                shadow-md
+                            "
+                        >
+                            <Compass size={24} />
+                        </div>
+
+                        <div>
+
+                            <p
+                                className="
+                                    text-xs
+                                    font-semibold
+                                    uppercase
+                                    tracking-[0.30em]
+                                    text-sky-600
+                                "
+                            >
+                                Travel Journal
+                            </p>
+
+                            <h2
+                                className="
+                                    mt-1
+                                    text-3xl
+                                    font-bold
+                                    tracking-tight
+                                    text-slate-900
+                                "
+                            >
+                                Journey Story
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+                    {/* Divider */}
+
+                    <div
+                        className="
+                            my-8
+                            h-px
+                            bg-gradient-to-r
+                            from-transparent
+                            via-slate-200
+                            to-transparent
+                        "
                     />
 
-                    <h2
+                    {/* Story */}
+
+                    <div
                         className="
-                            text-3xl
-                            font-bold
-                            tracking-tight
-                            text-gray-900
-                        "
-                    >
-                        Journey Story
-                    </h2>
-
-                </div>
-
-                <div className="mt-6 mb-10 border-t border-gray-100" />
-
-                <div className="mt-5">
-
-                    <p
-                        className="
-                            text-lg
-                            leading-10
-                            text-gray-700
+                            w-full
+                            text-[17px]
+                            leading-9
+                            text-slate-600
                             whitespace-pre-line
+                            lg:text-[18px]
+                            lg:leading-10
                         "
                     >
                         {memory.description}
-                    </p>
+                    </div>
 
                 </div>
 
-            </section>
+            </div>
 
-        </main>
-    );
-};
+        </section>
+                {isOpen && (
+            <Lightbox
+                media={memory.media}
+                selectedIndex={selectedIndex}
+                nextImage={nextImage}
+                previousImage={previousImage}
+                goToImage={goToImage}
+                canDownload={isOwner}
+                memoryTitle={memory.title}
+                onClose={() => {
+                    setIsOpen(false);
+
+                    setSearchParams({}, {
+                        replace: false,
+                    });
+                }}
+            />
+        )}
+
+    </main>
+);
+}
 
 export default PublicMemory;
