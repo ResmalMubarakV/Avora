@@ -1,5 +1,7 @@
 import { Menu, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import LogoutModal from "../navigation/LogoutModal";
 
 import Logo from "../common/Logo";
 import SearchBar from "../navigation/SearchBar";
@@ -11,14 +13,17 @@ const Navbar = ({
     isMobile,
 }) => {
     const navigate = useNavigate();
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        sessionStorage.removeItem("token");
+    setShowLogoutModal(false);
 
-        navigate("/login", {
-            replace: true,
-        });
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
+
+    navigate("/login", {
+        replace: true,
+    });
     };
 
     return (
@@ -66,7 +71,7 @@ const Navbar = ({
 
                     {/* Desktop & Tablet Logout */}
                     <button
-                        onClick={handleLogout}
+                        onClick={() => setShowLogoutModal(true)}
                         className="
                             hidden
                             items-center
@@ -98,6 +103,11 @@ const Navbar = ({
             <div className="px-4 pb-4 lg:hidden sm:px-6">
                 <SearchBar />
             </div>
+            <LogoutModal
+                open={showLogoutModal}
+                onClose={() => setShowLogoutModal(false)}
+                onConfirm={handleLogout}
+            />
         </header>
     );
 };

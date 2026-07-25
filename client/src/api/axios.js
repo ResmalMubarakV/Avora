@@ -22,18 +22,24 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-    (response) => {
-        return response;
-    },
+    (response) => response,
 
     (error) => {
-        if(error.response?.status === 401){
-        localStorage.removeItem("token");
-        sessionStorage.removeItem("token");
-        window.location.href = "/";
+        if (error.response?.status === 401) {
+
+            const hasToken =
+                localStorage.getItem("token") ||
+                sessionStorage.getItem("token");
+
+            if (hasToken) {
+                localStorage.removeItem("token");
+                sessionStorage.removeItem("token");
+                window.location.href = "/";
+            }
         }
-            return Promise.reject(error);
+
+        return Promise.reject(error);
     }
-    );
+);
 
 export default api;

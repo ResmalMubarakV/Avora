@@ -10,6 +10,9 @@ import {
 } from "lucide-react";
 
 import { NavLink, useNavigate } from "react-router-dom";
+import LogoutModal from "../navigation/LogoutModal";
+import { useState } from "react";
+
 
 const menus = [
   {
@@ -46,11 +49,15 @@ const Sidebar = ({
 }) => {
 
   const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
-    navigate("/login", { replace: true });
+      setShowLogoutModal(false);
+
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
+
+      navigate("/login", { replace: true });
   };
 
   return (
@@ -286,7 +293,7 @@ const Sidebar = ({
           <div className="p-3 border-t border-slate-200/70">
 
             <button
-              onClick={handleLogout}
+              onClick={() => setShowLogoutModal(true)}
               className={`
                 w-full
                 h-14
@@ -330,6 +337,7 @@ const Sidebar = ({
                 Logout
               </span>
 
+
             </button>
 
           </div>
@@ -337,6 +345,12 @@ const Sidebar = ({
         </div>
 
       </aside>
+
+    <LogoutModal
+        open={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogout}
+    />
 
     </>
   );
