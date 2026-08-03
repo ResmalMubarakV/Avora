@@ -5,6 +5,8 @@ import {
     Download,
     Maximize2,
     Minimize2,
+    Play,
+    Video,
 } from "lucide-react";
 
 import { useEffect, useRef, useState } from "react";
@@ -20,6 +22,11 @@ const Lightbox = ({
     memoryTitle,
 }) => {
     const selectedMedia = media[selectedIndex];
+
+    const isVideoItem = (item) =>
+        item?.type === "video" ||
+        /\.(mp4|webm|ogg|ogv|mov|m4v)(\?.*)?$/i.test(item?.url || "");
+
     const thumbnailRefs = useRef([]);
     const [imageLoading, setImageLoading] = useState(true);
     const touchStartX = useRef(0);
@@ -93,7 +100,7 @@ const Lightbox = ({
             return;
         }
 
-        if (selectedMedia.type === "video") return;
+        if (isVideoItem(selectedMedia)) return;
 
         touchStartX.current = event.touches[0].clientX;
         touchStartY.current = event.touches[0].clientY;
@@ -178,7 +185,7 @@ const Lightbox = ({
                         if (scale > 1) {
                             setScale(1);
                             setTranslate({ x: 0, y: 0 });
-                        } else if (selectedMedia.type === "image") {
+                        } else if (!isVideoItem(selectedMedia)) {
                             setScale(DOUBLE_TAP_ZOOM);
                         }
 
@@ -306,7 +313,7 @@ const Lightbox = ({
 
     const handleMouseDown = (e) => {
 
-        if (selectedMedia.type === "video") return;
+        if (isVideoItem(selectedMedia)) return;
 
         if (scale > 1) return;
 
@@ -402,7 +409,7 @@ const handleMouseUp = () => {
 
         setImageLoading(true);
 
-        if (selectedMedia.type !== "image") {
+        if (isVideoItem(selectedMedia)) {
 
             setImageLoading(false);
             return;
@@ -714,22 +721,21 @@ useEffect(() => {
                             "
                         >
                             {media.map((item, index) => (
-                                <img
+                                <button
                                     key={index}
                                     ref={(el) =>
                                         (thumbnailRefs.current[index] = el)
                                     }
-                                    src={item.url}
-                                    alt={`Thumbnail ${index + 1} of ${media.length}`}
-                                    aria-label={`Go to media ${index + 1}`}
-                                    role="button"
-                                    decoding="async"
+                                    type="button"
                                     onClick={() => goToImage(index)}
+                                    aria-label={`Go to media ${index + 1} of ${media.length}`}
                                     className={`
+                                        relative
+                                        shrink-0
                                         w-24
                                         h-24
                                         rounded-xl
-                                        object-cover
+                                        overflow-hidden
                                         cursor-pointer
                                         border-2
                                         transition-all
@@ -741,7 +747,79 @@ useEffect(() => {
                                                 : "border-transparent opacity-45 hover:opacity-100 hover:border-white/40 hover:scale-105"
                                         }
                                     `}
-                                />
+                                >
+
+                                    {isVideoItem(item) ? (
+
+                                        <>
+
+                                            {item.thumbnailUrl || item.poster ? (
+                                                <img
+                                                    src={item.thumbnailUrl || item.poster}
+                                                    alt={`Thumbnail ${index + 1} of ${media.length}`}
+                                                    decoding="async"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <div
+                                                    className="
+                                                        w-full
+                                                        h-full
+                                                        bg-slate-800
+                                                        flex
+                                                        items-center
+                                                        justify-center
+                                                    "
+                                                >
+                                                    <Video
+                                                        size={24}
+                                                        className="text-white/50"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            <div
+                                                className="
+                                                    absolute
+                                                    inset-0
+                                                    flex
+                                                    items-center
+                                                    justify-center
+                                                    bg-black/25
+                                                "
+                                            >
+                                                <div
+                                                    className="
+                                                        h-7
+                                                        w-7
+                                                        rounded-full
+                                                        bg-white/90
+                                                        flex
+                                                        items-center
+                                                        justify-center
+                                                    "
+                                                >
+                                                    <Play
+                                                        size={14}
+                                                        className="text-black fill-black ml-0.5"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                        </>
+
+                                    ) : (
+
+                                        <img
+                                            src={item.url}
+                                            alt={`Thumbnail ${index + 1} of ${media.length}`}
+                                            decoding="async"
+                                            className="w-full h-full object-cover"
+                                        />
+
+                                    )}
+
+                                </button>
                             ))}
                         </div>
 
@@ -841,7 +919,7 @@ useEffect(() => {
             }}
         >
 
-        {selectedMedia.type === "image" ? (
+        {!isVideoItem(selectedMedia) ? (
             <img
                 key={selectedMedia.url}
                 src={selectedMedia.url}
@@ -919,7 +997,7 @@ useEffect(() => {
             "
         >
 
-            {selectedMedia.type !== "video" && (
+            {!isVideoItem(selectedMedia) && (
                 <div className="flex items-center justify-center gap-12 sm:gap-16 md:gap-20 pointer-events-auto">
 
                     <button

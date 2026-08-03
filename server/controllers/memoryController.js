@@ -8,7 +8,8 @@ const generateSlug = (title) => {
         .toLowerCase()
         .trim()
         .replace(/[^\w\s-]/g, "")
-        .replace(/\s+/g, "-");
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-");
 };
 
 const createMemory = async (req , res) => {
@@ -43,6 +44,18 @@ const createMemory = async (req , res) => {
     if(!req.files|| !req.files.coverImage || req.files.coverImage.length === 0){
         return res.status(400).json({
             message : "Cover Image Is Required"
+        });
+    }
+
+    if (
+        req.body.startDate &&
+        req.body.endDate &&
+        new Date(req.body.endDate) <
+            new Date(req.body.startDate)
+    ) {
+        return res.status(400).json({
+            message:
+                "End date cannot be earlier than the start date.",
         });
     }
 
@@ -133,7 +146,7 @@ const createMemory = async (req , res) => {
         modeOfTravel,
         coverImage : coverUpload.secure_url,
         coverImagePublicId : coverUpload.public_id,
-        isPublic,
+        isPublic: isPublic === "true",
         media : uploadedMedia,
         slug: finalSlug,
         user : req.user._id
@@ -268,6 +281,18 @@ const updateMemory = async (req, res) => {
             ({message : "Please provide data to update"});
         }
 
+        if (
+        req.body.startDate &&
+        req.body.endDate &&
+        new Date(req.body.endDate) <
+            new Date(req.body.startDate)
+    ) {
+        return res.status(400).json({
+            message:
+                "End date cannot be earlier than the start date.",
+        });
+    }
+
         let oldCoverPublicId = null;
 
         // Update Cover Image
@@ -305,14 +330,13 @@ const updateMemory = async (req, res) => {
             memory.coverImagePublicId = coverUpload.public_id;
         }
 
+            // Append Gallery Media
 
-        // Append Gallery Media
-
-        if(req.files?.media?.length > 0){
-            
             const uploadedMedia = [];
 
-            for (const file of req.files.media) {
+            if (req.files?.media?.length > 0) {
+
+                for (const file of req.files.media) {
 
                     let upload;
 
@@ -345,9 +369,60 @@ const updateMemory = async (req, res) => {
                     });
 
                 }
-            memory.media.push(...uploadedMedia);
-            
+
+            }
+
+        // Keep only gallery items selected by frontend
+
+        if (req.body.existingGallery) {
+
+            let keepMedia = [];
+
+            try {
+
+                keepMedia = JSON.parse(req.body.existingGallery);
+
+            } catch {
+
+                keepMedia = [];
+
+            }
+
+            const removedMedia = memory.media.filter(
+                item => !keepMedia.includes(item.publicId)
+            );
+
+            for (const media of removedMedia) {
+
+                try {
+
+                    await cloudinary.uploader.destroy(
+                        media.publicId,
+                        {
+                            resource_type:
+                                media.type === "video"
+                                    ? "video"
+                                    : "image",
+                        }
+                    );
+
+                } catch (err) {
+
+                    console.error(
+                        err.message
+                    );
+
+                }
+
+            }
+
+            memory.media = memory.media.filter(
+                item => keepMedia.includes(item.publicId)
+            );
+
         }
+
+        memory.media.push(...uploadedMedia);
         
 
         // Update Slug if Title Changes
@@ -370,6 +445,35 @@ const updateMemory = async (req, res) => {
             memory.slug = finalSlug;
         }
 
+        if (
+            req.body.removeCover === "true" &&
+            !req.files?.coverImage?.length
+        ) {
+
+            if (memory.coverImagePublicId) {
+
+                try {
+
+                    await cloudinary.uploader.destroy(
+                        memory.coverImagePublicId
+                    );
+
+                } catch (err) {
+
+                    console.error(
+                        "Cover Delete Error:",
+                        err.message
+                    );
+
+                }
+
+            }
+
+            memory.coverImage = "";
+            memory.coverImagePublicId = "";
+
+        }
+
         // Update Other Fields
         memory.title = req.body.title || memory.title;
         memory.description = req.body.description || memory.description;
@@ -377,7 +481,9 @@ const updateMemory = async (req, res) => {
         memory.startDate = req.body.startDate || memory.startDate;
         memory.endDate = req.body.endDate || memory.endDate;
         memory.modeOfTravel = req.body.modeOfTravel || memory.modeOfTravel;
-        memory.isPublic = req.body.isPublic ?? memory.isPublic;
+        if (req.body.isPublic !== undefined) {
+            memory.isPublic = req.body.isPublic === "true";
+        }
         
         await memory.save();
 

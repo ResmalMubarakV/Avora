@@ -1,6 +1,10 @@
-import MemoryCard from "../../memory/MemoryCard";
+import MemoryCard from "../../cards/MemoryCard";
 
-const MemoriesSection = ({ memories, username }) => {
+const MemoriesSection = ({
+    memories,
+    username,
+    isOwner,
+}) => {
     return (
         <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
 
@@ -22,7 +26,10 @@ const MemoriesSection = ({ memories, username }) => {
                     <MemoryCard
                         key={memory._id}
                         memory={memory}
-                        username={username}
+                        openFrom={`/${username}`}
+                        openLabel="Profile"
+                        redirectTo={`/${username}`}
+                        showActions={isOwner}
                     />
                 ))}
 

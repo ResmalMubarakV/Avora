@@ -16,7 +16,6 @@ const Login = () => {
     // State
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [rememberMe, setRememberMe] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -36,11 +35,7 @@ const Login = () => {
                 password,
             });
 
-            if (rememberMe) {
-                localStorage.setItem("token", data.token);
-            } else {
-                sessionStorage.setItem("token", data.token);
-            }
+            localStorage.setItem("token", data.token);
 
             navigate("/dashboard", {
                     replace: true,
@@ -130,28 +125,6 @@ const Login = () => {
 
                     <div className="flex items-center justify-between">
 
-                        {/* Remember Me */}
-                        <label className="flex cursor-pointer items-center gap-2">
-
-                            <input
-                                type="checkbox"
-                                checked={rememberMe}
-                                onChange={(e) => setRememberMe(e.target.checked)}
-                                className="
-                                    h-4
-                                    w-4
-                                    rounded
-                                    border-slate-300
-                                    text-blue-600
-                                    focus:ring-blue-500
-                                "
-                            />
-
-                            <span className="text-sm text-slate-600">
-                                Remember Me
-                            </span>
-
-                        </label>
 
                         {/* Forgot Password */}
                         <button

@@ -120,7 +120,6 @@ const Dashboard = () => {
                           text-sm
                           font-semibold
                           text-white
-
                           shadow-lg
                           shadow-[#1E3A8A]/20
 

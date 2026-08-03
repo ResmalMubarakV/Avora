@@ -2,7 +2,13 @@ import MemoryInfo from "./MemoryInfo";
 import CoverImage from "./CoverImage";
 import MediaPreview from "./MediaPreview";
 
-const MemoryHero = ({ username, memory, openGallery }) => {
+const MemoryHero = ({
+    username,
+    memory,
+    openGallery,
+    isOwner,
+    locationState,
+}) => {
     return (
         <section
             className="
@@ -33,6 +39,8 @@ const MemoryHero = ({ username, memory, openGallery }) => {
                         <MemoryInfo
                             username={username}
                             memory={memory}
+                            isOwner={isOwner}
+                            locationState={locationState}
                         />
 
                     </div>

@@ -14,6 +14,8 @@ import PendingApproval from "./pages/onboarding/PendingApproval";
 import Suspended from "./pages/auth/Suspended";
 import NotFound from "./pages/errors/NotFound";
 import Forbidden from "./pages/errors/Forbidden";
+import CreateMemory from "./pages/memory/CreateMemory";
+import EditMemory from "./pages/memory/EditMemory";
 
 
 function App() {
@@ -38,6 +40,8 @@ function App() {
                 <Route element={<DashboardLayout />}>
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/profile" element={<OwnerProfile />} />
+                    <Route path="/dashboard/create-memory" element={<CreateMemory />} />
+                    <Route path="/dashboard/edit-memory/:id" element={<EditMemory />} />
                 </Route>
             </Route>
 

@@ -80,6 +80,7 @@ const Navbar = ({
                             border
                             border-red-200
                             px-4
+                            cursor-pointer
                             py-2
                             text-sm
                             font-medium

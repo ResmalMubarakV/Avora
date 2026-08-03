@@ -8,10 +8,10 @@ import {
   Menu,
   X,
 } from "lucide-react";
-
 import { NavLink, useNavigate } from "react-router-dom";
 import LogoutModal from "../navigation/LogoutModal";
 import { useState } from "react";
+import useCurrentUser from "../../hooks/useCurrentUser";
 
 
 const menus = [
@@ -50,6 +50,7 @@ const Sidebar = ({
 
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const { user } = useCurrentUser();
 
   const handleLogout = () => {
       setShowLogoutModal(false);
@@ -184,7 +185,7 @@ const Sidebar = ({
 
                   <X
                     size={20}
-                    className="text-slate-500"
+                    className="text-slate-500 cursor-pointer"
                   />
 
                 </>
@@ -210,11 +211,18 @@ const Sidebar = ({
 
               const Icon = menu.icon;
 
+              const resolvedPath =
+                menu.title === "Profile"
+                  ? user?.username
+                    ? `/${user.username}`
+                    : "/dashboard"
+                  : menu.path;
+
               return (
 
                 <NavLink
                   key={menu.title}
-                  to={menu.path}
+                  to={resolvedPath}
                   title={!sidebarOpen ? menu.title : ""}
                   onClick={() => {
 
@@ -298,6 +306,7 @@ const Sidebar = ({
                 w-full
                 h-14
                 rounded-2xl
+                cursor-pointer
                 transition-all
                 duration-300
                 flex

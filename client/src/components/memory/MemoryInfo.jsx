@@ -1,5 +1,3 @@
-import { Link } from "react-router-dom";
-
 import {
     ArrowLeft,
     MapPin,
@@ -13,9 +11,28 @@ import {
     Ship,
     Footprints,
     Compass,
+    Pencil,
 } from "lucide-react";
 
-const MemoryInfo = ({ username, memory }) => {
+import {
+    useNavigate,
+    useLocation,
+} from "react-router-dom";
+   
+const MemoryInfo = ({
+    username,
+    memory,
+    isOwner,
+    locationState,
+}) => {
+
+        const navigate = useNavigate();
+        const location = useLocation();
+        const from =
+            locationState?.from || `/${username}`;
+
+        const label =
+            locationState?.label || "Profile";
 
     const travelIcons = {
         bike: Bike,
@@ -69,37 +86,106 @@ return (
 
     <div className="flex flex-col">
 
+        {/* Top Actions */}
+
+    <div className="flex items-center justify-between gap-4">
+
         {/* Back Button */}
 
-        <Link
-            to={`/${username}`}
+        <button
+            type="button"
+            onClick={() => navigate(from)}
             className="
                 inline-flex
-                w-fit
                 items-center
                 gap-2
+
                 rounded-full
                 border
                 border-slate-200
+
                 bg-white
+
                 px-4
                 py-2
+
                 text-xs
                 sm:text-sm
                 font-medium
                 text-slate-800
+
                 shadow-sm
+
                 transition-all
                 duration-300
+
                 hover:bg-slate-50
                 hover:shadow-md
             "
         >
             <ArrowLeft size={16} />
 
-            Back to Profile
+            <span>
+                Back to {label}
+            </span>
 
-        </Link>
+        </button>
+
+        {/* Edit Button */}
+
+        {isOwner && (
+
+            <button
+                type="button"
+                onClick={() =>
+                    navigate(
+                        `/dashboard/edit-memory/${memory._id}`,
+                        {
+                            state: {
+                                from: location.pathname,
+                            },
+                        }
+                    )
+                }
+                className="
+                    inline-flex
+                    items-center
+                    gap-2
+
+                    rounded-full
+
+                    bg-gradient-to-r
+                    from-[#1E3A8A]
+                    to-[#3559D4]
+
+                    px-4
+                    py-2
+
+                    text-xs
+                    sm:text-sm
+                    font-semibold
+                    text-white
+
+                    shadow-md
+
+                    transition-all
+                    duration-300
+
+                    hover:-translate-y-0.5
+                    hover:shadow-lg
+                "
+            >
+                <Pencil size={16} />
+
+                <span>
+                    Edit Memory
+                </span>
+
+            </button>
+
+        )}
+
+    </div>
 
         {/* Badge */}
 

@@ -1,114 +1,204 @@
-import { Link } from "react-router-dom";
+import {
+    CalendarDays,
+    MapPin,
+    Globe,
+    Lock,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-const MemoryCard = ({ memory, username }) => {
+import MemoryActions from "../memory/MemoryActions";
+
+const formatDate = (date) => {
+
+    if (!date) return "";
+
+    return new Date(date).toLocaleDateString(
+        "en-IN",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        }
+    );
+
+};
+
+const MemoryCard = ({ memory }) => {
+
+    const navigate = useNavigate();
+
     return (
-        <Link to={`/${username}/${memory.slug}`}>
-            <article
-                className="
-                    overflow-hidden
-                    rounded-3xl
-                    border
-                    border-slate-200
-                    bg-white
-                    shadow-md
-                    transition-all
-                    duration-300
-                    hover:-translate-y-1
-                    hover:shadow-xl
-                "
-            >
-                {/* Cover Image */}
 
-                <div className="h-64 overflow-hidden bg-slate-100">
+        <div
+            onClick={() =>
+                navigate(
+                    `/${memory.user.username}/${memory.slug}`,
+                    {
+                        state: {
+                            from: "/dashboard",
+                            label: "Dashboard",
+                        },
+                    }
+                )
+            }
+            className="
+                group
+                relative
+                cursor-pointer
+                overflow-visible
+                rounded-2xl
+                border
+                border-slate-200
+                bg-white
+                shadow-sm
+                transition-all
+                duration-300
+                hover:-translate-y-1
+                hover:shadow-xl
+            "
+        >
 
-                    {memory.coverImage && (
-                        <img
-                            src={memory.coverImage}
-                            alt={memory.title}
+            {/* Cover */}
+
+            <div className="relative overflow-hidden rounded-t-2xl">
+
+                <img
+                    src={memory.coverImage}
+                    alt={memory.title}
+                    className="
+                        h-56
+                        w-full
+                        object-cover
+                        transition-transform
+                        duration-500
+                        group-hover:scale-105
+                    "
+                />
+
+                {/* Visibility */}
+
+                <div className="absolute top-3 right-3">
+
+                    {memory.isPublic ? (
+
+                        <div
                             className="
-                                h-full
-                                w-full
-                                object-cover
-                                transition-transform
-                                duration-500
-                                hover:scale-105
+                                flex
+                                items-center
+                                gap-1
+                                rounded-full
+                                bg-white/95
+                                px-3
+                                py-1
+                                text-xs
+                                font-medium
+                                text-slate-700
+                                shadow
+                                backdrop-blur
                             "
-                        />
+                        >
+
+                            <Globe size={14} />
+
+                            Public
+
+                        </div>
+
+                    ) : (
+
+                        <div
+                            className="
+                                flex
+                                items-center
+                                gap-1
+                                rounded-full
+                                bg-white/95
+                                px-3
+                                py-1
+                                text-xs
+                                font-medium
+                                text-slate-700
+                                shadow
+                                backdrop-blur
+                            "
+                        >
+
+                            <Lock size={14} />
+
+                            Private
+
+                        </div>
+
                     )}
 
                 </div>
 
-                {/* Content */}
+            </div>
 
-                <div className="p-6">
+            {/* Body */}
 
-                    {/* Title */}
+            <div className="relative p-5">
 
-                    <h2
-                        className="
-                            text-2xl
-                            font-bold
-                            tracking-tight
-                            text-slate-900
-                        "
-                    >
-                        {memory.title}
-                    </h2>
+                <h3 className="pr-14 text-xl font-bold text-slate-900">
 
-                    {/* Description */}
+                    {memory.title}
 
-                    <p
-                        className="
-                            mt-3
-                            whitespace-pre-line
-                            break-words
-                            text-base
-                            leading-7
-                            text-slate-600
-                        "
-                    >
-                        {memory.description}
-                    </p>
+                </h3>
 
-                    {/* Footer */}
+                <div className="mt-4 flex items-center gap-2 text-slate-500">
 
-                    <div
-                        className="
-                            mt-6
-                            flex
-                            items-center
-                            justify-between
-                            border-t
-                            border-slate-200
-                            pt-4
-                            text-sm
-                            text-slate-500
-                        "
-                    >
+                    <MapPin size={16} />
 
-                        <div className="flex items-center gap-2">
-                            <span>📍</span>
-                            <span>{memory.location}</span>
-                        </div>
+                    <span className="truncate">
 
-                        <div>
-                            {new Date(memory.startDate).toLocaleDateString(
-                                "en-IN",
-                                {
-                                    day: "numeric",
-                                    month: "short",
-                                    year: "numeric",
-                                }
-                            )}
-                        </div>
+                        {memory.location}
 
-                    </div>
+                    </span>
 
                 </div>
 
-            </article>
-        </Link>
+                <div className="mt-2 flex items-center gap-2 text-slate-500">
+
+                    <CalendarDays size={16} />
+
+                    <span>
+
+                        {formatDate(memory.startDate)}
+
+                    </span>
+
+                </div>
+
+                {/* Actions */}
+
+                <div
+                    className="
+                        absolute
+                        bottom-5
+                        right-5
+
+                        opacity-0
+                        transition-opacity
+                        duration-300
+
+                        group-hover:opacity-100
+                    "
+                    onClick={(e) => e.stopPropagation()}
+                >
+
+                    <MemoryActions
+                        memory={memory}
+                        redirectTo="/dashboard"
+                    />
+
+                </div>
+
+            </div>
+
+        </div>
+
     );
+
 };
 
 export default MemoryCard;

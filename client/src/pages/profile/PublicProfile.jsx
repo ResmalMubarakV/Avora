@@ -1,62 +1,114 @@
-import { useState, useEffect  } from "react";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+
 import api from "../../api/axios";
+import { getMyProfile } from "../../api/userApi";
+
+import AppHeader from "../../components/navigation/AppHeader";
 import ProfileHero from "../../components/public/profile/ProfileHero";
 import MemoriesSection from "../../components/public/profile/MemoriesSection";
-import AppHeader from "../../components/navigation/AppHeader";
 
 const PublicProfile = () => {
-   const { username } = useParams();
-   const [user, setUser] = useState(null);
-   const [memories, setMemories] = useState([]);
-   const [loading, setLoading] = useState(true);
-   const navigate = useNavigate();
+    const { username } = useParams();
+    const navigate = useNavigate();
 
-   const fetchProfile = async () => {
-    try {
-      const {data} = await api.get(`/api/public/${username}`);
-      setUser(data.user);
-      setMemories(data.memories);
-    } catch (error) {
+    const [user, setUser] = useState(null);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [memories, setMemories] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-      if (error.response?.status === 403) {
-        navigate("/403", { replace: true });
-        return;
+    const isOwner =
+        currentUser?.username === username;
+
+    useEffect(() => {
+
+        const fetchCurrentUser = async () => {
+
+            try {
+
+                const user = await getMyProfile();
+
+                setCurrentUser(user);
+
+            } catch {
+
+                // Visitor is not logged in
+                setCurrentUser(null);
+
+            }
+
+        };
+
+        fetchCurrentUser();
+
+    }, []);
+
+    useEffect(() => {
+
+        const fetchProfile = async () => {
+
+            try {
+
+                const { data } = await api.get(
+                    `/api/public/${username}`
+                );
+
+                setUser(data.user);
+                setMemories(data.memories);
+
+            } catch (error) {
+
+                if (error.response?.status === 403) {
+                    navigate("/403", {
+                        replace: true,
+                    });
+                    return;
+                }
+
+                if (error.response?.status === 404) {
+                    navigate("/404", {
+                        replace: true,
+                    });
+                    return;
+                }
+
+                console.error(error);
+
+            } finally {
+
+                setLoading(false);
+
+            }
+
+        };
+
+        fetchProfile();
+
+    }, [username, navigate]);
+
+    if (loading) {
+        return (
+            <h1 className="text-center mt-20 text-lg">
+                Loading...
+            </h1>
+        );
     }
 
-      if (error.response?.status === 404) {
-        navigate("/404", { replace: true });
-        return;
-    }
-    console.error(error);
-    } finally {
-      setLoading(false);
-    }
-   }
+    return (
+        <main className="min-h-screen bg-slate-50">
 
-   useEffect(() => {
-      fetchProfile();
-   }, [username, navigate]);
+            <AppHeader />
 
-  if(loading) {
-     return <h1>Loading...</h1>;
-  }
+            <ProfileHero user={user} />
 
-return (
-    <main className="min-h-screen bg-slate-50">
+            <MemoriesSection
+                memories={memories}
+                username={user.username}
+                isOwner={isOwner}
+            />
 
-       <AppHeader />
-
-        <ProfileHero user={user} />
-
-        <MemoriesSection
-            memories={memories}
-            username={user.username}
-        />
-
-    </main>
-);
+        </main>
+    );
 };
 
 export default PublicProfile;

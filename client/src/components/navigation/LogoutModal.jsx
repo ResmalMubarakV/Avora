@@ -103,6 +103,7 @@ return (
                     onClick={onClose}
                     className="
                         rounded-xl
+                        cursor-pointer
                         p-2
                         text-slate-500
                         transition
@@ -139,6 +140,7 @@ return (
                         border
                         border-slate-200
                         bg-white
+                        cursor-pointer
                         px-5
                         py-2.5
                         font-medium
@@ -161,6 +163,7 @@ return (
                         py-2.5
                         font-semibold
                         text-white
+                        cursor-pointer
                         shadow-lg
                         shadow-red-500/20
                         transition-all

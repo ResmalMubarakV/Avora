@@ -4,6 +4,7 @@ import {
     useNavigate,
     useParams,
     useSearchParams,
+    useLocation,
 } from "react-router-dom";
 
 import api from "../../api/axios";
@@ -15,6 +16,7 @@ import { Compass } from "lucide-react";
 
 const PublicMemory = () => {
     const navigate = useNavigate();
+    const location = useLocation();
 
     const { username, slug } = useParams();
 
@@ -300,6 +302,8 @@ return (
                     memory={memory}
                     username={username}
                     openGallery={openGallery}
+                    isOwner={isOwner}
+                    locationState={location.state}
                 />
 
             </div>

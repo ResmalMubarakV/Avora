@@ -95,6 +95,8 @@ const DashboardHero = () => {
                             text-base
                             font-semibold
                             text-white
+                            cursor-pointer
+
 
                             shadow-lg
                             shadow-[#1E3A8A]/20

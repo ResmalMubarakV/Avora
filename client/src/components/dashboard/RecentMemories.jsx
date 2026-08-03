@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import MemoryCard from "./MemoryCard";
+import MemoryCard from "../cards/MemoryCard";
 
 const RecentMemories = ({ memories }) => {
 
@@ -61,7 +61,13 @@ const RecentMemories = ({ memories }) => {
                             }
                         `}
                     >
-                        <MemoryCard memory={memory} />
+                        <MemoryCard
+                            key={memory._id}
+                            memory={memory}
+                            openFrom="/dashboard"
+                            openLabel="Dashboard"
+                            redirectTo="/dashboard"
+                        />
                     </div>
                 ))}
             </div>
