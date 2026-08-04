@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import {
     AlertTriangle,
     Loader2,
@@ -12,13 +13,13 @@ const DeleteMemoryModal = ({
 
     if (!open) return null;
 
-    return (
+    return createPortal(
 
         <div
             className="
                 fixed
                 inset-0
-                z-[100]
+                z-[9999]
                 flex
                 items-center
                 justify-center
@@ -26,9 +27,11 @@ const DeleteMemoryModal = ({
                 px-4
                 backdrop-blur-sm
             "
+            onClick={onClose}
         >
 
             <div
+                onClick={(e) => e.stopPropagation()}
                 className="
                     w-full
                     max-w-md
@@ -36,6 +39,9 @@ const DeleteMemoryModal = ({
                     rounded-3xl
                     bg-white
                     shadow-2xl
+                    animate-in
+                    zoom-in-95
+                    duration-200
                 "
             >
 
@@ -56,9 +62,7 @@ const DeleteMemoryModal = ({
                             text-red-600
                         "
                     >
-
                         <AlertTriangle size={30} />
-
                     </div>
 
                     <h2
@@ -116,7 +120,8 @@ const DeleteMemoryModal = ({
                             text-sm
                             font-semibold
                             text-slate-700
-                            transition
+                            transition-all
+                            duration-200
                             hover:bg-slate-50
                             disabled:cursor-not-allowed
                             disabled:opacity-50
@@ -142,7 +147,8 @@ const DeleteMemoryModal = ({
                             text-sm
                             font-semibold
                             text-white
-                            transition
+                            transition-all
+                            duration-200
                             hover:bg-red-700
                             disabled:cursor-not-allowed
                             disabled:opacity-60
@@ -174,7 +180,9 @@ const DeleteMemoryModal = ({
 
             </div>
 
-        </div>
+        </div>,
+
+        document.body
 
     );
 

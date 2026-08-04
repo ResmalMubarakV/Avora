@@ -168,7 +168,7 @@ const MemoryActions = ({
 
             <div
                 ref={menuRef}
-                className="relative inline-block"
+                className="inline-block"
             >
 
                 <button
@@ -182,6 +182,7 @@ const MemoryActions = ({
                     }}
                     className="
                         flex
+                        cursor-pointer
                         h-10
                         w-10
                         items-center
@@ -336,14 +337,18 @@ const MemoryActions = ({
 
             </div>
 
-            <DeleteMemoryModal
-                open={showDeleteModal}
-                loading={loading}
-                onClose={() =>
-                    setShowDeleteModal(false)
-                }
-                onDelete={handleDelete}
-            />
+            <div
+                onClick={(e) => e.stopPropagation()}
+            >
+                <DeleteMemoryModal
+                    open={showDeleteModal}
+                    loading={loading}
+                    onClose={() =>
+                        setShowDeleteModal(false)
+                    }
+                    onDelete={handleDelete}
+                />
+            </div>
 
         </>
 

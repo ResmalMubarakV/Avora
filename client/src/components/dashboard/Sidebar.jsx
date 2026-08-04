@@ -49,8 +49,8 @@ const Sidebar = ({
 }) => {
 
   const navigate = useNavigate();
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { user } = useCurrentUser();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
       setShowLogoutModal(false);
@@ -207,92 +207,92 @@ const Sidebar = ({
 
           <nav className="flex-1 px-3 pt-8 space-y-3 overflow-y-auto">
 
-            {menus.map((menu) => {
+              {menus.map((menu) => {
 
-              const Icon = menu.icon;
+                  const Icon = menu.icon;
 
-              const resolvedPath =
-                menu.title === "Profile"
-                  ? user?.username
-                    ? `/${user.username}`
-                    : "/dashboard"
-                  : menu.path;
+                  const destination =
+                      menu.title === "Profile"
+                          ? user?.username
+                              ? `/${user.username}`
+                              : "/dashboard"
+                          : menu.path;
 
-              return (
+                  return (
 
-                <NavLink
-                  key={menu.title}
-                  to={resolvedPath}
-                  title={!sidebarOpen ? menu.title : ""}
-                  onClick={() => {
+                      <NavLink
+                          key={menu.title}
+                          to={destination}
+                          title={!sidebarOpen ? menu.title : ""}
+                          onClick={() => {
 
-                    if (isMobile) {
-                      setSidebarOpen(false);
-                    }
+                              if (isMobile) {
+                                  setSidebarOpen(false);
+                              }
 
-                  }}
-                  className={({ isActive }) => `
-                    flex
-                    items-center
-                    h-14
-                    rounded-2xl
-                    transition-all
-                    duration-300
+                          }}
+                          className={({ isActive }) => `
+                              flex
+                              items-center
+                              h-14
+                              rounded-2xl
+                              transition-all
+                              duration-300
 
-                    ${
-                      sidebarOpen
-                        ? "justify-start gap-4 px-4"
-                        : "justify-center"
-                    }
+                              ${
+                                  sidebarOpen
+                                      ? "justify-start gap-4 px-4"
+                                      : "justify-center"
+                              }
 
-                    ${
-                      isActive
-                        ? `
-                          bg-gradient-to-r
-                          from-[#1E3A8A]
-                          to-[#3559D4]
-                          text-white
-                          shadow-lg
-                          shadow-[#1E3A8A]/20
-                        `
-                        : `
-                          text-slate-600
-                          hover:bg-[#1E3A8A]/5
-                          hover:text-[#1E3A8A]
-                        `
-                    }
-                  `}
-                >
+                              ${
+                                  isActive
+                                      ? `
+                                          bg-gradient-to-r
+                                          from-[#1E3A8A]
+                                          to-[#3559D4]
+                                          text-white
+                                          shadow-lg
+                                          shadow-[#1E3A8A]/20
+                                      `
+                                      : `
+                                          text-slate-600
+                                          hover:bg-[#1E3A8A]/5
+                                          hover:text-[#1E3A8A]
+                                      `
+                              }
+                          `}
+                      >
 
-                  <Icon
-                    size={22}
-                    className="shrink-0"
-                  />
+                          <Icon
+                              size={22}
+                              className="shrink-0"
+                          />
 
-                  <span
-                    className={`
-                      overflow-hidden
-                      whitespace-nowrap
-                      transition-all
-                      duration-300
+                          <span
+                              className={`
+                                  overflow-hidden
+                                  whitespace-nowrap
+                                  transition-all
+                                  duration-300
 
-                      ${
-                        sidebarOpen
-                          ? "opacity-100 w-auto"
-                          : "opacity-0 w-0"
-                      }
-                    `}
-                  >
+                                  ${
+                                      sidebarOpen
+                                          ? "opacity-100 w-auto"
+                                          : "opacity-0 w-0"
+                                  }
+                              `}
+                          >
 
-                    {menu.title}
+                              {menu.title}
 
-                  </span>
+                          </span>
 
-                </NavLink>
+                      </NavLink>
 
-              );
+                  );
 
-            })}
+              })}
 
           </nav>
 

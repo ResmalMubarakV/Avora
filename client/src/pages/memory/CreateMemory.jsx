@@ -231,18 +231,49 @@ const CreateMemory = () => {
                         className="
                             sticky
                             top-28
-                            rounded-3xl
-                            border
-                            border-slate-200
-                            bg-white
-                            p-8
-                            shadow-sm
+                            space-y-6
                         "
                     >
 
-                        <LivePreview
-                            formData={formData}
-                        />
+                        {/* Preview */}
+
+                        <div
+                            className="
+                                rounded-3xl
+                                border
+                                border-slate-200
+                                bg-white
+                                p-8
+                                shadow-sm
+                            "
+                        >
+
+                            <LivePreview
+                                formData={formData}
+                            />
+
+                        </div>
+
+                        {/* Actions */}
+
+                        <div
+                            className="
+                                rounded-3xl
+                                border
+                                border-slate-200
+                                bg-white
+                                p-6
+                                shadow-sm
+                            "
+                        >
+
+                            <ActionButtons
+                                loading={loading}
+                                onSubmit={handleSubmit}
+                                onCancel={handleCancel}
+                            />
+
+                        </div>
 
                     </div>
 
@@ -250,11 +281,17 @@ const CreateMemory = () => {
 
             </div>
 
-            <ActionButtons
-                loading={loading}
-                onSubmit={handleSubmit}
-                onCancel={handleCancel}
-            />
+            {/* Mobile Actions */}
+
+            <div className="xl:hidden">
+
+                <ActionButtons
+                    loading={loading}
+                    onSubmit={handleSubmit}
+                    onCancel={handleCancel}
+                />
+
+            </div>
 
             <DiscardMemoryModal
                 open={showDiscardModal}

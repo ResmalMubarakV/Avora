@@ -15,15 +15,18 @@ import Lightbox from "../../components/memory/Lightbox";
 import { Compass } from "lucide-react";
 
 const PublicMemory = () => {
+
     const navigate = useNavigate();
     const location = useLocation();
 
     const { username, slug } = useParams();
 
     const [searchParams, setSearchParams] = useSearchParams();
+
     const [currentUser, setCurrentUser] = useState(null);
     const [memory, setMemory] = useState(null);
     const [loading, setLoading] = useState(true);
+    const memoryUsername = username;
 
     const imageParam = searchParams.get("image");
 
@@ -127,41 +130,43 @@ const previousImage = () => {
 
         useEffect(() => {
 
-        const fetchMemory = async () => {
+    if (!memoryUsername) return;
 
-            try {
+    const fetchMemory = async () => {
 
-                const response = await api.get(
-                    `/api/public/${username}/${slug}`
-                );
+        try {
 
-                setMemory(response.data);
+            const response = await api.get(
+                `/api/public/${username}/${slug}`
+            );
 
-            } catch (error) {
+            setMemory(response.data);
 
-                if (error.response?.status === 403) {
-                    navigate("/403", { replace: true });
-                    return;
-                }
+        } catch (error) {
 
-                if (error.response?.status === 404) {
-                    navigate("/404", { replace: true });
-                    return;
-                }
-
-                console.error(error);
-
-            } finally {
-
-                setLoading(false);
-
+            if (error.response?.status === 403) {
+                navigate("/403", { replace: true });
+                return;
             }
 
-        };
+            if (error.response?.status === 404) {
+                navigate("/404", { replace: true });
+                return;
+            }
 
-        fetchMemory();
+            console.error(error);
 
-    }, [username, slug, navigate]);
+        } finally {
+
+            setLoading(false);
+
+        }
+
+    };
+
+    fetchMemory();
+
+}, [username, slug, navigate]);
 
 
     const isOwner =

@@ -49,6 +49,7 @@ const getFeaturedTravelers = async (req, res) => {
  */
 const getPublicProfile = async (req, res) => {
     try {
+
         const { username } = req.params;
 
         const user = await User.findOne({
@@ -63,21 +64,30 @@ const getPublicProfile = async (req, res) => {
             });
         }
 
+        const isOwner =
+            req.user &&
+            req.user._id.toString() === user._id.toString();
+
         const memories = await Memory.find({
             user: user._id,
-            isPublic: true,
-        }).sort({ createdAt: -1 });
+            ...(isOwner ? {} : { isPublic: true }),
+        })
+            .populate("user", "username")
+            .sort({ createdAt: -1 });
 
         return res.status(200).json({
             user,
             memories,
         });
+
     } catch (error) {
+
         console.error("Public Profile Error:", error.message);
 
         return res.status(500).json({
             message: "Server Error",
         });
+
     }
 };
 
@@ -86,6 +96,7 @@ const getPublicProfile = async (req, res) => {
  */
 const getPublicMemory = async (req, res) => {
     try {
+
         const { username, slug } = req.params;
 
         const user = await User.findOne({
@@ -100,11 +111,15 @@ const getPublicMemory = async (req, res) => {
             });
         }
 
+        const isOwner =
+            req.user &&
+            req.user._id.toString() === user._id.toString();
+
         const memory = await Memory.findOne({
             user: user._id,
             slug,
-            isPublic: true,
-        });
+            ...(isOwner ? {} : { isPublic: true }),
+        }).populate("user", "username");
 
         if (!memory) {
             return res.status(404).json({
@@ -113,12 +128,15 @@ const getPublicMemory = async (req, res) => {
         }
 
         return res.status(200).json(memory);
+
     } catch (error) {
+
         console.error("Public Memory Error:", error.message);
 
         return res.status(500).json({
             message: "Server Error",
         });
+
     }
 };
 

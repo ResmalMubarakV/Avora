@@ -38,24 +38,24 @@ const Login = () => {
             localStorage.setItem("token", data.token);
 
             navigate("/dashboard", {
-                    replace: true,
-                });
+                replace: true,
+            });
 
         } catch (error) {
 
             const { code, message } = error.response?.data || {};
 
-                if (code === "ACCOUNT_PENDING") {
-                    navigate("/pending", { replace: true });
-                    return;
-                }
+            if (code === "ACCOUNT_PENDING") {
+                navigate("/pending", { replace: true });
+                return;
+            }
 
-                if (code === "ACCOUNT_SUSPENDED") {
-                    navigate("/suspended", { replace: true });
-                    return;
-                }
+            if (code === "ACCOUNT_SUSPENDED") {
+                navigate("/suspended", { replace: true });
+                return;
+            }
 
-                setError(message || "Unable to sign in.");
+            setError(message || "Unable to sign in.");
 
         } finally {
 
@@ -123,18 +123,17 @@ const Login = () => {
                         disabled={loading}
                     />
 
-                    <div className="flex items-center justify-between">
-
-
+                    <div className="flex justify-end">
                         {/* Forgot Password */}
-                        <button
-                            type="button"
-                            disabled
-                            className="cursor-not-allowed text-sm font-medium text-slate-400"
-                        >
-                            Forgot Password
-                        </button>
-
+                        <Link
+                            to="/forgot-password"
+                            className="
+                                text-sm
+                                text-slate-700
+                                hover:text-slate-900
+                            ">
+                            Forgot Password?
+                        </Link>
                     </div>
 
                     {error && (
@@ -158,13 +157,13 @@ const Login = () => {
 
                     <div className="text-center">
 
-                        <p className="mt-2 max-w-xs text-center text-slate-500">
+                        <p className="mt-2 max-w-xs text-center text-blue-900">
 
-                            Don't have an account?{" "}
+                            Don't have an account?{"   "}
 
                             <Link
                                 to="/register"
-                                className="font-semibold text-blue-600 transition-colors hover:text-blue-700"
+                                className="font-semibold text-blue-700 transition-colors hover:text-blue-900"
                             >
                                 Create Account
                             </Link>

@@ -8,9 +8,17 @@ const userResponse = (user) => ({
     name: user.name,
     username: user.username,
     email: user.email,
+
     profileImage: user.profileImage,
+    coverImage: user.coverImage,
+
     bio: user.bio,
-    location: user.location
+    location: user.location,
+
+    website: user.website,
+    instagram: user.instagram,
+    youtube: user.youtube,
+    linkedin: user.linkedin,
 });
 
 const checkUsername = async (req, res) => {
@@ -72,10 +80,14 @@ const getMyProfile = async (req , res) => {
 const updateProfile = async (req, res) => {
     try {
         const {
-            name, 
+            name,
             username,
             bio,
-            location
+            location,
+            website,
+            instagram,
+            youtube,
+            linkedin,
         } = req.body;
 
         if(Object.keys(req.body).length === 0){
@@ -115,10 +127,14 @@ const updateProfile = async (req, res) => {
             }
         }
 
-        user.name = name || user.name;
-        user.username = username || user.username;
-        user.bio = bio || user.bio;
-        user.location = location || user.location;
+        user.name = name ?? user.name;
+        user.username = username ?? user.username;
+        user.bio = bio ?? user.bio;
+        user.location = location ?? user.location;
+        user.website = website ?? user.website;
+        user.instagram = instagram ?? user.instagram;
+        user.youtube = youtube ?? user.youtube;
+        user.linkedin = linkedin ?? user.linkedin;
         await user.save();
 
         return res.status(200).json(userResponse(user));
@@ -177,10 +193,89 @@ const updateProfileImage = async (req, res) => {
     }
 }
 
+const updateCoverImage = async (req, res) => {
+
+    try {
+
+        if (!req.file) {
+
+            return res.status(400).json({
+                message: "Please upload a cover image."
+            });
+
+        }
+
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+
+            return res.status(404).json({
+                message: "User not found."
+            });
+
+        }
+
+        const result = await cloudinary.uploader.upload(
+            req.file.path,
+            {
+                folder: "avora/profile-covers",
+            }
+        );
+
+        try {
+
+            if (req.file?.path) {
+
+                await fs.promises.unlink(req.file.path);
+
+            }
+
+        } catch (cleanupError) {
+
+            console.error(
+                "Cleanup Error:",
+                cleanupError.message
+            );
+
+        }
+
+        if (user.coverImagePublicId) {
+
+            await cloudinary.uploader.destroy(
+                user.coverImagePublicId
+            );
+
+        }
+
+        user.coverImage = result.secure_url;
+        user.coverImagePublicId = result.public_id;
+
+        await user.save();
+
+        return res
+            .status(200)
+            .json(userResponse(user));
+
+    } catch (error) {
+
+        console.error(
+            "Update Cover Image Error:",
+            error.message
+        );
+
+        return res.status(500).json({
+            message: "Server Error",
+        });
+
+    }
+
+};
+
 
 module.exports = {
     getMyProfile,
     updateProfile,
     updateProfileImage,
-    checkUsername
-}
+    updateCoverImage,
+    checkUsername,
+};

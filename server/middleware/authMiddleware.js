@@ -1,35 +1,90 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-// Middleware to protect routes
-const protect = async (req , res , next) => {
+// Required Authentication
+const protect = async (req, res, next) => {
     let token;
 
-    if(
+    if (
         req.headers.authorization &&
         req.headers.authorization.startsWith("Bearer")
-    ){
+    ) {
         try {
-            // Get token from header
-            token = req.headers.authorization.split (" ")[1];
+            token = req.headers.authorization.split(" ")[1];
 
-            // Verify token 
-            const decoded = jwt.verify(token , process.env.JWT_SECRET);
+            const decoded = jwt.verify(
+                token,
+                process.env.JWT_SECRET
+            );
 
-            // Get user from the token
-            req.user = await User.findById(decoded.id).select("-password");
+            req.user = await User.findById(
+                decoded.id
+            ).select("-password");
 
             return next();
 
         } catch (error) {
-        console.error( "Protect Error " ,error);
-        return res.status(401).json({"message" : "Not Authorized , Token Failed"});
-       }
- 
-} else {
-    return res.status(401).json({"message" : "Not Authorized , No Token"});
-}
+
+            console.error("Protect Error", error);
+
+            return res.status(401).json({
+                message: "Not Authorized, Token Failed",
+            });
+
+        }
+    }
+
+    return res.status(401).json({
+        message: "Not Authorized, No Token",
+    });
+};
+
+// Optional Authentication
+const protectOptional = async (
+    req,
+    res,
+    next
+) => {
+
+    const authHeader =
+        req.headers.authorization;
+
+    if (
+        authHeader &&
+        authHeader.startsWith("Bearer")
+    ) {
+
+        try {
+
+            const token =
+                authHeader.split(" ")[1];
+
+            const decoded = jwt.verify(
+                token,
+                process.env.JWT_SECRET
+            );
+
+            req.user = await User.findById(
+                decoded.id
+            ).select("-password");
+
+        } catch {
+
+            req.user = null;
+
+        }
+
+    } else {
+
+        req.user = null;
+
+    }
+
+    next();
 
 };
 
-module.exports = {protect};
+module.exports = {
+    protect,
+    protectOptional,
+};

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import {
     MapPin,
     CalendarDays,
@@ -9,9 +9,42 @@ import {
 
 const LivePreview = ({ formData }) => {
 
-    const coverPreview = formData.coverImage
-    ? URL.createObjectURL(formData.coverImage)
-    : formData.existingCover || null;
+    const coverPreview = useMemo(() => {
+
+        if (formData.coverImage) {
+
+            return URL.createObjectURL(formData.coverImage);
+
+        }
+
+        return formData.existingCover || null;
+
+    }, [
+        formData.coverImage,
+        formData.existingCover,
+    ]);
+
+    useEffect(() => {
+
+        return () => {
+
+            if (
+                coverPreview &&
+                formData.coverImage
+            ) {
+
+                URL.revokeObjectURL(
+                    coverPreview
+                );
+
+            }
+
+        };
+
+    }, [
+        coverPreview,
+        formData.coverImage,
+    ]);
 
     return (
 
@@ -21,29 +54,21 @@ const LivePreview = ({ formData }) => {
 
             <div>
 
-                <h3
-                    className="
-                        text-xl
-                        font-semibold
-                        text-slate-900
-                    "
-                >
+                <h3 className="text-xl font-semibold text-slate-900">
+
                     Live Preview
+
                 </h3>
 
-                <p
-                    className="
-                        mt-1
-                        text-sm
-                        text-slate-500
-                    "
-                >
+                <p className="mt-1 text-sm text-slate-500">
+
                     Your memory updates as you type.
+
                 </p>
 
             </div>
 
-            {/* Preview Card */}
+            {/* Card */}
 
             <div
                 className="
@@ -69,7 +94,7 @@ const LivePreview = ({ formData }) => {
 
                         <img
                             src={coverPreview}
-                            alt="Cover Preview"
+                            alt="Cover"
                             className="
                                 h-full
                                 w-full
@@ -101,14 +126,10 @@ const LivePreview = ({ formData }) => {
 
                 <div className="space-y-4 p-5">
 
-                    <h4
-                        className="
-                            text-lg
-                            font-semibold
-                            text-slate-900
-                        "
-                    >
+                    <h4 className="text-lg font-semibold text-slate-900">
+
                         {formData.title || "Memory Title"}
+
                     </h4>
 
                     <div className="space-y-2 text-sm text-slate-600">
@@ -153,7 +174,9 @@ const LivePreview = ({ formData }) => {
                                 line-clamp-4
                             "
                         >
+
                             {formData.description}
+
                         </p>
 
                     )}
@@ -172,7 +195,9 @@ const LivePreview = ({ formData }) => {
                                     text-slate-700
                                 "
                             >
+
                                 Gallery
+
                             </h5>
 
                             <div
@@ -185,10 +210,10 @@ const LivePreview = ({ formData }) => {
 
                                 {formData.gallery
                                     .slice(0, 4)
-                                    .map((file, index) => (
+                                    .map((item) => (
 
                                         <div
-                                            key={index}
+                                            key={item.id}
                                             className="
                                                 aspect-square
                                                 overflow-hidden
@@ -197,11 +222,12 @@ const LivePreview = ({ formData }) => {
                                             "
                                         >
 
-                                            {file.type.startsWith("image") ? (
+                                            {item.type.startsWith("image") ? (
 
                                                 <img
-                                                    src={URL.createObjectURL(file)}
+                                                    src={item.preview}
                                                     alt=""
+                                                    loading="lazy"
                                                     className="
                                                         h-full
                                                         w-full
@@ -212,7 +238,8 @@ const LivePreview = ({ formData }) => {
                                             ) : (
 
                                                 <video
-                                                    src={URL.createObjectURL(file)}
+                                                    src={item.preview}
+                                                    preload="metadata"
                                                     className="
                                                         h-full
                                                         w-full
@@ -237,7 +264,9 @@ const LivePreview = ({ formData }) => {
                                         text-slate-500
                                     "
                                 >
+
                                     +{formData.gallery.length - 4} more files
+
                                 </p>
 
                             )}
@@ -258,7 +287,6 @@ const LivePreview = ({ formData }) => {
                             py-1.5
                             text-xs
                             font-semibold
-
                             ${
                                 formData.isPublic
                                     ? "bg-blue-50 text-blue-700"
@@ -270,15 +298,21 @@ const LivePreview = ({ formData }) => {
                         {formData.isPublic ? (
 
                             <>
+
                                 <Globe size={14} />
+
                                 Public Memory
+
                             </>
 
                         ) : (
 
                             <>
+
                                 <Lock size={14} />
+
                                 Private Memory
+
                             </>
 
                         )}

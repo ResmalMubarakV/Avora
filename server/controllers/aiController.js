@@ -7,13 +7,22 @@ const client = new Groq({
 });
 
 const generateAI = async (req, res) => {
-    
     try {
-
-        if(!req.user) {
+        if (!req.user) {
             return res.status(401).json({
-                message : "User not authorized"
-            })
+                message: "User not authorized"
+            });
+        }
+
+        const {
+            message,
+            history = [],
+        } = req.body;
+
+        if (!message) {
+            return res.status(400).json({
+                message: "Message is required",
+            });
         }
 
         const user = await User.findById(req.user._id)
@@ -25,116 +34,206 @@ const generateAI = async (req, res) => {
             });
         }
 
-        const memories = await Memory.find({
-            user : req.user._id, 
-        }).select("title location modeOfTravel description startDate endDate")
-    
-        const travelHistory =
-        memories.length > 0
-            ? memories
-                  .map(
-                      (memory) =>
-                          `• ${memory.title}
-                        Location: ${memory.location}
-                        Travel Mode: ${memory.modeOfTravel}
-                        Trip Dates: ${memory.startDate.toDateString()} - ${memory.endDate.toDateString()}
-                        Description: ${memory.description}`
-                  )
-                  .join("\n\n")
-            : "No previous travel memories.";
+        const lowerMessage = message.toLowerCase();
+
+        const greetingKeywords = [
+            "hi",
+            "hello",
+            "hey",
+            "good morning",
+            "good evening",
+            "good afternoon",
+        ];
+
+        const isGreeting = greetingKeywords.some((word) =>
+            lowerMessage === word
+        );
+
+        const isTravelQuestion = [
+            "trip",
+            "travel",
+            "destination",
+            "recommend",
+            "plan",
+            "itinerary",
+            "budget",
+            "visit",
+            "vacation",
+            "holiday",
+        ].some((word) => lowerMessage.includes(word));
+
+        const isMemoryQuestion = [
+            "remember",
+            "memory",
+            "previous",
+            "last trip",
+            "my trip",
+            "visited",
+        ].some((word) => lowerMessage.includes(word));
+
+        let memories = [];
+
+        if (isTravelQuestion || isMemoryQuestion) {
+            memories = await Memory.find({
+                user: req.user._id,
+            })
+                .sort({
+                    startDate: -1,
+                })
+                .limit(30)
+                .select(
+                    "title location modeOfTravel description startDate endDate"
+                );
+        }
+
+        let travelHistory = "";
+
+        if (memories.length > 0) {
+            travelHistory = memories
+                .map(
+                    (memory) => `
+        • ${memory.title}
+        Location: ${memory.location}
+        Travel Mode: ${memory.modeOfTravel}
+        Description: ${memory.description}
+        `
+                )
+                .join("\n");
+        }
 
         let favoriteTravelMode = "Unknown";
 
-            if (memories.length > 0) {
-                const travelModeCount = {};
+        if (memories.length > 0) {
+            const travelModeCount = {};
 
-                memories.forEach((memory) => {
-                    const mode = memory.modeOfTravel;
+            memories.forEach((memory) => {
+                const mode = memory.modeOfTravel;
+                travelModeCount[mode] = (travelModeCount[mode] || 0) + 1;
+            });
 
-                    travelModeCount[mode] = (travelModeCount[mode] || 0) + 1;
-                });
-
-                favoriteTravelMode = Object.keys(travelModeCount).reduce((a, b) =>
-                    travelModeCount[a] > travelModeCount[b] ? a : b
-                );
-            }
+            favoriteTravelMode = Object.keys(travelModeCount).reduce((a, b) =>
+                travelModeCount[a] > travelModeCount[b] ? a : b
+            );
+        }
 
         const userProfile = `
-                Name: ${user.name}
-                Username: ${user.username}
-                Location: ${user.location || "Not provided"}
-                Bio: ${user.bio || "Not provided"}
-                Preferred Travel Mode: ${favoriteTravelMode}
-                `;
+        Name: ${user.name}
+        Username: ${user.username}
+        Location: ${user.location || "Not provided"}
+        Bio: ${user.bio || "Not provided"}
+        Preferred Travel Mode: ${favoriteTravelMode}
+        `;
 
-        const { message } = req.body;
+        let systemPrompt = "";
 
-        if (!message) {
-            return res.status(400).json({
-                message: "Message is required",
-            });
+        if (isGreeting) {
+            systemPrompt = `
+        You are Avora AI.
+
+        The user is simply greeting you.
+
+        Reply naturally.
+
+        Keep your response under 3 sentences.
+
+        Do not recommend destinations.
+
+        Do not mention travel history unless asked.
+        `;
         }
+        else if (isTravelQuestion) {
+            systemPrompt = `
+        You are Avora AI.
+
+        Current User
+
+        ${userProfile}
+
+        Travel History
+
+        ${travelHistory}
+
+        Give personalized travel advice.
+
+        Recommend destinations based on previous trips.
+
+        Avoid places already visited.
+
+        Include itinerary, budget and food only when useful.
+        `;
+        }
+        else if (isMemoryQuestion) {
+            systemPrompt = `
+        You are Avora AI.
+
+        Current User
+
+        ${userProfile}
+
+        Travel History
+
+        ${travelHistory}
+
+        Answer using the user's previous travel memories.
+
+        If information isn't available, say so honestly.
+        `;
+        }
+        else {
+            systemPrompt = `
+        You are Avora AI.
+
+        Be friendly.
+
+        Keep responses concise.
+
+        Don't include unnecessary travel suggestions.
+        `;
+        }
+
+        // Apply the strict global guardrails to every prompt 
+        systemPrompt += `
+        If you don't know something, say you don't know.
+        Never invent information.
+        Never assume travel history that isn't provided.
+        `;
+
+        // Sanitize history to strip out timestamps and any other unexpected fields
+        const sanitizedHistory = history.map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+        }));
 
         const completion = await client.chat.completions.create({
             model: "llama-3.3-70b-versatile",
             messages: [
                 {
                     role: "system",
-                    content: `
-                            You are Avora AI.
-
-                            You are an intelligent and friendly travel assistant.
-
-                            Current User Profile:
-
-                            ${userProfile}
-
-                            Previous Travel History:
-
-                            ${travelHistory}
-
-                            Instructions:
-
-                            - Personalize every response using the user's profile and travel history.
-                            - Greet the user by their first name when it feels natural.
-                            - Recommend destinations that match the user's travel interests.
-                            - Avoid recommending destinations already visited unless the user specifically asks.
-                            - Consider the user's preferred travel mode when suggesting trips.
-                            - If the user asks about a destination, include:
-                            • Best time to visit
-                            • Estimated budget
-                            • Suggested itinerary
-                            • Local food
-                            • Hidden gems
-                            • Packing tips
-                            • Weather advice (if relevant)
-                            - Keep responses practical, concise and engaging.
-                            - Always format responses using clear markdown headings and bullet points
-                            `
+                    content: systemPrompt,
                 },
+                ...sanitizedHistory,
                 {
                     role: "user",
                     content: message,
                 },
             ],
-            temperature: 0.7,
+            temperature: 0.5,
         });
 
         return res.status(200).json({
             response: completion.choices[0].message.content,
         });
-    } catch (error) {
-        console.error("AI Error:", error);
 
-            return res.status(error.status || 500).json({
+    } catch (error) {
+        console.error("AI Error:", error.message);
+
+        return res.status(error.status || 500).json({
             message:
                 error.response?.data?.error?.message ||
-                error.message ||
                 "Server Error",
         });
     }
 };
-
 
 module.exports = {
     generateAI

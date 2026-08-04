@@ -101,18 +101,8 @@ const NotFound = () => {
                 <div className="mt-10 flex flex-col gap-4 sm:flex-row">
 
                     <button
-                        onClick={() => navigate("/")}
-                        className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#1E3A8A] py-3.5 font-semibold text-white transition-all duration-300 hover:bg-[#16213E]"
-                    >
-                        <Home size={18} />
-
-                        Return Home
-
-                    </button>
-
-                    <button
                         onClick={() => navigate(-1)}
-                        className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white py-3.5 font-semibold text-slate-700 transition hover:bg-slate-50"
+                        className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-[#1E3A8A] py-3.5 font-semibold text-white transition-all duration-300 hover:bg-[#16213E]"
                     >
                         <ArrowLeft size={18} />
 

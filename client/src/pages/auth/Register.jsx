@@ -4,6 +4,7 @@ import { FiUser, FiMail, FiAtSign } from "react-icons/fi";
 
 import api from "../../api/axios";
 import AuthLayout from "../../layouts/AuthLayout";
+import PasswordStrength from "../../components/auth/PasswordStrength";
 
 import avoraLogo from "../../assets/images/avoraLogo.png";
 
@@ -49,12 +50,11 @@ const Register = () => {
                 password,
             });
             navigate("/pending-approval", {
-                        replace: true,
-                        state: {
+                replace: true,
+                state: {
                     registrationSuccess: true,
                 },
-
-                    });
+            });
         } catch (error) {
             console.error(error);
             setError(
@@ -250,6 +250,10 @@ const Register = () => {
                         disabled={loading}
                     />
 
+                    {password && (
+                        <PasswordStrength password={password} />
+                    )}
+
                     <PasswordField
                         label="Confirm Password"
                         placeholder="Confirm your password"
@@ -257,7 +261,7 @@ const Register = () => {
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                         disabled={loading}
-                        />
+                    />
 
                         
                     <ValidationMessage
@@ -284,13 +288,13 @@ const Register = () => {
 
                     <div className="pt-1 text-center">
 
-                        <p className="mt-2 max-w-xs text-center text-slate-500">
+                        <p className="mt-2 max-w-xs text-center text-blue-900">
 
-                            Already have an account?{" "}
+                            Already have an account?{"   "}
 
                             <Link
                                 to="/login"
-                                className="font-semibold text-blue-600 transition-colors hover:text-blue-700"
+                                className="font-semibold text-blue-700 transition-colors hover:text-blue-900"
                             >
                                 Sign In
                             </Link>
