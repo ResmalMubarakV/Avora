@@ -155,6 +155,7 @@ const AdminSidebar = ({ sidebarOpen, setSidebarOpen, isMobile }) => {
                     open={showLogoutModal}
                     onClose={() => setShowLogoutModal(false)}
                     onConfirm={handleLogout}
+                    isAdmin={true}
                 />
             </aside>
         </>

@@ -15,43 +15,33 @@ export const getDashboard = async () => {
 };
 
 // Users
-export const getUsers = async (status = "") => {
-    const response = await api.get("/api/admin/users", {
-        params: {
-            status,
-        },
-    });
-
+export const getUsers = async (params = {}) => {
+    const response = await api.get("/api/admin/users", { params });
     return response.data;
 };
 
 export const approveUser = async (id) => {
-    const response = await api.patch(
-        `/api/admin/users/${id}/approve`
-    );
-
+    const response = await api.patch(`/api/admin/users/${id}/approve`);
     return response.data;
 };
 
 export const suspendUser = async (id) => {
-    const response = await api.patch(
-        `/api/admin/users/${id}/suspend`
-    );
+    const response = await api.patch(`/api/admin/users/${id}/suspend`);
+    return response.data;
+};
 
+export const deleteUser = async (id) => {
+    const response = await api.delete(`/api/admin/users/${id}`);
     return response.data;
 };
 
 // Memories
-export const getMemories = async () => {
-    const response = await api.get("/api/admin/memories");
-
+export const getMemories = async (params = {}) => {
+    const response = await api.get("/api/admin/memories", { params });
     return response.data;
 };
 
 export const deleteMemory = async (id) => {
-    const response = await api.delete(
-        `/api/admin/memories/${id}`
-    );
-
+    const response = await api.delete(`/api/admin/memories/${id}`);
     return response.data;
 };

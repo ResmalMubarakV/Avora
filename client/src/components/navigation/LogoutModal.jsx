@@ -1,75 +1,122 @@
-import { createPortal } from "react-dom";
-import { LogOut, X, ShieldAlert } from "lucide-react";
+import { useEffect, useState } from "react";
+import ReactDOM from "react-dom";
+import { LogOut, ShieldAlert, X } from "lucide-react";
 
 // ==========================================
-// ADMIN LOGOUT MODAL COMPONENT
+// PORTAL-BASED UNIFORM CENTERED LOGOUT MODAL
 // ==========================================
-/**
- * Renders an elite, premium SaaS logout modal with contextual security warnings 
- * and precise viewport centering via React portals.
- */
-const LogoutModal = ({ open, onClose, onConfirm }) => {
-    if (!open) return null;
+const LogoutModal = ({ isOpen, open, onClose, onConfirm, isAdmin = false, loading = false }) => {
+    const isModalVisible = isOpen ?? open;
+    const [mounted, setMounted] = useState(false);
 
-    return createPortal(
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
-            <div className="w-full max-w-md rounded-3xl border border-slate-200/80 bg-white p-7 shadow-2xl animate-in zoom-in-95 duration-200 text-left">
-                {/* Header Row */}
-                <div className="flex items-center justify-between mb-5">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 border border-amber-100 text-amber-600 shadow-sm shrink-0">
-                            <ShieldAlert size={22} />
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
+
+    if (!isModalVisible || !mounted) return null;
+
+    return ReactDOM.createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/75 backdrop-blur-md p-4 animate-in fade-in duration-200">
+            <div className={`w-full max-w-md rounded-3xl border bg-white shadow-2xl overflow-hidden ${
+                isAdmin ? "border-red-200 shadow-[0_20px_60px_rgba(239,68,68,0.2)]" : "border-slate-200 shadow-[0_20px_60px_rgba(0,0,0,0.2)]"
+            }`}>
+                
+                {/* Conditional Accent Top Bar */}
+                {isAdmin && <div className="h-1.5 w-full bg-gradient-to-r from-red-500 via-rose-500 to-red-600" />}
+
+                <div className="p-7">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-5">
+                        <div className={`flex items-center gap-3 ${isAdmin ? "text-red-600" : "text-blue-600"}`}>
+                            <div className={`flex h-11 w-11 items-center justify-center rounded-2xl border shadow-inner ${
+                                isAdmin ? "bg-red-50 border-red-100" : "bg-blue-50 border-blue-100"
+                            }`}>
+                                {isAdmin ? <ShieldAlert size={22} /> : <LogOut size={22} />}
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900">
+                                    {isAdmin ? "Terminate Admin Session" : "Sign Out"}
+                                </h3>
+                                <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                                    {isAdmin ? "Avora Enterprise Control Center" : "Avora Travel Platform"}
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">
-                                Terminate Session
-                            </h3>
-                            <p className="text-xs font-medium text-slate-500">
-                                Avora Enterprise Control Center
-                            </p>
-                        </div>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            disabled={loading}
+                            className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer transition disabled:opacity-50"
+                        >
+                            <X size={20} />
+                        </button>
                     </div>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        aria-label="Close Modal"
-                        className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer transition"
-                    >
-                        <X size={20} />
-                    </button>
-                </div>
 
-                {/* Description Body with Warning */}
-                <div className="space-y-4 mb-6">
-                    <p className="text-sm text-slate-600 leading-relaxed">
-                        Are you sure you want to sign out of the <span className="font-bold text-slate-900">Avora Enterprise Control Center</span>? Your active session token will be securely cleared.
+                    {/* Description */}
+                    <p className="text-sm text-slate-700 mb-5 leading-relaxed font-medium">
+                        {isAdmin ? (
+                            <>
+                                Are you sure you want to sign out of the <span className="font-extrabold text-slate-900">Avora Enterprise Control Center</span>? Your active administrative session will be securely cleared.
+                            </>
+                        ) : (
+                            <>
+                                Are you sure you want to sign out of your <span className="font-extrabold text-slate-900">Avora</span> account? You can log back in anytime to access your travel memories.
+                            </>
+                        )}
                     </p>
 
-                    <div className="flex items-start gap-3 rounded-2xl border border-amber-200/80 bg-amber-50/70 p-3.5 text-xs text-amber-900 shadow-inner">
-                        <ShieldAlert size={16} className="shrink-0 text-amber-600 mt-0.5" />
-                        <span className="leading-normal font-medium">
-                            <strong className="font-bold">Security Notice:</strong> You will need to re-authenticate with your administrator credentials to regain access to management features.
-                        </span>
-                    </div>
-                </div>
+                    {/* Notice Box */}
+                    {isAdmin ? (
+                        <div className="mb-6 rounded-2xl border border-red-100 bg-red-50/60 p-4 text-xs text-red-900 space-y-1">
+                            <div className="flex items-center gap-2 font-bold text-red-800">
+                                <span>⚠</span>
+                                <span>Security Notice</span>
+                            </div>
+                            <p className="text-red-700/90 font-medium">
+                                You will need to re-authenticate with your administrator credentials to regain access to management features.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50/60 p-4 text-xs text-blue-900 space-y-1">
+                            <div className="flex items-center gap-2 font-bold text-blue-800">
+                                <span>ℹ</span>
+                                <span>Session Info</span>
+                            </div>
+                            <p className="text-blue-700/90 font-medium">
+                                Your local session data will be safely cleared. Public stories remain visible to visitors.
+                            </p>
+                        </div>
+                    )}
 
-                {/* Action Buttons */}
-                <div className="flex items-center justify-end gap-3 pt-2">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 cursor-pointer active:scale-95 shadow-sm"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="button"
-                        onClick={onConfirm}
-                        className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 px-5 py-3 text-xs font-semibold text-white shadow-lg shadow-red-600/25 transition hover:from-red-500 hover:to-rose-500 active:scale-95 cursor-pointer"
-                    >
-                        <LogOut size={16} />
-                        <span>Sign Out</span>
-                    </button>
+                    {/* Action Buttons */}
+                    <div className="flex items-center justify-end gap-3 pt-2">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            disabled={loading}
+                            className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 cursor-pointer active:scale-95 disabled:opacity-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (onConfirm) onConfirm();
+                            }}
+                            disabled={loading}
+                            className={`inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-xs font-semibold text-white shadow-lg transition active:scale-95 cursor-pointer disabled:opacity-50 ${
+                                isAdmin 
+                                    ? "bg-red-600 hover:bg-red-700 shadow-red-500/20" 
+                                    : "bg-blue-600 hover:bg-blue-700 shadow-blue-500/20"
+                            }`}
+                        >
+                            <LogOut size={15} />
+                            <span>{isAdmin ? "Terminate Session" : "Sign Out"}</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>,

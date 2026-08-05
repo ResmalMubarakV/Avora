@@ -1,184 +1,58 @@
 import avoraLogo from "../../assets/images/avoraLogo.png";
 
 // ==========================================
-// LANDING FOOTER COMPONENT
+// LANDING FOOTER COMPONENT (CENTERED GRADIENT ELITE)
 // ==========================================
-/**
- * Renders the landing page footer section. Features ambient background gradients,
- * the Avora brand logo with smooth scroll-to-top interactivity, mission statement text,
- * a decorative divider, and copyright notice.
- */
 const LandingFooter = () => {
-    // --- Smooth Scroll to Top Handler ---
-    const scrollToTop = () => {
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth",
-        });
-    };
-
     return (
-        <footer
-            className="
-                relative
-                overflow-hidden
-                border-t
-                border-slate-200
-                bg-gradient-to-br
-                from-white
-                via-[#F8FAFC]
-                to-[#EEF4FF]
-            "
-        >
-            {/* Background Ambient Glow & Lighting Effects */}
+        <footer className="relative overflow-hidden border-t border-slate-200/90 bg-gradient-to-br from-white via-slate-50/80 to-blue-50/40 text-slate-700">
+            {/* Ambient Background Glow Accent */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                {/* Left Glow Accent */}
-                <div
-                    className="
-                        absolute
-                        left-0
-                        top-0
-                        h-full
-                        w-80
-                        bg-gradient-to-r
-                        from-[#1E3A8A]/12
-                        via-[#1E3A8A]/5
-                        to-transparent
-                    "
-                />
-
-                {/* Right Glow Accent */}
-                <div
-                    className="
-                        absolute
-                        right-0
-                        top-0
-                        h-full
-                        w-80
-                        bg-gradient-to-l
-                        from-[#3559D4]/12
-                        via-[#3559D4]/5
-                        to-transparent
-                    "
-                />
-
-                {/* Top Highlight */}
-                <div
-                    className="
-                        absolute
-                        inset-x-0
-                        top-0
-                        h-32
-                        bg-gradient-to-b
-                        from-white
-                        via-white/70
-                        to-transparent
-                    "
-                />
-
-                {/* Bottom Highlight */}
-                <div
-                    className="
-                        absolute
-                        inset-x-0
-                        bottom-0
-                        h-32
-                        bg-gradient-to-t
-                        from-[#1E3A8A]/6
-                        to-transparent
-                    "
-                />
-
-                {/* Center Ambient Blur Glow */}
-                <div
-                    className="
-                        absolute
-                        left-1/2
-                        top-1/2
-                        h-[500px]
-                        w-[500px]
-                        -translate-x-1/2
-                        -translate-y-1/2
-                        rounded-full
-                        bg-[#1E3A8A]/6
-                        blur-[120px]
-                    "
-                />
+                <div className="absolute left-1/2 bottom-0 h-40 w-[600px] -translate-x-1/2 rounded-full bg-blue-500/10 blur-[100px]" />
             </div>
 
-            {/* Footer Inner Content */}
-            <div className="relative z-10 mx-auto max-w-7xl px-5 py-16 md:px-8">
-                <div className="flex flex-col items-center gap-8 text-center md:flex-row md:justify-center md:gap-14 md:text-left">
-                    {/* Logo with Scroll-to-Top Action */}
-                    <button
-                        type="button"
-                        onClick={scrollToTop}
-                        aria-label="Back to top"
-                        className="
-                            rounded-2xl
-                            transition-all
-                            duration-300
-                            hover:scale-105
-                            cursor-pointer
-                        "
-                    >
+            {/* Main Footer Container */}
+            <div className="relative z-10 mx-auto max-w-4xl px-6 py-12 sm:px-8 text-center">
+                
+                {/* Centered Content Stack */}
+                <div className="flex flex-col items-center justify-center gap-6">
+                    
+                    {/* Brand Logo Container with Gradient Border Glow */}
+                    <div className="rounded-2xl bg-white p-3 shadow-sm border border-slate-200/80 inline-flex shadow-blue-500/5">
                         <img
                             src={avoraLogo}
                             alt="Avora Logo"
-                            draggable="false"
-                            className="
-                                h-20
-                                w-auto
-                                drop-shadow-lg
-                                sm:h-24
-                                md:h-28
-                            "
+                            className="h-14 sm:h-16 w-auto object-contain"
                         />
-                    </button>
-
-                    {/* Mission Tagline */}
-                    <div>
-                        <p
-                            className="
-                                max-w-sm
-                                text-base
-                                leading-8
-                                text-slate-700
-                                sm:text-lg
-                            "
-                        >
-                            Every adventure deserves
-                            <br />
-                            a place to be remembered.
+                    </div>
+                    
+                    {/* Title & Tagline */}
+                    <div className="space-y-1">
+                        <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                            Avora Travel Archives
+                        </h3>
+                        <p className="text-xs sm:text-sm font-medium text-slate-500 max-w-md mx-auto">
+                            Every adventure deserves a place to be remembered.
                         </p>
                     </div>
+
+                    {/* Minimalist Status Badge with subtle gradient accent */}
+                    <div className="inline-flex items-center gap-2 text-xs font-semibold text-blue-600 bg-gradient-to-r from-blue-50 via-sky-50 to-blue-50 px-4 py-1.5 rounded-full border border-blue-100 shadow-2xs">
+                        <span className="h-2 w-2 rounded-full bg-blue-600 animate-pulse" />
+                        <span>Designed for global travel creators</span>
+                    </div>
+
                 </div>
 
-                {/* Decorative Divider */}
-                <div
-                    className="
-                        mx-auto
-                        mt-12
-                        h-px
-                        w-80
-                        bg-gradient-to-r
-                        from-transparent
-                        via-[#1E3A8A]/25
-                        to-transparent
-                    "
-                />
+                {/* Divider Line */}
+                <div className="my-8 h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
 
-                {/* Copyright Notice */}
-                <p
-                    className="
-                        mt-8
-                        text-center
-                        text-sm
-                        text-slate-500
-                    "
-                >
-                    © 2026 Avora. All rights reserved.
-                </p>
+                {/* Bottom Copyright Notice */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-xs font-semibold text-slate-900">
+                    <p>© 2026 Avora. All rights reserved.</p>
+                    <span className="hidden sm:inline text-slate-300">•</span>
+                    <p className="font-medium text-slate-900">Secure Digital Travel Journaling Ecosystem</p>
+                </div>
             </div>
         </footer>
     );

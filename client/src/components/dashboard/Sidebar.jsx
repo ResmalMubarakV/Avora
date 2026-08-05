@@ -184,6 +184,7 @@ const Sidebar = ({
         open={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
         onConfirm={handleLogout}
+        isAdmin={false}
       />
     </>
   );

@@ -1,11 +1,11 @@
-import { Users, UserCheck, Clock, Images, ArrowUpRight } from "lucide-react";
+import { Users, UserCheck, Clock, Images, ArrowUpRight, TrendingUp } from "lucide-react";
 
 // ==========================================
 // DASHBOARD STATS COMPONENT
 // ==========================================
 /**
- * Renders an elite SaaS metrics grid with interactive hover elevations, 
- * subtle background gradients, and sleek typography.
+ * Renders an elite SaaS metrics grid with trend analytics, interactive hover elevations, 
+ * and subtle background gradients.
  */
 const DashboardStats = ({
     totalUsers = 0,
@@ -19,6 +19,8 @@ const DashboardStats = ({
             key: "all-users",
             label: "Total Users",
             value: totalUsers,
+            trend: "+12% today",
+            trendType: "positive",
             icon: <Users size={22} className="text-blue-600" />,
             bgGradient: "from-blue-600/10 via-indigo-500/5 to-transparent",
             borderColor: "border-slate-200/80 hover:border-blue-500/30",
@@ -30,6 +32,8 @@ const DashboardStats = ({
             key: "pending",
             label: "Pending Approvals",
             value: pendingUsers,
+            trend: "Action Required",
+            trendType: "neutral",
             icon: <Clock size={22} className="text-amber-600" />,
             bgGradient: "from-amber-500/10 via-orange-500/5 to-transparent",
             borderColor: "border-slate-200/80 hover:border-amber-500/30",
@@ -41,6 +45,8 @@ const DashboardStats = ({
             key: "approved",
             label: "Active Users",
             value: approvedUsers,
+            trend: "+8% this week",
+            trendType: "positive",
             icon: <UserCheck size={22} className="text-emerald-600" />,
             bgGradient: "from-emerald-500/10 via-teal-500/5 to-transparent",
             borderColor: "border-slate-200/80 hover:border-emerald-500/30",
@@ -52,6 +58,8 @@ const DashboardStats = ({
             key: "memories",
             label: "Total Memories",
             value: totalMemories,
+            trend: "Last 30 Days",
+            trendType: "neutral",
             icon: <Images size={22} className="text-indigo-600" />,
             bgGradient: "from-indigo-500/10 via-purple-500/5 to-transparent",
             borderColor: "border-slate-200/80 hover:border-indigo-500/30",
@@ -77,7 +85,7 @@ const DashboardStats = ({
                     <div className={`absolute inset-0 bg-gradient-to-br ${stat.bgGradient} opacity-40 transition-opacity duration-300 group-hover:opacity-100`} />
                     
                     {/* Top Row: Icon & Action Indicator */}
-                    <div className="relative z-10 flex items-center justify-between mb-5">
+                    <div className="relative z-10 flex items-center justify-between mb-4">
                         <div className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${stat.iconBg} shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
                             {stat.icon}
                         </div>
@@ -86,14 +94,20 @@ const DashboardStats = ({
                         </span>
                     </div>
 
-                    {/* Bottom Row: Label & Value */}
+                    {/* Bottom Row: Label, Value & Analytics Trend */}
                     <div className="relative z-10 space-y-1">
                         <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
                             {stat.label}
                         </p>
-                        <h3 className="text-3xl font-black tracking-tight text-slate-900">
-                            {stat.value.toLocaleString()}
-                        </h3>
+                        <div className="flex items-baseline justify-between">
+                            <h3 className="text-3xl font-black tracking-tight text-slate-900">
+                                {stat.value.toLocaleString()}
+                            </h3>
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/60 shadow-xs">
+                                <TrendingUp size={11} />
+                                {stat.trend}
+                            </span>
+                        </div>
                     </div>
                 </div>
             ))}

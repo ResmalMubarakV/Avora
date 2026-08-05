@@ -69,6 +69,7 @@ const AdminNavbar = ({ sidebarOpen, setSidebarOpen }) => {
         open={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
         onConfirm={handleLogout}
+        isAdmin={true}
       />
     </header>
   );

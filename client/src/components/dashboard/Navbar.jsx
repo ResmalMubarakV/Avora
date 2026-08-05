@@ -93,6 +93,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
         open={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
         onConfirm={handleLogout}
+        isAdmin={false}
       />
     </header>
   );
