@@ -1,21 +1,32 @@
 import { Search } from "lucide-react";
 
+// ==========================================
+// COVER IMAGE COMPONENT
+// ==========================================
+/**
+ * Renders a clickable profile or memory cover image banner with hover zoom, 
+ * dark overlay gradients, and a centered "View Gallery" action preview button.
+ * Fully responsive with rectangular proportions across all screen sizes.
+ */
 const CoverImage = ({ image, onClick }) => {
     return (
         <button
+            type="button"
             onClick={onClick}
             className="
                 group
                 relative
                 w-full
-                h-[380px]
+                h-56
+                sm:h-72
+                lg:h-[380px]
                 overflow-hidden
                 rounded-3xl
                 focus:outline-none
+                cursor-pointer
             "
         >
-            {/* Image */}
-
+            {/* Cover Image */}
             <img
                 src={image}
                 alt="Cover"
@@ -29,8 +40,7 @@ const CoverImage = ({ image, onClick }) => {
                 "
             />
 
-            {/* Dark Overlay */}
-
+            {/* Dark Overlay Gradient on Hover */}
             <div
                 className="
                     absolute
@@ -42,8 +52,7 @@ const CoverImage = ({ image, onClick }) => {
                 "
             />
 
-            {/* Center Content */}
-
+            {/* Centered Gallery Action Pill */}
             <div
                 className="
                     absolute

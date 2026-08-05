@@ -1,6 +1,13 @@
 import { Link } from "react-router-dom";
 import { FiArrowRight, FiMapPin } from "react-icons/fi";
 
+// ==========================================
+// TRAVELER CARD COMPONENT
+// ==========================================
+/**
+ * Renders an interactive public traveler profile card with avatar fallback support, 
+ * location badges, hover lift/glow transitions, and a direct "View Profile" navigation link.
+ */
 const TravelerCard = ({ traveler }) => {
     return (
         <Link
@@ -21,15 +28,15 @@ const TravelerCard = ({ traveler }) => {
                 hover:shadow-sky-500/10
             "
         >
-            {/* Avatar */}
+            {/* Traveler Avatar Image */}
             <div className="flex justify-center">
                 <img
-                        src={
-                            traveler.profileImage ||
-                            "https://ui-avatars.com/api/?background=0f172a&color=ffffff&name=" +
-                                encodeURIComponent(traveler.name)
-                        }
-                        alt={traveler.name}
+                    src={
+                        traveler.profileImage ||
+                        "https://ui-avatars.com/api/?background=0f172a&color=ffffff&name=" +
+                            encodeURIComponent(traveler.name)
+                    }
+                    alt={traveler.name}
                     className="
                         h-20
                         w-20
@@ -40,31 +47,33 @@ const TravelerCard = ({ traveler }) => {
                         transition-transform
                         duration-300
                         group-hover:scale-105
+                        shadow-md
                     "
                 />
             </div>
 
-            {/* Name */}
-            <h3 className="mt-4 text-center text-2xl font-bold text-white">
+            {/* Traveler Full Name */}
+            <h3 className="mt-4 text-center text-xl sm:text-2xl font-bold text-white tracking-tight">
                 {traveler.name}
             </h3>
 
-            {/* Username */}
-            <p className="mt-1 text-center text-slate-400">
+            {/* Traveler Handle Username */}
+            <p className="mt-1 text-center text-sm font-medium text-slate-400">
                 @{traveler.username}
             </p>
 
-            {/* Location */}
-            <div className="mt-4 flex items-center justify-center gap-2 text-sky-400">
-                <FiMapPin className="text-base" />
+            {/* Location Detail */}
+            {traveler.location && (
+                <div className="mt-4 flex items-center justify-center gap-1.5 text-sm font-medium text-sky-400">
+                    <FiMapPin className="text-base shrink-0" />
+                    <span className="truncate">{traveler.location}</span>
+                </div>
+            )}
 
-                <span>{traveler.location}</span>
-            </div>
-
-            {/* Divider */}
+            {/* Divider Line */}
             <div className="my-5 border-t border-white/10" />
 
-            {/* Bottom */}
+            {/* Bottom Action Footer */}
             <div
                 className="
                     flex
@@ -76,7 +85,7 @@ const TravelerCard = ({ traveler }) => {
                     group-hover:text-sky-400
                 "
             >
-                <span className="font-medium">
+                <span className="text-sm font-semibold">
                     View Profile
                 </span>
 

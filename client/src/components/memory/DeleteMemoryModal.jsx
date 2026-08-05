@@ -4,17 +4,23 @@ import {
     Loader2,
 } from "lucide-react";
 
+// ==========================================
+// DELETE MEMORY MODAL COMPONENT
+// ==========================================
+/**
+ * Renders a confirmation dialog modal via React portal for permanently deleting 
+ * a travel memory, its cover image, and associated gallery media. Features 
+ * backdrop blur, click-outside dismissal prevention, and loading spinner states.
+ */
 const DeleteMemoryModal = ({
     open,
     loading,
     onClose,
     onDelete,
 }) => {
-
     if (!open) return null;
 
     return createPortal(
-
         <div
             className="
                 fixed
@@ -29,7 +35,6 @@ const DeleteMemoryModal = ({
             "
             onClick={onClose}
         >
-
             <div
                 onClick={(e) => e.stopPropagation()}
                 className="
@@ -44,11 +49,8 @@ const DeleteMemoryModal = ({
                     duration-200
                 "
             >
-
-                {/* Header */}
-
+                {/* Header & Warning Icon Section */}
                 <div className="border-b border-slate-200 p-6">
-
                     <div
                         className="
                             mx-auto
@@ -91,11 +93,9 @@ const DeleteMemoryModal = ({
                         Your memory, cover image and all gallery
                         media will be permanently deleted.
                     </p>
-
                 </div>
 
-                {/* Footer */}
-
+                {/* Footer Action Buttons */}
                 <div
                     className="
                         flex
@@ -105,7 +105,6 @@ const DeleteMemoryModal = ({
                         sm:flex-row
                     "
                 >
-
                     <button
                         type="button"
                         disabled={loading}
@@ -154,9 +153,7 @@ const DeleteMemoryModal = ({
                             disabled:opacity-60
                         "
                     >
-
                         {loading ? (
-
                             <>
                                 <Loader2
                                     size={18}
@@ -164,28 +161,18 @@ const DeleteMemoryModal = ({
                                 />
                                 Deleting...
                             </>
-
                         ) : (
-
                             <>
                                 <AlertTriangle size={18} />
                                 Delete Memory
                             </>
-
                         )}
-
                     </button>
-
                 </div>
-
             </div>
-
         </div>,
-
         document.body
-
     );
-
 };
 
 export default DeleteMemoryModal;

@@ -1,186 +1,80 @@
-import { LogOut, X } from "lucide-react";
-import { useEffect } from "react";
+import { createPortal } from "react-dom";
+import { LogOut, X, ShieldAlert } from "lucide-react";
 
+// ==========================================
+// ADMIN LOGOUT MODAL COMPONENT
+// ==========================================
+/**
+ * Renders an elite, premium SaaS logout modal with contextual security warnings 
+ * and precise viewport centering via React portals.
+ */
 const LogoutModal = ({ open, onClose, onConfirm }) => {
-    
-    useEffect(() => {
-        if (!open) return;
-        
-        const handleKeyDown = (e) => {
-            if (e.key === "Escape") {
-                onClose();
-            }
-            
-            if (e.key === "Enter") {
-                onConfirm();
-            }
-        };
-        
-        window.addEventListener("keydown", handleKeyDown);
-        
-        return () => {
-            window.removeEventListener("keydown", handleKeyDown);
-        };
-    }, [open, onClose, onConfirm]);
-    
     if (!open) return null;
 
-return (
-    <div
-        className="
-            fixed
-            inset-0
-            z-[100]
-            flex
-            items-center
-            justify-center
-            bg-slate-950/60
-            backdrop-blur-md
-            p-4
-        "
-        onClick={onClose}
-    >
-        <div
-            onClick={(e) => e.stopPropagation()}
-            className="
-                w-full
-                max-w-md
-                overflow-hidden
-                rounded-3xl
-                border
-                border-white/20
-                bg-white/95
-                shadow-[0_30px_80px_rgba(15,23,42,0.25)]
-                backdrop-blur-xl
-                animate-in
-                fade-in
-                zoom-in-95
-                duration-200
-            "
-        >
-            {/* Header */}
-
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
-
-                <div className="flex items-center gap-4">
-
-                    <div
-                        className="
-                            flex
-                            h-14
-                            w-14
-                            items-center
-                            justify-center
-                            rounded-2xl
-                            bg-gradient-to-br
-                            from-red-50
-                            to-red-100
-                            border
-                            border-red-200
-                        "
+    return createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
+            <div className="w-full max-w-md rounded-3xl border border-slate-200/80 bg-white p-7 shadow-2xl animate-in zoom-in-95 duration-200 text-left">
+                {/* Header Row */}
+                <div className="flex items-center justify-between mb-5">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 border border-amber-100 text-amber-600 shadow-sm shrink-0">
+                            <ShieldAlert size={22} />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">
+                                Terminate Session
+                            </h3>
+                            <p className="text-xs font-medium text-slate-500">
+                                Avora Enterprise Control Center
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        aria-label="Close Modal"
+                        className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer transition"
                     >
-                        <LogOut
-                            size={24}
-                            className="text-red-600"
-                        />
-                    </div>
-
-                    <div>
-
-                        <h2 className="text-xl font-bold text-slate-900">
-                            Sign out of Avora?
-                        </h2>
-
-                        <p className="mt-1 text-sm text-slate-500">
-                            Your current session will be ended.
-                        </p>
-
-                    </div>
-
+                        <X size={20} />
+                    </button>
                 </div>
 
-                <button
-                    onClick={onClose}
-                    className="
-                        rounded-xl
-                        cursor-pointer
-                        p-2
-                        text-slate-500
-                        transition
-                        hover:bg-slate-100
-                        hover:text-slate-700
-                    "
-                >
-                    <X size={18} />
-                </button>
+                {/* Description Body with Warning */}
+                <div className="space-y-4 mb-6">
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                        Are you sure you want to sign out of the <span className="font-bold text-slate-900">Avora Enterprise Control Center</span>? Your active session token will be securely cleared.
+                    </p>
 
+                    <div className="flex items-start gap-3 rounded-2xl border border-amber-200/80 bg-amber-50/70 p-3.5 text-xs text-amber-900 shadow-inner">
+                        <ShieldAlert size={16} className="shrink-0 text-amber-600 mt-0.5" />
+                        <span className="leading-normal font-medium">
+                            <strong className="font-bold">Security Notice:</strong> You will need to re-authenticate with your administrator credentials to regain access to management features.
+                        </span>
+                    </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center justify-end gap-3 pt-2">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 cursor-pointer active:scale-95 shadow-sm"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onConfirm}
+                        className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 px-5 py-3 text-xs font-semibold text-white shadow-lg shadow-red-600/25 transition hover:from-red-500 hover:to-rose-500 active:scale-95 cursor-pointer"
+                    >
+                        <LogOut size={16} />
+                        <span>Sign Out</span>
+                    </button>
+                </div>
             </div>
-
-            {/* Body */}
-
-            <div className="px-6 py-6">
-
-                <p className="text-[15px] leading-7 text-slate-600">
-
-                    You'll need to sign in again to access your dashboard,
-                    private memories, AI assistant, and account settings.
-
-                </p>
-
-            </div>
-
-            {/* Footer */}
-
-            <div className="flex justify-end gap-3 border-t border-slate-200 bg-slate-50/70 px-6 py-5">
-
-                <button
-                    onClick={onClose}
-                    className="
-                        rounded-xl
-                        border
-                        border-slate-200
-                        bg-white
-                        cursor-pointer
-                        px-5
-                        py-2.5
-                        font-medium
-                        text-slate-700
-                        transition-all
-                        duration-200
-                        hover:border-slate-300
-                        hover:bg-slate-100
-                    "
-                >
-                    Cancel
-                </button>
-
-                <button
-                    onClick={onConfirm}
-                    className="
-                        rounded-xl
-                        bg-red-600
-                        px-5
-                        py-2.5
-                        font-semibold
-                        text-white
-                        cursor-pointer
-                        shadow-lg
-                        shadow-red-500/20
-                        transition-all
-                        duration-200
-                        hover:bg-red-700
-                        hover:shadow-xl
-                        hover:shadow-red-500/30
-                        active:scale-[0.98]
-                    "
-                >
-                    Sign Out
-                </button>
-
-            </div>
-        </div>
-    </div>
-);
+        </div>,
+        document.body
+    );
 };
 
 export default LogoutModal;

@@ -8,8 +8,13 @@ import { useNavigate } from "react-router-dom";
 
 import MemoryActions from "../memory/MemoryActions";
 
+// ==========================================
+// DATE FORMATTER UTILITY
+// ==========================================
+/**
+ * Formats a given ISO date string into a localized Indian date format (e.g. 15 Jan 2026).
+ */
 const formatDate = (date) => {
-
     if (!date) return "";
 
     return new Date(date).toLocaleDateString(
@@ -20,15 +25,19 @@ const formatDate = (date) => {
             year: "numeric",
         }
     );
-
 };
 
+// ==========================================
+// MEMORY CARD COMPONENT
+// ==========================================
+/**
+ * Renders an interactive travel memory card with cover image zoom, public/private badges, 
+ * location and date details, and hover-triggered memory actions menu.
+ */
 const MemoryCard = ({ memory }) => {
-
     const navigate = useNavigate();
 
     return (
-
         <div
             onClick={() =>
                 navigate(
@@ -57,11 +66,8 @@ const MemoryCard = ({ memory }) => {
                 hover:shadow-xl
             "
         >
-
-            {/* Cover */}
-
+            {/* Cover Image & Visibility Badge */}
             <div className="relative overflow-hidden rounded-t-2xl">
-
                 <img
                     src={memory.coverImage}
                     alt={memory.title}
@@ -75,12 +81,9 @@ const MemoryCard = ({ memory }) => {
                     "
                 />
 
-                {/* Visibility */}
-
+                {/* Visibility Status Badge */}
                 <div className="absolute top-3 right-3">
-
                     {memory.isPublic ? (
-
                         <div
                             className="
                                 flex
@@ -97,15 +100,10 @@ const MemoryCard = ({ memory }) => {
                                 backdrop-blur
                             "
                         >
-
                             <Globe size={14} />
-
                             Public
-
                         </div>
-
                     ) : (
-
                         <div
                             className="
                                 flex
@@ -122,55 +120,34 @@ const MemoryCard = ({ memory }) => {
                                 backdrop-blur
                             "
                         >
-
                             <Lock size={14} />
-
                             Private
-
                         </div>
-
                     )}
-
                 </div>
-
             </div>
 
-            {/* Body */}
-
+            {/* Card Body Content */}
             <div className="relative p-5">
-
-                <h3 className="pr-14 text-xl font-bold text-slate-900">
-
+                <h3 className="pr-14 text-xl font-bold text-slate-900 line-clamp-1">
                     {memory.title}
-
                 </h3>
 
-                <div className="mt-4 flex items-center gap-2 text-slate-500">
-
-                    <MapPin size={16} />
-
+                <div className="mt-4 flex items-center gap-2 text-slate-500 text-sm">
+                    <MapPin size={16} className="shrink-0 text-slate-400" />
                     <span className="truncate">
-
                         {memory.location}
-
                     </span>
-
                 </div>
 
-                <div className="mt-2 flex items-center gap-2 text-slate-500">
-
-                    <CalendarDays size={16} />
-
+                <div className="mt-2 flex items-center gap-2 text-slate-500 text-sm">
+                    <CalendarDays size={16} className="shrink-0 text-slate-400" />
                     <span>
-
                         {formatDate(memory.startDate)}
-
                     </span>
-
                 </div>
 
-                {/* Actions */}
-
+                {/* Hover Memory Actions Menu Wrapper */}
                 <div
                     className="
                         absolute
@@ -185,20 +162,14 @@ const MemoryCard = ({ memory }) => {
                     "
                     onClick={(e) => e.stopPropagation()}
                 >
-
                     <MemoryActions
                         memory={memory}
                         redirectTo="/dashboard"
                     />
-
                 </div>
-
             </div>
-
         </div>
-
     );
-
 };
 
 export default MemoryCard;

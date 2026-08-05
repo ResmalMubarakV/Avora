@@ -6,45 +6,45 @@ import {
     FaLinkedin,
 } from "react-icons/fa";
 
+// ==========================================
+// SOCIAL LINKS CARD COMPONENT
+// ==========================================
+/**
+ * Renders social media profile link inputs (Website, Instagram, YouTube, LinkedIn)
+ * with associated brand/icon symbols, placeholders, and form update handlers.
+ */
 const SocialLinksCard = ({
     formData,
     handleChange,
 }) => {
-
     const fields = [
-
         {
             name: "website",
             label: "Website",
             placeholder: "https://yourwebsite.com",
             icon: Globe,
         },
-
         {
             name: "instagram",
             label: "Instagram",
             placeholder: "https://instagram.com/username",
             icon: FaInstagram,
         },
-
         {
             name: "youtube",
             label: "YouTube",
             placeholder: "https://youtube.com/@username",
             icon: FaYoutube,
         },
-
         {
             name: "linkedin",
             label: "LinkedIn",
             placeholder: "https://linkedin.com/in/username",
             icon: FaLinkedin,
         },
-
     ];
 
     return (
-
         <div
             className="
                 rounded-3xl
@@ -58,11 +58,8 @@ const SocialLinksCard = ({
                 shadow-sm
             "
         >
-
             {/* Header */}
-
             <div className="mb-8">
-
                 <h2
                     className="
                         text-xl
@@ -70,9 +67,7 @@ const SocialLinksCard = ({
                         text-slate-900
                     "
                 >
-
                     Social Links
-
                 </h2>
 
                 <p
@@ -83,23 +78,17 @@ const SocialLinksCard = ({
                         text-slate-500
                     "
                 >
-
                     Share your online presence with fellow travelers.
-
                 </p>
-
             </div>
 
+            {/* Social Input Fields List */}
             <div className="space-y-6">
-
                 {fields.map((field) => {
-
                     const Icon = field.icon;
 
                     return (
-
                         <div key={field.name}>
-
                             <label
                                 htmlFor={field.name}
                                 className="
@@ -111,13 +100,10 @@ const SocialLinksCard = ({
                                     text-slate-700
                                 "
                             >
-
                                 {field.label}
-
                             </label>
 
                             <div className="relative">
-
                                 <Icon
                                     size={18}
                                     className="
@@ -157,21 +143,13 @@ const SocialLinksCard = ({
                                         focus:ring-blue-100
                                     "
                                 />
-
                             </div>
-
                         </div>
-
                     );
-
                 })}
-
             </div>
-
         </div>
-
     );
-
 };
 
 export default SocialLinksCard;

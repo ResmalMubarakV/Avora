@@ -1,5 +1,4 @@
 import {
-    ArrowLeft,
     MapPin,
     CalendarDays,
     Globe,
@@ -11,29 +10,21 @@ import {
     Ship,
     Footprints,
     Compass,
-    Pencil,
+    Camera,
+    Video,
+    Clock,
+    Lock,
 } from "lucide-react";
 
-import {
-    useNavigate,
-    useLocation,
-} from "react-router-dom";
-   
-const MemoryInfo = ({
-    username,
-    memory,
-    isOwner,
-    locationState,
-}) => {
-
-        const navigate = useNavigate();
-        const location = useLocation();
-        const from =
-            locationState?.from || `/${username}`;
-
-        const label =
-            locationState?.label || "Profile";
-
+// ==========================================
+// MEMORY INFO COMPONENT
+// ==========================================
+/**
+ * Renders metadata and details for a specific travel memory view card 
+ * (internal card details without duplicate navigation buttons).
+ */
+const MemoryInfo = ({ memory }) => {
+    // --- Travel Mode Icon Map ---
     const travelIcons = {
         bike: Bike,
         car: Car,
@@ -47,14 +38,16 @@ const MemoryInfo = ({
     const TravelIcon =
         travelIcons[memory.modeOfTravel?.toLowerCase()] || Compass;
 
-    const totalPhotos = memory.media.filter(
-        media => media.type === "image"
-    ).length;
+    // --- Media Count Calculations ---
+    const totalPhotos = memory.media?.filter(
+        (media) => media.type === "image"
+    ).length || 0;
 
-    const totalVideos = memory.media.filter(
-        media => media.type === "video"
-    ).length;
+    const totalVideos = memory.media?.filter(
+        (media) => media.type === "video"
+    ).length || 0;
 
+    // --- Total Trip Days Calculation ---
     const totalDays =
         Math.ceil(
             (
@@ -64,6 +57,7 @@ const MemoryInfo = ({
             (1000 * 60 * 60 * 24)
         ) + 1;
 
+    // --- Date Formatters ---
     const startDate = new Date(memory.startDate).toLocaleDateString(
         "en-IN",
         {
@@ -82,423 +76,266 @@ const MemoryInfo = ({
         }
     );
 
-return (
-
-    <div className="flex flex-col">
-
-        {/* Top Actions */}
-
-    <div className="flex items-center justify-between gap-4">
-
-        {/* Back Button */}
-
-        <button
-            type="button"
-            onClick={() => navigate(from)}
-            className="
-                inline-flex
-                items-center
-                gap-2
-
-                rounded-full
-                border
-                border-slate-200
-
-                bg-white
-
-                px-4
-                py-2
-
-                text-xs
-                sm:text-sm
-                font-medium
-                text-slate-800
-
-                shadow-sm
-
-                transition-all
-                duration-300
-
-                hover:bg-slate-50
-                hover:shadow-md
-            "
-        >
-            <ArrowLeft size={16} />
-
-            <span>
-                Back to {label}
-            </span>
-
-        </button>
-
-        {/* Edit Button */}
-
-        {isOwner && (
-
-            <button
-                type="button"
-                onClick={() =>
-                    navigate(
-                        `/dashboard/edit-memory/${memory._id}`,
-                        {
-                            state: {
-                                from: location.pathname,
-                            },
-                        }
-                    )
-                }
+    return (
+        <div className="flex flex-col h-full justify-between">
+          <div>
+            {/* Memory Title */}
+            <h1
                 className="
-                    inline-flex
-                    items-center
-                    gap-2
-
-                    rounded-full
-
-                    bg-gradient-to-r
-                    from-[#1E3A8A]
-                    to-[#3559D4]
-
-                    px-4
-                    py-2
-
-                    text-xs
-                    sm:text-sm
-                    font-semibold
-                    text-white
-
-                    shadow-md
-
-                    transition-all
-                    duration-300
-
-                    hover:-translate-y-0.5
-                    hover:shadow-lg
+                    text-xl
+                    sm:text-3xl
+                    lg:text-4xl
+                    font-extrabold
+                    tracking-tight
+                    leading-tight
+                    text-slate-900
                 "
             >
-                <Pencil size={16} />
+                {memory.title}
+            </h1>
 
-                <span>
-                    Edit Memory
-                </span>
+            {/* Top Divider */}
+            <div className="mt-4 sm:mt-6 h-px bg-slate-200" />
 
-            </button>
+            {/* Metadata Details List */}
+            <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-5">
+                {/* Destination Location */}
+                <div className="flex items-start gap-3">
+                    <div
+                        className="
+                            flex
+                            h-9
+                            w-9
+                            sm:h-10
+                            sm:w-10
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-xl
+                            bg-sky-100
+                            text-sky-600
+                        "
+                    >
+                        <MapPin size={16} className="sm:w-[18px] sm:h-[18px]" />
+                    </div>
 
-        )}
+                    <div className="min-w-0 flex-1">
+                        <p
+                            className="
+                                text-[10px]
+                                font-semibold
+                                uppercase
+                                tracking-[0.15em]
+                                text-slate-400
+                            "
+                        >
+                            Destination
+                        </p>
 
-    </div>
+                        <p
+                            className="
+                                mt-0.5
+                                text-xs
+                                sm:text-base
+                                font-semibold
+                                text-slate-900
+                                truncate
+                            "
+                        >
+                            {memory.location}
+                        </p>
+                    </div>
+                </div>
 
-        {/* Badge */}
+                {/* Travel Dates */}
+                <div className="flex items-start gap-3">
+                    <div
+                        className="
+                            flex
+                            h-9
+                            w-9
+                            sm:h-10
+                            sm:w-10
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-xl
+                            bg-sky-100
+                            text-sky-600
+                        "
+                    >
+                        <CalendarDays size={16} className="sm:w-[18px] sm:h-[18px]" />
+                    </div>
 
-        <div
-            className="
-                mt-7
-                inline-flex
-                w-fit
-                rounded-full
-                border
-                border-sky-200
-                bg-sky-50
-                px-3
-                py-1.5
-                text-[11px]
-                font-bold
-                uppercase
-                tracking-[0.22em]
-                text-sky-600
-            "
-        >
-            Travel Memory
+                    <div className="min-w-0 flex-1">
+                        <p
+                            className="
+                                text-[10px]
+                                font-semibold
+                                uppercase
+                                tracking-[0.15em]
+                                text-slate-400
+                            "
+                        >
+                            Travel Dates
+                        </p>
+
+                        <p
+                            className="
+                                mt-0.5
+                                text-xs
+                                sm:text-base
+                                font-semibold
+                                text-slate-900
+                                truncate
+                            "
+                        >
+                            {startDate} — {endDate}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Mode of Travel */}
+                <div className="flex items-start gap-3">
+                    <div
+                        className="
+                            flex
+                            h-9
+                            w-9
+                            sm:h-10
+                            sm:w-10
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-xl
+                            bg-sky-100
+                            text-sky-600
+                        "
+                    >
+                        <TravelIcon size={16} className="sm:w-[18px] sm:h-[18px]" />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                        <p
+                            className="
+                                text-[10px]
+                                font-semibold
+                                uppercase
+                                tracking-[0.15em]
+                                text-slate-400
+                            "
+                        >
+                            Mode of Travel
+                        </p>
+
+                        <p
+                            className="
+                                mt-0.5
+                                text-xs
+                                sm:text-base
+                                font-semibold
+                                capitalize
+                                text-slate-900
+                                truncate
+                            "
+                        >
+                            {memory.modeOfTravel}
+                        </p>
+                    </div>
+                </div>
+            </div>
+          </div>
+
+          <div>
+            {/* Middle Divider */}
+            <div className="my-4 sm:my-6 h-px bg-slate-200" />
+
+            {/* Clean Icon-Text Micro-Stats Bar: Horizontal grid on mobile, Vertical clean stack on desktop */}
+            <div
+                className="
+                    grid
+                    grid-cols-4
+                    lg:flex
+                    lg:flex-col
+                    items-center
+                    lg:items-stretch
+                    gap-2
+                    lg:gap-3
+                    rounded-2xl
+                    border
+                    border-slate-200/80
+                    bg-slate-50/80
+                    p-2.5
+                    sm:px-4
+                    sm:py-3
+                    lg:py-4
+                "
+            >
+                {/* Photos */}
+                <div className="flex items-center justify-center lg:justify-between gap-1.5 text-xs font-semibold text-slate-700 bg-white lg:bg-transparent rounded-xl lg:rounded-none p-2 lg:p-0 border border-slate-200/60 lg:border-none shadow-xs lg:shadow-none">
+                    <div className="flex items-center gap-1.5">
+                        <Camera size={15} className="text-slate-400 shrink-0" />
+                        <span className="hidden lg:inline text-slate-500 font-medium text-xs">Photos</span>
+                    </div>
+                    <span>{totalPhotos}</span>
+                </div>
+
+                {/* Videos */}
+                <div className="flex items-center justify-center lg:justify-between gap-1.5 text-xs font-semibold text-slate-700 bg-white lg:bg-transparent rounded-xl lg:rounded-none p-2 lg:p-0 border border-slate-200/60 lg:border-none shadow-xs lg:shadow-none">
+                    <div className="flex items-center gap-1.5">
+                        <Video size={15} className="text-slate-400 shrink-0" />
+                        <span className="hidden lg:inline text-slate-500 font-medium text-xs">Videos</span>
+                    </div>
+                    <span>{totalVideos}</span>
+                </div>
+
+                {/* Duration */}
+                <div className="flex items-center justify-center lg:justify-between gap-1.5 text-xs font-semibold text-slate-700 bg-white lg:bg-transparent rounded-xl lg:rounded-none p-2 lg:p-0 border border-slate-200/60 lg:border-none shadow-xs lg:shadow-none">
+                    <div className="flex items-center gap-1.5">
+                        <Clock size={15} className="text-slate-400 shrink-0" />
+                        <span className="hidden lg:inline text-slate-500 font-medium text-xs">Duration</span>
+                    </div>
+                    <span>{totalDays}D</span>
+                </div>
+
+                {/* Visibility */}
+                <div
+                    className={`
+                        flex
+                        items-center
+                        justify-center
+                        lg:justify-between
+                        gap-1.5
+                        text-xs
+                        font-semibold
+                        bg-white
+                        lg:bg-transparent
+                        rounded-xl
+                        lg:rounded-none
+                        p-2
+                        lg:p-0
+                        border
+                        border-slate-200/60
+                        lg:border-none
+                        shadow-xs
+                        lg:shadow-none
+                        ${
+                            memory.isPublic
+                                ? "text-emerald-700"
+                                : "text-slate-700"
+                        }
+                    `}
+                >
+                    <div className="flex items-center gap-1.5">
+                        {memory.isPublic ? <Globe size={15} className="text-emerald-500 shrink-0" /> : <Lock size={15} className="text-slate-500 shrink-0" />}
+                        <span className="hidden lg:inline text-slate-500 font-medium text-xs">Status</span>
+                    </div>
+                    <span>{memory.isPublic ? "Public" : "Private"}</span>
+                </div>
+            </div>
+          </div>
         </div>
-
-        {/* Title */}
-
-        <h1
-            className="
-                mt-5
-                text-3xl
-                sm:text-4xl
-                lg:text-5xl
-                font-black
-                tracking-tight
-                leading-tight
-                text-slate-900
-            "
-        >
-            {memory.title}
-        </h1>
-
-        {/* Divider */}
-
-        <div className="mt-8 h-px bg-slate-200" />
-
-        {/* Details */}
-
-        <div className="mt-8 space-y-6">
-
-            {/* Destination */}
-
-            <div className="flex items-start gap-4">
-
-                <div
-                    className="
-                        flex
-                        h-11
-                        w-11
-                        items-center
-                        justify-center
-                        rounded-xl
-                        bg-sky-100
-                        text-sky-600
-                    "
-                >
-                    <MapPin size={20} />
-                </div>
-
-                <div>
-
-                    <p
-                        className="
-                            text-[10px]
-                            sm:text-xs
-                            font-semibold
-                            uppercase
-                            tracking-[0.15em]
-                            text-slate-500
-                        "
-                    >
-                        Destination
-                    </p>
-
-                    <p
-                        className="
-                            mt-1
-                            text-base
-                            sm:text-lg
-                            font-semibold
-                            text-slate-900
-                        "
-                    >
-                        {memory.location}
-                    </p>
-
-                </div>
-
-            </div>
-
-            {/* Travel Dates */}
-
-            <div className="flex items-start gap-4">
-
-                <div
-                    className="
-                        flex
-                        h-11
-                        w-11
-                        items-center
-                        justify-center
-                        rounded-xl
-                        bg-sky-100
-                        text-sky-600
-                    "
-                >
-                    <CalendarDays size={20} />
-                </div>
-
-                <div>
-
-                    <p
-                        className="
-                            text-[10px]
-                            sm:text-xs
-                            font-semibold
-                            uppercase
-                            tracking-[0.15em]
-                            text-slate-500
-                        "
-                    >
-                        Travel Dates
-                    </p>
-
-                    <p
-                        className="
-                            mt-1
-                            text-base
-                            sm:text-lg
-                            font-semibold
-                            text-slate-900
-                        "
-                    >
-                        {startDate} — {endDate}
-                    </p>
-
-                </div>
-
-            </div>
-
-            {/* Mode */}
-
-            <div className="flex items-start gap-4">
-
-                <div
-                    className="
-                        flex
-                        h-11
-                        w-11
-                        items-center
-                        justify-center
-                        rounded-xl
-                        bg-sky-100
-                        text-sky-600
-                    "
-                >
-                    <TravelIcon size={20} />
-                </div>
-
-                <div>
-
-                    <p
-                        className="
-                            text-[10px]
-                            sm:text-xs
-                            font-semibold
-                            uppercase
-                            tracking-[0.15em]
-                            text-slate-500
-                        "
-                    >
-                        Mode of Travel
-                    </p>
-
-                    <p
-                        className="
-                            mt-1
-                            text-base
-                            sm:text-lg
-                            font-semibold
-                            capitalize
-                            text-slate-900
-                        "
-                    >
-                        {memory.modeOfTravel}
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-                {/* Divider */}
-
-        <div className="my-8 h-px bg-slate-200" />
-
-        {/* Journey Summary */}
-
-<div
-    className="
-        flex
-        flex-nowrap
-        items-center
-        justify-between
-        gap-2
-        overflow-x-auto
-        scrollbar-hide
-    "
->
-
-    <span
-        className="
-            inline-flex
-            shrink-0
-            items-center
-            rounded-full
-            border
-            border-slate-200
-            bg-slate-50
-            px-2.5
-            py-1.5
-            text-[10px]
-            sm:px-4
-            sm:py-2
-            sm:text-sm
-            font-medium
-            text-slate-700
-        "
-    >
-        📷 {totalPhotos}
-    </span>
-
-    <span
-        className="
-            inline-flex
-            shrink-0
-            items-center
-            rounded-full
-            border
-            border-slate-200
-            bg-slate-50
-            px-2.5
-            py-1.5
-            text-[10px]
-            sm:px-4
-            sm:py-2
-            sm:text-sm
-            font-medium
-            text-slate-700
-        "
-    >
-        🎥 {totalVideos}
-    </span>
-
-    <span
-        className="
-            inline-flex
-            shrink-0
-            items-center
-            rounded-full
-            border
-            border-slate-200
-            bg-slate-50
-            px-2.5
-            py-1.5
-            text-[10px]
-            sm:px-4
-            sm:py-2
-            sm:text-sm
-            font-medium
-            text-slate-700
-        "
-    >
-        🗓 {totalDays} Days
-    </span>
-
-    <span
-        className={`
-            inline-flex
-            shrink-0
-            items-center
-            rounded-full
-            border
-            px-2.5
-            py-1.5
-            text-[10px]
-            sm:px-4
-            sm:py-2
-            sm:text-sm
-            font-medium
-            ${
-                memory.isPublic
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                    : "border-slate-200 bg-slate-50 text-slate-700"
-            }
-        `}
-    >
-        🌍 {memory.isPublic ? "Public" : "Private"}
-    </span>
-
-    </div>
-</div>
-);
-
+    );
 };
 
 export default MemoryInfo;

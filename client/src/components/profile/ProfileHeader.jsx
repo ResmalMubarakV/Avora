@@ -1,57 +1,74 @@
+// ==========================================
+// PROFILE HEADER COMPONENT
+// ==========================================
+/**
+ * Renders the traveler profile banner and header section, featuring a cover photo banner, 
+ * overlapping profile avatar, name, handle, bio, location, and total memory count.
+ */
 const ProfileHeader = ({ user, memoryCount }) => {
-  return (
-    <div>
-      {/* Cover Image */}
-      <div className="h-56 w-full bg-gray-300">
-        {user.coverImage && (
-          <img
-            src={user.coverImage}
-            alt="Cover"
-            className="w-full h-full object-cover"
-          />
-        )}
-      </div>
+    return (
+        <div>
+            {/* Profile Cover Image Banner */}
+            <div className="h-56 w-full bg-slate-200 overflow-hidden">
+                {user.coverImage && (
+                    <img
+                        src={user.coverImage}
+                        alt="Profile Cover"
+                        className="w-full h-full object-cover"
+                    />
+                )}
+            </div>
 
-      {/* Profile Section */}
-      <div className="max-w-5xl mx-auto px-6">
-        <div className="-mt-16 flex items-end gap-5">
+            {/* Profile Details Section */}
+            <div className="max-w-5xl mx-auto px-6">
+                <div className="-mt-16 flex flex-col sm:flex-row items-start sm:items-end gap-5">
+                    {/* Overlapping Profile Avatar */}
+                    <div className="w-32 h-32 rounded-full border-4 border-white bg-slate-200 overflow-hidden shrink-0 shadow-md">
+                        {user.profileImage ? (
+                            <img
+                                src={user.profileImage}
+                                alt={user.name}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-sky-600 font-bold text-white text-3xl">
+                                {user.name?.charAt(0).toUpperCase()}
+                            </div>
+                        )}
+                    </div>
 
-          {/* Profile Image */}
-          <div className="w-32 h-32 rounded-full border-4 border-white bg-gray-200 overflow-hidden">
-            {user.profileImage && (
-              <img
-                src={user.profileImage}
-                alt={user.name}
-                className="w-full h-full object-cover"
-              />
-            )}
-          </div>
+                    {/* User Metadata & Information */}
+                    <div className="pb-3">
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+                            {user.name}
+                        </h1>
 
-          {/* User Info */}
-          <div className="pb-3">
-            <h1 className="text-3xl font-bold">{user.name}</h1>
+                        <p className="text-sm font-medium text-slate-500">
+                            @{user.username}
+                        </p>
 
-            <p className="text-gray-500">@{user.username}</p>
+                        {user.bio && (
+                            <p className="mt-2 text-sm sm:text-base leading-relaxed text-slate-700 max-w-2xl">
+                                {user.bio}
+                            </p>
+                        )}
 
-            {user.bio && (
-              <p className="mt-2">{user.bio}</p>
-            )}
+                        <div className="mt-3 flex flex-wrap items-center gap-4 text-sm font-medium text-slate-600">
+                            {user.location && (
+                                <span className="flex items-center gap-1">
+                                    📍 {user.location}
+                                </span>
+                            )}
 
-            {user.location && (
-              <p className="text-gray-600 mt-1">
-                📍 {user.location}
-              </p>
-            )}
-
-            <p className="mt-2 font-medium">
-              {memoryCount} Memories
-            </p>
-          </div>
-
+                            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 border border-slate-200">
+                                🗓 {memoryCount} {memoryCount === 1 ? "Memory" : "Memories"}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default ProfileHeader;

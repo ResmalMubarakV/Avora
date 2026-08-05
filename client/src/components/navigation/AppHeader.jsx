@@ -4,15 +4,20 @@ import Logo from "../common/Logo";
 import SearchBar from "./SearchBar";
 import UserMenu from "./UserMenu";
 
+// ==========================================
+// APP HEADER COMPONENT
+// ==========================================
+/**
+ * Renders the primary application header navbar. Dynamically switches between 
+ * an authenticated owner layout (featuring Home link, search bar, and user menu dropdown) 
+ * and a public visitor layout (featuring Login & Get Started CTAs).
+ */
 const AppHeader = ({
     isOwner = false,
     isLoggedIn = false,
 }) => {
-
     return (
-
         <header className="sticky top-0 z-50 w-full border-b border-slate-100 bg-white/80 backdrop-blur-md">
-
             <div
                 className="
                     mx-auto
@@ -29,48 +34,34 @@ const AppHeader = ({
                     md:py-5
                 "
             >
-
-                {/* Logo */}
-
+                {/* Brand Logo Section */}
                 <div className="flex-shrink-0">
-
-                    {/* Mobile */}
-
+                    {/* Mobile Logo View */}
                     <div className="sm:hidden">
-
                         <Logo
                             to={isLoggedIn ? "/dashboard" : "/"}
                             size="sm"
                         />
-
                     </div>
 
-                    {/* Desktop */}
-
+                    {/* Desktop Logo View */}
                     <div className="hidden sm:block">
-
                         <Logo
                             to={isLoggedIn ? "/dashboard" : "/"}
                             size="lg"
                         />
-
                     </div>
-
                 </div>
 
                 {isOwner ? (
-
                     <>
-
-                        {/* Navigation */}
-
+                        {/* Navigation Links */}
                         <nav className="ml-10 hidden items-center gap-8 md:flex">
-
                             <Link
                                 to="/dashboard"
                                 className="
                                     text-sm
-                                    font-medium
+                                    font-semibold
                                     text-slate-700
                                     transition-colors
                                     duration-300
@@ -79,29 +70,20 @@ const AppHeader = ({
                             >
                                 Home
                             </Link>
-
                         </nav>
 
-                        {/* Search */}
-
+                        {/* Search Bar Bar */}
                         <div className="mx-auto w-full max-w-xl px-6">
-
                             <SearchBar />
-
                         </div>
 
-                        {/* User */}
-
+                        {/* User Menu Dropdown */}
                         <UserMenu />
-
                     </>
-
                 ) : (
-
+                    /* Public Visitor Action Links */
                     <div className="flex items-center gap-2 sm:gap-3 md:gap-5">
-
-                        {/* Login */}
-
+                        {/* Login Link */}
                         <Link
                             to="/login"
                             className="
@@ -109,7 +91,7 @@ const AppHeader = ({
                                 sm:block
 
                                 text-sm
-                                font-medium
+                                font-semibold
                                 text-slate-700
 
                                 transition-colors
@@ -123,8 +105,7 @@ const AppHeader = ({
                             Login
                         </Link>
 
-                        {/* Get Started */}
-
+                        {/* Get Started Registration Button */}
                         <Link
                             to="/register"
                             className="
@@ -144,6 +125,7 @@ const AppHeader = ({
                                 transition-all
                                 duration-300
 
+                                hover:-translate-y-0.5
                                 hover:bg-slate-800
                                 hover:shadow-md
 
@@ -155,17 +137,11 @@ const AppHeader = ({
                         >
                             Get Started
                         </Link>
-
                     </div>
-
                 )}
-
             </div>
-
         </header>
-
     );
-
 };
 
 export default AppHeader;

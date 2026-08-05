@@ -1,5 +1,14 @@
 import React from "react";
+import { X } from "lucide-react";
 
+// ==========================================
+// INPUT FIELD COMPONENT
+// ==========================================
+/**
+ * Renders a reusable form input field wrapper featuring an optional icon label, 
+ * focus rings, validation error messaging, and an interactive clear (cross) button 
+ * when text is present.
+ */
 const InputField = ({
     label,
     type = "text",
@@ -12,38 +21,54 @@ const InputField = ({
     error = "",
     name,
 }) => {
+    // --- Handle Clearing Input Value ---
+    const handleClear = () => {
+        const syntheticEvent = {
+            target: {
+                name: name || "",
+                value: "",
+            },
+        };
+        onChange(syntheticEvent);
+    };
+
     return (
         <div className="space-y-1.5">
-
+            {/* Field Label */}
             {label && (
-                <label className="block text-sm font-medium text-slate-700">
+                <label className="block text-sm font-semibold text-slate-700">
                     {label}
                 </label>
             )}
 
+            {/* Input Box Container */}
             <div
-                className="
+                className={`
                     flex
                     items-center
                     rounded-2xl
                     border
-                    border-slate-300
                     bg-white
                     px-4
                     py-2.5
                     transition-all
                     duration-300
-                    focus-within:border-blue-500
-                    focus-within:ring-4
-                    focus-within:ring-blue-100
-                "
+                    ${
+                        error
+                            ? "border-red-400 focus-within:border-red-500 focus-within:ring-4 focus-within:ring-red-100"
+                            : "border-slate-300 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100"
+                    }
+                    ${disabled ? "bg-slate-50 opacity-60 cursor-not-allowed" : ""}
+                `}
             >
+                {/* Leading Icon */}
                 {icon && (
-                    <span className="mr-3 text-slate-400 flex-shrink-0">
+                    <span className="mr-3 text-slate-400 shrink-0">
                         {icon}
                     </span>
                 )}
 
+                {/* Core HTML Input */}
                 <input
                     type={type}
                     placeholder={placeholder}
@@ -61,17 +86,42 @@ const InputField = ({
                         placeholder:text-slate-400
                         outline-none
                         disabled:cursor-not-allowed
-                        disabled:opacity-60
                     "
                 />
+
+                {/* Clear (Cross) Action Button */}
+                {!disabled && value && (
+                    <button
+                        type="button"
+                        onClick={handleClear}
+                        aria-label="Clear input"
+                        className="
+                            ml-2
+                            flex
+                            h-6
+                            w-6
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-full
+                            text-slate-400
+                            transition
+                            cursor-pointer
+                            hover:bg-slate-100
+                            hover:text-slate-700
+                        "
+                    >
+                        <X size={14} />
+                    </button>
+                )}
             </div>
 
+            {/* Validation Error Text */}
             {error && (
-                <p className="text-xs text-red-500">
+                <p className="text-xs font-medium text-red-500">
                     {error}
                 </p>
             )}
-
         </div>
     );
 };

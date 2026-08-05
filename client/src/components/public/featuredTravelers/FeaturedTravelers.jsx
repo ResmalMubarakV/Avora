@@ -3,21 +3,28 @@ import { useEffect, useState } from "react";
 import TravelerCard from "./TravelerCard";
 import { getFeaturedTravelers } from "../../../api/publicApi";
 
+// ==========================================
+// FEATURED TRAVELERS SECTION COMPONENT
+// ==========================================
+/**
+ * Renders the featured public travelers section on the public landing page.
+ * Features data fetching with loading skeleton and error states, a responsive 
+ * horizontal snap-scroll carousel for mobile/tablets, and a 3-column grid for desktops.
+ */
 const FeaturedTravelers = () => {
     const [travelers, setTravelers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    // --- Fetch Featured Travelers on Mount ---
     useEffect(() => {
         const fetchTravelers = async () => {
             try {
                 setLoading(true);
-
                 const data = await getFeaturedTravelers();
-
                 setTravelers(data);
             } catch (err) {
-                console.error(err);
+                console.error("Failed to load featured travelers:", err);
                 setError("Unable to load travelers.");
             } finally {
                 setLoading(false);
@@ -33,6 +40,7 @@ const FeaturedTravelers = () => {
             className="bg-transparent py-16 sm:py-20 lg:py-24"
         >
             <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+                {/* Section Header Banner */}
                 <div className="mx-auto mb-12 max-w-3xl text-center sm:mb-16">
                     <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-400 sm:text-sm">
                         PUBLIC PROFILES
@@ -49,39 +57,44 @@ const FeaturedTravelers = () => {
                     </p>
                 </div>
 
+                {/* Loading State Banner */}
                 {loading && (
                     <div className="flex justify-center">
-                        <div className="rounded-2xl border border-slate-700 bg-slate-900 px-8 py-6 text-slate-300">
+                        <div className="rounded-2xl border border-slate-700 bg-slate-900 px-8 py-6 text-sm font-medium text-slate-300 shadow-md">
                             Loading travelers...
                         </div>
                     </div>
                 )}
 
+                {/* Error State Banner */}
                 {!loading && error && (
                     <div className="flex justify-center">
-                        <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-8 py-6 text-red-300">
+                        <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-8 py-6 text-sm font-medium text-red-300 shadow-md">
                             {error}
                         </div>
                     </div>
                 )}
 
+                {/* Empty State Banner */}
                 {!loading && !error && travelers.length === 0 && (
                     <div className="flex justify-center">
-                        <div className="rounded-2xl border border-slate-700 bg-slate-900 px-8 py-6 text-slate-300">
+                        <div className="rounded-2xl border border-slate-700 bg-slate-900 px-8 py-6 text-sm font-medium text-slate-300 shadow-md">
                             No public travelers found.
                         </div>
                     </div>
                 )}
 
+                {/* Travelers Data List */}
                 {!loading && !error && travelers.length > 0 && (
                     <>
+                        {/* Mobile Swipe Hint Pill */}
                         <div className="mb-8 flex items-center justify-center lg:hidden">
-                            <span className="rounded-full border border-slate-700 bg-slate-900/50 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-400 backdrop-blur">
+                            <span className="rounded-full border border-slate-700 bg-slate-900/50 px-4 py-2 text-xs uppercase tracking-[0.2em] text-slate-400 backdrop-blur shadow-sm">
                                 ← Swipe to explore →
                             </span>
                         </div>
 
-                        {/* Mobile & Tablet Carousel */}
+                        {/* Mobile & Tablet Horizontal Carousel */}
                         <div
                             className="
                                 no-scrollbar
@@ -109,7 +122,7 @@ const FeaturedTravelers = () => {
                             ))}
                         </div>
 
-                        {/* Desktop Grid */}
+                        {/* Desktop 3-Column Grid */}
                         <div className="hidden gap-6 lg:grid lg:grid-cols-3">
                             {travelers.map((traveler) => (
                                 <TravelerCard

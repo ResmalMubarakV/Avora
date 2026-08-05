@@ -2,139 +2,47 @@ import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import useCurrentUser from "../../hooks/useCurrentUser";
 
+// ==========================================
+// DASHBOARD HERO COMPONENT
+// ==========================================
+/**
+ * Renders an executive dashboard hero section with a compact mobile layout 
+ * and larger, premium typography scaled for desktop screens.
+ */
 const DashboardHero = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { user, loading } = useCurrentUser();
 
-    const { user, loading } = useCurrentUser();
+  return (
+    <section className="mb-6 sm:mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {/* Compact Title & Personalized Greeting */}
+        <div>
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900">
+            Dashboard
+          </h1>
+          <p className="mt-1 text-xs sm:text-base font-medium text-slate-500">
+            Welcome back, {loading ? "Traveler" : user?.name || "Traveler"} 👋
+          </p>
+        </div>
 
-    return (
-        <section className="mb-6 md:mb-8 lg:mb-10">
-
-            <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-
-                {/* Left */}
-
-                <div>
-
-                    <h2
-                        className="
-                            text-[2.25rem]
-                            leading-none
-                            font-bold
-                            tracking-tight
-                            text-slate-900
-
-                            sm:text-4xl
-                            lg:text-5xl
-                        "
-                    >
-                        Dashboard
-                    </h2>
-
-                    <h3
-                        className="
-                            mt-3
-                            text-[1.05rem]
-                            leading-snug
-                            font-semibold
-                            text-slate-700
-
-                            sm:mt-2
-                            sm:text-xl
-
-                            lg:text-2xl
-                        "
-                    >
-                        Welcome back,{" "}
-                        {loading
-                            ? "Traveler"
-                            : user?.name || "Traveler"}{" "}
-                        👋
-                    </h3>
-
-                    <p
-                        className="
-                            mt-2
-                            text-[15px]
-                            leading-6
-                            text-slate-500
-
-                            sm:mt-1
-                            sm:text-base
-
-                            lg:text-lg
-                        "
-                    >
-                        Here's your travel summary.
-                    </p>
-
-                </div>
-
-                {/* Desktop / Tablet Only */}
-
-                <div className="hidden md:flex">
-
-                    <button
-                        onClick={() => navigate("/dashboard/create-memory")}
-                        className="
-                            group
-                            inline-flex
-                            items-center
-                            justify-center
-                            gap-2
-
-                            rounded-2xl
-
-                            bg-gradient-to-r
-                            from-[#1E3A8A]
-                            to-[#3559D4]
-
-                            px-6
-                            py-3.5
-
-                            text-base
-                            font-semibold
-                            text-white
-                            cursor-pointer
-
-
-                            shadow-lg
-                            shadow-[#1E3A8A]/20
-
-                            transition-all
-                            duration-300
-
-                            hover:-translate-y-0.5
-                            hover:shadow-xl
-                            hover:shadow-[#1E3A8A]/30
-
-                            active:scale-[0.98]
-                        "
-                    >
-
-                        <Plus
-                            size={18}
-                            className="
-                                transition-transform
-                                duration-300
-                                group-hover:rotate-90
-                            "
-                        />
-
-                        <span>
-
-                            New Memory
-
-                        </span>
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </section>
-    );
+        {/* Desktop & Tablet New Memory Action Button */}
+        <div className="hidden sm:flex">
+          <button
+            type="button"
+            onClick={() => navigate("/dashboard/create-memory")}
+            className="group inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-800 active:scale-[0.98]"
+          >
+            <Plus
+              size={16}
+              className="transition-transform duration-300 group-hover:rotate-90"
+            />
+            <span>New Memory</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export default DashboardHero;

@@ -2,27 +2,20 @@ const express = require("express");
 const router = express.Router();
 
 const {
-    getFeaturedTravelers,
-    getPublicProfile,
-    getPublicMemory,
+  getFeaturedTravelers,
+  getPublicProfile,
+  getPublicMemory,
 } = require("../controllers/publicController");
+const { protectOptional } = require("../middleware/authMiddleware");
 
-const {
-    protectOptional,
-} = require("../middleware/authMiddleware");
+// ==========================================
+// PUBLIC ROUTES
+// ==========================================
+// Routes for viewing public profiles and memories. 
+// protectOptional is used to reveal private data if the owner is the one viewing it.
 
 router.get("/travelers", getFeaturedTravelers);
-
-router.get(
-    "/:username",
-    protectOptional,
-    getPublicProfile
-);
-
-router.get(
-    "/:username/:slug",
-    protectOptional,
-    getPublicMemory
-);
+router.get("/:username", protectOptional, getPublicProfile);
+router.get("/:username/:slug", protectOptional, getPublicMemory);
 
 module.exports = router;

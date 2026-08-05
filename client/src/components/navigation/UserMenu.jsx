@@ -1,9 +1,18 @@
 import { Link } from "react-router-dom";
 import useCurrentUser from "../../hooks/useCurrentUser";
 
+// ==========================================
+// USER MENU COMPONENT
+// ==========================================
+/**
+ * Renders the authenticated user profile dropdown / navigation trigger in the header. 
+ * Handles loading skeleton states, avatar display with fallback initials, 
+ * user name and handle typography, and hover zoom ring animations.
+ */
 const UserMenu = () => {
     const { user, loading } = useCurrentUser();
 
+    // --- Loading Skeleton State ---
     if (loading || !user) {
         return (
             <div className="flex items-center gap-3">
@@ -33,6 +42,7 @@ const UserMenu = () => {
                 hover:bg-slate-100
             "
         >
+            {/* Profile Avatar Image or Initial Fallback */}
             {user.profileImage ? (
                 <img
                     src={user.profileImage}
@@ -48,6 +58,7 @@ const UserMenu = () => {
                         duration-300
                         group-hover:ring-sky-400/40
                         group-hover:scale-105
+                        shadow-sm
                     "
                 />
             ) : (
@@ -68,12 +79,14 @@ const UserMenu = () => {
                         duration-300
                         group-hover:ring-sky-400/40
                         group-hover:scale-105
+                        shadow-sm
                     "
                 >
                     {user.name.charAt(0).toUpperCase()}
                 </div>
             )}
 
+            {/* User Details Name & Handle (Visible on Medium screens and up) */}
             <div className="hidden text-left md:block">
                 <p className="text-sm font-semibold text-slate-800 transition-colors group-hover:text-sky-600">
                     {user.name}

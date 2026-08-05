@@ -1,6 +1,15 @@
 import heroImage from "../../../assets/images/pending-bg.png";
 
+// ==========================================
+// PENDING HERO COMPONENT
+// ==========================================
+/**
+ * Renders the hero banner for newly registered users awaiting admin approval. 
+ * Features a scenic background image with gradient overlays, an approval status badge, 
+ * smooth scrolling navigation to the featured travelers section, and animated bounce indicators.
+ */
 const PendingHero = () => {
+    // --- Smooth Scroll to Featured Profiles Section ---
     const handleExploreProfiles = () => {
         const section = document.getElementById("featured-travelers");
 
@@ -14,14 +23,14 @@ const PendingHero = () => {
 
     return (
         <section className="relative min-h-screen overflow-hidden">
-            {/* Background */}
+            {/* Background Scenic Landscape Image */}
             <img
                 src={heroImage}
                 alt="Mountain Landscape"
                 className="absolute inset-0 h-full w-full object-cover"
             />
 
-            {/* Overlay */}
+            {/* Dark Gradient Overlay */}
             <div
                 className="
                     absolute
@@ -33,7 +42,7 @@ const PendingHero = () => {
                 "
             />
 
-            {/* Hero Content */}
+            {/* Hero Main Content Container */}
             <div
                 className="
                     relative
@@ -92,6 +101,7 @@ const PendingHero = () => {
                         travel stories shared by explorers from around the world.
                     </p>
 
+                    {/* CTA Actions Button & Status Badge Group */}
                     <div
                         className="
                             mt-10
@@ -105,6 +115,7 @@ const PendingHero = () => {
                         "
                     >
                         <button
+                            type="button"
                             onClick={handleExploreProfiles}
                             className="
                                 rounded-full
@@ -114,6 +125,7 @@ const PendingHero = () => {
                                 text-sm
                                 font-semibold
                                 text-white
+                                cursor-pointer
                                 transition-all
                                 duration-300
                                 hover:-translate-y-1
@@ -146,9 +158,9 @@ const PendingHero = () => {
                                 sm:w-auto
                             "
                         >
-                            <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-amber-400" />
+                            <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-amber-400 shrink-0" />
 
-                            <span className="text-sm text-slate-300">
+                            <span className="text-sm font-medium text-slate-300">
                                 Awaiting approval
                             </span>
                         </div>
@@ -156,7 +168,7 @@ const PendingHero = () => {
                 </div>
             </div>
 
-            {/* Scroll Indicator */}
+            {/* Bottom Scroll Bounce Indicator */}
             <div
                 className="
                     absolute
@@ -169,7 +181,7 @@ const PendingHero = () => {
                     sm:bottom-8
                 "
             >
-                <p className="mb-2 text-xs uppercase tracking-[0.35em]">
+                <p className="mb-2 text-xs uppercase tracking-[0.35em] font-semibold">
                     EXPLORE
                 </p>
 

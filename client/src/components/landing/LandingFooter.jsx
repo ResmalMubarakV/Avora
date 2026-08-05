@@ -1,7 +1,15 @@
 import avoraLogo from "../../assets/images/avoraLogo.png";
 
+// ==========================================
+// LANDING FOOTER COMPONENT
+// ==========================================
+/**
+ * Renders the landing page footer section. Features ambient background gradients,
+ * the Avora brand logo with smooth scroll-to-top interactivity, mission statement text,
+ * a decorative divider, and copyright notice.
+ */
 const LandingFooter = () => {
-
+    // --- Smooth Scroll to Top Handler ---
     const scrollToTop = () => {
         window.scrollTo({
             top: 0,
@@ -10,7 +18,6 @@ const LandingFooter = () => {
     };
 
     return (
-
         <footer
             className="
                 relative
@@ -23,13 +30,9 @@ const LandingFooter = () => {
                 to-[#EEF4FF]
             "
         >
-
-            {/* Background */}
-
+            {/* Background Ambient Glow & Lighting Effects */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-
-                {/* Left Glow */}
-
+                {/* Left Glow Accent */}
                 <div
                     className="
                         absolute
@@ -44,8 +47,7 @@ const LandingFooter = () => {
                     "
                 />
 
-                {/* Right Glow */}
-
+                {/* Right Glow Accent */}
                 <div
                     className="
                         absolute
@@ -61,7 +63,6 @@ const LandingFooter = () => {
                 />
 
                 {/* Top Highlight */}
-
                 <div
                     className="
                         absolute
@@ -76,7 +77,6 @@ const LandingFooter = () => {
                 />
 
                 {/* Bottom Highlight */}
-
                 <div
                     className="
                         absolute
@@ -89,8 +89,7 @@ const LandingFooter = () => {
                     "
                 />
 
-                {/* Center Ambient Glow */}
-
+                {/* Center Ambient Blur Glow */}
                 <div
                     className="
                         absolute
@@ -105,16 +104,14 @@ const LandingFooter = () => {
                         blur-[120px]
                     "
                 />
-
             </div>
 
-            {/* Content */}
-
+            {/* Footer Inner Content */}
             <div className="relative z-10 mx-auto max-w-7xl px-5 py-16 md:px-8">
-
                 <div className="flex flex-col items-center gap-8 text-center md:flex-row md:justify-center md:gap-14 md:text-left">
-
+                    {/* Logo with Scroll-to-Top Action */}
                     <button
+                        type="button"
                         onClick={scrollToTop}
                         aria-label="Back to top"
                         className="
@@ -122,9 +119,9 @@ const LandingFooter = () => {
                             transition-all
                             duration-300
                             hover:scale-105
+                            cursor-pointer
                         "
                     >
-
                         <img
                             src={avoraLogo}
                             alt="Avora Logo"
@@ -137,11 +134,10 @@ const LandingFooter = () => {
                                 md:h-28
                             "
                         />
-
                     </button>
 
+                    {/* Mission Tagline */}
                     <div>
-
                         <p
                             className="
                                 max-w-sm
@@ -155,11 +151,10 @@ const LandingFooter = () => {
                             <br />
                             a place to be remembered.
                         </p>
-
                     </div>
-
                 </div>
 
+                {/* Decorative Divider */}
                 <div
                     className="
                         mx-auto
@@ -173,6 +168,7 @@ const LandingFooter = () => {
                     "
                 />
 
+                {/* Copyright Notice */}
                 <p
                     className="
                         mt-8
@@ -183,11 +179,8 @@ const LandingFooter = () => {
                 >
                     © 2026 Avora. All rights reserved.
                 </p>
-
             </div>
-
         </footer>
-
     );
 };
 

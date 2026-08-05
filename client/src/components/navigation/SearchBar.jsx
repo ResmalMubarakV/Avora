@@ -2,6 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import SearchResults from "./SearchResults";
 import api from "../../api/axios";
 
+// ==========================================
+// SEARCH BAR COMPONENT
+// ==========================================
+/**
+ * Renders an interactive header search bar component with debounced API search triggers, 
+ * clear query buttons, click-outside dismissal handlers, and search results popup dropdowns.
+ */
 const SearchBar = () => {
     const [query, setQuery] = useState("");
     const wrapperRef = useRef(null);
@@ -13,6 +20,7 @@ const SearchBar = () => {
     });
     const [loading, setLoading] = useState(false);
 
+    // --- Click Outside to Close Search Results Popup ---
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
@@ -32,6 +40,7 @@ const SearchBar = () => {
             );
     }, []);
 
+    // --- Debounced API Search Effect ---
     useEffect(() => {
         if (!query.trim()) {
             setResults({
@@ -51,19 +60,14 @@ const SearchBar = () => {
                 );
 
                 setResults(data);
-                console.log("API Response:", data);
-
             } catch (error) {
-                console.error(error);
-
+                console.error("Search query failed:", error);
             } finally {
                 setLoading(false);
             }
-
         }, 300);
 
         return () => clearTimeout(timer);
-
     }, [query]);
 
     return (
@@ -72,9 +76,7 @@ const SearchBar = () => {
                 ref={wrapperRef}
                 className="relative w-full max-w-3xl"
             >
-
-                {/* Search Icon */}
-
+                {/* Search Icon SVG */}
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
@@ -90,6 +92,7 @@ const SearchBar = () => {
                     />
                 </svg>
 
+                {/* Search Input Field */}
                 <input
                     type="text"
                     value={query}
@@ -118,17 +121,19 @@ const SearchBar = () => {
                     "
                 />
 
-                {/* Clear */}
-
+                {/* Clear Query Button */}
                 {query && (
                     <button
+                        type="button"
                         onClick={() => setQuery("")}
+                        aria-label="Clear search"
                         className="
                             absolute
                             right-4
                             top-1/2
                             -translate-y-1/2
                             rounded-full
+                            cursor-pointer
                             p-1
                             text-slate-400
                             transition
@@ -140,13 +145,13 @@ const SearchBar = () => {
                     </button>
                 )}
 
+                {/* Search Results Dropdown Component */}
                 <SearchResults
                     open={focused}
                     query={query}
                     results={results}
                     loading={loading}
                 />
-
             </div>
         </div>
     );

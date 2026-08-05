@@ -1,0 +1,57 @@
+import api from "./axios";
+
+// ==========================================
+// ADMIN API SERVICES
+// ==========================================
+/**
+ * Centralized API calls for administrative operations,
+ * including dashboard analytics, user moderation, and memory management.
+ */
+
+// Dashboard
+export const getDashboard = async () => {
+    const response = await api.get("/api/admin/dashboard");
+    return response.data;
+};
+
+// Users
+export const getUsers = async (status = "") => {
+    const response = await api.get("/api/admin/users", {
+        params: {
+            status,
+        },
+    });
+
+    return response.data;
+};
+
+export const approveUser = async (id) => {
+    const response = await api.patch(
+        `/api/admin/users/${id}/approve`
+    );
+
+    return response.data;
+};
+
+export const suspendUser = async (id) => {
+    const response = await api.patch(
+        `/api/admin/users/${id}/suspend`
+    );
+
+    return response.data;
+};
+
+// Memories
+export const getMemories = async () => {
+    const response = await api.get("/api/admin/memories");
+
+    return response.data;
+};
+
+export const deleteMemory = async (id) => {
+    const response = await api.delete(
+        `/api/admin/memories/${id}`
+    );
+
+    return response.data;
+};

@@ -1,261 +1,81 @@
 import {
-    Sparkles,
-    Bot,
-    Plus,
-    ArrowLeft,
+  Sparkles,
+  Bot,
+  Plus,
+  ArrowLeft,
 } from "lucide-react";
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NewChatModal from "./NewChatModal";
 
+// ==========================================
+// AI HEADER COMPONENT
+// ==========================================
+/**
+ * Sticky header for the AI assistant page. 
+ * Provides responsive views for desktop and mobile, displaying conversation titles, 
+ * branding, back buttons to return to the dashboard, and triggers for starting new chat sessions.
+ */
 const AIHeader = ({
-    title,
-    onNewChat,
+  title,
+  onNewChat,
 }) => {
+  const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
 
-    const navigate = useNavigate();
-    const [showModal, setShowModal] =
-    useState(false);
-
-    return (
-
-        <header
-            className="
-                sticky
-                top-0
-                z-30
-
-                border-b
-                border-slate-200/70
-
-                bg-white/80
-                backdrop-blur-xl
-            "
+  return (
+    <header className="sticky top-0 z-35 border-b border-slate-200/80 bg-white/80 backdrop-blur-2xl shadow-sm">
+      <div className="mx-auto flex h-20 max-w-5xl items-center justify-between px-4 sm:px-6">
+        {/* Left: Back Button to Dashboard */}
+        <button
+          onClick={() => navigate("/dashboard")}
+          aria-label="Go to dashboard"
+          className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-white text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300 shadow-sm cursor-pointer"
         >
-
-            {/* Desktop */}
-
-            <div
-                className="
-                    mx-auto
-                    hidden
-                    max-w-6xl
-                    items-center
-                    justify-between
-
-                    px-6
-                    py-4
-
-                    md:flex
-                "
-            >
-
-                <div className="flex items-center gap-4">
-
-                    <div
-                        className="
-                            relative
-
-                            flex
-                            h-14
-                            w-14
-                            items-center
-                            justify-center
-
-                            rounded-3xl
-
-                            bg-gradient-to-br
-                            from-[#3559D4]
-                            via-[#4166E0]
-                            to-[#1E3A8A]
-
-                            text-white
-
-                            shadow-lg
-                            shadow-blue-300/40
-                        "
-                    >
-
-                        <Bot size={26} />
-
-                        <span
-                            className="
-                                absolute
-                                -top-1
-                                -right-1
-
-                                flex
-                                h-6
-                                w-6
-                                items-center
-                                justify-center
-
-                                rounded-full
-
-                                bg-white
-
-                                text-[#3559D4]
-
-                                shadow
-                            "
-                        >
-
-                            <Sparkles size={12} />
-
-                        </span>
-
-                    </div>
-
-                    <div>
-
-                        <h1 className="text-2xl font-bold text-slate-900">
-
-                            {title || "New Chat"}
-
-                        </h1>
-
-                        <p className="mt-1 text-sm text-slate-500">
-
-                            Personalized travel planning powered by your memories
-
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <button
-                    onClick={() => setShowModal(true)}
-                    className="
-                        flex
-                        items-center
-                        gap-2
-
-                        rounded-2xl
-
-                        border
-                        border-slate-200
-
-                        bg-white
-
-                        px-4
-                        py-2.5
-
-                        text-sm
-                        font-medium
-
-                        transition-all
-
-                        hover:border-[#3559D4]
-                        hover:text-[#3559D4]
-                    "
-                >
-
-                    <Plus size={18} />
-
-                    New Chat
-
-                </button>
-
-            </div>
-
-            {/* Mobile */}
-
-            <div
-                className="
-                    flex
-                    items-center
-                    justify-between
-
-                    px-4
-                    py-3
-
-                    md:hidden
-                "
-            >
-
-                <button
-                    onClick={() => navigate("/dashboard")}
-                    className="
-                        flex
-                        h-10
-                        w-10
-                        items-center
-                        justify-center
-
-                        rounded-xl
-
-                        border
-                        border-slate-200
-
-                        bg-white
-
-                        transition
-
-                        hover:bg-slate-100
-                    "
-                >
-
-                    <ArrowLeft size={20} />
-
-                </button>
-
-                <h1
-                    className="
-                        text-lg
-                        font-semibold
-                        text-slate-900
-                    "
-                >
-
-                    Avora AI
-
-                </h1>
-
-                <button
-                    onClick={() => setShowModal(true)}
-                    className="
-                        flex
-                        h-10
-                        w-10
-                        items-center
-                        justify-center
-
-                        rounded-xl
-
-                        bg-[#3559D4]
-
-                        text-white
-
-                        transition
-
-                        hover:bg-[#2748BC]
-                    "
-                >
-
-                    <Plus size={18} />
-
-                </button>
-
-            </div>
-
-            <NewChatModal
-                open={showModal}
-                onClose={() => setShowModal(false)}
-                onConfirm={() => {
-
-                    onNewChat();
-
-                    setShowModal(false);
-
-                }}
-            />
-
-        </header>
-
-    );
-
+          <ArrowLeft size={20} />
+        </button>
+
+        {/* Center: Bot Branding & Title */}
+        <div className="flex items-center gap-3 text-center">
+          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#3559D4] via-[#4166E0] to-[#1E3A8A] text-white shadow-md shadow-blue-500/20">
+            <Bot size={22} />
+            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-white text-[#3559D4] shadow-sm">
+              <Sparkles size={9} />
+            </span>
+          </div>
+
+          <div className="text-left hidden sm:block">
+            <h1 className="text-base font-bold text-slate-900 truncate max-w-xs">
+              {title || "New Chat"}
+            </h1>
+            <p className="text-xs text-slate-500 truncate max-w-xs">
+              Powered by Avora AI & your travel memories
+            </p>
+          </div>
+        </div>
+
+        {/* Right: New Chat Button */}
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex items-center gap-2 rounded-2xl border border-slate-200/80 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:border-[#3559D4] hover:bg-blue-50/50 hover:text-[#3559D4] cursor-pointer shadow-sm"
+        >
+          <Plus size={18} />
+          <span className="hidden sm:inline">New Chat</span>
+        </button>
+      </div>
+
+      {/* New Chat Confirmation Modal */}
+      <NewChatModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        onConfirm={() => {
+          onNewChat();
+          setShowModal(false);
+        }}
+      />
+    </header>
+  );
 };
 
 export default AIHeader;
