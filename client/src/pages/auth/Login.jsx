@@ -1,139 +1,130 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { FiMail } from "react-icons/fi";
-
-import api from "../../api/axios";
-import AuthLayout from "../../layouts/AuthLayout";
-import avoraLogo from "../../assets/images/avoraLogo.png";
-
-import InputField from "../../components/ui/InputField";
-import PasswordField from "../../components/ui/PasswordField";
-import PrimaryButton from "../../components/ui/PrimaryButton";
-
 // ==========================================
-// LOGIN PAGE COMPONENT
+// LOGIN PAGE COMPONENT (`client/src/pages/auth/Login.jsx`)
 // ==========================================
-/**
- * Handles user authentication via email and password.
- * Manages form state, token storage, error handling, and redirection 
- * based on account status and user role.
- */
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { FiMail } from 'react-icons/fi';
+
+import api from '../../api/axios';
+import AuthLayout from '../../layouts/AuthLayout';
+import avoraLogo from '../../assets/images/avoraLogo.png';
+import PageTitle from '../../components/common/PageTitle';
+
+import InputField from '../../components/ui/InputField';
+import PasswordField from '../../components/ui/PasswordField';
+import PrimaryButton from '../../components/ui/PrimaryButton';
+
 const Login = () => {
-  // --- Component State ---
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const navigate = useNavigate();
 
-  // --- Form Submission Handler ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setError('');
 
     try {
-      const { data } = await api.post("/api/auth/login", {
-        email,
-        password,
-      });
+      const { data } = await api.post('/api/auth/login', { email, password });
 
-      // Save token and user role to localStorage
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("userRole", data.user.role);
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userRole', data.user.role);
 
-      // Redirect based on whether they are an admin or a regular user
-      if (data.user.role === "admin") {
-        navigate("/admin", { replace: true });
+      if (data.user.role === 'admin') {
+        navigate('/admin', { replace: true });
       } else {
-        navigate("/dashboard", { replace: true });
+        navigate('/dashboard', { replace: true });
       }
     } catch (err) {
       const { code, message } = err.response?.data || {};
 
-      // Handle restricted account statuses
-      if (code === "ACCOUNT_PENDING") {
-        navigate("/pending", { replace: true });
+      if (code === 'ACCOUNT_PENDING') {
+        navigate('/pending-approval', { replace: true });
         return;
       }
 
-      if (code === "ACCOUNT_SUSPENDED") {
-        navigate("/suspended", { replace: true });
+      if (code === 'ACCOUNT_SUSPENDED') {
+        navigate('/suspended', { replace: true });
         return;
       }
 
-      setError(message || "Unable to sign in.");
+      setError(message || 'Unable to sign in.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <AuthLayout>
-      <div className="w-full rounded-3xl border border-white/60 bg-white/90 backdrop-blur-xl shadow-[0_25px_60px_rgba(15,23,42,0.15)] px-10 py-8">
-        {/* Header Section */}
-        <div className="flex flex-col items-center">
+    <AuthLayout type="login">
+      <PageTitle title="Sign In" />
+      <div className="w-full">
+        {/* Header */}
+        <div className="mb-8 flex flex-col items-center">
           <img
             src={avoraLogo}
             alt="Avora"
-            className="h-16 w-auto select-none"
+            className="mb-4 h-14 sm:h-16 w-auto select-none drop-shadow-sm transition-transform duration-500 hover:scale-105"
             draggable={false}
           />
-          <h1 className="mt-6 text-4xl font-semibold text-slate-900">Welcome Back</h1>
-          <p className="mt-2 max-w-xs text-center text-slate-500">
+          <h1 className="bg-gradient-to-br from-slate-900 to-[#1E3A8A] bg-clip-text text-2xl font-extrabold tracking-tight text-transparent sm:text-3xl">
+            Welcome Back
+          </h1>
+          <p className="mt-2 text-sm font-medium text-slate-500 text-center">
             Sign in to continue your travel journey.
           </p>
         </div>
 
-        {/* Login Form */}
-        <form onSubmit={handleSubmit} className="mt-10 space-y-6">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-5">
           <InputField
             label="Email Address"
             type="email"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            icon={<FiMail size={20} />}
+            icon={<FiMail size={18} />}
             required
             disabled={loading}
           />
 
-          <PasswordField
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            disabled={loading}
-          />
-
-          {/* Forgot Password Link */}
-          <div className="flex justify-end">
-            <Link
-              to="/forgot-password"
-              className="text-sm text-slate-700 hover:text-slate-900"
-            >
-              Forgot Password?
-            </Link>
+          <div className="space-y-1">
+            <PasswordField
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={loading}
+            />
+            <div className="flex justify-end pt-1">
+              <Link
+                to="/forgot-password"
+                className="text-xs font-bold text-[#1E3A8A] transition-colors hover:text-[#3559D4] hover:underline"
+              >
+                Forgot Password?
+              </Link>
+            </div>
           </div>
 
-          {/* Error Message Banner */}
           {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="rounded-2xl border border-red-200 bg-red-50/80 px-4 py-3 shadow-sm backdrop-blur-sm">
+              <p className="text-sm font-medium text-red-600">{error}</p>
             </div>
           )}
 
-          <PrimaryButton type="submit" loading={loading}>
-            Sign In
-          </PrimaryButton>
+          <div className="pt-2">
+            <PrimaryButton type="submit" loading={loading}>
+              Sign In
+            </PrimaryButton>
+          </div>
 
-          {/* Registration Redirect */}
-          <div className="text-center">
-            <p className="mt-2 max-w-xs text-center text-blue-900">
-              Don't have an account?{" "}
+          <div className="pt-5 text-center">
+            <p className="text-sm font-medium text-slate-600">
+              Don't have an account?{' '}
               <Link
                 to="/register"
-                className="font-semibold text-blue-700 transition-colors hover:text-blue-900"
+                className="font-bold text-[#1E3A8A] transition-colors hover:text-[#3559D4]"
               >
                 Create Account
               </Link>

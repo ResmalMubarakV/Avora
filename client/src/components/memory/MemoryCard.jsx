@@ -1,19 +1,20 @@
+import { useState } from "react";
 import {
     CalendarDays,
     MapPin,
     Globe,
     Lock,
+    Heart,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 import MemoryActions from "../memory/MemoryActions";
+import api from "../../../api/axios";
 
 // ==========================================
 // DATE FORMATTER UTILITY
 // ==========================================
-/**
- * Formats a given ISO date string into a localized Indian date format (e.g. 15 Jan 2026).
- */
 const formatDate = (date) => {
     if (!date) return "";
 
@@ -31,11 +32,39 @@ const formatDate = (date) => {
 // MEMORY CARD COMPONENT
 // ==========================================
 /**
- * Renders an interactive travel memory card with cover image zoom, public/private badges, 
- * location and date details, and hover-triggered memory actions menu.
+ * Renders an interactive travel memory card with cover image zoom, public/private badges,
+ * an interactive like heart button, and hover-triggered memory actions.
  */
-const MemoryCard = ({ memory }) => {
+const MemoryCard = ({ memory, onLikeToggle }) => {
     const navigate = useNavigate();
+    const [liked, setLiked] = useState(memory?.isLiked || false);
+    const [likeLoading, setLikeLoading] = useState(false);
+
+    // --- Handle Like Toggle API Call ---
+    const handleLikeClick = async (e) => {
+        e.stopPropagation(); // Prevent card navigation click
+        if (likeLoading) return;
+
+        try {
+            setLikeLoading(true);
+            const nextState = !liked;
+            setLiked(nextState); // Optimistic UI update
+
+            await api.patch(`/api/memories/${memory._id}/like`);
+            
+            if (onLikeToggle) {
+                onLikeToggle(memory._id, nextState);
+            }
+
+            toast.success(nextState ? "Added to liked memories" : "Removed from liked memories");
+        } catch (error) {
+            setLiked(!liked); // Revert on error
+            console.error(error);
+            toast.error("Unable to update like status.");
+        } finally {
+            setLikeLoading(false);
+        }
+    };
 
     return (
         <div
@@ -55,19 +84,20 @@ const MemoryCard = ({ memory }) => {
                 relative
                 cursor-pointer
                 overflow-visible
-                rounded-2xl
+                rounded-[28px]
                 border
-                border-slate-200
+                border-slate-200/80
                 bg-white
                 shadow-sm
                 transition-all
                 duration-300
-                hover:-translate-y-1
+                hover:-translate-y-1.5
                 hover:shadow-xl
+                hover:border-slate-300
             "
         >
-            {/* Cover Image & Visibility Badge */}
-            <div className="relative overflow-hidden rounded-t-2xl">
+            {/* Cover Image & Badges Container */}
+            <div className="relative overflow-hidden rounded-t-[28px]">
                 <img
                     src={memory.coverImage}
                     alt={memory.title}
@@ -81,26 +111,56 @@ const MemoryCard = ({ memory }) => {
                     "
                 />
 
-                {/* Visibility Status Badge */}
+                {/* Top-Left: Interactive Like Button Placeholder / Toggle */}
+                <div className="absolute top-3 left-3 z-10">
+                    <button
+                        type="button"
+                        onClick={handleLikeClick}
+                        aria-label="Like Memory"
+                        className={`
+                            flex
+                            h-9
+                            w-9
+                            items-center
+                            justify-center
+                            rounded-full
+                            backdrop-blur-md
+                            transition-all
+                            duration-200
+                            cursor-pointer
+                            shadow-md
+                            active:scale-90
+                            ${
+                                liked
+                                    ? "bg-rose-500 text-white shadow-rose-500/30"
+                                    : "bg-white/90 text-slate-600 hover:bg-white hover:text-rose-500"
+                            }
+                        `}
+                    >
+                        <Heart size={16} className={liked ? "fill-current" : ""} />
+                    </button>
+                </div>
+
+                {/* Top-Right: Visibility Status Badge */}
                 <div className="absolute top-3 right-3">
                     {memory.isPublic ? (
                         <div
                             className="
                                 flex
                                 items-center
-                                gap-1
+                                gap-1.5
                                 rounded-full
                                 bg-white/95
-                                px-3
-                                py-1
+                                px-3.5
+                                py-1.5
                                 text-xs
-                                font-medium
+                                font-bold
                                 text-slate-700
-                                shadow
-                                backdrop-blur
+                                shadow-md
+                                backdrop-blur-md
                             "
                         >
-                            <Globe size={14} />
+                            <Globe size={13} className="text-blue-600" />
                             Public
                         </div>
                     ) : (
@@ -108,19 +168,19 @@ const MemoryCard = ({ memory }) => {
                             className="
                                 flex
                                 items-center
-                                gap-1
+                                gap-1.5
                                 rounded-full
                                 bg-white/95
-                                px-3
-                                py-1
+                                px-3.5
+                                py-1.5
                                 text-xs
-                                font-medium
+                                font-bold
                                 text-slate-700
-                                shadow
-                                backdrop-blur
+                                shadow-md
+                                backdrop-blur-md
                             "
                         >
-                            <Lock size={14} />
+                            <Lock size={13} className="text-slate-500" />
                             Private
                         </div>
                     )}
@@ -128,19 +188,19 @@ const MemoryCard = ({ memory }) => {
             </div>
 
             {/* Card Body Content */}
-            <div className="relative p-5">
-                <h3 className="pr-14 text-xl font-bold text-slate-900 line-clamp-1">
+            <div className="relative p-5 sm:p-6">
+                <h3 className="pr-12 text-lg sm:text-xl font-black text-slate-900 line-clamp-1 tracking-tight">
                     {memory.title}
                 </h3>
 
-                <div className="mt-4 flex items-center gap-2 text-slate-500 text-sm">
-                    <MapPin size={16} className="shrink-0 text-slate-400" />
+                <div className="mt-3.5 flex items-center gap-2 text-slate-500 text-xs sm:text-sm font-medium">
+                    <MapPin size={16} className="shrink-0 text-[#3559D4]" />
                     <span className="truncate">
                         {memory.location}
                     </span>
                 </div>
 
-                <div className="mt-2 flex items-center gap-2 text-slate-500 text-sm">
+                <div className="mt-2 flex items-center gap-2 text-slate-500 text-xs sm:text-sm font-medium">
                     <CalendarDays size={16} className="shrink-0 text-slate-400" />
                     <span>
                         {formatDate(memory.startDate)}

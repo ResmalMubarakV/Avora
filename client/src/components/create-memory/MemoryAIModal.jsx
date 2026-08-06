@@ -1,14 +1,11 @@
 import { useState } from "react";
 import { Sparkles, X, Wand2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { askAI } from "../../api/aiApi";
 
 // ==========================================
 // MEMORY AI STORY ASSISTANT MODAL
 // ==========================================
-/**
- * Intelligent modal that transforms brief trip notes into a vivid,
- * immersive, first-person live travel narrative.
- */
 const MemoryAIModal = ({ open, onClose, onApply }) => {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,17 +21,45 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
     try {
       setLoading(true);
 
-      // Highly vivid, immersive, first-person narrative designed to make readers feel present on the trip
-      const liveStory = `We finally packed our bags and hit the road, and honestly, the excitement was unreal right from the moment we locked the front door. Cruising out together, the city noise quickly faded behind us, replaced by winding open roads and endless playlist tracks playing in the background. Every stretch of the route felt like a scene unfolding live—the sunlight filtering through the trees, the sudden drop in temperature, and the windows rolled down just enough to catch that crisp, refreshing mountain breeze. \n\nArriving at our destination, the sheer calm of the place instantly took over. We spent our days wandering without any rush, stopping wherever looked interesting, clicking candid photos, and treating ourselves to roadside local snacks. There is something magical about exploring new corners together, sharing spontaneous laughs over little things, and just breathing in the slow pace of nature. As the trip wraps up and we head back home, we aren't just carrying luggage—we're bringing back a heart full of stories and warmth that we'll be talking about for ages.`;
+      // Random angles to force the AI to break out of standard narrative patterns
+      const narrativeStyles = [
+        "Focus the story around the physical sensory details (the shifting air temperature, engine hum, and roadside aromas).",
+        "Focus the narrative primarily on the dynamic between the travelers, conversations, and shared laughter.",
+        "Begin the story right in the middle of the journey at a specific turning point, using a fast-paced, reflective style.",
+        "Focus heavily on the stark visual contrast between where the trip started and where it ended."
+      ];
+      const randomStyle = narrativeStyles[Math.floor(Math.random() * narrativeStyles.length)];
 
-      onApply(liveStory);
-      toast.success("Live travel story generated successfully!");
+      const aiPrompt = `Write a completely fresh, humanized travel memory based on these details: "${prompt}". 
+      
+      Stylistic constraint for this specific generation: ${randomStyle}
+      
+      Strictly ensure this story does not follow a generic formula or predictable structure. Make the sentence architecture, opening hook, and pacing entirely unique compared to standard travel diaries.`;
+
+      const generatedStory = await askAI(aiPrompt);
+
+      if (!generatedStory) {
+        throw new Error("Empty response from AI");
+      }
+
+      onApply(generatedStory);
+      toast.success("Unique narrative generated successfully!");
+      setPrompt("");
       onClose();
     } catch (error) {
       console.error(error);
       toast.error("Failed to generate story. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (!loading && prompt.trim()) {
+        handleGenerate();
+      }
     }
   };
 
@@ -49,7 +74,7 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900">Avora AI Storyteller</h3>
-              <p className="text-xs text-slate-500">Immersive, live-feel travel narratives</p>
+              <p className="text-xs text-slate-500">Dynamic, non-repetitive travel narratives</p>
             </div>
           </div>
           <button
@@ -70,39 +95,46 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
               rows={4}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g., A 2 day trip from Palakkad to Kodaikanal with family and cousins via Palani and Kodaikanal hills..."
+              onKeyDown={handleKeyDown}
+              autoFocus
+              placeholder="e.g., A spontaneous drive to Vagamon with friends, dodging rain and stopping for tea..."
               className="w-full rounded-2xl border border-slate-200 p-4 text-sm text-slate-800 outline-none focus:border-[#3559D4] focus:ring-4 focus:ring-blue-100 transition resize-none placeholder:text-slate-400"
             />
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            disabled={loading}
-            onClick={handleGenerate}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#3559D4] to-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition disabled:opacity-50 cursor-pointer"
-          >
-            {loading ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                <span>Crafting Live Story...</span>
-              </>
-            ) : (
-              <>
-                <Wand2 size={16} />
-                <span>Generate Live Story</span>
-              </>
-            )}
-          </button>
+        <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+          <p className="text-[11px] text-slate-400 font-medium">
+            Press <kbd className="px-1.5 py-0.5 rounded border border-slate-200 bg-slate-100 text-slate-600">Enter</kbd> to generate
+          </p>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={loading}
+              onClick={handleGenerate}
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#3559D4] to-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition disabled:opacity-50 cursor-pointer"
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>Crafting Story...</span>
+                </>
+              ) : (
+                <>
+                  <Wand2 size={16} />
+                  <span>Generate Unique Story</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

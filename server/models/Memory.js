@@ -48,6 +48,10 @@ const memorySchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isLiked: {
+      type: Boolean,
+      default: false,
+    },
     slug: {
       type: String,
       required: true,

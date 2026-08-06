@@ -26,6 +26,7 @@ import Memories from "./pages/dashboard/Memories";
 import CreateMemory from "./pages/memory/CreateMemory";
 import EditMemory from "./pages/memory/EditMemory";
 import EditProfile from "./pages/profile/EditProfile";
+import SecuritySettings from "./pages/dashboard/SecuritySettings";
 import AI from "./pages/ai/AI";
 
 // Admin Pages
@@ -33,6 +34,7 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminMemories from "./pages/admin/AdminMemories";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 // Error Pages
 import Forbidden from "./pages/errors/Forbidden";
@@ -41,13 +43,7 @@ import NotFound from "./pages/errors/NotFound";
 // ==========================================
 // APP ROUTING CONFIGURATION
 // ==========================================
-/**
- * Main application component defining the route hierarchy.
- * Implements public routes, dynamic user profile routes, 
- * protected dashboard routes, administrative routes, and global cross-tab synchronization.
- */
 function App() {
-  // --- Global Cross-Tab Synchronization Listener ---
   useEffect(() => {
     const handleGlobalSync = (e) => {
       if (e.key === "avora_memory_updated" || e.key === "avora_profile_updated") {
@@ -84,18 +80,19 @@ function App() {
       {/* Admin Auth Route */}
       <Route path="/admin/login" element={<AdminLogin />} />
 
-      {/* Public Profile Routes */}
+      {/* Public Profile & Memory Routes */}
       <Route path="/:username" element={<Profile />} />
       <Route path="/:username/:slug" element={<PublicMemory />} />
 
-      {/* Protected App Routes */}
+      {/* Protected App Routes (Unified under DashboardLayout) */}
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/memories" element={<Memories />} />
           <Route path="/dashboard/create-memory" element={<CreateMemory />} />
           <Route path="/dashboard/edit-memory/:id" element={<EditMemory />} />
-          <Route path="/profile/edit" element={<EditProfile />} />
+          <Route path="/dashboard/settings/profile" element={<EditProfile />} />
+          <Route path="/dashboard/settings/security" element={<SecuritySettings />} />
           <Route path="/dashboard/ai" element={<AI />} />
         </Route>
       </Route>
@@ -106,6 +103,7 @@ function App() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/admin/memories" element={<AdminMemories />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
         </Route>
       </Route>
 

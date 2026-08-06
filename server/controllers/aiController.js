@@ -9,12 +9,8 @@ const client = new Groq({
 // ==========================================
 // GENERATE AI RESPONSE
 // ==========================================
-/**
- * Generates a contextual AI response tailored to user travel data.
- */
 const generateAI = async (req, res) => {
   try {
-    // Validate user authentication and message input
     if (!req.user) {
       return res.status(401).json({ message: "User not authorized" });
     }
@@ -24,38 +20,27 @@ const generateAI = async (req, res) => {
       return res.status(400).json({ message: "Message is required" });
     }
 
-    // Fetch user details for contextual prompts
     const user = await User.findById(req.user._id).select("name username location bio");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // ==========================================
-    // INTENT DETECTION
-    // ==========================================
     const lowerMessage = message.toLowerCase();
 
-    // Check if the user is just saying hello
     const greetingKeywords = ["hi", "hello", "hey", "good morning", "good evening", "good afternoon"];
     const isGreeting = greetingKeywords.some((word) => lowerMessage === word);
 
-    // Check if the user is asking for future travel advice
     const isTravelQuestion = [
       "trip", "travel", "destination", "recommend", "plan",
       "itinerary", "budget", "visit", "vacation", "holiday",
     ].some((word) => lowerMessage.includes(word));
 
-    // Check if the user is asking about their past trips
     const isMemoryQuestion = [
       "remember", "memory", "previous", "last trip", "my trip", "visited",
     ].some((word) => lowerMessage.includes(word));
 
-    // ==========================================
-    // FETCH & FORMAT TRAVEL DATA
-    // ==========================================
     let memories = [];
 
-    // Only hit the database if the question requires travel context
     if (isTravelQuestion || isMemoryQuestion) {
       memories = await Memory.find({ user: req.user._id })
         .sort({ startDate: -1 })
@@ -66,7 +51,6 @@ const generateAI = async (req, res) => {
     let travelHistory = "";
     let favoriteTravelMode = "Unknown";
 
-    // Format memories and calculate the most frequent travel mode
     if (memories.length > 0) {
       travelHistory = memories
         .map(
@@ -98,26 +82,20 @@ const generateAI = async (req, res) => {
       Preferred Travel Mode: ${favoriteTravelMode}
     `;
 
-    // ==========================================
-    // SYSTEM PROMPT CONSTRUCTION
-    // ==========================================
     let systemPrompt = "";
 
-    // Assign specific AI behavior instructions based on detected intent
     if (isGreeting) {
       systemPrompt = `
       You are Avora AI.
       The user is simply greeting you.
       Reply naturally. Keep your response under 3 sentences.
-      Do not recommend destinations or mention travel history unless asked.
       `;
     } else if (isTravelQuestion) {
       systemPrompt = `
       You are Avora AI.
       Current User: ${userProfile}
       Travel History: ${travelHistory}
-      Give personalized travel advice. Recommend destinations based on previous trips.
-      Avoid places already visited. Include itinerary, budget and food only when useful.
+      Give personalized travel advice. Avoid places already visited.
       `;
     } else if (isMemoryQuestion) {
       systemPrompt = `
@@ -125,34 +103,30 @@ const generateAI = async (req, res) => {
       Current User: ${userProfile}
       Travel History: ${travelHistory}
       Answer using the user's previous travel memories.
-      If information isn't available, say so honestly.
       `;
     } else {
+      // ANTI-TEMPLATE SYSTEM INSTRUCTIONS FOR UNIQUE NARRATIVES
       systemPrompt = `
-      You are Avora AI.
-      Be friendly and concise.
-      Don't include unnecessary travel suggestions.
+      You are an authentic human travel writer. Your goal is to write a unique, organic travel memory based on the user's notes.
+      
+      CRITICAL DIVERSITY RULES TO PREVENT REPETITIVE STORIES:
+      1. BREAK THE TEMPLATE: Do not follow a rigid chronological script (e.g., do not automatically start with "we left early in the morning" or end with "watching the sunset"). Start the story mid-action, with a striking sensory observation, a specific conversation, or a reflection on the weather.
+      2. PERSPECTIVE SHIFT: Randomly select a unique narrative angle for this specific entry (e.g., focus deeply on the physical feeling of the ride/drive, the humor of small mishaps, the distinct personalities of the people, or the stark shift in environment).
+      3. VARIETY IN STRUCTURE: Vary paragraph lengths significantly. Mix punchy, short sentences with flowing descriptive ones.
+      4. HUMAN VOICE: Write with genuine emotion and variable pacing. Avoid cliché travel blog filler words. Make every single generated story feel like it was written by a different person on a different day.
       `;
     }
 
-    // Append strict global guardrails
     systemPrompt += `
       If you don't know something, say you don't know.
       Never invent information.
-      Never assume travel history that isn't provided.
     `;
 
-    // ==========================================
-    // EXECUTE AI API CALL
-    // ==========================================
-    
-    // Sanitize message history to prevent API format errors
     const sanitizedHistory = history.map((msg) => ({
       role: msg.role,
       content: msg.content,
     }));
 
-    // Trigger Groq inference
     const completion = await client.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
@@ -160,7 +134,7 @@ const generateAI = async (req, res) => {
         ...sanitizedHistory,
         { role: "user", content: message },
       ],
-      temperature: 0.5,
+      temperature: 0.95, // Maximum creative variance to ensure structural and stylistic uniqueness
     });
 
     return res.status(200).json({

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
 import { createMemory } from "../../api/memoryApi";
 
 import PageHeader from "../../components/create-memory/PageHeader";
@@ -11,6 +12,7 @@ import VisibilityCard from "../../components/create-memory/VisibilityCard";
 import ActionButtons from "../../components/create-memory/ActionButtons";
 import LivePreview from "../../components/create-memory/LivePreview";
 import DiscardMemoryModal from "../../components/create-memory/DiscardMemoryModal";
+import PageTitle from "../../components/common/PageTitle";
 
 // ==========================================
 // CREATE MEMORY PAGE COMPONENT
@@ -21,7 +23,6 @@ const CreateMemory = () => {
   const [loading, setLoading] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
 
-  // --- Form State ---
   const [formData, setFormData] = useState({
     title: "",
     location: "",
@@ -34,7 +35,6 @@ const CreateMemory = () => {
     gallery: [],
   });
 
-  // --- Input Change Handler ---
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -43,52 +43,42 @@ const CreateMemory = () => {
     }));
   };
 
-  // --- Form Validation ---
   const validateForm = () => {
     if (!formData.title.trim()) {
       toast.error("Please enter a memory title.");
       return false;
     }
-
     if (!formData.location.trim()) {
       toast.error("Please enter a location.");
       return false;
     }
-
     if (!formData.startDate) {
       toast.error("Please select a start date.");
       return false;
     }
-
     if (!formData.endDate) {
       toast.error("Please select an end date.");
       return false;
     }
-
     if (!formData.modeOfTravel) {
       toast.error("Please select a mode of travel.");
       return false;
     }
-
     if (!formData.description.trim()) {
       toast.error("Please write your story.");
       return false;
     }
-
     if (!formData.coverImage) {
       toast.error("Please upload a cover image.");
       return false;
     }
-
     if (new Date(formData.endDate) < new Date(formData.startDate)) {
       toast.error("End date cannot be earlier than the start date.");
       return false;
     }
-
     return true;
   };
 
-  // --- Form Submission Handler ---
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
@@ -108,7 +98,6 @@ const CreateMemory = () => {
         data.append("coverImage", formData.coverImage);
       }
 
-      // Safely handle gallery files whether stored as raw Files or objects with a .file property
       if (Array.isArray(formData.gallery)) {
         formData.gallery.forEach((item) => {
           const fileToAppend = item instanceof File ? item : item?.file;
@@ -121,18 +110,6 @@ const CreateMemory = () => {
       await createMemory(data);
       toast.success("Memory created successfully!");
 
-      setFormData({
-        title: "",
-        location: "",
-        startDate: "",
-        endDate: "",
-        modeOfTravel: "",
-        description: "",
-        isPublic: false,
-        coverImage: null,
-        gallery: [],
-      });
-
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
@@ -144,7 +121,6 @@ const CreateMemory = () => {
     }
   };
 
-  // --- Cancel & Discard Logic ---
   const handleCancel = () => {
     const hasUnsavedChanges =
       formData.title ||
@@ -160,7 +136,6 @@ const CreateMemory = () => {
       navigate("/dashboard");
       return;
     }
-
     setShowDiscardModal(true);
   };
 
@@ -171,6 +146,18 @@ const CreateMemory = () => {
 
   return (
     <div className="space-y-6 pb-12">
+      <PageTitle title="Create New Memory" />
+      <div>
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 cursor-pointer"
+        >
+          <ArrowLeft size={16} />
+          <span>Back</span>
+        </button>
+      </div>
+
       <PageHeader />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
@@ -209,17 +196,6 @@ const CreateMemory = () => {
               />
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className="xl:hidden pt-4">
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
-          <ActionButtons
-            loading={loading}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            buttonText="Publish Memory"
-          />
         </div>
       </div>
 

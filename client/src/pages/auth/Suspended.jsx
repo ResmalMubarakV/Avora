@@ -2,6 +2,7 @@ import { Mail, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import avoraLogo from "../../assets/images/avoraLogo.png";
+import PageTitle from "../../components/common/PageTitle";
 
 // ==========================================
 // SUSPENDED ACCOUNT PAGE COMPONENT
@@ -23,6 +24,8 @@ const Suspended = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-10">
+      <PageTitle title="Account Suspended" />
+
       <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white px-8 py-10 shadow-sm">
         {/* Logo Section */}
         <div className="flex justify-center">
@@ -65,7 +68,7 @@ const Suspended = () => {
         <div className="mt-8 flex justify-center">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors duration-200 hover:text-slate-900"
+            className="flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors duration-200 hover:text-slate-900 cursor-pointer"
           >
             <LogOut size={17} />
             Logout

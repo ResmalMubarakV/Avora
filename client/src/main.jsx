@@ -25,8 +25,29 @@ createRoot(document.getElementById("root")).render(
       <BrowserRouter>
         <App />
         
-        {/* Global Toast Notification Provider */}
-        <Toaster position="top-right" richColors closeButton />
+        {/* Global Universal Below-Navbar, Larger High-End Toast Provider */}
+        <Toaster 
+          position="top-center" 
+          offset="80px" 
+          richColors 
+          closeButton 
+          expand={true}
+          toastOptions={{
+            style: {
+              background: "#ffffff",
+              border: "1px solid rgba(226, 232, 240, 0.9)",
+              borderRadius: "24px",
+              padding: "18px 24px",
+              minWidth: "360px",
+              boxShadow: "0 25px 50px -12px rgba(30, 58, 138, 0.18)",
+              fontFamily: "'Outfit', sans-serif",
+              fontSize: "15px",
+              fontWeight: "600",
+              color: "#0f172a",
+            },
+            className: "vora-toast-custom",
+          }}
+        />
       </BrowserRouter>
     </GoogleOAuthProvider>
   </StrictMode>

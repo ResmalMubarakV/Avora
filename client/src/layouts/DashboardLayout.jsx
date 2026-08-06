@@ -14,10 +14,15 @@ const DashboardLayout = () => {
   const pathSegments = location.pathname.split("/").filter(Boolean);
 
   const isAIPage = location.pathname === "/dashboard/ai";
-  const isProfilePage = pathSegments.length === 1 && pathSegments[0] !== "dashboard" && pathSegments[0] !== "profile";
+  
+  // A path is strictly a public profile page if it's 1 segment long and NOT a dashboard/system route
+  const isPublicProfile = pathSegments.length === 1 && 
+    !["dashboard", "profile", "admin", "login", "register", "forgot-password", "403", "404"].includes(pathSegments[0]);
+
+  // A path is a public memory page if it has 2 segments and does not start with dashboard
   const isPublicMemoryPage = pathSegments.length >= 2 && pathSegments[0] !== "dashboard";
 
-  const hideSidebarAndNav = isProfilePage || isPublicMemoryPage || isAIPage;
+  const hideSidebarAndNav = isPublicProfile || isPublicMemoryPage || isAIPage;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

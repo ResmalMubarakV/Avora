@@ -1,30 +1,27 @@
 const User = require("../models/User");
 const Memory = require("../models/Memory");
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
 // ==========================================
 // GET DASHBOARD STATS & RECENT DATA
 // ==========================================
 const getDashboard = async (req, res) => {
   try {
-    // Exclude admin accounts from total, pending, and approved counts
     const totalUsers = await User.countDocuments({ role: { $ne: "admin" } });
     const pendingUsersCount = await User.countDocuments({ status: "pending", role: { $ne: "admin" } });
     const approvedUsersCount = await User.countDocuments({ status: "approved", role: { $ne: "admin" } });
     const totalMemories = await Memory.countDocuments();
 
-    // Fetch pending users list (excluding admin)
     const pendingUsers = await User.find({ status: "pending", role: { $ne: "admin" } })
       .select("-password")
       .sort({ createdAt: -1 });
 
-    // Fetch recent users (excluding admin)
     const recentUsers = await User.find({ role: { $ne: "admin" } })
       .select("-password")
       .sort({ createdAt: -1 })
       .limit(5);
 
-    // Fetch recent memories
     const recentMemories = await Memory.find()
       .populate("user", "name username profileImage")
       .sort({ createdAt: -1 })
@@ -55,19 +52,20 @@ const getUsers = async (req, res) => {
     const status = req.query.status;
     const validStatuses = ["pending", "approved", "suspended"];
 
-    if (status && !validStatuses.includes(status)) {
-      return res.status(400).json({ message: "Invalid status" });
-    }
-
-    // Always exclude admin accounts from user management directory lists
     const query = { role: { $ne: "admin" } };
-    if (status) query.status = status;
+
+    if (status && status !== "all") {
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+      query.status = status;
+    }
 
     const users = await User.find(query)
       .select("-password")
       .sort({ createdAt: -1 });
 
-    return res.status(200).json(users);
+    return res.status(200).json({ users });
   } catch (error) {
     console.error("Get Users Error:", error.message);
     return res.status(500).json({ message: "Server Error" });
@@ -184,6 +182,43 @@ const deleteMemory = async (req, res) => {
   }
 };
 
+// ==========================================
+// UPDATE ADMIN PASSWORD
+// ==========================================
+const updateAdminPassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Please provide both current and new passwords." });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "New password must be at least 6 characters long." });
+    }
+
+    const adminUser = await User.findById(req.user._id);
+
+    if (!adminUser || adminUser.role !== "admin") {
+      return res.status(404).json({ message: "Admin user not found." });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, adminUser.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect current password." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    adminUser.password = await bcrypt.hash(newPassword, salt);
+    await adminUser.save();
+
+    return res.status(200).json({ message: "Password updated successfully." });
+  } catch (error) {
+    console.error("Update Admin Password Error:", error.message);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
 module.exports = {
   getDashboard,
   getUsers,
@@ -191,4 +226,5 @@ module.exports = {
   suspendUser,
   getMemories,
   deleteMemory,
+  updateAdminPassword,
 };

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { FiArrowRight, FiMapPin } from "react-icons/fi";
 
 // ==========================================
-// TRAVELER CARD COMPONENT (RESPONSIVE DARK)
+// TRAVELER CARD COMPONENT (PREMIUM LIGHT)
 // ==========================================
 const TravelerCard = ({ traveler }) => {
     return (
@@ -14,24 +14,24 @@ const TravelerCard = ({ traveler }) => {
                 flex
                 flex-col
                 justify-between
-                rounded-3xl
+                rounded-[2rem]
                 border
-                border-slate-800
-                bg-slate-900/90
-                backdrop-blur-xl
-                p-6
-                sm:p-7
-                shadow-xl
+                border-slate-100
+                bg-white
+                p-8
+                shadow-[0_15px_40px_-15px_rgba(30,58,138,0.05)]
                 transition-all
-                duration-300
+                duration-500
                 hover:-translate-y-2
-                hover:border-sky-500/50
-                hover:bg-slate-900
-                hover:shadow-2xl
-                hover:shadow-sky-500/10
+                hover:border-blue-100
+                hover:shadow-[0_20px_50px_-10px_rgba(30,58,138,0.15)]
                 w-full
+                overflow-hidden
             "
         >
+            {/* Subtle Hover Gradient Glow */}
+            <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 blur-3xl transition-opacity duration-500 opacity-0 group-hover:opacity-100 pointer-events-none" />
+
             <div className="relative z-10">
                 {/* Traveler Avatar Image */}
                 <div className="flex justify-center">
@@ -39,56 +39,54 @@ const TravelerCard = ({ traveler }) => {
                         <img
                             src={
                                 traveler.profileImage ||
-                                "https://ui-avatars.com/api/?background=1e293b&color=ffffff&name=" +
+                                "https://ui-avatars.com/api/?background=f1f5f9&color=1e3a8a&name=" +
                                     encodeURIComponent(traveler.name)
                             }
                             alt={traveler.name}
                             className="
-                                h-16
-                                w-16
-                                sm:h-20
-                                sm:w-20
-                                rounded-2xl
+                                h-20
+                                w-20
+                                rounded-[1.25rem]
                                 border-2
-                                border-slate-700
+                                border-white
                                 object-cover
                                 transition-transform
-                                duration-300
+                                duration-500
                                 group-hover:scale-105
-                                shadow-lg
+                                shadow-[0_10px_20px_rgba(30,58,138,0.1)]
                             "
                         />
-                        <div className="absolute -bottom-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-emerald-500 border-2 border-slate-900 flex items-center justify-center text-[9px] text-white font-bold shadow-md" />
+                        <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-[9px] text-white font-bold shadow-sm" />
                     </div>
                 </div>
 
                 {/* Full Name */}
-                <h3 className="mt-4 sm:mt-5 text-center text-lg sm:text-xl font-bold text-white tracking-tight group-hover:text-sky-400 transition-colors truncate">
+                <h3 className="mt-5 text-center text-xl font-extrabold text-slate-900 tracking-tight group-hover:text-[#1E3A8A] transition-colors truncate">
                     {traveler.name}
                 </h3>
 
                 {/* Username Handle */}
-                <p className="mt-0.5 text-center text-xs font-semibold text-slate-400 truncate">
+                <p className="mt-1 text-center text-sm font-semibold text-slate-400 truncate">
                     @{traveler.username}
                 </p>
 
                 {/* Location Detail */}
                 {traveler.location && (
-                    <div className="mt-3 sm:mt-4 flex items-center justify-center gap-1.5 text-[11px] sm:text-xs font-medium text-sky-400 bg-sky-500/10 py-1 px-2.5 sm:py-1.5 sm:px-3 rounded-full border border-sky-500/20 max-w-full mx-auto shadow-inner">
-                        <FiMapPin className="text-xs sm:text-sm shrink-0" />
+                    <div className="mt-4 flex items-center justify-center gap-1.5 text-xs font-bold text-[#3559D4] bg-blue-50 py-1.5 px-3.5 rounded-full border border-blue-100 max-w-fit mx-auto transition-colors group-hover:bg-[#3559D4] group-hover:text-white group-hover:border-[#3559D4]">
+                        <FiMapPin className="text-sm shrink-0" />
                         <span className="truncate">{traveler.location}</span>
                     </div>
                 )}
             </div>
 
             {/* Action Footer */}
-            <div className="relative z-10 mt-5 pt-4 border-t border-slate-800 flex items-center justify-between text-slate-400 transition-colors duration-300 group-hover:text-white">
-                <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider">
-                    View Travel Log
+            <div className="relative z-10 mt-8 pt-5 border-t border-slate-100 flex items-center justify-between text-slate-400 transition-colors duration-300 group-hover:text-[#1E3A8A]">
+                <span className="text-xs font-bold uppercase tracking-widest">
+                    View Journal
                 </span>
 
-                <div className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-xl bg-slate-800 border border-slate-700 transition-all duration-300 group-hover:bg-sky-500 group-hover:text-white group-hover:border-sky-400 shadow-md">
-                    <FiArrowRight className="text-sm sm:text-base transition-transform duration-300 group-hover:translate-x-0.5" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[1rem] bg-slate-50 border border-slate-100 transition-all duration-300 group-hover:bg-[#1E3A8A] group-hover:text-white group-hover:border-[#1E3A8A] shadow-sm">
+                    <FiArrowRight className="text-base transition-transform duration-300 group-hover:translate-x-0.5" />
                 </div>
             </div>
         </Link>

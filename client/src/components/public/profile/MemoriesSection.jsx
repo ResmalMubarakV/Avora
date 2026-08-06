@@ -12,7 +12,7 @@ const ITEMS_PER_PAGE = 12;
 // ==========================================
 /**
  * Renders the traveler's memories collection section with live search filtering, 
- * visibility status filters, and responsive grid presentation.
+ * multi-select visibility/liked filters, and responsive grid presentation.
  */
 const MemoriesSection = ({
     memories,
@@ -20,11 +20,19 @@ const MemoriesSection = ({
     isOwner,
 }) => {
     const [search, setSearch] = useState("");
-    const [visibility, setVisibility] = useState(
-        isOwner ? "all" : "public"
-    );
+    // Changed from single string visibility to array of selected filters for multi-select support
+    const [selectedFilters, setSelectedFilters] = useState([]);
     const [sortBy, setSortBy] = useState("newest");
     const [currentPage, setCurrentPage] = useState(1);
+
+    // --- Toggle Filter Handler for Multi-Select ---
+    const toggleFilter = (filterValue) => {
+        setSelectedFilters((prev) =>
+            prev.includes(filterValue)
+                ? prev.filter((f) => f !== filterValue)
+                : [...prev, filterValue]
+        );
+    };
 
     // --- Filter & Sort Memories via UseMemo ---
     const filteredMemories = useMemo(() => {
@@ -35,19 +43,25 @@ const MemoriesSection = ({
                 memory.title.toLowerCase().includes(keyword) ||
                 memory.location.toLowerCase().includes(keyword);
 
-            let matchesVisibility = true;
+            if (!matchesSearch) return false;
 
-            if (isOwner) {
-                if (visibility === "public") {
-                    matchesVisibility = memory.isPublic;
-                } else if (visibility === "private") {
-                    matchesVisibility = !memory.isPublic;
-                }
-            } else {
-                matchesVisibility = memory.isPublic;
+            // If not owner, strictly force public only
+            if (!isOwner) {
+                return memory.isPublic;
             }
 
-            return matchesSearch && matchesVisibility;
+            // If owner and no filters selected, match everything
+            if (selectedFilters.length === 0) return true;
+
+            // Intersection logic: Memory must satisfy ALL selected filter criteria (e.g., Public AND Liked)
+            const matchesAll = selectedFilters.every((f) => {
+                if (f === "public") return memory.isPublic;
+                if (f === "private") return !memory.isPublic;
+                if (f === "liked") return memory.isLiked;
+                return true;
+            });
+
+            return matchesAll;
         });
 
         // --- Sorting Logic ---
@@ -71,12 +85,12 @@ const MemoriesSection = ({
         }
 
         return filtered;
-    }, [memories, search, visibility, sortBy, isOwner]);
+    }, [memories, search, selectedFilters, sortBy, isOwner]);
 
     // --- Reset to Page 1 on Filter Changes ---
     useEffect(() => {
         setCurrentPage(1);
-    }, [search, visibility, sortBy]);
+    }, [search, selectedFilters, sortBy]);
 
     // --- Pagination Calculations ---
     const totalPages = Math.max(
@@ -136,11 +150,13 @@ const MemoriesSection = ({
                     {isOwner && (
                         <p
                             className="
-                                mt-0.5
+                                mt-1.5
                                 text-xs
                                 sm:text-sm
                                 font-medium
                                 text-slate-500
+                                tracking-wider
+                                [word-spacing:0.25rem]
                             "
                         >
                             {filteredMemories.length}{" "}
@@ -149,7 +165,7 @@ const MemoriesSection = ({
                     )}
                 </div>
 
-                {/* Search Bar & Sort Dropdown Group */}
+                {/* Search Bar & Single Sort Dropdown Group */}
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                     <div className="flex-1 sm:flex-initial">
                         <ProfileSearch
@@ -158,7 +174,7 @@ const MemoriesSection = ({
                         />
                     </div>
 
-                    {/* Quick Sort Dropdown (Visible for both owners and viewers uniformly next to search) */}
+                    {/* Single Sort Dropdown */}
                     <div className="shrink-0">
                         <select
                             value={sortBy}
@@ -190,15 +206,12 @@ const MemoriesSection = ({
                 </div>
             </div>
 
-            {/* Filters Bar Component (Displayed only for profile owners, omitting duplicate sort) */}
+            {/* Multi-Select Filter Bar Component */}
             {isOwner && (
                 <ProfileFilters
                     isOwner={isOwner}
-                    visibility={visibility}
-                    setVisibility={setVisibility}
-                    sortBy={sortBy}
-                    setSortBy={setSortBy}
-                    hideSort={true}
+                    selectedFilters={selectedFilters}
+                    toggleFilter={toggleFilter}
                 />
             )}
 

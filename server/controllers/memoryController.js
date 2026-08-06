@@ -187,6 +187,35 @@ const getMemoryById = async (req, res) => {
 };
 
 // ==========================================
+// TOGGLE LIKE MEMORY
+// ==========================================
+/**
+ * Toggles the like/favorite status of a memory.
+ */
+const toggleLikeMemory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Memory ID" });
+    }
+
+    const memory = await Memory.findOne({ _id: id, user: req.user._id });
+    if (!memory) {
+      return res.status(404).json({ message: "Memory not found" });
+    }
+
+    memory.isLiked = !memory.isLiked;
+    await memory.save();
+
+    return res.status(200).json({ success: true, isLiked: memory.isLiked });
+  } catch (error) {
+    console.error("Toggle Like Error:", error.message);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
+// ==========================================
 // UPDATE MEMORY
 // ==========================================
 /**
@@ -493,6 +522,7 @@ module.exports = {
   createMemory,
   getMemories,
   getMemoryById,
+  toggleLikeMemory,
   updateMemory,
   deleteMemory,
   deleteMedia,

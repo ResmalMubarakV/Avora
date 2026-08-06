@@ -5,6 +5,7 @@ import AIConversation from "../../components/ai/AIConversation";
 import ChatInput from "../../components/ai/ChatInput";
 
 import useAI from "../../hooks/useAI";
+import PageTitle from "../../components/common/PageTitle";
 
 // ==========================================
 // AI PAGE COMPONENT
@@ -25,7 +26,6 @@ const AI = () => {
 
   const inputRef = useRef(null);
 
-  // Auto-focus the chat input field once loading completes
   useEffect(() => {
     if (!loading) {
       inputRef.current?.focus();
@@ -34,6 +34,8 @@ const AI = () => {
 
   return (
     <main className="relative flex h-full flex-col overflow-hidden bg-slate-50/50">
+      <PageTitle title={conversationTitle ? `${conversationTitle} — AI Assistant` : "AI Travel Assistant"} />
+
       {/* Immersive Decorative Background Glows */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -left-32 -top-32 h-[30rem] w-[30rem] rounded-full bg-blue-400/10 blur-[120px]" />

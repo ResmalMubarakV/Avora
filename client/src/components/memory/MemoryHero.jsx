@@ -9,7 +9,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 // ==========================================
 /**
  * Renders the top hero section for a specific travel memory view. 
- * Features a single outside navigation header with the Back button aligned to the left 
+ * Features an outside navigation header with the Back button aligned to the left 
  * and the Edit button aligned to the right corresponding with the cover banner.
  */
 const MemoryHero = ({
@@ -27,34 +27,36 @@ const MemoryHero = ({
 
     return (
         <div className="flex flex-col gap-6">
-            {/* Top Navigation Bar Outside the Cards (Back left, Edit right) */}
+            {/* Top Navigation Bar Outside the Cards */}
             <div className="flex items-center justify-between gap-4">
                 <button
                     type="button"
                     onClick={() => navigate(from)}
                     className="
+                        group
                         inline-flex
                         items-center
-                        gap-1.5
-                        rounded-xl
+                        gap-2
+                        rounded-2xl
                         border
                         border-slate-200/80
                         bg-white
-                        px-3.5
-                        py-2
+                        px-4
+                        py-2.5
                         text-xs
                         sm:text-sm
-                        font-medium
+                        font-bold
                         text-slate-700
                         shadow-sm
                         transition-all
                         duration-300
                         cursor-pointer
                         hover:bg-slate-50
-                        hover:shadow-md
+                        hover:border-slate-300
+                        active:scale-95
                     "
                 >
-                    <ArrowLeft size={16} />
+                    <ArrowLeft size={16} className="transition-transform duration-300 group-hover:-translate-x-1" />
                     <span>Back to {label}</span>
                 </button>
 
@@ -74,16 +76,16 @@ const MemoryHero = ({
                         className="
                             inline-flex
                             items-center
-                            gap-1.5
-                            rounded-xl
+                            gap-2
+                            rounded-2xl
                             border
                             border-slate-200/80
                             bg-white/90
                             px-4
-                            py-2
+                            py-2.5
                             text-xs
                             sm:text-sm
-                            font-semibold
+                            font-bold
                             text-slate-700
                             shadow-sm
                             backdrop-blur-md
@@ -92,7 +94,8 @@ const MemoryHero = ({
                             cursor-pointer
                             hover:bg-white
                             hover:text-slate-900
-                            hover:shadow-md
+                            hover:border-slate-300
+                            active:scale-95
                         "
                     >
                         <Pencil size={15} />
@@ -122,6 +125,7 @@ const MemoryHero = ({
                             border-slate-200/80
                             bg-white
                             shadow-xl
+                            shadow-sky-950/[0.03]
                             overflow-hidden
                         "
                     >

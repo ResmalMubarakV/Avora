@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
 
 import {
   getMyProfile,
@@ -18,33 +19,18 @@ import BioCard from "../../components/edit-profile/BioCard";
 import SocialLinksCard from "../../components/edit-profile/SocialLinksCard";
 import ProfilePreview from "../../components/edit-profile/ProfilePreview";
 import ActionButtons from "../../components/edit-profile/ActionButtons";
+import PageTitle from "../../components/common/PageTitle";
 
-// ==========================================
-// GLOBAL CROSS-TAB PROFILE BROADCAST CHANNEL
-// ==========================================
-const profileChannel = new BroadcastChannel("avora_profile_channel");
-
-export const notifyProfileOtherTabs = () => {
-  profileChannel.postMessage("profile_updated");
-  localStorage.setItem("avora_profile_updated", Date.now().toString());
-};
-
-// ==========================================
-// EDIT PROFILE PAGE COMPONENT
-// ==========================================
-/**
- * Allows authenticated users to view and update their profile information, 
- * including avatars, cover photos, bio, social links, and cover scale/position adjustments. 
- * Features real-time debounced username availability verification and live profile previews.
- */
 const EditProfile = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const returnTo = location.state?.from || "/dashboard";
 
   const [loading, setLoading] = useState(false);
-  const [usernameStatus, setUsernameStatus] = useState("idle"); // "idle" | "checking" | "available" | "taken"
+  const [usernameStatus, setUsernameStatus] = useState("idle");
   const [originalUsername, setOriginalUsername] = useState("");
 
-  // --- Form State ---
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -62,7 +48,6 @@ const EditProfile = () => {
     coverPosition: { x: 0, y: 0 },
   });
 
-  // --- Fetch User Profile on Mount ---
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -98,7 +83,6 @@ const EditProfile = () => {
     fetchProfile();
   }, []);
 
-  // --- Input Change Handler (Forces lowercase and removes spaces for usernames) ---
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -108,7 +92,6 @@ const EditProfile = () => {
     }));
   };
 
-  // --- Debounced Username Availability Checker ---
   useEffect(() => {
     const username = formData.username.trim().toLowerCase();
 
@@ -135,32 +118,22 @@ const EditProfile = () => {
     return () => clearTimeout(timer);
   }, [formData.username, originalUsername]);
 
-  // --- Form Validation ---
   const validateForm = () => {
     if (!formData.name.trim()) {
       toast.error("Please enter your name.");
       return false;
     }
-
     if (!formData.username.trim()) {
       toast.error("Please enter a username.");
       return false;
     }
-
-    if (usernameStatus === "checking") {
-      toast.error("Please wait while we verify your username.");
-      return false;
-    }
-
-    if (usernameStatus === "taken") {
-      toast.error("Please choose another username.");
-      return false;
-    }
-
     return true;
   };
 
-  // --- Form Submission Handler ---
+  const handleCancel = () => {
+    navigate(returnTo);
+  };
+
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
@@ -170,19 +143,16 @@ const EditProfile = () => {
       let profileImage = formData.existingProfileImage;
       let coverImage = formData.existingCoverImage;
 
-      // Upload new avatar image if selected
       if (formData.profileImage) {
         const imageResponse = await updateProfileImage(formData.profileImage);
         profileImage = imageResponse.profileImage;
       }
 
-      // Upload new cover image if selected
       if (formData.coverImage) {
         const coverResponse = await updateCoverImage(formData.coverImage);
         coverImage = coverResponse.coverImage;
       }
 
-      // Update basic profile details and cover transformation metadata
       const updatedUser = await updateProfile({
         name: formData.name,
         username: formData.username,
@@ -196,37 +166,34 @@ const EditProfile = () => {
         coverPosition: formData.coverPosition,
       });
 
-      setFormData((prev) => ({
-        ...prev,
-        existingProfileImage: profileImage,
-        existingCoverImage: coverImage,
-        profileImage: null,
-        coverImage: null,
-      }));
-
       toast.success("Profile updated successfully.");
-
-      // Broadcast profile updates across all open tabs/windows instantly
-      notifyProfileOtherTabs();
-
       navigate(`/${updatedUser.username}`, { replace: true });
     } catch (error) {
       console.error(error);
-      toast.error(
-        error.response?.data?.message || "Unable to update profile. Please try again."
-      );
+      toast.error("Unable to update profile.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 pb-12">
+      <PageTitle title="Edit Profile" />
+      <div>
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 cursor-pointer"
+        >
+          <ArrowLeft size={16} />
+          <span>Back</span>
+        </button>
+      </div>
+
       <ProfileHeader />
 
-      <div className="grid grid-cols-1 gap-8 xl:grid-cols-3">
-        {/* Left Column: Form Sections */}
-        <div className="space-y-6 xl:col-span-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3 items-start">
+        <div className="xl:col-span-2 xl:h-[calc(100vh-12rem)] xl:overflow-y-auto xl:pr-4 space-y-6 scrollbar-hide">
           <BasicInformation
             formData={formData}
             handleChange={handleChange}
@@ -250,31 +217,22 @@ const EditProfile = () => {
           />
         </div>
 
-        {/* Right Column: Sticky Preview and Actions (Desktop) */}
-        <div className="hidden xl:block">
-          <div className="sticky top-28 space-y-6">
-            {/* Profile Live Preview Card */}
-            <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="hidden xl:block xl:col-span-1">
+          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 flex flex-col xl:h-[calc(100vh-12rem)]">
+            <div className="overflow-y-auto scrollbar-hide flex-1 pr-1 pb-4">
               <ProfilePreview formData={formData} />
             </div>
 
-            {/* Action Buttons Card */}
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="pt-4 border-t border-slate-100 bg-white shrink-0">
               <ActionButtons
                 loading={loading}
                 onSubmit={handleSubmit}
+                onCancel={handleCancel}
+                buttonText="Save Changes"
               />
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Mobile Action Buttons Toolbar */}
-      <div className="xl:hidden">
-        <ActionButtons
-          loading={loading}
-          onSubmit={handleSubmit}
-        />
       </div>
     </div>
   );

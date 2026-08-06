@@ -7,6 +7,7 @@ const {
   getMemories,
   createMemory,
   getMemoryById,
+  toggleLikeMemory,
   updateMemory,
   downloadMedia,
   deleteMemory,
@@ -31,6 +32,8 @@ router.post(
 
 router.get("/", protect, getMemories);
 router.get("/:id", protect, getMemoryById);
+
+router.patch("/:id/like", protect, toggleLikeMemory);
 
 router.put(
   "/:id",

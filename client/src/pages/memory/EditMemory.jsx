@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
 
 import {
   getMemoryById,
@@ -17,6 +18,7 @@ import ActionButtons from "../../components/create-memory/ActionButtons";
 import LivePreview from "../../components/create-memory/LivePreview";
 import DiscardMemoryModal from "../../components/create-memory/DiscardMemoryModal";
 import DeleteMediaModal from "../../components/edit-memory/DeleteMediaModal";
+import PageTitle from "../../components/common/PageTitle";
 
 // ==========================================
 // EDIT MEMORY PAGE COMPONENT
@@ -28,14 +30,12 @@ const EditMemory = () => {
 
   const returnTo = location.state?.from || "/dashboard";
 
-  // --- Component States ---
   const [loading, setLoading] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
   const [showDeleteMediaModal, setShowDeleteMediaModal] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // --- Form State ---
   const [formData, setFormData] = useState({
     title: "",
     location: "",
@@ -50,7 +50,6 @@ const EditMemory = () => {
     existingGallery: [],
   });
 
-  // --- Input Change Handler ---
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -59,7 +58,6 @@ const EditMemory = () => {
     }));
   };
 
-  // --- Fetch Memory Data on Mount ---
   useEffect(() => {
     const fetchMemory = async () => {
       try {
@@ -91,52 +89,38 @@ const EditMemory = () => {
     fetchMemory();
   }, [id, navigate, returnTo]);
 
-  // --- Form Validation ---
   const validateForm = () => {
     if (!formData.title.trim()) {
       toast.error("Please enter a memory title.");
       return false;
     }
-
     if (!formData.location.trim()) {
       toast.error("Please enter a location.");
       return false;
     }
-
     if (!formData.startDate) {
       toast.error("Please select a start date.");
       return false;
     }
-
     if (!formData.endDate) {
       toast.error("Please select an end date.");
       return false;
     }
-
     if (!formData.modeOfTravel) {
       toast.error("Please select a mode of travel.");
       return false;
     }
-
     if (!formData.description.trim()) {
       toast.error("Please write your story.");
       return false;
     }
-
     if (!formData.coverImage && !formData.existingCover) {
       toast.error("Please upload a cover image.");
       return false;
     }
-
-    if (new Date(formData.endDate) < new Date(formData.startDate)) {
-      toast.error("End date cannot be earlier than the start date.");
-      return false;
-    }
-
     return true;
   };
 
-  // --- Cancel & Discard Handlers ---
   const handleCancel = () => {
     setShowDiscardModal(true);
   };
@@ -146,7 +130,6 @@ const EditMemory = () => {
     navigate(returnTo);
   };
 
-  // --- Media Deletion Handlers ---
   const handleDeleteExistingMedia = (media) => {
     setSelectedMedia(media);
     setShowDeleteMediaModal(true);
@@ -171,13 +154,12 @@ const EditMemory = () => {
       setSelectedMedia(null);
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || "Unable to delete media.");
+      toast.error("Unable to delete media.");
     } finally {
       setDeleteLoading(false);
     }
   };
 
-  // --- Form Submission Handler ---
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
@@ -185,7 +167,6 @@ const EditMemory = () => {
       setLoading(true);
       const data = new FormData();
 
-      // Basic Details
       data.append("title", formData.title);
       data.append("location", formData.location);
       data.append("startDate", formData.startDate);
@@ -194,23 +175,19 @@ const EditMemory = () => {
       data.append("description", formData.description);
       data.append("isPublic", formData.isPublic);
 
-      // Existing Gallery Public IDs
       data.append(
         "existingGallery",
         JSON.stringify(formData.existingGallery.map((item) => item.publicId))
       );
 
-      // Check for removed cover
       if (!formData.coverImage && !formData.existingCover) {
         data.append("removeCover", "true");
       }
 
-      // New Cover Image
       if (formData.coverImage instanceof File) {
         data.append("coverImage", formData.coverImage);
       }
 
-      // Newly Added Gallery Files (Safely handles both raw File objects and wrapped file properties)
       if (Array.isArray(formData.gallery)) {
         formData.gallery.forEach((item) => {
           const fileToAppend = item instanceof File ? item : item?.file;
@@ -223,12 +200,6 @@ const EditMemory = () => {
       const response = await updateMemory(id, data);
       toast.success("Memory updated successfully!");
 
-      const channel = new BroadcastChannel("avora_memory_channel");
-      channel.postMessage("memory_updated");
-      channel.close();
-
-      localStorage.setItem("avora_memory_updated", Date.now().toString());
-
       if (response?.slug && response?.user?.username) {
         navigate(`/${response.user.username}/${response.slug}`, { replace: true });
       } else {
@@ -236,9 +207,7 @@ const EditMemory = () => {
       }
     } catch (error) {
       console.error(error);
-      toast.error(
-        error.response?.data?.message || "Unable to update memory. Please try again."
-      );
+      toast.error("Unable to update memory.");
     } finally {
       setLoading(false);
     }
@@ -246,6 +215,18 @@ const EditMemory = () => {
 
   return (
     <div className="space-y-6 pb-12">
+      <PageTitle title="Edit Memory" />
+      <div>
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 cursor-pointer"
+        >
+          <ArrowLeft size={16} />
+          <span>Back</span>
+        </button>
+      </div>
+
       <PageHeader
         title="Edit Memory"
         subtitle="Update your journey and keep your memories fresh."
@@ -290,17 +271,6 @@ const EditMemory = () => {
               />
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className="xl:hidden pt-4">
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
-          <ActionButtons
-            loading={loading}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            buttonText="Save Changes"
-          />
         </div>
       </div>
 

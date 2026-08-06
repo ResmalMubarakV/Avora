@@ -9,6 +9,7 @@ const {
   suspendUser,
   getMemories,
   deleteMemory,
+  updateAdminPassword,
 } = require("../controllers/adminController");
 
 // ==========================================
@@ -21,5 +22,7 @@ router.patch("/users/:id/suspend", protect, admin, suspendUser);
 
 router.get("/memories", protect, admin, getMemories);
 router.delete("/memories/:id", protect, admin, deleteMemory);
+
+router.put("/password", protect, admin, updateAdminPassword);
 
 module.exports = router;

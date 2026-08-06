@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
 
 import { getMemories } from "../../api/memoryApi";
 import MemoriesHeader from "../../components/dashboard/memories/MemoriesHeader";
@@ -8,27 +9,43 @@ import MemoriesSearch from "../../components/dashboard/memories/MemoriesSearch";
 import MemoriesFilters from "../../components/dashboard/memories/MemoriesFilters";
 import MemoriesPagination from "../../components/dashboard/memories/MemoriesPagination";
 import MemoriesCard from "../../components/dashboard/memories/MemoriesCard";
+import PageTitle from "../../components/common/PageTitle";
 
 const ITEMS_PER_PAGE = 12;
 
 const Memories = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const initialFilter = searchParams.get("filter") || "all";
+  const initialFilter = searchParams.get("filter");
 
   const [loading, setLoading] = useState(true);
   const [memories, setMemories] = useState([]);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState(initialFilter);
+  
+  // Multi-select filters state (supports combining e.g. ["public", "liked"])
+  const [selectedFilters, setSelectedFilters] = useState(
+    initialFilter && initialFilter !== "all" ? [initialFilter] : []
+  );
+  
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
 
   // Sync filter if URL parameter changes dynamically
   useEffect(() => {
     const urlFilter = searchParams.get("filter");
-    if (urlFilter) {
-      setFilter(urlFilter);
+    if (urlFilter && urlFilter !== "all") {
+      setSelectedFilters([urlFilter]);
     }
   }, [searchParams]);
+
+  // Toggle filter helper for multi-selection
+  const toggleFilter = (filterValue) => {
+    setSelectedFilters((prev) =>
+      prev.includes(filterValue)
+        ? prev.filter((f) => f !== filterValue)
+        : [...prev, filterValue]
+    );
+  };
 
   // --- Fetch All Memories on Mount ---
   useEffect(() => {
@@ -48,7 +65,7 @@ const Memories = () => {
     fetchMemories();
   }, []);
 
-  // --- Filter and Sort Memories Memo ---
+  // --- Multi-Condition Filter and Sort Memo ---
   const filteredMemories = useMemo(() => {
     const filtered = memories.filter((memory) => {
       const keyword = search.toLowerCase();
@@ -56,14 +73,20 @@ const Memories = () => {
         memory.title.toLowerCase().includes(keyword) ||
         memory.location.toLowerCase().includes(keyword);
 
-      const matchesVisibility =
-        filter === "all"
-          ? true
-          : filter === "public"
-          ? memory.isPublic
-          : !memory.isPublic;
+      if (!matchesSearch) return false;
 
-      return matchesSearch && matchesVisibility;
+      // If no filters selected, match everything
+      if (selectedFilters.length === 0) return true;
+
+      // Intersection logic: Memory must satisfy ALL selected filters (e.g. Public AND Liked)
+      const matchesAll = selectedFilters.every((f) => {
+        if (f === "public") return memory.isPublic;
+        if (f === "private") return !memory.isPublic;
+        if (f === "liked") return memory.isLiked;
+        return true;
+      });
+
+      return matchesAll;
     });
 
     // Apply sorting criteria
@@ -81,12 +104,12 @@ const Memories = () => {
     }
 
     return filtered;
-  }, [memories, search, filter, sortBy]);
+  }, [memories, search, selectedFilters, sortBy]);
 
   // Reset to page 1 whenever filters, search, or sorting change
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, filter, sortBy]);
+  }, [search, selectedFilters, sortBy]);
 
   // --- Pagination Calculations ---
   const totalPages = Math.max(
@@ -106,19 +129,33 @@ const Memories = () => {
   );
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-8 pb-16">
+      <PageTitle title="My Memories" />
+
+      {/* Back Button Navigation Header */}
+      <div>
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 cursor-pointer"
+        >
+          <ArrowLeft size={16} />
+          <span>Back</span>
+        </button>
+      </div>
+
       {/* Header and Total Count */}
       <MemoriesHeader total={filteredMemories.length} />
 
-      {/* Search and Filter Controls */}
+      {/* Search and Multi-Select Filter Controls */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <MemoriesSearch
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <MemoriesFilters
-          visibility={filter}
-          setVisibility={setFilter}
+          selectedFilters={selectedFilters}
+          toggleFilter={toggleFilter}
           sortBy={sortBy}
           setSortBy={setSortBy}
         />
@@ -148,12 +185,11 @@ const Memories = () => {
         <div className="rounded-3xl border border-dashed border-slate-300 bg-white py-24 text-center">
           <h2 className="text-2xl font-bold text-slate-900">No memories found</h2>
           <p className="mt-3 text-slate-500">
-            Try another search, change the filters, or create your next journey.
+            Try adjusting your multi-select filters or search criteria.
           </p>
         </div>
       ) : (
         <>
-          {/* Memories Grid - Compact 2 columns on mobile, 2 on md, 3 on xl */}
           <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
             {paginatedMemories.map((memory) => (
               <MemoriesCard
@@ -168,7 +204,6 @@ const Memories = () => {
             ))}
           </div>
 
-          {/* Pagination Controls */}
           <MemoriesPagination
             currentPage={currentPage}
             totalPages={totalPages}

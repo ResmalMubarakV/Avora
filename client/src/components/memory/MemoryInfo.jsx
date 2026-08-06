@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
     MapPin,
     CalendarDays,
@@ -14,16 +15,42 @@ import {
     Video,
     Clock,
     Lock,
+    Heart,
 } from "lucide-react";
+import { toast } from "sonner";
+import api from "../../api/axios";
 
 // ==========================================
 // MEMORY INFO COMPONENT
 // ==========================================
 /**
- * Renders metadata and details for a specific travel memory view card 
- * (internal card details without duplicate navigation buttons).
+ * Renders metadata and details for a specific travel memory view card,
+ * including a fully interactive like heart button and like status indicator.
  */
 const MemoryInfo = ({ memory }) => {
+    const [liked, setLiked] = useState(memory?.isLiked || false);
+    const [loading, setLoading] = useState(false);
+
+    // --- Handle Like Toggle ---
+    const handleLikeToggle = async () => {
+        if (loading) return;
+
+        try {
+            setLoading(true);
+            const nextState = !liked;
+            setLiked(nextState); // Optimistic UI
+
+            await api.patch(`/api/memories/${memory._id}/like`);
+            toast.success(nextState ? "Added to your liked memories!" : "Removed from liked memories");
+        } catch (error) {
+            setLiked(!liked); // Revert on error
+            console.error(error);
+            toast.error("Failed to update like status.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // --- Travel Mode Icon Map ---
     const travelIcons = {
         bike: Bike,
@@ -79,20 +106,53 @@ const MemoryInfo = ({ memory }) => {
     return (
         <div className="flex flex-col h-full justify-between">
           <div>
-            {/* Memory Title */}
-            <h1
-                className="
-                    text-xl
-                    sm:text-3xl
-                    lg:text-4xl
-                    font-extrabold
-                    tracking-tight
-                    leading-tight
-                    text-slate-900
-                "
-            >
-                {memory.title}
-            </h1>
+            {/* Memory Title & Interactive Like Button Header */}
+            <div className="flex items-start justify-between gap-4">
+                <h1
+                    className="
+                        text-xl
+                        sm:text-3xl
+                        lg:text-4xl
+                        font-extrabold
+                        tracking-tight
+                        leading-tight
+                        text-slate-900
+                    "
+                >
+                    {memory.title}
+                </h1>
+
+                {/* Interactive Like Action Button */}
+                <button
+                    type="button"
+                    onClick={handleLikeToggle}
+                    aria-label="Like Memory"
+                    className={`
+                        flex
+                        h-11
+                        w-11
+                        sm:h-12
+                        sm:w-12
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-2xl
+                        border
+                        transition-all
+                        duration-300
+                        cursor-pointer
+                        shadow-sm
+                        active:scale-95
+                        ${
+                            liked
+                                ? "bg-rose-50 border-rose-200 text-rose-500 shadow-rose-100"
+                                : "bg-slate-50 border-slate-200 text-slate-400 hover:text-rose-500 hover:bg-rose-50/50"
+                        }
+                    `}
+                >
+                    <Heart size={22} className={liked ? "fill-current" : ""} />
+                </button>
+            </div>
 
             {/* Top Divider */}
             <div className="mt-4 sm:mt-6 h-px bg-slate-200" />
@@ -250,7 +310,7 @@ const MemoryInfo = ({ memory }) => {
             {/* Middle Divider */}
             <div className="my-4 sm:my-6 h-px bg-slate-200" />
 
-            {/* Clean Icon-Text Micro-Stats Bar: Horizontal grid on mobile, Vertical clean stack on desktop */}
+            {/* Clean Icon-Text Micro-Stats Bar */}
             <div
                 className="
                     grid

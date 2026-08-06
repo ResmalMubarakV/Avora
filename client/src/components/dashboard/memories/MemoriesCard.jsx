@@ -1,3 +1,4 @@
+import { useState, useRef } from "react";
 import {
   CalendarDays,
   Globe,
@@ -6,10 +7,13 @@ import {
   Image,
   Video,
   ArrowRight,
+  Heart,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 import MemoryActions from "../../memory/MemoryActions";
+import api from "../../../api/axios";
 
 // ==========================================
 // UTILITY: FORMAT DATE
@@ -33,15 +37,52 @@ const formatDate = (date) => {
 /**
  * Renders a travel memory card for listing pages with hidden descriptions on mobile,
  * limited 3-line description clamping for tablet and above screens, media counts, 
- * and properly aligned actions toolbar.
+ * properly aligned actions toolbar, double-tap touch liking, and persistent heart button.
  */
 const MemoriesCard = ({
   memory,
   username,
   isOwner = false,
   redirectTo = "",
+  onLikeToggle,
 }) => {
   const navigate = useNavigate();
+  const [isLiked, setIsLiked] = useState(memory.isLiked || false);
+  const [animatingHeart, setAnimatingHeart] = useState(false);
+  
+  // Ref to track last tap time for touch screen double-tap detection
+  const lastTapRef = useRef(0);
+
+  // --- Toggle Like Handler ---
+  const handleToggleLike = async (e) => {
+    if (e) e.stopPropagation();
+
+    try {
+      const newStatus = !isLiked;
+      setIsLiked(newStatus);
+      setAnimatingHeart(true);
+      setTimeout(() => setAnimatingHeart(false), 600);
+
+      await api.patch(`/api/memories/${memory._id}/like`);
+      memory.isLiked = newStatus; // update local ref
+      if (onLikeToggle) onLikeToggle(memory._id, newStatus);
+    } catch (error) {
+      setIsLiked(!isLiked); // Revert on failure
+      toast.error("Failed to update favorite status");
+    }
+  };
+
+  // --- Touch Screen Double-Tap Listener ---
+  const handleTouchEnd = (e) => {
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTapRef.current;
+    
+    if (tapLength < 300 && tapLength > 0) {
+      e.preventDefault();
+      handleToggleLike();
+    }
+    lastTapRef.current = currentTime;
+  };
 
   // --- Calculate Media Item Counts ---
   const totalPhotos =
@@ -51,7 +92,6 @@ const MemoriesCard = ({
 
   // --- Handle Navigation to Detailed Memory View ---
   const handleOpenMemory = () => {
-    // Robust resolution for owner/author username to prevent 404 routing bugs
     const profileUsername =
       typeof memory.user === "object"
         ? memory.user?.username
@@ -67,7 +107,8 @@ const MemoriesCard = ({
   return (
     <div
       onClick={handleOpenMemory}
-      className="group relative cursor-pointer overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col justify-between"
+      onTouchEnd={handleTouchEnd}
+      className="group relative cursor-pointer overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col justify-between select-none"
     >
       <div>
         {/* Cover Image & Visibility Badge */}
@@ -94,6 +135,25 @@ const MemoriesCard = ({
                 <span className="hidden xs:inline">Private</span>
               </div>
             )}
+          </div>
+
+          {/* Persistent Favorite / Placeholder Heart Button */}
+          <div className="absolute right-2 top-2 sm:right-4 sm:top-4 z-10">
+            <button
+              type="button"
+              onClick={handleToggleLike}
+              className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border transition-all cursor-pointer shadow-sm ${
+                isLiked 
+                  ? "bg-rose-50 border-rose-200 text-rose-600 scale-105" 
+                  : "bg-white/90 backdrop-blur-xs border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200"
+              }`}
+              title={isLiked ? "Remove from favorites" : "Mark as favorite"}
+            >
+              <Heart 
+                size={16} 
+                className={`sm:w-[18px] sm:h-[18px] transition-transform duration-300 ${isLiked ? "fill-rose-500 scale-110" : ""} ${animatingHeart ? "scale-125" : ""}`} 
+              />
+            </button>
           </div>
         </div>
 

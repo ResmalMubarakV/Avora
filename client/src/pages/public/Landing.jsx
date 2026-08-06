@@ -4,6 +4,7 @@ import LandingHighlights from "../../components/landing/LandingHighlights";
 import WhyChooseAvora from "../../components/landing/WhyChooseAvora";
 import LandingCTA from "../../components/landing/LandingCTA";
 import LandingFooter from "../../components/landing/LandingFooter";
+import PageTitle from "../../components/common/PageTitle";
 
 // ==========================================
 // LANDING PAGE COMPONENT
@@ -16,6 +17,7 @@ import LandingFooter from "../../components/landing/LandingFooter";
 const Landing = () => {
   return (
     <>
+      <PageTitle title="Travel Diary Platform" />
       {/* Top Navigation Bar */}
       <LandingNavbar />
 
