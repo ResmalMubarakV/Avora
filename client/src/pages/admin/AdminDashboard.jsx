@@ -96,7 +96,7 @@ const AdminDashboard = () => {
         const username = memory.user?.username;
         const slug = memory.slug || memory._id;
         if (username) {
-            window.open(`/${username}/${slug}`, "_blank");
+            window.open(`/u/${username}/${slug}`, "_blank");
         } else {
             console.error("Author username missing for redirection.");
         }
@@ -226,7 +226,7 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
                 <RecentUsers
                     users={dashboard?.recentUsers || []}
-                    onView={(user) => window.open(`/${user.username}`, "_blank")}
+                    onView={(user) => window.open(`/u/${user.username}`, "_blank")}
                 />
                 <RecentMemories
                     memories={dashboard?.recentMemories || []}

@@ -80,9 +80,9 @@ function App() {
       {/* Admin Auth Route */}
       <Route path="/admin/login" element={<AdminLogin />} />
 
-      {/* Public Profile & Memory Routes */}
-      <Route path="/:username" element={<Profile />} />
-      <Route path="/:username/:slug" element={<PublicMemory />} />
+     {/* Public Profile & Memory Routes */}
+      <Route path="/u/:username" element={<Profile />} />
+      <Route path="/u/:username/:slug" element={<PublicMemory />} />
 
       {/* Protected App Routes (Unified under DashboardLayout) */}
       <Route element={<ProtectedRoute />}>

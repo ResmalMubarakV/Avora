@@ -20,7 +20,7 @@ const NotFound = ({ isViewer = false, profileUsername = null }) => {
     } else {
       if (isViewer) {
         if (profileUsername) {
-          navigate(`/${profileUsername}`);
+          navigate(`/u/${profileUsername}`);
         } else {
           navigate("/");
         }

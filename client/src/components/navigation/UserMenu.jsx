@@ -28,7 +28,7 @@ const UserMenu = () => {
 
     return (
         <Link
-            to={`/${user.username}`}
+            to={`/u/${user.username}`}
             className="
                 group
                 flex

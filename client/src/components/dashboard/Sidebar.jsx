@@ -145,7 +145,7 @@ const Sidebar = ({
               const destination =
                 menu.title === "Profile"
                   ? user?.username
-                    ? `/${user.username}`
+                    ? `/u/${user.username}`
                     : "/dashboard"
                   : menu.path;
 

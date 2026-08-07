@@ -39,7 +39,7 @@ const AdminMemories = () => {
         const username = memory.user?.username;
         const slug = memory.slug || memory._id;
         if (username) {
-            window.open(`/${username}/${slug}`, "_blank");
+            window.open(`/u/${username}/${slug}`, "_blank");
         } else {
             console.error("Author username missing for redirection.");
         }

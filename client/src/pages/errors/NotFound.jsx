@@ -22,7 +22,7 @@ const NotFound = ({ isViewer = false, profileUsername = null }) => {
       // Fallback if accessed directly via URL
       if (isViewer) {
         if (profileUsername) {
-          navigate(`/${profileUsername}`);
+          navigate(`/u/${profileUsername}`);
         } else {
           navigate("/");
         }

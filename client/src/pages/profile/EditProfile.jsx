@@ -167,7 +167,7 @@ const EditProfile = () => {
       });
 
       toast.success("Profile updated successfully.");
-      navigate(`/${updatedUser.username}`, { replace: true });
+      navigate(`/u/${updatedUser.username}`, { replace: true });
     } catch (error) {
       console.error(error);
       toast.error("Unable to update profile.");
