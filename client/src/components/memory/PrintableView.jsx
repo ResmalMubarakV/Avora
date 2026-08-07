@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { MapPin, CalendarDays, Navigation, Plane, Car, Train, Ship, Move } from "lucide-react";
 
-// SafeImage: FULL MULTI-TOUCH SUPPORT (Pinch Zoom & Drag Pan) + Mouse controls.
+// SafeImage: FLAWLESS BOUNDED PAN & MULTI-TOUCH ENGINE
 const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditing, activeSlot, onSlotClick, onUpdateConfig, style = {}, imgStyle = {} }) => {
   if (!config || !config.url) return <div className={className} style={{ width: '100%', height: '100%', backgroundColor: '#e2e8f0', ...style }} />;
   const { url, zoom = 1, x = 0, y = 0 } = config;
@@ -10,13 +10,13 @@ const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditin
   const [isDragging, setIsDragging] = useState(false);
   const [isPinching, setIsPinching] = useState(false);
   
-  // State logic
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const [startPan, setStartPan] = useState({ x: 0, y: 0 });
   const [initialPinchDist, setInitialPinchDist] = useState(null);
   const [initialZoom, setInitialZoom] = useState(1);
 
-  // MOUSE EVENTS
+  const getMaxPan = (z) => (z > 1 ? ((z - 1) / z) * 50 : 0);
+
   const handleMouseDown = (e) => {
     if (!isEditing) return;
     e.stopPropagation();
@@ -31,30 +31,33 @@ const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditin
   const handleMouseMove = (e) => {
     if (!isActive || !isDragging || !onUpdateConfig) return;
     const speed = 0.15 / zoom;
-    onUpdateConfig(slotId, 'x', Math.max(-50, Math.min(50, startPan.x + ((e.clientX - startPos.x) * speed))));
-    onUpdateConfig(slotId, 'y', Math.max(-50, Math.min(50, startPan.y + ((e.clientY - startPos.y) * speed))));
+    const maxPan = getMaxPan(zoom);
+    onUpdateConfig(slotId, 'x', Math.max(-maxPan, Math.min(maxPan, startPan.x + ((e.clientX - startPos.x) * speed))));
+    onUpdateConfig(slotId, 'y', Math.max(-maxPan, Math.min(maxPan, startPan.y + ((e.clientY - startPos.y) * speed))));
   };
 
   const handleMouseUp = () => { setIsDragging(false); };
+  
   const handleWheel = (e) => {
     if (!isActive || !onUpdateConfig) return;
     e.preventDefault();
-    onUpdateConfig(slotId, 'zoom', Math.max(1, Math.min(4, zoom + (e.deltaY < 0 ? 0.1 : -0.1))));
+    const newZoom = Math.max(1, Math.min(5, zoom + (e.deltaY < 0 ? 0.1 : -0.1)));
+    const maxPan = getMaxPan(newZoom);
+    onUpdateConfig(slotId, 'zoom', newZoom);
+    onUpdateConfig(slotId, 'x', Math.max(-maxPan, Math.min(maxPan, x)));
+    onUpdateConfig(slotId, 'y', Math.max(-maxPan, Math.min(maxPan, y)));
   };
 
-  // TOUCH EVENTS (Mobile Pinch & Pan)
   const handleTouchStart = (e) => {
     if (!isEditing) return;
     e.stopPropagation();
     if (!isActive && onSlotClick) onSlotClick(slotId);
 
     if (e.touches.length === 1 && onUpdateConfig) {
-        // 1-finger pan
         setIsDragging(true);
         setStartPos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
         setStartPan({ x, y });
     } else if (e.touches.length === 2 && onUpdateConfig) {
-        // 2-finger pinch
         setIsPinching(true);
         setIsDragging(false);
         const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
@@ -68,12 +71,17 @@ const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditin
     
     if (isDragging && e.touches.length === 1) {
         const speed = 0.2 / zoom;
-        onUpdateConfig(slotId, 'x', Math.max(-50, Math.min(50, startPan.x + ((e.touches[0].clientX - startPos.x) * speed))));
-        onUpdateConfig(slotId, 'y', Math.max(-50, Math.min(50, startPan.y + ((e.touches[0].clientY - startPos.y) * speed))));
+        const maxPan = getMaxPan(zoom);
+        onUpdateConfig(slotId, 'x', Math.max(-maxPan, Math.min(maxPan, startPan.x + ((e.touches[0].clientX - startPos.x) * speed))));
+        onUpdateConfig(slotId, 'y', Math.max(-maxPan, Math.min(maxPan, startPan.y + ((e.touches[0].clientY - startPos.y) * speed))));
     } else if (isPinching && e.touches.length === 2 && initialPinchDist) {
         const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
         const scale = dist / initialPinchDist;
-        onUpdateConfig(slotId, 'zoom', Math.max(1, Math.min(4, initialZoom * scale)));
+        const newZoom = Math.max(1, Math.min(5, initialZoom * scale));
+        const maxPan = getMaxPan(newZoom);
+        onUpdateConfig(slotId, 'zoom', newZoom);
+        onUpdateConfig(slotId, 'x', Math.max(-maxPan, Math.min(maxPan, x)));
+        onUpdateConfig(slotId, 'y', Math.max(-maxPan, Math.min(maxPan, y)));
     }
   };
 
@@ -83,7 +91,6 @@ const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditin
     setInitialPinchDist(null);
   };
 
-  // Extract CSS filter specifically for html-to-image compatibility
   const { filter, ...restImgStyle } = imgStyle;
 
   return (
@@ -93,9 +100,17 @@ const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditin
       onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} onWheel={handleWheel}
       onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchEnd}
     >
-      <div style={{ width: '100%', height: '100%', transform: `scale(${zoom}) translate(${x}%, ${y}%)`, transformOrigin: 'center center', transition: isDragging || isPinching ? 'none' : 'transform 0.1s ease-out', filter: filter, WebkitFilter: filter }}>
-        <img src={url} crossOrigin="anonymous" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', pointerEvents: 'none', ...restImgStyle }} alt="memory" draggable={false} />
-      </div>
+      <img 
+        src={url} 
+        crossOrigin="anonymous" 
+        style={{ 
+          width: '100%', height: '100%', objectFit: 'cover', display: 'block', pointerEvents: 'none', 
+          transform: `scale(${zoom}) translate(${x}%, ${y}%)`, transformOrigin: 'center center', 
+          transition: isDragging || isPinching ? 'none' : 'transform 0.1s ease-out', 
+          filter: filter, WebkitFilter: filter, ...restImgStyle 
+        }} 
+        alt="memory" draggable={false} 
+      />
       
       {isActive && (
         <div style={{ position: 'absolute', inset: 0, border: '4px solid #3559D4', backgroundColor: 'rgba(53, 89, 212, 0.1)', boxShadow: 'inset 0 0 0 2px rgba(255,255,255,0.5)', zIndex: 50, pointerEvents: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -135,7 +150,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
   };
 
   const Wrapper = ({ children, style, className = "" }) => (
-    <div id="actual-print-container" className={className} style={{ width: '800px', height: '1131px', minHeight: '1131px', minWidth: '800px', overflow: 'hidden', position: 'relative', boxSizing: 'border-box', backgroundColor: '#ffffff', ...style }}>
+    <div className={className} style={{ width: '800px', height: '1131px', minHeight: '1131px', minWidth: '800px', overflow: 'hidden', position: 'relative', boxSizing: 'border-box', backgroundColor: '#ffffff', ...style }}>
       {children}
     </div>
   );
@@ -143,7 +158,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
   const sharedImgProps = { isEditing, activeSlot, onSlotClick, onUpdateConfig };
 
   // ==========================================
-  // TEMPLATES 0-19 (PURE FLEXBOX)
+  // TEMPLATES 0-19
   // ==========================================
 
   if (layoutIndex === 0) {
@@ -433,32 +448,47 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
     );
   }
 
+  // FIXED LAYOUT 9: ABSOLUTE PIXEL POSITIONING FOR 3x3 GRID TO ELIMINATE WRAP BUGS
   if (layoutIndex === 9) {
     return (
-      <Wrapper style={{ backgroundColor: '#f8fafc', padding: '48px', color: '#0f172a' }}>
-          <header style={{ display: 'flex', alignItems: 'center', gap: '32px', marginBottom: '48px', backgroundColor: '#ffffff', padding: '32px', borderRadius: '24px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9', flexShrink: 0 }}>
-              <div style={{ width: '128px', height: '128px', borderRadius: '50%', flexShrink: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '4px solid #f1f5f9', backgroundColor: '#f8fafc' }}>
+      <Wrapper style={{ backgroundColor: '#f8fafc', padding: '40px', color: '#0f172a' }}>
+          <header style={{ position: 'absolute', top: '40px', left: '40px', width: '720px', height: '110px', display: 'flex', alignItems: 'center', gap: '20px', backgroundColor: '#ffffff', padding: '20px 24px', borderRadius: '24px', boxSizing: 'border-box', border: '1px solid #f1f5f9' }}>
+              <div style={{ width: '70px', height: '70px', borderRadius: '50%', flexShrink: 0, overflow: 'hidden', backgroundColor: '#f8fafc' }}>
                   <SafeImage config={coverConfig} slotId="cover" {...sharedImgProps} />
               </div>
-              <div style={{ overflow: 'hidden' }}>
-                  <h1 style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '8px', margin: '0 0 8px 0', paddingBottom: '8px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{title}</h1>
-                  <p style={{ color: '#64748b', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', margin: '0 0 16px 0' }}><MapPin size={18}/> {location}</p>
-                  <div style={{ display: 'flex', gap: '24px', fontSize: '14px', fontWeight: '600', color: '#334155' }}>
-                      <span style={{ backgroundColor: '#f1f5f9', padding: '4px 12px', borderRadius: '9999px', display: 'flex', alignItems: 'center', gap: '8px' }}>{renderIcon(16)} {mode}</span>
-                      <span style={{ backgroundColor: '#f1f5f9', padding: '4px 12px', borderRadius: '9999px', display: 'flex', alignItems: 'center', gap: '8px' }}><CalendarDays size={16}/> {dateStr}</span>
+              <div style={{ overflow: 'hidden', flex: 1 }}>
+                  <h1 style={{ fontSize: '22px', fontWeight: 'bold', margin: '0 0 4px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</h1>
+                  <p style={{ color: '#64748b', fontWeight: '500', margin: '0 0 6px 0', fontSize: '13px' }}>{location}</p>
+                  <div style={{ display: 'flex', gap: '12px', fontSize: '11px', fontWeight: '600', color: '#334155' }}>
+                      <span style={{ backgroundColor: '#f1f5f9', padding: '2px 8px', borderRadius: '9999px' }}>{mode}</span>
+                      <span style={{ backgroundColor: '#f1f5f9', padding: '2px 8px', borderRadius: '9999px' }}>{dateStr}</span>
                   </div>
               </div>
           </header>
-          <div style={{ backgroundColor: '#ffffff', padding: '32px', borderRadius: '24px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9', marginBottom: '40px', height: '150px', overflow: 'hidden', flexShrink: 0 }}>
-              <p style={{ fontSize: '16px', lineHeight: '1.6', color: '#475569', fontWeight: '500', margin: 0 }}>{story}</p>
+
+          <div style={{ position: 'absolute', top: '166px', left: '40px', width: '720px', height: '90px', backgroundColor: '#ffffff', padding: '16px 20px', borderRadius: '20px', boxSizing: 'border-box', border: '1px solid #f1f5f9', overflow: 'hidden' }}>
+              <p style={{ fontSize: '12px', lineHeight: '1.4', color: '#475569', fontWeight: '500', margin: 0, height: '100%', overflow: 'hidden' }}>{story}</p>
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-              {slotConfigs.slice(0, 9).map((cfg, i) => (
-                  <div key={i} style={{ width: 'calc(33.333% - 11px)', aspectRatio: '1/1', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+
+          {slotConfigs.slice(0, 9).map((cfg, i) => {
+              const cols = 3;
+              const cellWidth = 224;
+              const cellHeight = 224;
+              const gap = 24;
+              const startX = 40;
+              const startY = 276;
+              
+              const col = i % cols;
+              const row = Math.floor(i / cols);
+              const left = startX + col * (cellWidth + gap);
+              const top = startY + row * (cellHeight + gap);
+
+              return (
+                  <div key={i} style={{ position: 'absolute', left: `${left}px`, top: `${top}px`, width: `${cellWidth}px`, height: `${cellHeight}px`, backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden', boxSizing: 'border-box' }}>
                       <SafeImage config={cfg} slotId={i} {...sharedImgProps} />
                   </div>
-              ))}
-          </div>
+              );
+          })}
       </Wrapper>
     );
   }

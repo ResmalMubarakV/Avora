@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import MemoryAIModal from "./MemoryAIModal";
+import LocationAutocomplete from "../common/LocationAutocomplete";
 
 // ==========================================
 // JOURNEY DETAILS FORM SECTION
@@ -40,18 +41,15 @@ const JourneyDetails = ({ formData, setFormData, handleChange }) => {
         />
       </div>
 
-      {/* Location Field */}
+      {/* Location Field (Live Autocomplete) */}
       <div>
         <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
           Location <span className="text-red-500">*</span>
         </label>
-        <input
-          type="text"
+        <LocationAutocomplete
           name="location"
           value={formData.location}
           onChange={handleChange}
-          placeholder="e.g., Munnar, Kerala"
-          className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100 placeholder:text-slate-400"
         />
       </div>
 

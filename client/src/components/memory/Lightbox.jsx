@@ -15,8 +15,8 @@ import { useEffect, useRef, useState } from "react";
 // LIGHTBOX COMPONENT
 // ==========================================
 /**
- * Renders an immersive full-screen media lightbox viewer supporting images and videos, 
- * pinch-to-zoom / double-tap zoom gestures, touch swipe navigation, keyboard shortcuts, 
+ * Renders an immersive full-screen media lightbox viewer supporting images and videos,
+ * pinch-to-zoom / double-tap zoom gestures, touch swipe navigation, keyboard shortcuts,
  * thumbnail side rail navigation, and file downloading with dynamic media slugs.
  */
 const Lightbox = ({
@@ -29,7 +29,8 @@ const Lightbox = ({
     canDownload,
     memoryTitle,
 }) => {
-    const selectedMedia = media[selectedIndex];
+    const selectedMedia =
+        media && media.length > 0 ? media[selectedIndex] : null;
 
     const isVideoItem = (item) =>
         item?.type === "video" ||
@@ -44,7 +45,10 @@ const Lightbox = ({
     const videoRef = useRef(null);
     const lightboxRef = useRef(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    
+    // Drag & Swipe tracking state
     const isDragging = useRef(false);
+    const isSwipeTracking = useRef(false);
     const dragStartX = useRef(0);
     const dragEndX = useRef(0);
 
@@ -87,7 +91,6 @@ const Lightbox = ({
         }
 
         if (event.touches.length === 1) {
-            // Fresh single-finger gesture — reset tap tracking
             hadMultiTouch.current = false;
             tapStartPos.current = {
                 x: event.touches[0].clientX,
@@ -108,8 +111,11 @@ const Lightbox = ({
 
             if (isVideoItem(selectedMedia)) return;
 
+            isSwipeTracking.current = false;
             touchStartX.current = event.touches[0].clientX;
             touchStartY.current = event.touches[0].clientY;
+            touchEndX.current = event.touches[0].clientX;
+            touchEndY.current = event.touches[0].clientY;
         }
     };
 
@@ -140,13 +146,48 @@ const Lightbox = ({
             return;
         }
 
-        touchEndX.current = event.touches[0].clientX;
-        touchEndY.current = event.touches[0].clientY;
+        // Visual Gallery Swipe Tracking
+        if (event.touches.length === 1 && scale === 1 && !isVideoItem(selectedMedia)) {
+            const currentX = event.touches[0].clientX;
+            const currentY = event.touches[0].clientY;
+            const dx = currentX - touchStartX.current;
+            const dy = currentY - touchStartY.current;
+
+            if (!isSwipeTracking.current && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) {
+                isSwipeTracking.current = true;
+            }
+
+            if (isSwipeTracking.current) {
+                let visualX = dx;
+                if ((selectedIndex === 0 && dx > 0) || (selectedIndex === media.length - 1 && dx < 0)) {
+                    visualX = dx * 0.3; // Rubber-band edge resistance
+                }
+                setTranslate({ x: visualX, y: 0 });
+            }
+
+            touchEndX.current = currentX;
+            touchEndY.current = currentY;
+        }
     };
 
     const handleTouchEnd = (event) => {
-        // Still has a finger down (e.g. pinch releasing to a single finger)
         if (event.touches.length > 0) {
+            const remaining = event.touches[0];
+            pinchStartDistance.current = null;
+            hadMultiTouch.current = true; 
+
+            if (scale > 1) {
+                isPanning.current = true;
+                setIsInteractingZoom(true);
+                panStart.current = { x: remaining.clientX, y: remaining.clientY };
+                translateStart.current = { ...translate };
+            } else {
+                isPanning.current = false;
+                touchStartX.current = remaining.clientX;
+                touchStartY.current = remaining.clientY;
+                touchEndX.current = remaining.clientX;
+                touchEndY.current = remaining.clientY;
+            }
             return;
         }
 
@@ -157,7 +198,7 @@ const Lightbox = ({
         isPanning.current = false;
         setIsInteractingZoom(false);
 
-        // Double-tap-to-zoom: only for a clean single-finger tap (no pinch involved)
+        // Double-tap-to-zoom check
         if (!hadMultiTouch.current && !wasPinching) {
             const endTouch = event.changedTouches && event.changedTouches[0];
 
@@ -179,48 +220,65 @@ const Lightbox = ({
                         } else if (!isVideoItem(selectedMedia)) {
                             setScale(DOUBLE_TAP_ZOOM);
                         }
-
                         return;
                     }
-
                     lastTapTime.current = now;
                 }
             }
         }
 
-        // Snap back if zoomed out past 1x
-        if (scale <= 1) {
+        if (scale < 1) {
             setScale(1);
             setTranslate({ x: 0, y: 0 });
             return;
         }
 
-        // Don't trigger swipe navigation while zoomed in or just finished panning
         if (scale > 1 || wasPanning) {
+            return; 
+        }
+
+        // Handle Gallery Swipe Completion
+        if (isSwipeTracking.current) {
+            const deltaX = touchStartX.current - touchEndX.current;
+            const SWIPE_THRESHOLD = 45;
+
+            if (deltaX > SWIPE_THRESHOLD && selectedIndex < media.length - 1) {
+                setTranslate({ x: -window.innerWidth, y: 0 });
+                setTimeout(() => {
+                    setTranslate({ x: 0, y: 0 });
+                    nextImage();
+                }, 150);
+            } else if (deltaX < -SWIPE_THRESHOLD && selectedIndex > 0) {
+                setTranslate({ x: window.innerWidth, y: 0 });
+                setTimeout(() => {
+                    setTranslate({ x: 0, y: 0 });
+                    previousImage();
+                }, 150);
+            } else {
+                setTranslate({ x: 0, y: 0 }); // Snap back
+            }
+            
+            isSwipeTracking.current = false;
             return;
         }
 
+        // Fallback for quick flicks
         const deltaX = touchStartX.current - touchEndX.current;
         const deltaY = touchStartY.current - touchEndY.current;
-        const MIN_SWIPE_DISTANCE = 50;
+        const MIN_SWIPE_DISTANCE = 45;
 
-        // Ignore mostly vertical gestures
-        if (Math.abs(deltaY) > Math.abs(deltaX)) {
-            return;
-        }
-
-        if (Math.abs(deltaX) < MIN_SWIPE_DISTANCE) {
-            return;
-        }
-
-        if (deltaX > 0) {
-            nextImage();
-        } else {
-            previousImage();
+        if (Math.abs(deltaY) < Math.abs(deltaX) && Math.abs(deltaX) > MIN_SWIPE_DISTANCE) {
+            if (deltaX > 0 && selectedIndex < media.length - 1) {
+                nextImage();
+            } else if (deltaX < 0 && selectedIndex > 0) {
+                previousImage();
+            }
         }
     };
 
     const downloadMedia = async () => {
+        if (!selectedMedia) return;
+
         try {
             const response = await fetch(selectedMedia.url);
             const blob = await response.blob();
@@ -276,27 +334,46 @@ const Lightbox = ({
         if (scale > 1) return;
 
         isDragging.current = true;
+        isSwipeTracking.current = false;
         dragStartX.current = e.clientX;
+        dragEndX.current = e.clientX;
     };
 
     const handleMouseMove = (e) => {
         if (!isDragging.current) return;
+        
         dragEndX.current = e.clientX;
+        const dx = e.clientX - dragStartX.current;
+        
+        if (!isSwipeTracking.current && Math.abs(dx) > 5) {
+            isSwipeTracking.current = true;
+        }
+
+        if (isSwipeTracking.current) {
+            let visualX = dx;
+            if ((selectedIndex === 0 && dx > 0) || (selectedIndex === media.length - 1 && dx < 0)) {
+                visualX = dx * 0.3;
+            }
+            setTranslate({ x: visualX, y: 0 });
+        }
     };
 
     const handleMouseUp = () => {
         if (!isDragging.current) return;
-
         isDragging.current = false;
-        const delta = dragStartX.current - dragEndX.current;
-        const DRAG_DISTANCE = 80;
 
-        if (Math.abs(delta) < DRAG_DISTANCE) return;
+        if (isSwipeTracking.current) {
+            const deltaX = dragStartX.current - dragEndX.current;
+            const DRAG_DISTANCE = 70;
 
-        if (delta > 0) {
-            nextImage();
-        } else {
-            previousImage();
+            if (deltaX > DRAG_DISTANCE && selectedIndex < media.length - 1) {
+                nextImage();
+            } else if (deltaX < -DRAG_DISTANCE && selectedIndex > 0) {
+                previousImage();
+            } else {
+                setTranslate({ x: 0, y: 0 });
+            }
+            isSwipeTracking.current = false;
         }
     };
 
@@ -305,16 +382,9 @@ const Lightbox = ({
             setIsFullscreen(!!document.fullscreenElement);
         };
 
-        document.addEventListener(
-            "fullscreenchange",
-            handleFullscreenChange
-        );
-
+        document.addEventListener("fullscreenchange", handleFullscreenChange);
         return () => {
-            document.removeEventListener(
-                "fullscreenchange",
-                handleFullscreenChange
-            );
+            document.removeEventListener("fullscreenchange", handleFullscreenChange);
         };
     }, []);
 
@@ -325,28 +395,22 @@ const Lightbox = ({
         };
     }, []);
 
-    // Focus the dialog on open so keyboard users start inside it
     useEffect(() => {
         if (lightboxRef.current) {
             lightboxRef.current.focus();
         }
     }, []);
 
-    // Show a brief one-time nudge on touch devices so people discover swipe
     useEffect(() => {
         if (typeof window === "undefined") return;
 
         const isTouchDevice =
-            window.matchMedia &&
-            window.matchMedia("(pointer: coarse)").matches;
+            window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
 
         if (!isTouchDevice || media.length <= 1) return;
 
         setShowSwipeHint(true);
-
-        const timer = setTimeout(() => {
-            setShowSwipeHint(false);
-        }, 1400);
+        const timer = setTimeout(() => setShowSwipeHint(false), 1400);
 
         return () => clearTimeout(timer);
     }, [media.length]);
@@ -354,7 +418,7 @@ const Lightbox = ({
     useEffect(() => {
         setImageLoading(true);
 
-        if (isVideoItem(selectedMedia)) {
+        if (!selectedMedia || isVideoItem(selectedMedia)) {
             setImageLoading(false);
             return;
         }
@@ -369,16 +433,19 @@ const Lightbox = ({
         const handleKeyDown = (event) => {
             switch (event.key) {
                 case "ArrowRight":
-                    nextImage();
+                    if (selectedIndex < media.length - 1) nextImage();
                     break;
 
                 case "ArrowLeft":
-                    previousImage();
+                    if (selectedIndex > 0) previousImage();
                     break;
 
                 case "Escape":
                     if (document.fullscreenElement) {
                         document.exitFullscreen();
+                    } else if (scale > 1) {
+                        setScale(1);
+                        setTranslate({ x: 0, y: 0 });
                     } else {
                         onClose();
                     }
@@ -423,7 +490,7 @@ const Lightbox = ({
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
         };
-    }, [nextImage, previousImage, onClose]);
+    }, [nextImage, previousImage, onClose, selectedIndex, media.length, scale]);
 
     useEffect(() => {
         const selected = thumbnailRefs.current[selectedIndex];
@@ -453,7 +520,7 @@ const Lightbox = ({
     useEffect(() => {
         if (selectedIndex > 0) {
             const previous = media[selectedIndex - 1];
-            if (previous.type === "image") {
+            if (previous && !isVideoItem(previous)) {
                 const img = new Image();
                 img.src = previous.url;
             }
@@ -461,12 +528,16 @@ const Lightbox = ({
 
         if (selectedIndex < media.length - 1) {
             const next = media[selectedIndex + 1];
-            if (next.type === "image") {
+            if (next && !isVideoItem(next)) {
                 const img = new Image();
                 img.src = next.url;
             }
         }
     }, [selectedIndex, media]);
+
+    if (!media || media.length === 0 || !selectedMedia) {
+        return null;
+    }
 
     return (
         <div
@@ -486,11 +557,14 @@ const Lightbox = ({
             "
         >
             {/* Top Control Bar */}
-            <div className="flex justify-end items-center gap-4 p-6">
+            <div className="flex justify-end items-center gap-4 p-6 pointer-events-auto relative z-50">
                 {canDownload && (
                     <button
                         type="button"
-                        onClick={downloadMedia}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            downloadMedia();
+                        }}
                         aria-label="Download media"
                         className="
                             text-white
@@ -509,7 +583,10 @@ const Lightbox = ({
 
                 <button
                     type="button"
-                    onClick={toggleFullscreen}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFullscreen();
+                    }}
                     aria-label={
                         isFullscreen
                             ? "Exit fullscreen"
@@ -539,7 +616,10 @@ const Lightbox = ({
 
                 <button
                     type="button"
-                    onClick={handleClose}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleClose();
+                    }}
                     aria-label="Close media viewer"
                     className="
                         text-white
@@ -595,7 +675,9 @@ const Lightbox = ({
                                 pr-6
                                 py-2
                                 h-[calc(100vh-120px)]
+                                relative z-50
                             "
+                            onClick={(e) => e.stopPropagation()}
                         >
                             {/* Scrollable Thumbnails List */}
                             <div
@@ -619,7 +701,10 @@ const Lightbox = ({
                                             (thumbnailRefs.current[index] = el)
                                         }
                                         type="button"
-                                        onClick={() => goToImage(index)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            goToImage(index);
+                                        }}
                                         aria-label={`Go to media ${index + 1} of ${media.length}`}
                                         className={`
                                             relative
@@ -789,9 +874,9 @@ const Lightbox = ({
                             <div
                                 style={{
                                     transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
-                                    transition: isInteractingZoom
+                                    transition: (isInteractingZoom || isSwipeTracking.current || isDragging.current)
                                         ? "none"
-                                        : "transform 0.2s ease-out",
+                                        : "transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
                                     touchAction: "none",
                                 }}
                             >
@@ -867,10 +952,13 @@ const Lightbox = ({
                                 "
                             >
                                 {!isVideoItem(selectedMedia) && (
-                                    <div className="flex items-center justify-center gap-12 sm:gap-16 md:gap-20 pointer-events-auto">
+                                    <div className="flex items-center justify-center gap-12 sm:gap-16 md:gap-20 pointer-events-auto relative z-50">
                                         <button
                                             type="button"
-                                            onClick={previousImage}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (selectedIndex > 0) previousImage();
+                                            }}
                                             disabled={selectedIndex === 0}
                                             aria-label="Previous media"
                                             className={`
@@ -889,7 +977,10 @@ const Lightbox = ({
 
                                         <button
                                             type="button"
-                                            onClick={nextImage}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (selectedIndex < media.length - 1) nextImage();
+                                            }}
                                             disabled={selectedIndex === media.length - 1}
                                             aria-label="Next media"
                                             className={`
