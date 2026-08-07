@@ -10,9 +10,21 @@ import Lightbox from "../../components/memory/Lightbox";
 import PageTitle from "../../components/common/PageTitle";
 import PrintableView from "../../components/memory/PrintableView";
 
-import { Compass, Download, X, Loader2, ChevronLeft, ChevronRight, ZoomIn, RefreshCcw, MousePointerClick, Settings2, MoveHorizontal, MoveVertical } from "lucide-react";
-import { MapContainer, TileLayer, Marker } from 'react-leaflet';
-import { useReactToPrint } from "react-to-print"; // <-- Uses native browser print engine for crystal-clear quality
+import { Compass, Download, X, ChevronLeft, ChevronRight, ZoomIn, RefreshCcw, MousePointerClick, Settings2, MoveHorizontal, MoveVertical } from "lucide-react";
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import { useReactToPrint } from "react-to-print";
+
+// Helper component to fix Leaflet sizing bugs in production hosting (Vercel)
+const MapInvalidator = () => {
+  const map = useMap();
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [map]);
+  return null;
+};
 
 // ==========================================
 // PUBLIC MEMORY PAGE COMPONENT
@@ -34,20 +46,20 @@ const PublicMemory = () => {
   
   const [previewScale, setPreviewScale] = useState(1);
   const previewContainerRef = useRef(null);
-  const printComponentRef = useRef(null); // <-- Ref attached directly to print container
+  const printComponentRef = useRef(null); 
 
-  // --- High-Quality Native Print Engine ---
+  // --- NATIVE PRINT ENGINE ---
   const handlePrint = useReactToPrint({
     contentRef: printComponentRef,
     documentTitle: `${memory?.slug || 'memory'}-diary`,
     pageStyle: `
       @media print {
-        body { -webkit-print-color-adjust: exact; margin: 0; }
+        body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; margin: 0 !important; background-color: #ffffff !important; }
         @page { size: 800px 1131px; margin: 0; }
-        #actual-print-container { width: 800px !important; height: 1131px !important; overflow: hidden !important; }
+        #actual-print-container { width: 800px !important; height: 1131px !important; overflow: hidden !important; display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; }
       }
     `,
-    onBeforePrint: () => Promise.resolve(setActiveSlot(null)), // Clear active editing borders before printing
+    onBeforePrint: () => Promise.resolve(setActiveSlot(null)),
   });
 
   const imageParam = searchParams.get("image");
@@ -91,7 +103,7 @@ const PublicMemory = () => {
     }
   }, [isPreviewMode, memory, mediaConfig, allImages]);
 
-  // Adjust preview scaling dynamically to fit the screen
+  // Adjust preview scaling dynamically to fit screen
   useEffect(() => {
     if (isPreviewMode) {
       const calculateScale = () => {
@@ -203,7 +215,6 @@ const PublicMemory = () => {
                     </div>
                 </div>
                 
-                {/* Triggers native browser print dialog -> Save as PDF in pristine vector quality */}
                 <button onClick={handlePrint} className="flex items-center gap-2 bg-[#3559D4] text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer">
                     <Download size={16} /> <span className="hidden sm:inline">Save PDF / Print</span>
                 </button>
@@ -215,7 +226,6 @@ const PublicMemory = () => {
                       style={{ transform: `scale(${previewScale})`, transformOrigin: 'center center', width: '800px', height: '1131px', transition: 'transform 0s' }}
                       className="shadow-[0_20px_25px_rgba(0,0,0,0.5)] ring-1 ring-white/10 rounded-sm bg-[#ffffff] flex-shrink-0"
                     >
-                        {/* Attached printComponentRef handles the exact layout rendering for the native print dialog */}
                         <div ref={printComponentRef} id="actual-print-container" style={{ width: '800px', height: '1131px', backgroundColor: '#ffffff', overflow: 'hidden', position: 'relative', boxSizing: 'border-box' }}>
                             <PrintableView 
                                 memory={memory} 
@@ -351,6 +361,7 @@ const PublicMemory = () => {
                 <MapContainer key={mapCoords.join(',')} center={mapCoords} zoom={11} className="h-full w-full" scrollWheelZoom={false}>
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                   <Marker position={mapCoords} />
+                  <MapInvalidator />
                 </MapContainer>
               </div>
             </div>

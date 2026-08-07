@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { MapPin, CalendarDays, Navigation, Plane, Car, Train, Ship, Move } from "lucide-react";
 
-// SafeImage: FLAWLESS BOUNDED PAN & MULTI-TOUCH ENGINE
+// SafeImage: PRODUCTION PRINT-SAFE ENGINE (Explicit Pixel Locking & Reset)
 const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditing, activeSlot, onSlotClick, onUpdateConfig, style = {}, imgStyle = {} }) => {
   if (!config || !config.url) return <div className={className} style={{ width: '100%', height: '100%', backgroundColor: '#e2e8f0', ...style }} />;
   const { url, zoom = 1, x = 0, y = 0 } = config;
@@ -96,7 +96,17 @@ const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditin
   return (
     <div
       className={className}
-      style={{ position: 'relative', overflow: 'hidden', width: '100%', height: '100%', display: 'block', cursor: isEditing ? (isDragging ? 'grabbing' : 'pointer') : 'default', touchAction: isEditing ? 'none' : 'auto', ...style }}
+      style={{ 
+        position: 'relative', 
+        overflow: 'hidden', 
+        width: '100%', 
+        height: '100%', 
+        display: 'block', 
+        isolation: 'isolate',
+        cursor: isEditing ? (isDragging ? 'grabbing' : 'pointer') : 'default', 
+        touchAction: isEditing ? 'none' : 'auto', 
+        ...style 
+      }}
       onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} onWheel={handleWheel}
       onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchEnd}
     >
@@ -104,12 +114,25 @@ const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditin
         src={url} 
         crossOrigin="anonymous" 
         style={{ 
-          width: '100%', height: '100%', objectFit: 'cover', display: 'block', pointerEvents: 'none', 
-          transform: `scale(${zoom}) translate(${x}%, ${y}%)`, transformOrigin: 'center center', 
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%', 
+          height: '100%', 
+          maxWidth: 'none',
+          maxHeight: 'none',
+          objectFit: 'cover', 
+          display: 'block', 
+          pointerEvents: 'none', 
+          transform: `scale(${zoom}) translate(${x}%, ${y}%)`, 
+          transformOrigin: 'center center', 
           transition: isDragging || isPinching ? 'none' : 'transform 0.1s ease-out', 
-          filter: filter, WebkitFilter: filter, ...restImgStyle 
+          filter: filter, 
+          WebkitFilter: filter, 
+          ...restImgStyle 
         }} 
-        alt="memory" draggable={false} 
+        alt="memory" 
+        draggable={false} 
       />
       
       {isActive && (
@@ -448,7 +471,6 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
     );
   }
 
-  // FIXED LAYOUT 9: ABSOLUTE PIXEL POSITIONING FOR 3x3 GRID TO ELIMINATE WRAP BUGS
   if (layoutIndex === 9) {
     return (
       <Wrapper style={{ backgroundColor: '#f8fafc', padding: '40px', color: '#0f172a' }}>
@@ -492,10 +514,6 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
       </Wrapper>
     );
   }
-
-  // ==========================================
-  // TEMPLATES 10-19
-  // ==========================================
 
   if (layoutIndex === 10) {
     return (
