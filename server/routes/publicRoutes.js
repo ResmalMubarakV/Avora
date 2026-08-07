@@ -9,13 +9,19 @@ const {
 const { protectOptional } = require("../middleware/authMiddleware");
 
 // ==========================================
+// PARAM SANITIZATION FOR USERNAMES WITH DOTS
+// ==========================================
+// This ensures Express doesn't treat dots as file extensions
+router.param("username", (req, res, next, username) => {
+  req.params.username = username;
+  next();
+});
+
+// ==========================================
 // PUBLIC ROUTES
 // ==========================================
-// Routes for viewing public profiles and memories. 
-// protectOptional is used to reveal private data if the owner is the one viewing it.
-
 router.get("/travelers", getFeaturedTravelers);
-router.get("/:username([a-zA-Z0-9._-]+)", protectOptional, getPublicProfile);
-router.get("/:username([a-zA-Z0-9._-]+)/:slug", protectOptional, getPublicMemory);
+router.get("/:username", protectOptional, getPublicProfile);
+router.get("/:username/:slug", protectOptional, getPublicMemory);
 
 module.exports = router;
