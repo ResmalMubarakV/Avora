@@ -15,7 +15,7 @@ const { protectOptional } = require("../middleware/authMiddleware");
 // protectOptional is used to reveal private data if the owner is the one viewing it.
 
 router.get("/travelers", getFeaturedTravelers);
-router.get("/:username", protectOptional, getPublicProfile);
-router.get("/:username/:slug", protectOptional, getPublicMemory);
+router.get("/:username([a-zA-Z0-9._-]+)", protectOptional, getPublicProfile);
+router.get("/:username([a-zA-Z0-9._-]+)/:slug", protectOptional, getPublicMemory);
 
 module.exports = router;
