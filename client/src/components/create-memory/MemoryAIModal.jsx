@@ -34,7 +34,7 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
       
       Stylistic constraint for this specific generation: ${randomStyle}
       
-      Strictly ensure this story does not follow a generic formula or predictable structure. Make the sentence architecture, opening hook, and pacing entirely unique compared to standard travel diaries.`;
+      Strictly ensure this story does not follow a generic formula or predictable structure. Make the sentence architecture, opening hook, and pacing entirely unique compared to standard travel diaries. Do not use hashtags. Make it highly engaging.`;
 
       const generatedStory = await askAI(aiPrompt);
 

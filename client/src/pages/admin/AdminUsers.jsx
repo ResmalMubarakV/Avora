@@ -101,6 +101,38 @@ const AdminUsers = () => {
         }
     };
 
+    // Helper function to render status badge with dot
+    const renderStatusBadge = (status) => {
+        let dotColor = "bg-slate-400";
+        let bgColor = "bg-slate-50";
+        let borderColor = "border-slate-200";
+        let textColor = "text-slate-700";
+
+        if (status === "approved") {
+            dotColor = "bg-emerald-500";
+            bgColor = "bg-emerald-50";
+            borderColor = "border-emerald-200";
+            textColor = "text-emerald-700";
+        } else if (status === "suspended") {
+            dotColor = "bg-amber-500";
+            bgColor = "bg-amber-50";
+            borderColor = "border-amber-200";
+            textColor = "text-amber-700";
+        } else if (status === "pending") {
+            dotColor = "bg-blue-500";
+            bgColor = "bg-blue-50";
+            borderColor = "border-blue-200";
+            textColor = "text-blue-700";
+        }
+
+        return (
+            <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full capitalize border ${bgColor} ${borderColor} ${textColor}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`}></span>
+                {status || "Pending"}
+            </span>
+        );
+    };
+
     return (
         <div className="space-y-6 pb-16 animate-in fade-in duration-500 bg-slate-50/50 min-h-screen p-4 sm:p-8 rounded-3xl">
             <PageTitle title="User Management" />
@@ -197,9 +229,7 @@ const AdminUsers = () => {
                                             <Shield size={9} /> Admin
                                         </span>
                                     )}
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full capitalize border bg-slate-50 text-slate-700">
-                                        {user.status || "Pending"}
-                                    </span>
+                                    {renderStatusBadge(user.status)}
                                 </div>
 
                                 <div className="col-span-1 flex items-center gap-1.5 text-xs font-medium text-slate-500 whitespace-nowrap">

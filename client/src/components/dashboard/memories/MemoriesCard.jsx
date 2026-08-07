@@ -36,13 +36,14 @@ const formatDate = (date) => {
 // ==========================================
 /**
  * Renders a travel memory card for listing pages with hidden descriptions on mobile,
- * limited 3-line description clamping for tablet and above screens, media counts, 
- * properly aligned actions toolbar, double-tap touch liking, and persistent heart button.
+ * limited 3-line description clamping for tablet and above screens.
+ * Contains role-based liking features ensuring viewers see no placeholders.
  */
 const MemoriesCard = ({
   memory,
   username,
   isOwner = false,
+  isLoggedIn = false,
   redirectTo = "",
   onLikeToggle,
 }) => {
@@ -53,9 +54,13 @@ const MemoriesCard = ({
   // Ref to track last tap time for touch screen double-tap detection
   const lastTapRef = useRef(0);
 
+  // Permission check: Can interact if they are the owner or a logged in user
+  const canLike = isOwner || isLoggedIn;
+
   // --- Toggle Like Handler ---
   const handleToggleLike = async (e) => {
     if (e) e.stopPropagation();
+    if (!canLike) return;
 
     try {
       const newStatus = !isLiked;
@@ -74,6 +79,8 @@ const MemoriesCard = ({
 
   // --- Touch Screen Double-Tap Listener ---
   const handleTouchEnd = (e) => {
+    if (!canLike) return;
+
     const currentTime = new Date().getTime();
     const tapLength = currentTime - lastTapRef.current;
     
@@ -138,23 +145,29 @@ const MemoriesCard = ({
           </div>
 
           {/* Persistent Favorite / Placeholder Heart Button */}
-          <div className="absolute right-2 top-2 sm:right-4 sm:top-4 z-10">
-            <button
-              type="button"
-              onClick={handleToggleLike}
-              className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border transition-all cursor-pointer shadow-sm ${
-                isLiked 
-                  ? "bg-rose-50 border-rose-200 text-rose-600 scale-105" 
-                  : "bg-white/90 backdrop-blur-xs border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200"
-              }`}
-              title={isLiked ? "Remove from favorites" : "Mark as favorite"}
-            >
-              <Heart 
-                size={16} 
-                className={`sm:w-[18px] sm:h-[18px] transition-transform duration-300 ${isLiked ? "fill-rose-500 scale-110" : ""} ${animatingHeart ? "scale-125" : ""}`} 
-              />
-            </button>
-          </div>
+          {/* Hide entirely if the visitor cannot like and the memory is unliked */}
+          {(canLike || isLiked) && (
+            <div className="absolute right-2 top-2 sm:right-4 sm:top-4 z-10">
+              <button
+                type="button"
+                onClick={canLike ? handleToggleLike : undefined}
+                disabled={!canLike}
+                className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border transition-all shadow-sm ${
+                  canLike ? "cursor-pointer" : "cursor-default"
+                } ${
+                  isLiked 
+                    ? "bg-rose-50 border-rose-200 text-rose-600" + (canLike ? " hover:scale-105" : "")
+                    : "bg-white/90 backdrop-blur-xs border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200"
+                }`}
+                title={!canLike ? "Liked" : (isLiked ? "Remove from favorites" : "Mark as favorite")}
+              >
+                <Heart 
+                  size={16} 
+                  className={`sm:w-[18px] sm:h-[18px] transition-transform duration-300 ${isLiked ? "fill-rose-500" : ""} ${isLiked && canLike ? "scale-110" : ""} ${animatingHeart ? "scale-125" : ""}`} 
+                />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Card Body */}

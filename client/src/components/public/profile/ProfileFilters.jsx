@@ -6,19 +6,24 @@ import { Check } from "lucide-react";
 /**
  * Renders multi-select filter controls for a traveler's profile memories list,
  * featuring explicit click handlers and touch responsiveness.
+ * Owners see all filters, Viewers see only the 'Liked' filter.
  */
 const ProfileFilters = ({
     isOwner,
     selectedFilters = [],
     toggleFilter,
 }) => {
-    const filterOptions = [
-        { label: "Public", value: "public" },
-        { label: "Private", value: "private" },
-        { label: "Liked", value: "liked" },
-    ];
-
-    if (!isOwner) return null;
+    // 1. Untouched for Owners (Users)
+    // 2. Only 'Liked' filter for Viewers
+    const filterOptions = isOwner
+        ? [
+              { label: "Public", value: "public" },
+              { label: "Private", value: "private" },
+              { label: "Liked", value: "liked" },
+          ]
+        : [
+              { label: "Liked", value: "liked" },
+          ];
 
     return (
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-sm">

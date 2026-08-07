@@ -17,7 +17,7 @@ import { useEffect, useRef, useState } from "react";
 /**
  * Renders an immersive full-screen media lightbox viewer supporting images and videos, 
  * pinch-to-zoom / double-tap zoom gestures, touch swipe navigation, keyboard shortcuts, 
- * thumbnail side rail navigation, and file downloading.
+ * thumbnail side rail navigation, and file downloading with dynamic media slugs.
  */
 const Lightbox = ({
     media,
@@ -238,8 +238,10 @@ const Lightbox = ({
                 .trim()
                 .replace(/\s+/g, "-");
 
+            const mediaType = isVideoItem(selectedMedia) ? "video" : "image";
+
             link.href = objectUrl;
-            link.download = `${safeTitle}-${selectedIndex + 1}.${extension}`;
+            link.download = `${safeTitle}-${mediaType}-${selectedIndex + 1}.${extension}`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);

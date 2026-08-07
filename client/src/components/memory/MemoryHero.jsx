@@ -1,23 +1,20 @@
 import MemoryInfo from "./MemoryInfo";
 import CoverImage from "./CoverImage";
 import MediaPreview from "./MediaPreview";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, Pencil, FileText } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 // ==========================================
 // MEMORY HERO COMPONENT
 // ==========================================
-/**
- * Renders the top hero section for a specific travel memory view. 
- * Features an outside navigation header with the Back button aligned to the left 
- * and the Edit button aligned to the right corresponding with the cover banner.
- */
 const MemoryHero = ({
     username,
     memory,
     openGallery,
     isOwner,
+    isLoggedIn, // ADDED: Must accept isLoggedIn
     locationState,
+    onDownloadClick,
 }) => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -61,47 +58,79 @@ const MemoryHero = ({
                 </button>
 
                 {isOwner && (
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                `/dashboard/edit-memory/${memory._id}`,
-                                {
-                                    state: {
-                                        from: location.pathname,
-                                    },
-                                }
-                            )
-                        }
-                        className="
-                            inline-flex
-                            items-center
-                            gap-2
-                            rounded-2xl
-                            border
-                            border-slate-200/80
-                            bg-white/90
-                            px-4
-                            py-2.5
-                            text-xs
-                            sm:text-sm
-                            font-bold
-                            text-slate-700
-                            shadow-sm
-                            backdrop-blur-md
-                            transition-all
-                            duration-300
-                            cursor-pointer
-                            hover:bg-white
-                            hover:text-slate-900
-                            hover:border-slate-300
-                            active:scale-95
-                        "
-                    >
-                        <Pencil size={15} />
-                        <span className="hidden sm:inline">Edit Memory</span>
-                        <span className="sm:hidden">Edit</span>
-                    </button>
+                    <div className="flex items-center gap-3">
+                        {/* Export PDF Button (Navigates to Preview Screen) */}
+                        <button
+                            type="button"
+                            onClick={onDownloadClick}
+                            className="
+                                inline-flex
+                                items-center
+                                gap-2
+                                rounded-2xl
+                                bg-slate-900
+                                px-4
+                                py-2.5
+                                text-xs
+                                sm:text-sm
+                                font-bold
+                                text-white
+                                shadow-sm
+                                transition-all
+                                duration-300
+                                cursor-pointer
+                                hover:bg-slate-800
+                                active:scale-95
+                            "
+                        >
+                            <FileText size={15} />
+                            <span className="hidden sm:inline">Export PDF</span>
+                            <span className="sm:hidden">PDF</span>
+                        </button>
+
+                        {/* Existing Edit Memory Button */}
+                        <button
+                            type="button"
+                            onClick={() =>
+                                navigate(
+                                    `/dashboard/edit-memory/${memory._id}`,
+                                    {
+                                        state: {
+                                            from: location.pathname,
+                                        },
+                                    }
+                                )
+                            }
+                            className="
+                                inline-flex
+                                items-center
+                                gap-2
+                                rounded-2xl
+                                border
+                                border-slate-200/80
+                                bg-white/90
+                                px-4
+                                py-2.5
+                                text-xs
+                                sm:text-sm
+                                font-bold
+                                text-slate-700
+                                shadow-sm
+                                backdrop-blur-md
+                                transition-all
+                                duration-300
+                                cursor-pointer
+                                hover:bg-white
+                                hover:text-slate-900
+                                hover:border-slate-300
+                                active:scale-95
+                            "
+                        >
+                            <Pencil size={15} />
+                            <span className="hidden sm:inline">Edit Memory</span>
+                            <span className="sm:hidden">Edit</span>
+                        </button>
+                    </div>
                 )}
             </div>
 
@@ -116,40 +145,20 @@ const MemoryHero = ({
                     items-start
                 "
             >
-                {/* Left Column: Memory Metadata & Info Card */}
                 <div className="xl:col-span-5">
-                    <div
-                        className="
-                            rounded-[32px]
-                            border
-                            border-slate-200/80
-                            bg-white
-                            shadow-xl
-                            shadow-sky-950/[0.03]
-                            overflow-hidden
-                        "
-                    >
+                    <div className="rounded-[32px] border border-slate-200/80 bg-white shadow-xl shadow-sky-950/[0.03] overflow-hidden">
                         <div className="p-6 sm:p-8 lg:p-10">
-                            <MemoryInfo
-                                memory={memory}
-                            />
+                            {/* ADDED: Pass auth props securely down to the Info block */}
+                            <MemoryInfo memory={memory} isOwner={isOwner} isLoggedIn={isLoggedIn} />
                         </div>
                     </div>
                 </div>
 
-                {/* Right Column: Cover Banner & Media Thumbnails Preview */}
                 <div className="xl:col-span-7">
-                    <CoverImage
-                        image={memory.coverImage}
-                        onClick={() => openGallery(0)}
-                    />
-
+                    <CoverImage image={memory.coverImage} onClick={() => openGallery(0)} />
                     {memory.media && memory.media.length > 0 && (
                         <div className="mt-4 sm:mt-6">
-                            <MediaPreview
-                                media={memory.media}
-                                onOpenGallery={openGallery}
-                            />
+                            <MediaPreview media={memory.media} onOpenGallery={openGallery} />
                         </div>
                     )}
                 </div>

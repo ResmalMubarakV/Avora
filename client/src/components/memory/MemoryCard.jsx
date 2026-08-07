@@ -31,19 +31,17 @@ const formatDate = (date) => {
 // ==========================================
 // MEMORY CARD COMPONENT
 // ==========================================
-/**
- * Renders an interactive travel memory card with cover image zoom, public/private badges,
- * an interactive like heart button, and hover-triggered memory actions.
- */
-const MemoryCard = ({ memory, onLikeToggle }) => {
+const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false }) => {
     const navigate = useNavigate();
     const [liked, setLiked] = useState(memory?.isLiked || false);
     const [likeLoading, setLikeLoading] = useState(false);
 
+    const canLike = isOwner || isLoggedIn;
+
     // --- Handle Like Toggle API Call ---
     const handleLikeClick = async (e) => {
         e.stopPropagation(); // Prevent card navigation click
-        if (likeLoading) return;
+        if (!canLike || likeLoading) return;
 
         try {
             setLikeLoading(true);
@@ -112,34 +110,36 @@ const MemoryCard = ({ memory, onLikeToggle }) => {
                 />
 
                 {/* Top-Left: Interactive Like Button Placeholder / Toggle */}
-                <div className="absolute top-3 left-3 z-10">
-                    <button
-                        type="button"
-                        onClick={handleLikeClick}
-                        aria-label="Like Memory"
-                        className={`
-                            flex
-                            h-9
-                            w-9
-                            items-center
-                            justify-center
-                            rounded-full
-                            backdrop-blur-md
-                            transition-all
-                            duration-200
-                            cursor-pointer
-                            shadow-md
-                            active:scale-90
-                            ${
-                                liked
-                                    ? "bg-rose-500 text-white shadow-rose-500/30"
-                                    : "bg-white/90 text-slate-600 hover:bg-white hover:text-rose-500"
-                            }
-                        `}
-                    >
-                        <Heart size={16} className={liked ? "fill-current" : ""} />
-                    </button>
-                </div>
+                {(canLike || liked) && (
+                    <div className="absolute top-3 left-3 z-10">
+                        <button
+                            type="button"
+                            onClick={canLike ? handleLikeClick : undefined}
+                            aria-label="Like Memory"
+                            disabled={!canLike || likeLoading}
+                            className={`
+                                flex
+                                h-9
+                                w-9
+                                items-center
+                                justify-center
+                                rounded-full
+                                backdrop-blur-md
+                                transition-all
+                                duration-200
+                                shadow-md
+                                ${canLike ? "cursor-pointer active:scale-90" : "cursor-default"}
+                                ${
+                                    liked
+                                        ? "bg-rose-500 text-white shadow-rose-500/30"
+                                        : "bg-white/90 text-slate-600 hover:bg-white hover:text-rose-500"
+                                }
+                            `}
+                        >
+                            <Heart size={16} className={liked ? "fill-current" : ""} />
+                        </button>
+                    </div>
+                )}
 
                 {/* Top-Right: Visibility Status Badge */}
                 <div className="absolute top-3 right-3">
@@ -213,11 +213,9 @@ const MemoryCard = ({ memory, onLikeToggle }) => {
                         absolute
                         bottom-5
                         right-5
-
                         opacity-0
                         transition-opacity
                         duration-300
-
                         group-hover:opacity-100
                     "
                     onClick={(e) => e.stopPropagation()}

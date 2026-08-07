@@ -45,12 +45,13 @@ const MemoriesSection = ({
 
             if (!matchesSearch) return false;
 
-            // If not owner, strictly force public only
-            if (!isOwner) {
-                return memory.isPublic;
+            // If not owner, strictly force public only. 
+            // (Use an early return for false, rather than true, so we can still process filters)
+            if (!isOwner && !memory.isPublic) {
+                return false;
             }
 
-            // If owner and no filters selected, match everything
+            // If no filters selected, match everything that passed the visibility check above
             if (selectedFilters.length === 0) return true;
 
             // Intersection logic: Memory must satisfy ALL selected filter criteria (e.g., Public AND Liked)
@@ -206,14 +207,12 @@ const MemoriesSection = ({
                 </div>
             </div>
 
-            {/* Multi-Select Filter Bar Component */}
-            {isOwner && (
-                <ProfileFilters
-                    isOwner={isOwner}
-                    selectedFilters={selectedFilters}
-                    toggleFilter={toggleFilter}
-                />
-            )}
+            {/* Multi-Select Filter Bar Component - Now unconditionally rendered */}
+            <ProfileFilters
+                isOwner={isOwner}
+                selectedFilters={selectedFilters}
+                toggleFilter={toggleFilter}
+            />
 
             {/* Empty State or Grid Content */}
             {paginatedMemories.length === 0 ? (
@@ -256,7 +255,7 @@ const MemoriesSection = ({
                     >
                         {isOwner
                             ? "Try changing your filters or create a new memory."
-                            : "This traveler hasn't shared any public memories yet."}
+                            : "This traveler hasn't shared any public memories matching your filters yet."}
                     </p>
                 </div>
             ) : (
