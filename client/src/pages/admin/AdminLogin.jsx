@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, Mail, Loader2, ShieldAlert } from "lucide-react";
 import api from "../../api/axios";
-import PageTitle from "../../components/common/PageTitle";
 
 // ==========================================
 // ADMIN LOGIN PAGE COMPONENT
@@ -34,6 +33,7 @@ const AdminLogin = () => {
                 return;
             }
 
+            // Save both token and user role to localStorage
             localStorage.setItem("token", data.token);
             localStorage.setItem("userRole", data.user.role);
 
@@ -47,7 +47,6 @@ const AdminLogin = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4">
-            <PageTitle title="Admin Sign In" />
             <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
                 <div className="text-center mb-8">
                     <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-[#1E3A8A] to-[#3559D4] text-white shadow-lg shadow-blue-500/20 mb-4">

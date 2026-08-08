@@ -8,7 +8,6 @@ import {
     Shield,
     Menu,
     X,
-    Settings,
 } from "lucide-react";
 import LogoutModal from "../navigation/LogoutModal";
 
@@ -42,11 +41,6 @@ const AdminSidebar = ({ sidebarOpen, setSidebarOpen, isMobile }) => {
             label: "Memories",
             to: "/admin/memories",
             icon: Images,
-        },
-        {
-            label: "Settings",
-            to: "/admin/settings",
-            icon: Settings,
         },
     ];
 

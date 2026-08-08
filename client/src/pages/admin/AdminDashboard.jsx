@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getDashboard, approveUser, suspendUser, deleteMemory } from "../../api/adminApi";
 import api from "../../api/axios";
 import DashboardStats from "../../components/admin/DashboardStats";
 import PendingUsers from "../../components/admin/PendingUsers";
 import RecentUsers from "../../components/admin/RecentUsers";
 import RecentMemories from "../../components/admin/RecentMemories";
-import PageTitle from "../../components/common/PageTitle";
 import { ShieldAlert, Loader2, X, Sparkles, Activity, Users, Images, Clock, Eye, EyeOff } from "lucide-react";
 
 // ==========================================
@@ -14,26 +13,18 @@ import { ShieldAlert, Loader2, X, Sparkles, Activity, Users, Images, Clock, Eye,
 // ==========================================
 const AdminDashboard = () => {
     const navigate = useNavigate();
-    const location = useLocation();
     const [dashboard, setDashboard] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    // Deletion Modal State
     const [selectedMemory, setSelectedMemory] = useState(null);
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [deleteError, setDeleteError] = useState("");
 
+    // Dynamic Greeting State based on Time of Day
     const [greeting, setGreeting] = useState("Welcome back");
-
-    // Automatically scroll to top on initial page load or redirect
-    useEffect(() => {
-        window.scrollTo({
-            top: 0,
-            left: 0,
-            behavior: "instant",
-        });
-    }, [location.pathname]);
 
     useEffect(() => {
         const hour = new Date().getHours();
@@ -42,6 +33,7 @@ const AdminDashboard = () => {
         else setGreeting("Good Evening");
     }, []);
 
+    // Dynamic Core Status Ticker State
     const [coreStatusIndex, setCoreStatusIndex] = useState(0);
     const coreStatuses = [
         { label: "Operational Online", sub: "Cluster Healthy", color: "text-emerald-300", dot: "bg-emerald-400" },
@@ -106,7 +98,7 @@ const AdminDashboard = () => {
         const username = memory.user?.username;
         const slug = memory.slug || memory._id;
         if (username) {
-            window.open(`/u/${username}/${slug}`, "_blank");
+            window.open(`/${username}/${slug}`, "_blank");
         } else {
             console.error("Author username missing for redirection.");
         }
@@ -151,7 +143,6 @@ const AdminDashboard = () => {
     if (loading) {
         return (
             <div className="flex h-[80vh] items-center justify-center bg-slate-50">
-                <PageTitle title="Admin Dashboard" />
                 <div className="flex flex-col items-center gap-3">
                     <Loader2 size={32} className="animate-spin text-[#3559D4]" />
                     <p className="text-xs font-bold uppercase tracking-widest text-slate-400 animate-pulse">
@@ -169,8 +160,6 @@ const AdminDashboard = () => {
 
     return (
         <div className="space-y-8 pb-16 animate-in fade-in duration-500 bg-slate-50/50 min-h-screen p-4 sm:p-8 rounded-3xl">
-            <PageTitle title="Admin Control Center" />
-            
             {/* Elite Alive Hero Header */}
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#3559D4] p-8 sm:p-10 text-white shadow-xl">
                 <div className="absolute -right-12 -top-12 h-64 w-64 rounded-full bg-blue-400/10 blur-3xl pointer-events-none" />
@@ -185,6 +174,7 @@ const AdminDashboard = () => {
                             {greeting}, Administrator
                         </h1>
                         
+                        {/* Live Status Sub-metrics Summary */}
                         <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-blue-100/90 font-medium">
                             <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-xl backdrop-blur-md border border-white/10">
                                 <Users size={14} className="text-blue-200" />
@@ -201,6 +191,7 @@ const AdminDashboard = () => {
                         </div>
                     </div>
 
+                    {/* Dynamic Live System Core Ticker Badge */}
                     <div className="flex items-center gap-3 bg-white/10 border border-white/15 rounded-2xl px-4 py-3 backdrop-blur-md self-start md:self-auto shadow-inner transition-all duration-500">
                         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white border border-white/20">
                             <Activity size={18} className="animate-pulse text-blue-200" />
@@ -219,6 +210,7 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
+            {/* Metric Stats Cards */}
             <DashboardStats
                 totalUsers={dashboard?.stats?.totalUsers || 0}
                 pendingUsers={dashboard?.stats?.pendingUsers || 0}
@@ -227,16 +219,18 @@ const AdminDashboard = () => {
                 onCardClick={handleCardClick}
             />
 
+            {/* Pending Approvals Queue */}
             <PendingUsers
                 users={dashboard?.pendingUsers || []}
                 onApprove={handleApprove}
                 onSuspend={handleSuspend}
             />
 
+            {/* Recent Activity Grid */}
             <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
                 <RecentUsers
                     users={dashboard?.recentUsers || []}
-                    onView={(user) => window.open(`/u/${user.username}`, "_blank")}
+                    onView={(user) => window.open(`/${user.username}`, "_blank")}
                 />
                 <RecentMemories
                     memories={dashboard?.recentMemories || []}
@@ -248,9 +242,12 @@ const AdminDashboard = () => {
                 />
             </div>
 
+            {/* Secure Password Confirmation Modal */}
             {selectedMemory && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
                     <div className="w-full max-w-md rounded-3xl border border-red-200 bg-white shadow-[0_20px_50px_rgba(239,68,68,0.15)] overflow-hidden">
+                        
+                        {/* Thin Red Accent Top Border */}
                         <div className="h-1.5 w-full bg-gradient-to-r from-red-500 via-rose-500 to-red-600" />
 
                         <div className="p-7">
@@ -276,9 +273,28 @@ const AdminDashboard = () => {
                                 </button>
                             </div>
 
+                            {/* Stronger Warning Language */}
                             <p className="text-sm text-slate-700 mb-5 leading-relaxed font-medium">
-                                This action cannot be undone. Permanently delete <span className="font-extrabold text-slate-900">"{selectedMemory.title}"</span> and all associated files?
+                                This action cannot be undone. Permanently delete <span className="font-extrabold text-slate-900">"{selectedMemory.title}"</span> and all associated photos, videos, and metadata?
                             </p>
+
+                            {/* Warning Box */}
+                            <div className="mb-5 rounded-2xl border border-red-100 bg-red-50/60 p-4 text-xs text-red-900 space-y-2">
+                                <div className="flex items-center gap-2 font-bold text-red-800">
+                                    <span className="text-red-600">⚠</span>
+                                    <span>Permanent Action</span>
+                                </div>
+                                <p className="text-red-700/90 font-medium">Deleting this memory will permanently remove:</p>
+                                <ul className="list-disc list-inside space-y-1 text-red-700 font-semibold pl-1">
+                                    <li>Cover image</li>
+                                    <li>Gallery media</li>
+                                    <li>Travel story</li>
+                                    <li>Associated Cloudinary files</li>
+                                </ul>
+                                <p className="pt-1 text-[11px] font-bold text-red-800 uppercase tracking-wide border-t border-red-200/60 mt-2">
+                                    This action cannot be reversed.
+                                </p>
+                            </div>
 
                             {deleteError && (
                                 <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-3.5 text-xs font-semibold text-red-700 animate-shake">
@@ -312,6 +328,9 @@ const AdminDashboard = () => {
                                             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                         </button>
                                     </div>
+                                    <p className="text-[11px] text-slate-400 mt-1.5 font-medium">
+                                        Press Enter to confirm
+                                    </p>
                                 </div>
 
                                 <div className="flex items-center justify-end gap-3 pt-3">
