@@ -47,13 +47,10 @@ const PublicMemory = () => {
 
   // ==========================================
   // NATIVE PRINT HANDLER
-  // Triggers the OS dialog so the user can preview and pick a save location.
   // ==========================================
   const handleNativePrint = () => {
-    setActiveSlot(null); // Clear editing borders
+    setActiveSlot(null); 
     const prevTitle = document.title;
-    
-    // Change document title temporarily so the default PDF file name is clean
     document.title = `${memory?.slug || 'memory'}-diary`;
 
     setTimeout(() => {
@@ -90,7 +87,6 @@ const PublicMemory = () => {
     }
   }, [isPreviewMode, memory, mediaConfig, allImages]);
 
-  // Responsive UI Scaling
   useEffect(() => {
     if (!isPreviewMode) return;
     
@@ -188,14 +184,38 @@ const PublicMemory = () => {
       <>
         {/* ========================================== */}
         {/* EXACT PDF EXPORT TARGET (VISIBLE ONLY TO PRINTER) */}
-        {/* Hidden on screen (`hidden`), shown during print (`print:block`) */}
         {/* ========================================== */}
         <div className="hidden print:block absolute top-0 left-0 bg-white z-[999999] m-0 p-0 overflow-hidden" style={{ width: "800px", height: "1131px" }}>
+            
+            {/* 
+               CRITICAL FIX: 
+               Injecting the exact color-adjust rules directly into the DOM so the 
+               production build tools (Vite/Tailwind) cannot delete them during minification.
+            */}
+            <style dangerouslySetInnerHTML={{ __html: `
+              @media print {
+                @page { 
+                  size: 800px 1131px !important; 
+                  margin: 0 !important; 
+                }
+                html, body { 
+                  margin: 0 !important; 
+                  padding: 0 !important; 
+                  background-color: white !important; 
+                }
+                *, *::before, *::after {
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
+                }
+              }
+            `}} />
+
             <PrintableView
                 memory={memory}
                 layoutIndex={layoutIndex}
                 mediaConfig={mediaConfig}
-                isEditing={false} // Clean export with no edit borders
+                isEditing={false} 
                 activeSlot={null}
                 onSlotClick={() => {}}
                 onUpdateConfig={() => {}}
@@ -204,7 +224,6 @@ const PublicMemory = () => {
 
         {/* ========================================== */}
         {/* INTERACTIVE UI (HIDDEN DURING PRINT) */}
-        {/* Uses `print:hidden` to disappear when the print dialog opens */}
         {/* ========================================== */}
         <div className="print:hidden min-h-[100dvh] h-screen bg-slate-900 flex flex-col overflow-hidden fixed inset-0 z-[100]">
             <div className="flex-none flex items-center justify-between bg-slate-950/90 backdrop-blur-md px-4 sm:px-8 py-4 border-b border-slate-800 shadow-xl z-50">
@@ -214,14 +233,12 @@ const PublicMemory = () => {
 
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2 sm:gap-4">
-                        {/* Hide "Drag & Pinch Photo" on small screens to prevent overflow */}
                         <span className="text-white/60 text-[10px] sm:text-xs font-semibold tracking-wider uppercase hidden md:flex items-center gap-2">
                             <MousePointerClick size={14}/> Drag & Pinch Photo
                         </span>
                         
                         <div className="hidden md:block w-px h-4 bg-slate-800 mx-1"></div>
                         
-                        {/* Always show X/20, but hide the word "Template" on mobile */}
                         <span className="text-white/60 text-[10px] sm:text-xs font-semibold tracking-wider uppercase">
                             <span className="hidden sm:inline">Template </span>{layoutIndex + 1}/20
                         </span>

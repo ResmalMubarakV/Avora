@@ -48,7 +48,21 @@ body {
     margin: 0 !important;
     padding: 0 !important;
     background-color: white !important;
-    /* Force browsers to print all background colors and images */
+  }
+
+  /* 
+    AGGRESSIVE COLOR OVERRIDE:
+    Forces the browser to keep your exact text colors and dark backgrounds, 
+    preventing it from turning white text black to "save ink".
+  */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Redundant safeguard for text elements specifically */
+  h1, h2, h3, h4, h5, h6, p, span, div {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
