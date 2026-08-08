@@ -47,7 +47,7 @@ const PublicMemory = () => {
 
   // ==========================================
   // INJECT PRINT STYLES DIRECTLY TO <HEAD>
-  // Prevents Vite from deleting the color-adjust rules in production.
+  // Updated with explicit zero margins to remove mobile print borders
   // ==========================================
   useEffect(() => {
     if (!isPreviewMode) return;
@@ -65,6 +65,8 @@ const PublicMemory = () => {
             html, body { 
               margin: 0 !important; 
               padding: 0 !important; 
+              width: 800px !important;
+              height: 1131px !important;
               background-color: white !important; 
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
@@ -225,7 +227,6 @@ const PublicMemory = () => {
       <>
         {/* ========================================== */}
         {/* EXACT PDF EXPORT TARGET (VISIBLE ONLY TO PRINTER) */}
-        {/* Renders far off-screen instead of display:none to guarantee background colors are computed */}
         {/* ========================================== */}
         <div 
           className="fixed top-[-20000px] left-[-20000px] print:top-0 print:left-0 z-[999999] m-0 p-0 overflow-hidden bg-white" 
