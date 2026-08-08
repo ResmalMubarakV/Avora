@@ -66,7 +66,8 @@ const PublicMemory = () => {
 
   // --- NATIVE PRINT ENGINE (PRODUCTION SECURE) ---
   const handlePrint = useReactToPrint({
-    contentRef: printComponentRef,
+    // FIX: Use the standard v2.x 'content' function instead of 'contentRef'
+    content: () => printComponentRef.current, 
     documentTitle: `${memory?.slug || 'memory'}-diary`,
     pageStyle: `
       @page { size: 800px 1131px; margin: 0; }
@@ -89,7 +90,6 @@ const PublicMemory = () => {
         }
         
         /* 1. DEFEAT TAILWIND'S PRODUCTION PRINT RESETS */
-        /* The 'revert' keyword forces the browser to ignore Tailwind's !important resets and fall back to our inline component styles */
         *, ::before, ::after {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
@@ -112,7 +112,6 @@ const PublicMemory = () => {
     `,
     onBeforePrint: () => {
       setActiveSlot(null);
-      // Give Vercel's production network 500ms to paint the images inside the hidden print iframe
       return new Promise((resolve) => setTimeout(resolve, 500));
     },
   });
