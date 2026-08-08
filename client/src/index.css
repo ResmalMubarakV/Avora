@@ -35,14 +35,9 @@ body {
 
 /* ==========================================
    PRODUCTION & MOBILE PRINT SAFEGUARDS
-   This is the ONLY thing that controls what gets printed.
-   No iframe, no react-to-print pageStyle — just this.
    ========================================== */
 @media print {
   @page {
-    /* 800x1131 CSS px @ 96dpi, expressed in inches so mobile OS
-       print pipelines (which often ignore raw px @page sizes) still
-       honor it. */
     size: 8.33in 11.78in;
     margin: 0 !important;
   }
@@ -71,8 +66,7 @@ body {
     visibility: visible !important;
   }
 
-  /* 3. Detach the print container from any scaled/transformed ancestor
-        (the mobile preview scaling wrapper) and pin it top-left */
+  /* 3. Detach print container and pin top-left with a solid white base */
   #actual-print-container {
     position: fixed !important;
     top: 0 !important;
@@ -85,18 +79,17 @@ body {
     transform: none !important;
     overflow: hidden !important;
     z-index: 2147483647 !important;
+    box-shadow: none !important;
+    background-color: #ffffff !important; /* Forces solid white paper background */
   }
 
-  /* Neutralize the preview-scale wrapper that sits directly around
-     the print container in PublicMemory.jsx */
   div:has(> #actual-print-container) {
     transform: none !important;
     width: 800px !important;
     height: 1131px !important;
   }
 
-  /* 4. Force Outfit everywhere, with a tight fallback stack in case a
-        late-mounted element somehow hasn't inherited it */
+  /* 4. Force Outfit font and box sizing */
   #actual-print-container,
   #actual-print-container * {
     font-family: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
@@ -104,6 +97,7 @@ body {
     print-color-adjust: exact !important;
     color-adjust: exact !important;
     box-sizing: border-box !important;
+    box-shadow: none !important;
   }
 
   /* 5. Prevent flexbox image stretching */
@@ -113,5 +107,11 @@ body {
     min-width: 0 !important;
     min-height: 0 !important;
     object-fit: cover !important;
+  }
+
+  /* 6. Clean up layout wrapper background artifacts */
+  #actual-print-container div {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }

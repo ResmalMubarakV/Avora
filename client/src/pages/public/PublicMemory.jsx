@@ -13,15 +13,6 @@ import PrintableView from "../../components/memory/PrintableView";
 import { Compass, Download, X, ChevronLeft, ChevronRight, ZoomIn, RefreshCcw, MousePointerClick, Settings2, MoveHorizontal, MoveVertical } from "lucide-react";
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 
-// NOTE: react-to-print has been removed from the print flow. It clones
-// the target node into a fresh, isolated iframe document that has to
-// re-fetch fonts and re-establish its own CSS from scratch — that's
-// what caused the font/overlap race. We now call window.print() on the
-// LIVE DOM directly and let the global @media print CSS (in index.css)
-// handle isolation. This means fonts, colors, and layout are already
-// correct because it's literally the page already on screen — nothing
-// to re-load, nothing to race against.
-
 // ==========================================
 // FIX LEAFLET MARKER BUG IN PRODUCTION
 // ==========================================
@@ -47,8 +38,6 @@ const MapInvalidator = () => {
   return null;
 };
 
-// Must match the #actual-print-container selector used in the global
-// @media print CSS block in index.css.
 const PRINT_ROOT_ID = "actual-print-container";
 
 const PublicMemory = () => {
@@ -84,15 +73,13 @@ const PublicMemory = () => {
   ].filter(Boolean))).map(url => ({ url }));
 
   // ==========================================
-  // PRINT HANDLER — live DOM, no iframe.
+  // FINAL LIVE-DOM PRINT HANDLER
   // ==========================================
   const handlePrint = useCallback(() => {
     if (isPrinting) return;
     setIsPrinting(true);
 
-    // 1. Close the editor overlay first — the "isActive" border/drag-hint
-    //    UI lives inside #actual-print-container (rendered by SafeImage),
-    //    so it must be cleared before we snapshot, not just hidden by CSS.
+    // Clear editing outlines / handles so they never appear in the PDF export
     setActiveSlot(null);
 
     const prevTitle = document.title;
@@ -105,14 +92,9 @@ const PublicMemory = () => {
     };
     window.addEventListener("afterprint", restore);
 
-    // 2. Wait one paint frame for React to actually remove the overlay
-    //    from the DOM, then confirm fonts are ready (should resolve
-    //    near-instantly since this is the live page, not a fresh
-    //    iframe document), then print.
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const go = () => window.print();
-
         if (document.fonts && document.fonts.ready) {
           document.fonts.ready.then(go).catch(go);
         } else {
@@ -121,8 +103,6 @@ const PublicMemory = () => {
       });
     });
   }, [isPrinting, memory]);
-
-  const imageParamSetup = imageParam; // (kept for clarity, no behavior change)
 
   useEffect(() => {
     if (memory?.latitude && memory?.longitude) {
