@@ -18,6 +18,7 @@ const userResponse = (user) => ({
   coverImage: user.coverImage,
   bio: user.bio,
   location: user.location,
+  isLocked: user.isLocked,
   website: user.website,
   instagram: user.instagram,
   youtube: user.youtube,
@@ -79,11 +80,11 @@ const getMyProfile = async (req, res) => {
 // UPDATE PROFILE
 // ==========================================
 /**
- * Updates user text/link fields and validates username changes.
+ * Updates user text/link/privacy fields and validates username changes.
  */
 const updateProfile = async (req, res) => {
   try {
-    const { name, username, bio, location, website, instagram, youtube, linkedin } = req.body;
+    const { name, username, bio, location, isLocked, website, instagram, youtube, linkedin } = req.body;
 
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({ message: "Please Provide Data To Update" });
@@ -116,6 +117,11 @@ const updateProfile = async (req, res) => {
     user.username = username ?? user.username;
     user.bio = bio ?? user.bio;
     user.location = location ?? user.location;
+    
+    if (typeof isLocked === "boolean") {
+      user.isLocked = isLocked;
+    }
+
     user.website = website ?? user.website;
     user.instagram = instagram ?? user.instagram;
     user.youtube = youtube ?? user.youtube;

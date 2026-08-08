@@ -5,18 +5,16 @@ const Memory = require("../models/Memory");
 // GET FEATURED TRAVELERS
 // ==========================================
 /**
- * Returns approved users who have at least one public memory.
+ * Returns approved users who have at least one public memory and whose profiles are not locked.
  */
 const getFeaturedTravelers = async (req, res) => {
   try {
-    // Fetch all approved standard users
-    const users = await User.find({ role: "user", status: "approved" })
+    const users = await User.find({ role: "user", status: "approved", isLocked: false })
       .select("-password -email")
       .sort({ createdAt: -1 });
 
     const travelers = [];
 
-    // Check each user for public memories to build the featured list
     for (const user of users) {
       const publicMemoryCount = await Memory.countDocuments({
         user: user._id,
@@ -47,6 +45,7 @@ const getFeaturedTravelers = async (req, res) => {
 // ==========================================
 /**
  * Retrieves a user's public profile and their associated memories.
+ * Hides memories completely if the profile is locked and the requester is not the owner.
  */
 const getPublicProfile = async (req, res) => {
   try {
@@ -62,15 +61,18 @@ const getPublicProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Determine if requester is the profile owner to expose private memories
     const isOwner = req.user && req.user._id.toString() === user._id.toString();
 
-    const memories = await Memory.find({
-      user: user._id,
-      ...(isOwner ? {} : { isPublic: true }),
-    })
-      .populate("user", "username")
-      .sort({ createdAt: -1 });
+    // STRICT CHECK: If profile is locked and viewer is not owner, return empty memories array
+    let memories = [];
+    if (!user.isLocked || isOwner) {
+      memories = await Memory.find({
+        user: user._id,
+        ...(isOwner ? {} : { isPublic: true }),
+      })
+        .populate("user", "username")
+        .sort({ createdAt: -1 });
+    }
 
     return res.status(200).json({ user, memories });
   } catch (error) {
@@ -84,6 +86,7 @@ const getPublicProfile = async (req, res) => {
 // ==========================================
 /**
  * Retrieves a specific memory by username and slug.
+ * Throws a 403 error if the profile is locked, prompting the frontend to redirect.
  */
 const getPublicMemory = async (req, res) => {
   try {
@@ -99,8 +102,12 @@ const getPublicMemory = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check ownership to allow viewing of private memories
     const isOwner = req.user && req.user._id.toString() === user._id.toString();
+
+    // STRICT CHECK: Block access to individual memories if profile is locked and requester is not owner
+    if (user.isLocked && !isOwner) {
+      return res.status(403).json({ message: "This profile is locked." });
+    }
 
     const memory = await Memory.findOne({
       user: user._id,

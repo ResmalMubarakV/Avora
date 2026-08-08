@@ -129,20 +129,22 @@ const MemoriesCard = ({
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
 
-          {/* Visibility Badge */}
-          <div className="absolute left-2 top-2 sm:left-4 sm:top-4">
-            {memory.isPublic ? (
-              <div className="flex items-center gap-1 sm:gap-2 rounded-full bg-white/95 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-slate-700 backdrop-blur shadow">
-                <Globe size={12} className="sm:w-3.5 sm:h-3.5" />
-                <span className="hidden xs:inline">Public</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1 sm:gap-2 rounded-full bg-white/95 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-slate-700 backdrop-blur shadow">
-                <Lock size={12} className="sm:w-3.5 sm:h-3.5" />
-                <span className="hidden xs:inline">Private</span>
-              </div>
-            )}
-          </div>
+          {/* Visibility Badge: Shown only if isOwner is true, or if it's private */}
+          {(isOwner || !memory.isPublic) && (
+            <div className="absolute left-2 top-2 sm:left-4 sm:top-4">
+              {memory.isPublic ? (
+                <div className="flex items-center gap-1 sm:gap-2 rounded-full bg-white/95 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-slate-700 backdrop-blur shadow">
+                  <Globe size={12} className="sm:w-3.5 sm:h-3.5" />
+                  <span className="hidden xs:inline">Public</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 sm:gap-2 rounded-full bg-white/95 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-slate-700 backdrop-blur shadow">
+                  <Lock size={12} className="sm:w-3.5 sm:h-3.5" />
+                  <span className="hidden xs:inline">Private</span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Persistent Favorite / Placeholder Heart Button */}
           {/* Hide entirely if the visitor cannot like and the memory is unliked */}

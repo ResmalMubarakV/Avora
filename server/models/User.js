@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 // ==========================================
 /**
  * Defines the structure for application users.
- * Includes authentication, profile details, social links, and account status.
+ * Includes authentication, profile details, social links, account status, and profile locking.
  */
 const userSchema = new mongoose.Schema(
   {
@@ -64,6 +64,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
       trim: true,
+    },
+
+    // --- Privacy Settings ---
+    isLocked: {
+      type: Boolean,
+      default: false,
     },
 
     // --- Social Links ---

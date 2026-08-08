@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Lock, Unlock } from "lucide-react";
 
 import {
   getMyProfile,
@@ -21,6 +21,48 @@ import ProfilePreview from "../../components/edit-profile/ProfilePreview";
 import ActionButtons from "../../components/edit-profile/ActionButtons";
 import PageTitle from "../../components/common/PageTitle";
 import DiscardMemoryModal from "../../components/create-memory/DiscardMemoryModal";
+
+// ==========================================
+// PROFILE LOCK TOGGLE CARD COMPONENT
+// ==========================================
+const ProfileLockToggle = ({ formData, setFormData }) => {
+  const isLocked = formData.isLocked ?? false;
+
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+      <div className="flex items-start justify-between gap-6">
+        <div className="flex gap-4">
+          <div className={`flex h-12 w-12 items-center justify-center rounded-2xl transition ${isLocked ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-500"}`}>
+            {isLocked ? <Lock size={22} /> : <Unlock size={22} />}
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900">Lock Profile</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              {isLocked 
+                ? "Your profile is locked. Only your bio is visible to public visitors." 
+                : "Your profile is public. Everyone can view your profile and travel memories."}
+            </p>
+          </div>
+        </div>
+
+        {/* Toggle Switch */}
+        <button
+          type="button"
+          onClick={() => setFormData((prev) => ({ ...prev, isLocked: !prev.isLocked }))}
+          className={`relative h-8 w-14 rounded-full transition-all duration-300 cursor-pointer shrink-0 ${
+            isLocked ? "bg-[#3559D4]" : "bg-slate-300"
+          }`}
+        >
+          <span
+            className={`absolute top-1 h-6 w-6 rounded-full bg-white shadow-md transition-all duration-300 ${
+              isLocked ? "left-7" : "left-1"
+            }`}
+          />
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const EditProfile = () => {
   const navigate = useNavigate();
@@ -43,6 +85,7 @@ const EditProfile = () => {
     instagram: "",
     youtube: "",
     linkedin: "",
+    isLocked: false,
     profileImage: null,
     existingProfileImage: "",
     coverImage: null,
@@ -104,6 +147,7 @@ const EditProfile = () => {
           instagram: user.instagram || "",
           youtube: user.youtube || "",
           linkedin: user.linkedin || "",
+          isLocked: user.isLocked ?? false,
           profileImage: null,
           existingProfileImage: user.profileImage || "",
           coverImage: null,
@@ -215,6 +259,7 @@ const EditProfile = () => {
         instagram: formData.instagram,
         youtube: formData.youtube,
         linkedin: formData.linkedin,
+        isLocked: formData.isLocked,
         coverScale: formData.coverScale,
         coverPosition: formData.coverPosition,
       });
@@ -253,6 +298,13 @@ const EditProfile = () => {
             formData={formData}
             handleChange={handleChange}
             usernameStatus={usernameStatus}
+          />
+          <ProfileLockToggle
+            formData={formData}
+            setFormData={(updater) => {
+              setHasChanges(true);
+              setFormData(updater);
+            }}
           />
           <CoverUploader
             formData={formData}

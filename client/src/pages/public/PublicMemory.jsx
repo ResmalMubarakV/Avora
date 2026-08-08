@@ -204,8 +204,14 @@ const PublicMemory = () => {
         const response = await api.get(`/api/public/${username}/${slug}`);
         setMemory(response.data);
       } catch (error) {
-        if (error.response?.status === 403) navigate("/403", { replace: true });
-        if (error.response?.status === 404) navigate("/404", { replace: true });
+        // If the profile is locked (403), redirect directly back to the locked profile page instead of an error view
+        if (error.response?.status === 403) {
+          navigate(`/u/${username}`, { replace: true });
+          return;
+        }
+        if (error.response?.status === 404) {
+          navigate("/404", { replace: true });
+        }
       } finally { setLoading(false); }
     };
     fetchMemory();

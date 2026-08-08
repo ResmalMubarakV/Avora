@@ -11,6 +11,7 @@ import {
     MoreVertical,
     Copy,
     Mail,
+    Lock,
 } from "lucide-react";
 import {
     FaInstagram,
@@ -292,11 +293,21 @@ const ProfileHero = ({
                             <div className="flex-1 pt-1 sm:pt-2 w-full pr-0 sm:pr-4">
                                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                     
-                                    {/* Name & Handle */}
+                                    {/* Name & Handle & Owner Locked Icon Indicator */}
                                     <div className="space-y-1">
-                                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 pr-10 sm:pr-0">
-                                            {user.name}
-                                        </h1>
+                                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 pr-10 sm:pr-0">
+                                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900">
+                                                {user.name}
+                                            </h1>
+                                            {isOwner && user?.isLocked && (
+                                                <span 
+                                                    className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-[#3559D4] shadow-2xs"
+                                                    title="Your profile is currently locked"
+                                                >
+                                                    <Lock size={14} />
+                                                </span>
+                                            )}
+                                        </div>
                                         <p className="text-xs sm:text-sm font-semibold text-slate-500">
                                             @{user.username}
                                         </p>

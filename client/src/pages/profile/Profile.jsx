@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Lock } from "lucide-react";
 
 import api from "../../api/axios";
 import { getMyProfile } from "../../api/userApi";
@@ -83,6 +83,8 @@ const Profile = () => {
     );
   }
 
+  const isLockedForViewer = user?.isLocked && !isOwner;
+
   return (
     <main className="min-h-screen bg-slate-50 pb-16">
       <PageTitle title={user ? `${user.name} (@${user.username})` : "Travel Profile"} />
@@ -111,11 +113,26 @@ const Profile = () => {
         />
       </div>
 
-      <MemoriesSection
-        memories={memories}
-        username={profileUsername}
-        isOwner={isOwner}
-      />
+      {/* If profile is locked for viewer, show ONLY the locked alert card and hide all memories sections completely */}
+      {isLockedForViewer ? (
+        <div className="mx-auto max-w-[1500px] px-5 sm:px-8 lg:px-10 xl:px-14 pt-10 pb-24">
+          <div className="mx-auto max-w-xl text-center rounded-3xl border border-slate-200 bg-white p-10 shadow-sm space-y-4">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-[#3559D4] border border-blue-100">
+              <Lock size={30} />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900">This Profile is Locked</h3>
+            <p className="text-sm text-slate-500 leading-relaxed">
+              @{user.username} has locked their account. You can view their basic profile details and bio, but their individual travel journey stories are hidden.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <MemoriesSection
+          memories={memories}
+          username={profileUsername}
+          isOwner={isOwner}
+        />
+      )}
     </main>
   );
 };
