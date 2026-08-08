@@ -64,12 +64,10 @@ const PublicMemory = () => {
   const previewContainerRef = useRef(null);
   const printComponentRef = useRef(null); 
 
-  // --- NATIVE PRINT ENGINE (PRODUCTION SECURE) ---
+  // --- NATIVE PRINT ENGINE (PRODUCTION & MOBILE SECURE) ---
   const handlePrint = useReactToPrint({
     content: () => printComponentRef.current, 
     documentTitle: `${memory?.slug || 'memory'}-diary`,
-    // 🚨 FIX: Changed to onBeforeGetContent and lowered timeout to 15ms. 
-    // This stops the button from freezing and prevents mobile browsers from blocking the popup!
     onBeforeGetContent: () => {
       setActiveSlot(null);
       return new Promise((resolve) => setTimeout(resolve, 15));
@@ -77,35 +75,38 @@ const PublicMemory = () => {
     pageStyle: `
       @page { size: 800px 1131px; margin: 0; }
       @media print {
-        body, html { 
+        /* 1. Force background colors and dark themes to render */
+        html, body { 
           -webkit-print-color-adjust: exact !important; 
           print-color-adjust: exact !important; 
+          background-color: white !important;
           margin: 0 !important; 
           padding: 0 !important;
-          background-color: #ffffff !important; 
         }
+
+        /* 2. Hide all website UI in case mobile browsers trigger full-screen print */
+        body * {
+          visibility: hidden;
+        }
+
+        /* 3. Force ONLY the template to be visible */
+        #actual-print-container, 
+        #actual-print-container * {
+          visibility: visible !important;
+        }
+
+        /* 4. Snap template to the top left corner */
         #actual-print-container { 
-          width: 800px !important; 
-          height: 1131px !important; 
-          overflow: hidden !important; 
-          display: block !important; 
           position: absolute !important; 
           left: 0 !important; 
           top: 0 !important; 
+          width: 800px !important; 
+          height: 1131px !important; 
+          margin: 0 !important;
+          padding: 0 !important;
         }
         
-        /* 1. DEFEAT TAILWIND'S PRODUCTION PRINT RESETS */
-        *, ::before, ::after {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            background-color: revert !important;
-            color: revert !important;
-            box-shadow: revert !important;
-            text-shadow: revert !important;
-            border-color: revert !important;
-        }
-        
-        /* 2. PREVENT FLEXBOX IMAGE STRETCHING IN PRINT ENGINES */
+        /* 5. Prevent image stretching inside flexboxes */
         img {
             max-width: none !important;
             max-height: none !important;
