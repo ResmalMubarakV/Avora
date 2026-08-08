@@ -38,8 +38,6 @@ const MapInvalidator = () => {
   return null;
 };
 
-const PRINT_ROOT_ID = "actual-print-container";
-
 const PublicMemory = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -58,7 +56,7 @@ const PublicMemory = () => {
   const [previewScale, setPreviewScale] = useState(1);
   const previewContainerRef = useRef(null);
   const printComponentRef = useRef(null);
-  const [isPrinting, setIsPrinting] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const imageParam = searchParams.get("image");
   const [isOpen, setIsOpen] = useState(imageParam !== null);
@@ -73,67 +71,42 @@ const PublicMemory = () => {
   ].filter(Boolean))).map(url => ({ url }));
 
   // ==========================================
-  // BULLETPROOF PRINT HANDLER (MOBILE + DESKTOP)
+  // SERVER-SIDE PUPPETEER PDF DOWNLOAD HANDLER
   // ==========================================
-  const handlePrint = useCallback(() => {
-    if (isPrinting) return;
-    setIsPrinting(true);
-    setActiveSlot(null);
+  const handleServerPDFDownload = useCallback(async () => {
+    if (isDownloading || !printComponentRef.current) return;
+    setIsDownloading(true);
+    setActiveSlot(null); // Clear editing frames
 
-    const prevTitle = document.title;
-    document.title = `${memory?.slug || 'memory'}-diary`;
+    try {
+      const htmlContent = `
+        <html>
+          <head>
+            <style>
+              @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+              body { font-family: "Outfit", sans-serif; margin: 0; padding: 0; background: #ffffff; }
+            </style>
+          </head>
+          <body>
+            ${printComponentRef.current.innerHTML}
+          </body>
+        </html>
+      `;
 
-    // MOBILE DOM ISOLATION HACK: 
-    // Temporarily hide all non-print elements from the real DOM so mobile browsers cannot capture them
-    const rootElement = document.getElementById("root");
-    const printContainer = printComponentRef.current;
-    let originalParent = null;
-    let nextSibling = null;
+      const response = await api.post('/api/export-pdf', { htmlContent }, { responseType: 'blob' });
 
-    const isMobile = window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
-
-    if (isMobile && printContainer && rootElement) {
-      originalParent = printContainer.parentNode;
-      nextSibling = printContainer.nextSibling;
-      // Move print container directly to body and hide root
-      document.body.appendChild(printContainer);
-      rootElement.style.display = 'none';
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `${memory?.slug || 'memory'}-diary.pdf`;
+      link.click();
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      alert("Failed to download PDF. Please try again.");
+    } finally {
+      setIsDownloading(false);
     }
-
-    const restore = () => {
-      if (isMobile && printContainer && rootElement) {
-        rootElement.style.display = '';
-        if (originalParent) {
-          if (nextSibling) {
-            originalParent.insertBefore(printContainer, nextSibling);
-          } else {
-            originalParent.appendChild(printContainer);
-          }
-        }
-      }
-      document.title = prevTitle;
-      setIsPrinting(false);
-      window.removeEventListener("afterprint", restore);
-    };
-
-    window.addEventListener("afterprint", restore);
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const go = () => {
-          window.print();
-          // Fallback timer to restore DOM if afterprint event fails on mobile browsers
-          setTimeout(restore, 1000);
-        };
-
-        if (document.fonts && document.fonts.ready) {
-          document.fonts.ready.then(go).catch(go);
-        } else {
-          go();
-        }
-      });
-    });
-  }, [isPrinting, memory]);
+  }, [isDownloading, memory]);
 
   useEffect(() => {
     if (memory?.latitude && memory?.longitude) {
@@ -272,11 +245,11 @@ const PublicMemory = () => {
                 </div>
 
                 <button
-                    onClick={handlePrint}
-                    disabled={isPrinting}
+                    onClick={handleServerPDFDownload}
+                    disabled={isDownloading}
                     className="flex items-center gap-2 bg-[#3559D4] text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer disabled:opacity-60 disabled:cursor-wait"
                 >
-                    <Download size={16} /> <span className="hidden sm:inline">{isPrinting ? "Preparing..." : "Save PDF / Print"}</span>
+                    <Download size={16} /> <span className="hidden sm:inline">{isDownloading ? "Generating PDF..." : "Save PDF / Print"}</span>
                 </button>
             </div>
 
@@ -286,7 +259,7 @@ const PublicMemory = () => {
                       style={{ transform: `scale(${previewScale})`, transformOrigin: 'center center', width: '800px', height: '1131px', transition: 'transform 0s' }}
                       className="shadow-[0_20px_25px_rgba(0,0,0,0.5)] ring-1 ring-white/10 rounded-sm bg-[#ffffff] flex-shrink-0"
                     >
-                        <div ref={printComponentRef} id={PRINT_ROOT_ID} style={{ width: '800px', height: '1131px', backgroundColor: '#ffffff', overflow: 'hidden', position: 'relative', boxSizing: 'border-box' }}>
+                        <div ref={printComponentRef} id="actual-print-container" style={{ width: '800px', height: '1131px', backgroundColor: '#ffffff', overflow: 'hidden', position: 'relative', boxSizing: 'border-box' }}>
                             <PrintableView
                                 memory={memory}
                                 layoutIndex={layoutIndex}
@@ -416,7 +389,7 @@ const PublicMemory = () => {
               <h3 className="text-xl font-black text-slate-900 mb-6">Location Map</h3>
               <div className="w-full aspect-[16/9] sm:h-[400px] rounded-3xl overflow-hidden shadow-md border border-slate-200 z-0 relative">
                 <MapContainer key={mapCoords.join(',')} center={mapCoords} zoom={11} className="h-full w-full" scrollWheelZoom={false}>
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}../../{x}/{y}.png" />
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                   <Marker position={mapCoords} />
                   <MapInvalidator />
                 </MapContainer>
