@@ -82,9 +82,21 @@ const PublicMemory = () => {
       const htmlContent = `
         <html>
           <head>
+            <meta name="color-scheme" content="light">
             <style>
               @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
-              body { font-family: "Outfit", sans-serif; margin: 0; padding: 0; background: #ffffff; }
+              :root {
+                color-scheme: light !important;
+              }
+              html, body {
+                font-family: "Outfit", sans-serif;
+                margin: 0;
+                padding: 0;
+                background: #ffffff !important;
+                color-scheme: light !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
             </style>
           </head>
           <body>
@@ -96,10 +108,19 @@ const PublicMemory = () => {
       const response = await api.post('/api/export-pdf', { htmlContent }, { responseType: 'blob' });
 
       const blob = new Blob([response.data], { type: 'application/pdf' });
+      const blobUrl = window.URL.createObjectURL(blob);
+      
       const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = `${memory?.slug || 'memory'}-diary.pdf`;
+      link.href = blobUrl;
+      link.setAttribute('download', `${memory?.slug || 'memory'}-diary.pdf`);
+      document.body.appendChild(link);
       link.click();
+      
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+      }, 200);
+
     } catch (err) {
       console.error("PDF generation failed:", err);
       alert("Failed to download PDF. Please try again.");
