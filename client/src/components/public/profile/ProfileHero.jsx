@@ -142,7 +142,7 @@ const ProfileHero = ({
                 <div className="relative -mt-16 sm:-mt-24 rounded-3xl bg-white p-5 sm:p-8 lg:p-10 shadow-xl border border-slate-100">
                     
                     {/* --- ABSOLUTE TOP-RIGHT ACTION TRIGGERS --- */}
-                    <div className="absolute right-5 top-5 z-20 flex items-center gap-2">
+                    <div className="absolute right-4 top-4 sm:right-6 sm:top-6 z-20 flex items-center gap-2">
                         
                         {/* FOR GUESTS OR OTHER PROFILES: Share button always visible */}
                         {!isOwner && (
@@ -290,25 +290,25 @@ const ProfileHero = ({
                             </div>
 
                             {/* Profile Details */}
-                            <div className="flex-1 pt-1 sm:pt-2 w-full pr-0 sm:pr-4">
+                            <div className="flex-1 pt-1 sm:pt-2 w-full">
                                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                     
                                     {/* Name & Handle & Owner Locked Icon Indicator */}
                                     <div className="space-y-1">
-                                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 pr-10 sm:pr-0">
-                                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900">
+                                        <div className="flex items-center justify-center sm:justify-start gap-2.5 w-full">
+                                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 text-center sm:text-left">
                                                 {user.name}
                                             </h1>
                                             {isOwner && user?.isLocked && (
                                                 <span 
-                                                    className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-[#3559D4] shadow-2xs"
+                                                    className="inline-flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-[#3559D4] shadow-2xs shrink-0"
                                                     title="Your profile is currently locked"
                                                 >
-                                                    <Lock size={14} />
+                                                    <Lock size={13} />
                                                 </span>
                                             )}
                                         </div>
-                                        <p className="text-xs sm:text-sm font-semibold text-slate-500">
+                                        <p className="text-xs sm:text-sm font-semibold text-slate-500 text-center sm:text-left">
                                             @{user.username}
                                         </p>
                                     </div>
@@ -360,7 +360,7 @@ const ProfileHero = ({
 
                                 {/* Bio */}
                                 {user.bio && (
-                                    <p className="mt-3 max-w-2xl text-xs sm:text-sm lg:text-[15px] leading-relaxed text-slate-600 tracking-wide [word-spacing:0.15rem]">
+                                    <p className="mt-3 max-w-2xl text-xs sm:text-sm lg:text-[15px] leading-relaxed text-slate-600 tracking-wide [word-spacing:0.15rem] text-center sm:text-left mx-auto sm:mx-0">
                                         {user.bio}
                                     </p>
                                 )}
