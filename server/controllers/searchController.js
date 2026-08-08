@@ -5,7 +5,8 @@ const Memory = require("../models/Memory");
 // SEARCH CONTROLLER
 // ==========================================
 /**
- * Performs a global search across users, public memories, and distinct locations.
+ * Performs a global search across users, accessible memories (public + own private), 
+ * and distinct locations.
  */
 const search = async (req, res) => {
   try {
@@ -21,7 +22,7 @@ const search = async (req, res) => {
 
     const regex = new RegExp(query, "i");
 
-    // Search approved non-admin users by name or username
+    // 1. Search approved non-admin users by name or username
     const users = await User.find({
       username: { $ne: "admin" },
       status: "approved",
@@ -33,23 +34,37 @@ const search = async (req, res) => {
       .select("name username profileImage")
       .limit(5);
 
-    // Search public memories matching title, location, or description
+    // 2. Build Memory Visibility Conditions (Public OR Own Private)
+    const memoryVisibility = [{ isPublic: true }];
+    
+    // If the user is authenticated, allow them to search their own private memories
+    if (req.user && req.user._id) {
+      memoryVisibility.push({ user: req.user._id });
+    }
+
+    // 3. Search memories matching title, location, or description
     const memories = await Memory.find({
-      isPublic: true,
-      $or: [
-        { title: regex },
-        { location: regex },
-        { description: regex },
-      ],
+      $and: [
+        { $or: memoryVisibility }, // Enforce visibility rules
+        {
+          $or: [
+            { title: regex },
+            { location: regex },
+            { description: regex },
+          ],
+        }
+      ]
     })
       .populate("user", "username")
-      .select("title slug coverImage location user")
+      .select("title slug coverImage location user isPublic")
       .limit(5);
 
-    // Extract unique public locations matching the query
+    // 4. Extract unique locations matching the query from accessible memories
     const placeDocuments = await Memory.find({
-      isPublic: true,
-      location: regex,
+      $and: [
+        { $or: memoryVisibility },
+        { location: regex }
+      ]
     }).select("location");
 
     const places = [...new Set(placeDocuments.map((memory) => memory.location))];

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, useSearchParams, useLocation } from "react-router-dom";
 import api from "../../api/axios";
 import { getMyProfile } from "../../api/userApi";
@@ -11,38 +11,16 @@ import PageTitle from "../../components/common/PageTitle";
 import PrintableView from "../../components/memory/PrintableView";
 
 import { Compass, Download, X, ChevronLeft, ChevronRight, ZoomIn, RefreshCcw, MousePointerClick, Settings2, MoveHorizontal, MoveVertical } from "lucide-react";
-import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
-
-// ==========================================
-// FIX LEAFLET MARKER BUG IN PRODUCTION
-// ==========================================
-import L from 'leaflet';
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconUrl: markerIcon,
-  iconRetinaUrl: markerIcon2x,
-  shadowUrl: markerShadow,
-});
-// ==========================================
-
-const MapInvalidator = () => {
-  const map = useMap();
-  useEffect(() => {
-    const timer = setTimeout(() => { map.invalidateSize(); }, 250);
-    return () => clearTimeout(timer);
-  }, [map]);
-  return null;
-};
 
 const PublicMemory = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { username, slug } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [location.pathname]);
 
   const [currentUser, setCurrentUser] = useState(null);
   const [memory, setMemory] = useState(null);
@@ -52,11 +30,8 @@ const PublicMemory = () => {
   const layoutIndex = searchParams.has("layout") ? Number(searchParams.get("layout")) : 0;
 
   const [mapCoords, setMapCoords] = useState([20.5937, 78.9629]);
-
   const [previewScale, setPreviewScale] = useState(1);
   const previewContainerRef = useRef(null);
-  const printComponentRef = useRef(null);
-  const [isDownloading, setIsDownloading] = useState(false);
 
   const imageParam = searchParams.get("image");
   const [isOpen, setIsOpen] = useState(imageParam !== null);
@@ -71,26 +46,21 @@ const PublicMemory = () => {
   ].filter(Boolean))).map(url => ({ url }));
 
   // ==========================================
-  // NATIVE VECTOR PRINT / PDF HANDLER
+  // NATIVE PRINT HANDLER
+  // Triggers the OS dialog so the user can preview and pick a save location.
   // ==========================================
-  const handleNativePrint = useCallback(() => {
-    if (isDownloading) return;
-    setIsDownloading(true);
-    setActiveSlot(null); // Clear editing handles
-
+  const handleNativePrint = () => {
+    setActiveSlot(null); // Clear editing borders
     const prevTitle = document.title;
+    
+    // Change document title temporarily so the default PDF file name is clean
     document.title = `${memory?.slug || 'memory'}-diary`;
 
-    // Slight timeout allows mobile layout engines to mount vector fonts correctly
     setTimeout(() => {
       window.print();
-      
-      setTimeout(() => {
-        document.title = prevTitle;
-        setIsDownloading(false);
-      }, 500);
-    }, 250);
-  }, [isDownloading, memory]);
+      document.title = prevTitle;
+    }, 200);
+  };
 
   useEffect(() => {
     if (memory?.latitude && memory?.longitude) {
@@ -120,21 +90,29 @@ const PublicMemory = () => {
     }
   }, [isPreviewMode, memory, mediaConfig, allImages]);
 
+  // Responsive UI Scaling
   useEffect(() => {
-    if (isPreviewMode) {
-      const calculateScale = () => {
-        if (previewContainerRef.current) {
-          const availableWidth = previewContainerRef.current.offsetWidth - 32;
-          const availableHeight = previewContainerRef.current.offsetHeight - 32;
+    if (!isPreviewMode) return;
+    
+    const container = previewContainerRef.current;
+    if (!container) return;
+
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const { width, height } = entry.contentRect;
+        const availableWidth = width - 32; 
+        const availableHeight = height - 32;
+
+        if (availableWidth > 0 && availableHeight > 0) {
           const scaleX = availableWidth / 800;
           const scaleY = availableHeight / 1131;
           setPreviewScale(Math.min(scaleX, scaleY, 1));
         }
-      };
-      calculateScale();
-      window.addEventListener("resize", calculateScale);
-      return () => window.removeEventListener("resize", calculateScale);
-    }
+      }
+    });
+
+    observer.observe(container);
+    return () => observer.disconnect();
   }, [isPreviewMode, layoutIndex, activeSlot]);
 
   const handleConfigChange = (slotId, key, value) => {
@@ -186,7 +164,7 @@ const PublicMemory = () => {
         const response = await api.get(`/api/public/${username}/${slug}`);
         setMemory(response.data);
       } catch (error) {
-        if (error.response?.status === 403) navigate("/403", { replace: true });
+        if (error.response?.status === 403) navigate(`/u/${username}`, { replace: true });
         if (error.response?.status === 404) navigate("/404", { replace: true });
       } finally { setLoading(false); }
     };
@@ -207,7 +185,28 @@ const PublicMemory = () => {
 
   if (isPreviewMode) {
     return (
-        <div className="min-h-[100dvh] h-screen bg-slate-900 flex flex-col overflow-hidden fixed inset-0 z-[100]">
+      <>
+        {/* ========================================== */}
+        {/* EXACT PDF EXPORT TARGET (VISIBLE ONLY TO PRINTER) */}
+        {/* Hidden on screen (`hidden`), shown during print (`print:block`) */}
+        {/* ========================================== */}
+        <div className="hidden print:block absolute top-0 left-0 bg-white z-[999999] m-0 p-0 overflow-hidden" style={{ width: "800px", height: "1131px" }}>
+            <PrintableView
+                memory={memory}
+                layoutIndex={layoutIndex}
+                mediaConfig={mediaConfig}
+                isEditing={false} // Clean export with no edit borders
+                activeSlot={null}
+                onSlotClick={() => {}}
+                onUpdateConfig={() => {}}
+            />
+        </div>
+
+        {/* ========================================== */}
+        {/* INTERACTIVE UI (HIDDEN DURING PRINT) */}
+        {/* Uses `print:hidden` to disappear when the print dialog opens */}
+        {/* ========================================== */}
+        <div className="print:hidden min-h-[100dvh] h-screen bg-slate-900 flex flex-col overflow-hidden fixed inset-0 z-[100]">
             <div className="flex-none flex items-center justify-between bg-slate-950/90 backdrop-blur-md px-4 sm:px-8 py-4 border-b border-slate-800 shadow-xl z-50">
                 <button onClick={exitPreviewMode} className="flex items-center gap-1 sm:gap-2 text-white/80 hover:text-white font-medium cursor-pointer">
                     <X size={20} /> <span className="hidden sm:inline">Back</span>
@@ -215,45 +214,57 @@ const PublicMemory = () => {
 
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2 sm:gap-4">
-                        <span className="text-white/60 text-[10px] sm:text-xs font-semibold tracking-wider uppercase flex items-center gap-2">
+                        {/* Hide "Drag & Pinch Photo" on small screens to prevent overflow */}
+                        <span className="text-white/60 text-[10px] sm:text-xs font-semibold tracking-wider uppercase hidden md:flex items-center gap-2">
                             <MousePointerClick size={14}/> Drag & Pinch Photo
                         </span>
-                        <div className="hidden sm:block w-px h-4 bg-slate-800 mx-1"></div>
-                        <span className="text-white/60 text-[10px] sm:text-xs font-semibold tracking-wider uppercase hidden md:block">Template {layoutIndex + 1}/20</span>
+                        
+                        <div className="hidden md:block w-px h-4 bg-slate-800 mx-1"></div>
+                        
+                        {/* Always show X/20, but hide the word "Template" on mobile */}
+                        <span className="text-white/60 text-[10px] sm:text-xs font-semibold tracking-wider uppercase">
+                            <span className="hidden sm:inline">Template </span>{layoutIndex + 1}/20
+                        </span>
+                        
                         <div className="flex items-center bg-white/10 rounded-full border border-white/10 overflow-hidden">
-                            <button onClick={prevLayout} className="p-2 hover:bg-white/20 text-white transition" title="Previous Template"><ChevronLeft size={16} /></button>
+                            <button onClick={prevLayout} className="p-1.5 sm:p-2 hover:bg-white/20 text-white transition" title="Previous Template"><ChevronLeft size={16} /></button>
                             <div className="w-px h-4 bg-white/20"></div>
-                            <button onClick={nextLayout} className="p-2 hover:bg-white/20 text-white transition" title="Next Template"><ChevronRight size={16} /></button>
+                            <button onClick={nextLayout} className="p-1.5 sm:p-2 hover:bg-white/20 text-white transition" title="Next Template"><ChevronRight size={16} /></button>
                         </div>
                     </div>
                 </div>
 
                 <button
                     onClick={handleNativePrint}
-                    disabled={isDownloading}
-                    className="flex items-center gap-2 bg-[#3559D4] text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+                    className="flex items-center gap-2 bg-[#3559D4] text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer"
                 >
-                    <Download size={16} /> <span className="hidden sm:inline">{isDownloading ? "Preparing..." : "Save PDF / Print"}</span>
+                    <Download size={16} /> <span className="hidden sm:inline">Save PDF / Print</span>
                 </button>
             </div>
 
             <div className="flex-1 w-full flex flex-col md:flex-row overflow-hidden relative" onClick={() => setActiveSlot(null)}>
                 <div ref={previewContainerRef} className="flex-1 overflow-hidden flex justify-center items-center bg-slate-900 relative p-4">
+                    
+                    {/* SCALED PREVIEW WRAPPER */}
                     <div
-                      style={{ transform: `scale(${previewScale})`, transformOrigin: 'center center', width: '800px', height: '1131px', transition: 'transform 0s' }}
-                      className="shadow-[0_20px_25px_rgba(0,0,0,0.5)] ring-1 ring-white/10 rounded-sm bg-[#ffffff] flex-shrink-0"
+                      style={{ 
+                        transform: `scale(${previewScale})`, 
+                        transformOrigin: 'center center', 
+                        width: '800px', 
+                        height: '1131px', 
+                        transition: 'transform 0.1s ease-out' 
+                      }}
+                      className="shadow-[0_20px_25px_rgba(0,0,0,0.5)] ring-1 ring-white/10 flex-shrink-0 bg-white"
                     >
-                        <div ref={printComponentRef} id="actual-print-container" style={{ width: '800px', height: '1131px', backgroundColor: '#ffffff', overflow: 'hidden', position: 'relative', boxSizing: 'border-box' }}>
-                            <PrintableView
-                                memory={memory}
-                                layoutIndex={layoutIndex}
-                                mediaConfig={mediaConfig}
-                                isEditing={true}
-                                activeSlot={activeSlot}
-                                onSlotClick={(id) => setActiveSlot(id)}
-                                onUpdateConfig={handleConfigChange}
-                            />
-                        </div>
+                        <PrintableView
+                            memory={memory}
+                            layoutIndex={layoutIndex}
+                            mediaConfig={mediaConfig}
+                            isEditing={true}
+                            activeSlot={activeSlot}
+                            onSlotClick={(id) => setActiveSlot(id)}
+                            onUpdateConfig={handleConfigChange}
+                        />
                     </div>
                 </div>
 
@@ -339,11 +350,13 @@ const PublicMemory = () => {
                 )}
             </div>
         </div>
+      </>
     );
   }
 
+  // STANDARD PUBLIC MEMORY VIEW (Hidden during print)
   return (
-    <main className="min-h-screen bg-slate-50 pb-16 relative">
+    <main className="print:hidden min-h-screen bg-slate-50 pb-16 relative z-10">
       <PageTitle title={memory.title} />
       {isOwner ? <Navbar /> : <AppHeader isOwner={false} isLoggedIn={!!currentUser} />}
       <section className="relative overflow-hidden">
@@ -373,35 +386,37 @@ const PublicMemory = () => {
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-black text-slate-900">Location Map</h3>
                 <a 
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`)}`} 
-                  target="_blank" 
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`)}`}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs font-bold text-[#3559D4] hover:underline flex items-center gap-1"
                 >
                   Open in Google Maps ↗
                 </a>
               </div>
-              <div className="w-full aspect-[16/9] sm:h-[400px] rounded-3xl overflow-hidden shadow-md border border-slate-200 z-0 relative group bg-slate-100">
-                <iframe
-                  title="Google Map Location"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  allowFullScreen
-                  src={`https://maps.google.com/maps?q=${encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`)}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
-                />
-                <a 
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute inset-0 bg-transparent cursor-pointer"
-                  title="Click to open full Google Maps"
-                />
-                <div className="absolute bottom-4 right-4 pointer-events-none">
-                  <span className="bg-white/90 backdrop-blur-md text-slate-900 text-xs font-bold px-3.5 py-2 rounded-full shadow-lg border border-slate-200 flex items-center gap-1.5">
-                    View on Google Maps 🧭
-                  </span>
+              <div className="flex items-center justify-center w-full">
+                <div className="w-full max-w-4xl aspect-[16/9] sm:h-[400px] rounded-3xl overflow-hidden shadow-md border border-slate-200 z-0 relative group bg-slate-100 mx-auto">
+                  <iframe
+                    title="Google Map Location"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    allowFullScreen
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`)}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                  />
+                  <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute inset-0 bg-transparent cursor-pointer"
+                    title="Click to open full Google Maps"
+                  />
+                  <div className="absolute bottom-4 right-4 pointer-events-none">
+                    <span className="bg-white/90 backdrop-blur-md text-slate-900 text-xs font-bold px-3.5 py-2 rounded-full shadow-lg border border-slate-200 flex items-center gap-1.5">
+                      View on Google Maps 🧭
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
