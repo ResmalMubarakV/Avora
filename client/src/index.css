@@ -38,7 +38,7 @@ body {
    ========================================== */
 @media print {
   @page {
-    size: 8.33in 11.78in;
+    size: A4 portrait;
     margin: 0 !important;
   }
 
@@ -66,7 +66,7 @@ body {
     visibility: visible !important;
   }
 
-  /* 3. Detach print container and pin top-left with a solid white base */
+  /* 3. Detach print container, strip all outer borders/outlines, and pin top-left */
   #actual-print-container {
     position: fixed !important;
     top: 0 !important;
@@ -76,6 +76,8 @@ body {
     min-width: 800px !important;
     margin: 0 !important;
     padding: 0 !important;
+    border: none !important;
+    outline: none !important;
     transform: none !important;
     overflow: hidden !important;
     z-index: 2147483647 !important;
@@ -87,6 +89,8 @@ body {
     transform: none !important;
     width: 800px !important;
     height: 1131px !important;
+    border: none !important;
+    outline: none !important;
   }
 
   /* 4. Force Outfit font and box sizing */
