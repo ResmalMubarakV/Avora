@@ -11,7 +11,6 @@ import PageTitle from "../../components/common/PageTitle";
 import PrintableView from "../../components/memory/PrintableView";
 
 import { Compass, Download, X, ChevronLeft, ChevronRight, ZoomIn, RefreshCcw, MousePointerClick, Settings2, MoveHorizontal, MoveVertical } from "lucide-react";
-import html2canvas from "html2canvas"; // We brought this back for the image bake!
 
 const PublicMemory = () => {
   const navigate = useNavigate();
@@ -33,10 +32,6 @@ const PublicMemory = () => {
   const [mapCoords, setMapCoords] = useState([20.5937, 78.9629]);
   const [previewScale, setPreviewScale] = useState(1);
   const previewContainerRef = useRef(null);
-  
-  const printTargetRef = useRef(null); // Ref for our off-screen snapshot target
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [printSnapshot, setPrintSnapshot] = useState(null); // Holds the baked image
 
   const imageParam = searchParams.get("image");
   const [isOpen, setIsOpen] = useState(imageParam !== null);
@@ -51,53 +46,58 @@ const PublicMemory = () => {
   ].filter(Boolean))).map(url => ({ url }));
 
   // ==========================================
-  // HYBRID PRINT HANDLER (IMAGE BAKE + WINDOW.PRINT)
+  // INJECT PRINT STYLES DIRECTLY TO <HEAD>
+  // Prevents Vite from deleting the color-adjust rules in production.
   // ==========================================
-  const handleNativePrint = async () => {
-    if (isDownloading) return;
-    setIsDownloading(true);
-    setActiveSlot(null); 
-
-    try {
-        // 1. Wait a moment for editing borders to clear
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        if (document.fonts && document.fonts.ready) {
-            await document.fonts.ready;
-        }
-
-        const node = printTargetRef.current;
-        if (!node) throw new Error("Print target not found.");
-
-        // 2. Bake the precise template into an image
-        const canvas = await html2canvas(node, {
-            scale: 2, // 2x scale for crisp fonts
-            useCORS: true,
-            allowTaint: false,
-            backgroundColor: "#ffffff",
-            width: 800,
-            height: 1131,
-            logging: false,
-        });
-
-        // 3. Save the image data and set temporary title
-        const imgData = canvas.toDataURL("image/jpeg", 1.0);
-        setPrintSnapshot(imgData); 
-        
-        const prevTitle = document.title;
-        document.title = `${memory?.slug || 'memory'}-diary`;
-
-        // 4. Wait for React to place the image in the print block, then trigger print dialog
-        setTimeout(() => {
-            window.print();
-            document.title = prevTitle;
-            setIsDownloading(false);
-        }, 300);
-
-    } catch (error) {
-        console.error("Print generation failed:", error);
-        setIsDownloading(false);
-        window.alert("Failed to generate print preview.");
+  useEffect(() => {
+    if (!isPreviewMode) return;
+    
+    const styleId = "avora-print-styles";
+    if (!document.getElementById(styleId)) {
+        const style = document.createElement("style");
+        style.id = styleId;
+        style.innerHTML = `
+          @media print {
+            @page { 
+              size: 800px 1131px !important; 
+              margin: 0 !important; 
+            }
+            html, body { 
+              margin: 0 !important; 
+              padding: 0 !important; 
+              background-color: white !important; 
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+            }
+            *, *::before, *::after {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+            }
+          }
+        `;
+        document.head.appendChild(style);
     }
+
+    return () => {
+        const style = document.getElementById(styleId);
+        if (style) document.head.removeChild(style);
+    };
+  }, [isPreviewMode]);
+
+  // ==========================================
+  // NATIVE PRINT HANDLER
+  // ==========================================
+  const handleNativePrint = () => {
+    setActiveSlot(null); 
+    const prevTitle = document.title;
+    document.title = `${memory?.slug || 'memory'}-diary`;
+
+    setTimeout(() => {
+      window.print();
+      document.title = prevTitle;
+    }, 200);
   };
 
   useEffect(() => {
@@ -224,68 +224,58 @@ const PublicMemory = () => {
     return (
       <>
         {/* ========================================== */}
-        {/* OFF-SCREEN RENDER: Strictly used for html2canvas to take a perfect snapshot */}
+        {/* EXACT PDF EXPORT TARGET (VISIBLE ONLY TO PRINTER) */}
+        {/* Renders far off-screen instead of display:none to guarantee background colors are computed */}
         {/* ========================================== */}
-        <div className="fixed top-[-20000px] left-[-20000px] z-[-1] overflow-hidden bg-white">
-            <div ref={printTargetRef} style={{ width: "800px", height: "1131px", position: "relative" }}>
-                <PrintableView
-                    memory={memory}
-                    layoutIndex={layoutIndex}
-                    mediaConfig={mediaConfig}
-                    isEditing={false} 
-                    activeSlot={null}
-                    onSlotClick={() => {}}
-                    onUpdateConfig={() => {}}
-                />
-            </div>
-        </div>
-
-        {/* ========================================== */}
-        {/* PRINT DIALOG TARGET: Only visible to the printer. Displays the baked image. */}
-        {/* ========================================== */}
-        <div className="hidden print:block absolute top-0 left-0 z-[999999] m-0 p-0 overflow-hidden bg-white" style={{ width: "800px", height: "1131px" }}>
-            {printSnapshot && (
-                <img src={printSnapshot} alt="Print Preview" style={{ width: "800px", height: "1131px", objectFit: "contain" }} />
-            )}
+        <div 
+          className="fixed top-[-20000px] left-[-20000px] print:top-0 print:left-0 z-[999999] m-0 p-0 overflow-hidden bg-white" 
+          style={{ width: "800px", height: "1131px" }}
+        >
+            <PrintableView
+                memory={memory}
+                layoutIndex={layoutIndex}
+                mediaConfig={mediaConfig}
+                isEditing={false} 
+                activeSlot={null}
+                onSlotClick={() => {}}
+                onUpdateConfig={() => {}}
+            />
         </div>
 
         {/* ========================================== */}
         {/* INTERACTIVE UI (HIDDEN DURING PRINT) */}
         {/* ========================================== */}
         <div className="print:hidden min-h-[100dvh] h-screen bg-slate-900 flex flex-col overflow-hidden fixed inset-0 z-[100]">
-            <div className="flex-none flex items-center justify-between bg-slate-950/90 backdrop-blur-md px-3 sm:px-8 py-3 sm:py-4 border-b border-slate-800 shadow-xl z-50 relative">
-                
-                {/* LEFT: BACK BUTTON */}
-                <button onClick={exitPreviewMode} className="flex items-center gap-1 sm:gap-2 text-white/80 hover:text-white font-medium cursor-pointer z-10 shrink-0">
+            <div className="flex-none flex items-center justify-between bg-slate-950/90 backdrop-blur-md px-4 sm:px-8 py-4 border-b border-slate-800 shadow-xl z-50">
+                <button onClick={exitPreviewMode} className="flex items-center gap-1 sm:gap-2 text-white/80 hover:text-white font-medium cursor-pointer">
                     <X size={20} /> <span className="hidden sm:inline">Back</span>
                 </button>
 
-                {/* CENTER: COUNTER AND ARROWS */}
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 sm:gap-4 sm:static sm:translate-x-0 sm:translate-y-0 sm:left-auto sm:top-auto">
-                    <span className="text-white/60 text-[10px] sm:text-xs font-semibold tracking-wider uppercase hidden md:flex items-center gap-2">
-                        <MousePointerClick size={14}/> Drag & Pinch Photo
-                    </span>
-                    <div className="hidden md:block w-px h-4 bg-slate-800 mx-1"></div>
-                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                        <span className="text-white text-[11px] sm:text-xs font-bold tracking-widest uppercase whitespace-nowrap">
-                            <span className="hidden sm:inline">Template </span>
-                            <span>{layoutIndex + 1}/20</span>
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-4">
+                        <span className="text-white/60 text-[10px] sm:text-xs font-semibold tracking-wider uppercase hidden md:flex items-center gap-2">
+                            <MousePointerClick size={14}/> Drag & Pinch Photo
                         </span>
-                        <div className="flex items-center bg-white/10 rounded-full border border-white/10 overflow-hidden shrink-0">
-                            <button onClick={prevLayout} className="p-2 hover:bg-white/20 text-white transition active:bg-white/30" title="Previous Template"><ChevronLeft size={16} /></button>
+                        
+                        <div className="hidden md:block w-px h-4 bg-slate-800 mx-1"></div>
+                        
+                        <span className="text-white/60 text-[10px] sm:text-xs font-semibold tracking-wider uppercase">
+                            <span className="hidden sm:inline">Template </span>{layoutIndex + 1}/20
+                        </span>
+                        
+                        <div className="flex items-center bg-white/10 rounded-full border border-white/10 overflow-hidden">
+                            <button onClick={prevLayout} className="p-1.5 sm:p-2 hover:bg-white/20 text-white transition" title="Previous Template"><ChevronLeft size={16} /></button>
                             <div className="w-px h-4 bg-white/20"></div>
-                            <button onClick={nextLayout} className="p-2 hover:bg-white/20 text-white transition active:bg-white/30" title="Next Template"><ChevronRight size={16} /></button>
+                            <button onClick={nextLayout} className="p-1.5 sm:p-2 hover:bg-white/20 text-white transition" title="Next Template"><ChevronRight size={16} /></button>
                         </div>
                     </div>
                 </div>
 
-                {/* RIGHT: DOWNLOAD BUTTON */}
                 <button
                     onClick={handleNativePrint}
-                    disabled={isDownloading}
-                    className="flex items-center gap-2 bg-[#3559D4] text-white px-3 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer z-10 shrink-0 disabled:opacity-60 disabled:cursor-wait"
+                    className="flex items-center gap-2 bg-[#3559D4] text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer"
                 >
-                    <Download size={16} /> <span className="hidden sm:inline">{isDownloading ? "Preparing..." : "Save PDF / Print"}</span>
+                    <Download size={16} /> <span className="hidden sm:inline">Save PDF / Print</span>
                 </button>
             </div>
 
