@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 
@@ -15,6 +15,7 @@ const ITEMS_PER_PAGE = 12;
 
 const Memories = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const initialFilter = searchParams.get("filter");
 
@@ -29,6 +30,15 @@ const Memories = () => {
   
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Automatically scroll to top on initial page load or redirect
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [location.pathname]);
 
   // Sync filter if URL parameter changes dynamically
   useEffect(() => {

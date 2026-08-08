@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Search, Eye, Trash2, Globe, Lock, Images, ShieldAlert, Loader2, X, ArrowLeft, MapPin, User, Calendar } from "lucide-react";
 import { getMemories, deleteMemory } from "../../api/adminApi";
 import api from "../../api/axios";
@@ -10,6 +10,7 @@ import PageTitle from "../../components/common/PageTitle";
 // ==========================================
 const AdminMemories = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [search, setSearch] = useState("");
     const [memories, setMemories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -18,6 +19,15 @@ const AdminMemories = () => {
     const [password, setPassword] = useState("");
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [deleteError, setDeleteError] = useState("");
+
+    // Automatically scroll to top on initial page load or redirect
+    useEffect(() => {
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "instant",
+        });
+    }, [location.pathname]);
 
     useEffect(() => {
         const fetchMemories = async () => {

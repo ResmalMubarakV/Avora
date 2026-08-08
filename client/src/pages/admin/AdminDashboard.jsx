@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { getDashboard, approveUser, suspendUser, deleteMemory } from "../../api/adminApi";
 import api from "../../api/axios";
 import DashboardStats from "../../components/admin/DashboardStats";
@@ -14,6 +14,7 @@ import { ShieldAlert, Loader2, X, Sparkles, Activity, Users, Images, Clock, Eye,
 // ==========================================
 const AdminDashboard = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [dashboard, setDashboard] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -24,6 +25,15 @@ const AdminDashboard = () => {
     const [deleteError, setDeleteError] = useState("");
 
     const [greeting, setGreeting] = useState("Welcome back");
+
+    // Automatically scroll to top on initial page load or redirect
+    useEffect(() => {
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "instant",
+        });
+    }, [location.pathname]);
 
     useEffect(() => {
         const hour = new Date().getHours();

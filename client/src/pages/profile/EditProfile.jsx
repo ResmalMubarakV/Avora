@@ -20,6 +20,7 @@ import SocialLinksCard from "../../components/edit-profile/SocialLinksCard";
 import ProfilePreview from "../../components/edit-profile/ProfilePreview";
 import ActionButtons from "../../components/edit-profile/ActionButtons";
 import PageTitle from "../../components/common/PageTitle";
+import DiscardMemoryModal from "../../components/create-memory/DiscardMemoryModal";
 
 const EditProfile = () => {
   const navigate = useNavigate();
@@ -30,6 +31,8 @@ const EditProfile = () => {
   const [loading, setLoading] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState("idle");
   const [originalUsername, setOriginalUsername] = useState("");
+  const [hasChanges, setHasChanges] = useState(false);
+  const [showDiscardModal, setShowDiscardModal] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -47,6 +50,44 @@ const EditProfile = () => {
     coverScale: 1,
     coverPosition: { x: 0, y: 0 },
   });
+
+  // Automatically scroll to top on initial page load or redirect
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [location.pathname]);
+
+  // Intercept browser back button / swipe gestures safely via window history & popstate
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+
+    const handlePopState = () => {
+      if (hasChanges) {
+        window.history.pushState(null, "", window.location.href);
+        setShowDiscardModal(true);
+      } else {
+        navigate(-1);
+      }
+    };
+
+    const handleBeforeUnload = (e) => {
+      if (hasChanges) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [hasChanges, navigate]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -72,6 +113,7 @@ const EditProfile = () => {
         });
 
         setOriginalUsername(user.username);
+        setHasChanges(false);
       } catch (error) {
         console.error(error);
         toast.error("Unable to load profile.");
@@ -85,6 +127,7 @@ const EditProfile = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    setHasChanges(true);
     setFormData((prev) => ({
       ...prev,
       [name]:
@@ -131,6 +174,16 @@ const EditProfile = () => {
   };
 
   const handleCancel = () => {
+    if (hasChanges) {
+      setShowDiscardModal(true);
+    } else {
+      navigate(returnTo);
+    }
+  };
+
+  const discardProfileChanges = () => {
+    setShowDiscardModal(false);
+    setHasChanges(false);
     navigate(returnTo);
   };
 
@@ -166,6 +219,8 @@ const EditProfile = () => {
         coverPosition: formData.coverPosition,
       });
 
+      setHasChanges(false);
+      setShowDiscardModal(false);
       toast.success("Profile updated successfully.");
       navigate(`/u/${updatedUser.username}`, { replace: true });
     } catch (error) {
@@ -201,11 +256,17 @@ const EditProfile = () => {
           />
           <CoverUploader
             formData={formData}
-            setFormData={setFormData}
+            setFormData={(updater) => {
+              setHasChanges(true);
+              setFormData(updater);
+            }}
           />
           <AvatarUploader
             formData={formData}
-            setFormData={setFormData}
+            setFormData={(updater) => {
+              setHasChanges(true);
+              setFormData(updater);
+            }}
           />
           <BioCard
             formData={formData}
@@ -244,6 +305,14 @@ const EditProfile = () => {
           </div>
         </div>
       </div>
+
+      <DiscardMemoryModal
+        open={showDiscardModal}
+        loading={loading}
+        onClose={() => setShowDiscardModal(false)}
+        onDiscard={discardProfileChanges}
+        onPublish={handleSubmit}
+      />
     </div>
   );
 };

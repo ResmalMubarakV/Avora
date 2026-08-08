@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { createMemory } from "../../api/memoryApi";
@@ -16,9 +16,58 @@ import PageTitle from "../../components/common/PageTitle";
 
 const CreateMemory = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [loading, setLoading] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // Automatically scroll to top on initial page load or redirect
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [location.pathname]);
+
+  // Intercept browser back button / swipe gestures
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+
+    const handlePopState = () => {
+      if (hasChanges) {
+        window.history.pushState(null, "", window.location.href);
+        setShowDiscardModal(true);
+      } else {
+        navigate(-1);
+      }
+    };
+
+    const handleBeforeUnload = (e) => {
+      if (hasChanges) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [hasChanges, navigate]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setHasChanges(true);
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const [formData, setFormData] = useState({
     title: "",
@@ -31,14 +80,6 @@ const CreateMemory = () => {
     coverImage: null,
     gallery: [],
   });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
 
   const validateForm = () => {
     if (!formData.title.trim()) {
@@ -106,9 +147,10 @@ const CreateMemory = () => {
 
       await createMemory(data);
       setShowDiscardModal(false);
+      setHasChanges(false);
       toast.success("Memory created successfully!");
 
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       console.error(error);
       toast.error(
@@ -120,17 +162,7 @@ const CreateMemory = () => {
   };
 
   const handleCancel = () => {
-    const hasUnsavedChanges =
-      formData.title ||
-      formData.location ||
-      formData.startDate ||
-      formData.endDate ||
-      formData.modeOfTravel ||
-      formData.description ||
-      formData.coverImage ||
-      formData.gallery.length > 0;
-
-    if (!hasUnsavedChanges) {
+    if (!hasChanges) {
       navigate("/dashboard");
       return;
     }
@@ -139,6 +171,7 @@ const CreateMemory = () => {
 
   const discardMemory = () => {
     setShowDiscardModal(false);
+    setHasChanges(false);
     navigate("/dashboard");
   };
 
@@ -163,20 +196,32 @@ const CreateMemory = () => {
         <div className="xl:col-span-2 xl:h-[calc(100vh-10rem)] xl:overflow-y-auto xl:pr-4 space-y-6 scrollbar-hide">
           <JourneyDetails
             formData={formData}
-            setFormData={setFormData}
+            setFormData={(updater) => {
+              setHasChanges(true);
+              setFormData(updater);
+            }}
             handleChange={handleChange}
           />
           <CoverUploader
             formData={formData}
-            setFormData={setFormData}
+            setFormData={(updater) => {
+              setHasChanges(true);
+              setFormData(updater);
+            }}
           />
           <GalleryUploader
             formData={formData}
-            setFormData={setFormData}
+            setFormData={(updater) => {
+              setHasChanges(true);
+              setFormData(updater);
+            }}
           />
           <VisibilityCard
             formData={formData}
-            setFormData={setFormData}
+            setFormData={(updater) => {
+              setHasChanges(true);
+              setFormData(updater);
+            }}
           />
 
           {/* Mobile & Tablet Action Buttons */}

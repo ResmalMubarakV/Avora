@@ -44,6 +44,15 @@ const PublicMemory = () => {
   const { username, slug } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // Scroll to top automatically when component mounts or path/redirect changes
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [location.pathname]);
+
   const [currentUser, setCurrentUser] = useState(null);
   const [memory, setMemory] = useState(null);
   const [loading, setLoading] = useState(true);

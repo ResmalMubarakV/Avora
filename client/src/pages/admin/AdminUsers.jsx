@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useLocation } from "react-router-dom";
 import { getUsers, approveUser, suspendUser, deleteUser } from "../../api/adminApi";
 import api from "../../api/axios";
 import { Search, Loader2, UserCheck, ShieldAlert, Trash2, Mail, Calendar, Shield, X, Filter } from "lucide-react";
@@ -10,6 +10,7 @@ import PageTitle from "../../components/common/PageTitle";
 // ==========================================
 const AdminUsers = () => {
     const [searchParams, setSearchParams] = useSearchParams();
+    const location = useLocation();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -22,6 +23,15 @@ const AdminUsers = () => {
     const [deleteError, setDeleteError] = useState("");
     
     const currentStatus = searchParams.get("status") || "all";
+
+    // Automatically scroll to top on initial page load or redirect
+    useEffect(() => {
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "instant",
+        });
+    }, [location.pathname]);
 
     const fetchUsers = useCallback(async (searchQuery = "", statusFilter = "all") => {
         try {

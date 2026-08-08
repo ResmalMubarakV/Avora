@@ -1,4 +1,5 @@
 import { useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 import AIHeader from "../../components/ai/AIHeader";
 import AIConversation from "../../components/ai/AIConversation";
@@ -15,6 +16,7 @@ import PageTitle from "../../components/common/PageTitle";
  * decorative background gradients, auto-focus behavior, and layout composition.
  */
 const AI = () => {
+  const location = useLocation();
   const {
     messages,
     loading,
@@ -25,6 +27,15 @@ const AI = () => {
   } = useAI();
 
   const inputRef = useRef(null);
+
+  // Automatically scroll to top on initial page load or redirect
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!loading) {

@@ -35,6 +35,7 @@ const EditMemory = () => {
   const [showDeleteMediaModal, setShowDeleteMediaModal] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -50,13 +51,43 @@ const EditMemory = () => {
     existingGallery: [],
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  // Automatically scroll to top on initial page load or redirect
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [location.pathname]);
+
+  // Intercept browser back button / swipe gestures
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+
+    const handlePopState = () => {
+      if (hasChanges) {
+        window.history.pushState(null, "", window.location.href);
+        setShowDiscardModal(true);
+      } else {
+        navigate(-1);
+      }
+    };
+
+    const handleBeforeUnload = (e) => {
+      if (hasChanges) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [hasChanges, navigate]);
 
   useEffect(() => {
     const fetchMemory = async () => {
@@ -77,6 +108,7 @@ const EditMemory = () => {
           existingCover: memory.coverImage,
           existingGallery: memory.media,
         });
+        setHasChanges(false);
       } catch (error) {
         console.error(error);
         toast.error("Unable to load memory.");
@@ -122,16 +154,22 @@ const EditMemory = () => {
   };
 
   const handleCancel = () => {
-    setShowDiscardModal(true);
+    if (hasChanges) {
+      setShowDiscardModal(true);
+    } else {
+      navigate(returnTo);
+    }
   };
 
   const discardMemory = () => {
     setShowDiscardModal(false);
+    setHasChanges(false);
     navigate(returnTo);
   };
 
   const handleDeleteExistingMedia = (media) => {
     setSelectedMedia(media);
+    setHasChanges(true);
     setShowDeleteMediaModal(true);
   };
 
@@ -148,6 +186,7 @@ const EditMemory = () => {
           (item) => item.publicId !== selectedMedia.publicId
         ),
       }));
+      setHasChanges(true);
 
       toast.success("Media deleted successfully.");
       setShowDeleteMediaModal(false);
@@ -199,6 +238,7 @@ const EditMemory = () => {
 
       const response = await updateMemory(id, data);
       setShowDiscardModal(false);
+      setHasChanges(false);
       toast.success("Memory updated successfully!");
 
       if (response?.slug && response?.user?.username) {
@@ -237,23 +277,39 @@ const EditMemory = () => {
         <div className="xl:col-span-2 xl:h-[calc(100vh-10rem)] xl:overflow-y-auto xl:pr-4 space-y-6 scrollbar-hide">
           <JourneyDetails
             formData={formData}
-            setFormData={setFormData}
-            handleChange={handleChange}
+            setFormData={(updater) => {
+              setHasChanges(true);
+              setFormData(updater);
+            }}
+            handleChange={(e) => {
+              setHasChanges(true);
+              const { name, value } = e.target;
+              setFormData((prev) => ({ ...prev, [name]: value }));
+            }}
           />
           <CoverUploader
             formData={formData}
-            setFormData={setFormData}
+            setFormData={(updater) => {
+              setHasChanges(true);
+              setFormData(updater);
+            }}
             isEdit={true}
           />
           <GalleryUploader
             formData={formData}
-            setFormData={setFormData}
+            setFormData={(updater) => {
+              setHasChanges(true);
+              setFormData(updater);
+            }}
             isEdit={true}
             onDeleteExistingMedia={handleDeleteExistingMedia}
           />
           <VisibilityCard
             formData={formData}
-            setFormData={setFormData}
+            setFormData={(updater) => {
+              setHasChanges(true);
+              setFormData(updater);
+            }}
           />
 
           {/* Mobile & Tablet Action Buttons */}

@@ -1,4 +1,5 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import DashboardHero from "../../components/dashboard/DashboardHero";
 import StatsCards from "../../components/dashboard/StatsCards";
@@ -12,7 +13,17 @@ import PageTitle from "../../components/common/PageTitle";
 // ==========================================
 const Dashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { memories, loading, error } = useMemories();
+
+  // Automatically scroll to top on initial page load or redirect
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [location.pathname]);
 
   if (loading) {
     return (

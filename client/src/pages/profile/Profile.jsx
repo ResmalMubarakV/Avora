@@ -27,6 +27,15 @@ const Profile = () => {
   const profileUsername = username || currentUser?.username;
   const isOwner = currentUser?.username === profileUsername;
 
+  // Automatically scroll to top on initial page load or redirect
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [location.pathname]);
+
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
