@@ -12,6 +12,8 @@ import PrintableView from "../../components/memory/PrintableView";
 
 import { Compass, Download, X, ChevronLeft, ChevronRight, ZoomIn, RefreshCcw, MousePointerClick, Settings2, MoveHorizontal, MoveVertical } from "lucide-react";
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 // ==========================================
 // FIX LEAFLET MARKER BUG IN PRODUCTION
@@ -36,6 +38,23 @@ const MapInvalidator = () => {
     return () => clearTimeout(timer);
   }, [map]);
   return null;
+};
+
+// ==========================================
+// MOBILE DETECTION (used ONLY to pick which download path to use —
+// desktop's window.print() flow is completely untouched)
+// ==========================================
+const isMobileOrTabletDevice = () => {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || navigator.vendor || window.opera || "";
+
+  const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+  // iPadOS 13+ reports its UA as "Macintosh" but exposes multi-touch —
+  // this catches iPads that would otherwise be misdetected as desktop Mac.
+  const isIPadOS = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  const isAndroid = /Android/i.test(ua);
+
+  return isIOS || isIPadOS || isAndroid;
 };
 
 const PublicMemory = () => {
@@ -80,7 +99,7 @@ const PublicMemory = () => {
   ].filter(Boolean))).map(url => ({ url }));
 
   // ==========================================
-  // BULLETPROOF FONT-AWARE NATIVE PRINT / PDF HANDLER
+  // DESKTOP PATH — UNCHANGED. Native print, exactly as before.
   // ==========================================
   const handleNativePrint = useCallback(async () => {
     if (isDownloading) return;
@@ -97,7 +116,7 @@ const PublicMemory = () => {
 
       setTimeout(() => {
         window.print();
-        
+
         setTimeout(() => {
           document.title = prevTitle;
           setIsDownloading(false);
@@ -109,6 +128,71 @@ const PublicMemory = () => {
       setIsDownloading(false);
     }
   }, [isDownloading, memory]);
+
+  // ==========================================
+  // MOBILE PATH — NEW. Canvas-captured PDF, no browser print pipeline
+  // involved at all, so there's nothing for iOS/Android to misfire on:
+  // no viewport rasterization, no leaked toolbar, no black frame.
+  // ==========================================
+  const handleMobilePdfDownload = useCallback(async () => {
+    if (isDownloading) return;
+    setIsDownloading(true);
+    setActiveSlot(null); // Clear editing overlay before capture
+
+    try {
+      // Wait for React to actually remove the overlay from the DOM.
+      await new Promise((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(resolve))
+      );
+
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+
+      const node = printComponentRef.current;
+      if (!node) throw new Error("Print target not found");
+
+      const canvas = await html2canvas(node, {
+        width: 800,
+        height: 1131,
+        windowWidth: 800,
+        windowHeight: 1131,
+        scale: 3,               // high-res output (~2400x3393px raster)
+        useCORS: true,          // required for cross-origin memory images
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+
+      const pdf = new jsPDF({
+        unit: "px",
+        format: [800, 1131],
+        orientation: "portrait",
+        compress: true,
+      });
+
+      pdf.addImage(imgData, "JPEG", 0, 0, 800, 1131, undefined, "FAST");
+      pdf.save(`${memory?.slug || "memory"}-diary.pdf`);
+    } catch (error) {
+      console.error("Mobile PDF generation failed:", error);
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [isDownloading, memory]);
+
+  // ==========================================
+  // SINGLE ENTRY POINT — routes to the right path per device.
+  // Desktop behavior is 100% identical to before; only mobile is new.
+  // ==========================================
+  const handleDownloadClick = useCallback(() => {
+    if (isMobileOrTabletDevice()) {
+      handleMobilePdfDownload();
+    } else {
+      handleNativePrint();
+    }
+  }, [handleMobilePdfDownload, handleNativePrint]);
 
   useEffect(() => {
     if (memory?.latitude && memory?.longitude) {
@@ -253,7 +337,7 @@ const PublicMemory = () => {
                 </div>
 
                 <button
-                    onClick={handleNativePrint}
+                    onClick={handleDownloadClick}
                     disabled={isDownloading}
                     className="flex items-center gap-2 bg-[#3559D4] text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer disabled:opacity-60 disabled:cursor-wait"
                 >

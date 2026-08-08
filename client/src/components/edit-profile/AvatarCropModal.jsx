@@ -8,8 +8,8 @@ const OUTPUT_SIZE = 512; // exported square image size, in px
 // AVATAR CROP MODAL COMPONENT
 // ==========================================
 /**
- * Renders an interactive avatar cropping modal with drag repositioning, 
- * zoom slider controls, circular overlay guides, and canvas export to JPEG blob.
+ * Renders an interactive avatar cropping modal with free-form drag repositioning, 
+ * viewport-centered zoom controls, circular overlay guides, and canvas export to JPEG blob.
  */
 const AvatarCropModal = ({ file, onCancel, onSave }) => {
   const imgRef = useRef(null);
@@ -116,7 +116,7 @@ const AvatarCropModal = ({ file, onCancel, onSave }) => {
     dragState.current.dragging = false;
   };
 
-  // --- Zoom Slider Handler ---
+  // --- Zoom Slider Handler (Free-form viewport-centered zoom) ---
   const handleZoomChange = (e) => {
     const nextZoom = Number(e.target.value);
 
@@ -124,12 +124,13 @@ const AvatarCropModal = ({ file, onCancel, onSave }) => {
     const nextWidth = naturalSize.w * nextDisplayScale;
     const nextHeight = naturalSize.h * nextDisplayScale;
 
-    // Zoom toward the current crop center rather than the image corner
-    const centerX = offset.x - (nextWidth - displayWidth) / 2;
-    const centerY = offset.y - (nextHeight - displayHeight) / 2;
+    // Zoom relative to the center of the crop viewport (CROP_SIZE / 2)
+    const viewCenter = CROP_SIZE / 2;
+    const nextX = viewCenter - (viewCenter - offset.x) * (nextWidth / displayWidth);
+    const nextY = viewCenter - (viewCenter - offset.y) * (nextHeight / displayHeight);
 
     setZoom(nextZoom);
-    setOffset(clampOffset(centerX, centerY, nextWidth, nextHeight));
+    setOffset(clampOffset(nextX, nextY, nextWidth, nextHeight));
   };
 
   // --- Save & Export Cropped Canvas Image ---
@@ -242,7 +243,7 @@ const AvatarCropModal = ({ file, onCancel, onSave }) => {
 
         {/* Helper instruction */}
         <p className="mt-3 text-center text-xs text-slate-400">
-          Drag to reposition • Use the slider to zoom
+          Drag freely to select any area • Use the slider to zoom
         </p>
 
         {/* Zoom Slider */}
