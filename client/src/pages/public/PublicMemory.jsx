@@ -43,12 +43,10 @@ const MapInvalidator = () => {
 // ==========================================
 // MOBILE DETECTION — layered, not just UA sniffing.
 // UA sniffing alone breaks under "Request Desktop Site" mode, in-app
-// WebViews (Instagram/FB/WhatsApp browsers), and newer devices with
-// unusual UA strings. We combine UA + touch capability + viewport width
-// so a false negative here (mistakenly treating a phone as "desktop")
-// can't happen — a false negative is exactly what sends a device down
-// the fragile window.print() path instead of the reliable canvas-PDF
-// path, which is what causes the "prints whole window" regression.
+// WebViews, and unusual UA strings. Combining UA + touch capability +
+// viewport width ensures a false negative (treating a phone as
+// "desktop") can't happen — a false negative is what sends a device
+// down the fragile window.print() path instead of the canvas-PDF path.
 // ==========================================
 const isMobileOrTabletDevice = () => {
   if (typeof navigator === "undefined" || typeof window === "undefined") return false;
@@ -63,9 +61,9 @@ const isMobileOrTabletDevice = () => {
   const isUAMobile = isIOS || isIPadOS || isAndroid;
 
   // Capability-based fallback: primary input is touch/coarse pointer AND
-  // no hover capability AND a phone/tablet-sized viewport. This catches
-  // devices where UA sniffing lies (desktop-mode requests, odd WebViews)
-  // but the device is still physically a touchscreen phone/tablet.
+  // no hover capability AND a phone/tablet-sized viewport. Catches
+  // devices where UA sniffing lies but the hardware is still a touch
+  // device.
   const isCoarsePointer =
     typeof window.matchMedia === "function" &&
     window.matchMedia("(pointer: coarse)").matches &&
@@ -118,7 +116,7 @@ const PublicMemory = () => {
   ].filter(Boolean))).map(url => ({ url }));
 
   // ==========================================
-  // DESKTOP PATH — native print. Unchanged behavior.
+  // DESKTOP PATH — native print. Unchanged, working behavior.
   // ==========================================
   const handleNativePrint = useCallback(async () => {
     if (isDownloading) return;
@@ -149,9 +147,13 @@ const PublicMemory = () => {
   }, [isDownloading, memory]);
 
   // ==========================================
-  // MOBILE PATH — canvas-captured PDF, no browser print pipeline
-  // involved at all, so there's nothing for iOS/Android to misfire on:
-  // no viewport rasterization, no leaked toolbar, no black frame.
+  // MOBILE PATH — canvas-captured PDF, delivered via the native Share
+  // sheet where possible instead of a silent anchor-download. The
+  // jsPDF .save() anchor-click trick is what caused the "flop" (silent,
+  // no-feedback) behavior on mobile. navigator.share() with a File
+  // object hands off to the OS's real share/save UI. If unavailable,
+  // fall back to opening the PDF in a new tab so the user gets a real
+  // visible preview with the browser's own save controls.
   // ==========================================
   const handleMobilePdfDownload = useCallback(async () => {
     if (isDownloading) return;
@@ -193,16 +195,57 @@ const PublicMemory = () => {
       });
 
       pdf.addImage(imgData, "JPEG", 0, 0, 800, 1131, undefined, "FAST");
-      pdf.save(`${memory?.slug || "memory"}-diary.pdf`);
+
+      const fileName = `${memory?.slug || "memory"}-diary.pdf`;
+      const pdfBlob = pdf.output("blob");
+
+      // --- Path 1: Web Share API with a real File object. Opens the
+      // native OS share sheet (Save to Files, Drive, AirDrop, etc).
+      // Requires HTTPS (secure context) and file-sharing support, not
+      // just navigator.share existing.
+      const file = new File([pdfBlob], fileName, { type: "application/pdf" });
+      const canUseShareSheet =
+        typeof navigator !== "undefined" &&
+        navigator.canShare &&
+        navigator.canShare({ files: [file] });
+
+      if (canUseShareSheet) {
+        await navigator.share({
+          files: [file],
+          title: fileName,
+        });
+        return; // user picked Save/Share/Cancel in the native sheet — done.
+      }
+
+      // --- Path 2: Fallback — open the PDF in a new tab so the
+      // browser's own PDF viewer renders it with a visible preview and
+      // its own save/share controls, instead of an invisible download.
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      const opened = window.open(blobUrl, "_blank");
+
+      if (!opened) {
+        // Popup blocked — last resort: classic anchor-download trick.
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // Give the new tab / download time to pick up the blob before revoking.
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
     } catch (error) {
-      console.error("Mobile PDF generation failed:", error);
-      // Surface this instead of failing silently — a silent failure is
-      // what pushes people toward the browser's own Print/Share button,
-      // which reintroduces the whole-window bug since it bypasses this
-      // code entirely.
-      window.alert(
-        "Couldn't generate the PDF. Please check your connection and try again — avoid using your browser's own Print or Share button, as it will not produce a correct result."
-      );
+      // AbortError fires when the user just cancels the native share
+      // sheet — that's expected, not a real failure.
+      if (error?.name === "AbortError") {
+        console.log("User cancelled the share sheet.");
+      } else {
+        console.error("Mobile PDF generation failed:", error);
+        window.alert(
+          "Couldn't generate the PDF. Please check your connection and try again — avoid using your browser's own Print or Share button, as it will not produce a correct result."
+        );
+      }
     } finally {
       setIsDownloading(false);
     }
