@@ -71,62 +71,25 @@ const PublicMemory = () => {
   ].filter(Boolean))).map(url => ({ url }));
 
   // ==========================================
-  // SERVER-SIDE PUPPETEER PDF DOWNLOAD HANDLER
+  // NATIVE VECTOR PRINT / PDF HANDLER
   // ==========================================
-  const handleServerPDFDownload = useCallback(async () => {
-    if (isDownloading || !printComponentRef.current) return;
+  const handleNativePrint = useCallback(() => {
+    if (isDownloading) return;
     setIsDownloading(true);
-    setActiveSlot(null); // Clear editing frames
+    setActiveSlot(null); // Clear editing handles
 
-    try {
-      const htmlContent = `
-        <html>
-          <head>
-            <meta name="color-scheme" content="light">
-            <style>
-              @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
-              :root {
-                color-scheme: light !important;
-              }
-              html, body {
-                font-family: "Outfit", sans-serif;
-                margin: 0;
-                padding: 0;
-                background: #ffffff !important;
-                color-scheme: light !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-              }
-            </style>
-          </head>
-          <body>
-            ${printComponentRef.current.innerHTML}
-          </body>
-        </html>
-      `;
+    const prevTitle = document.title;
+    document.title = `${memory?.slug || 'memory'}-diary`;
 
-      const response = await api.post('/api/export-pdf', { htmlContent }, { responseType: 'blob' });
-
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const blobUrl = window.URL.createObjectURL(blob);
-      
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.setAttribute('download', `${memory?.slug || 'memory'}-diary.pdf`);
-      document.body.appendChild(link);
-      link.click();
+    // Slight timeout allows mobile layout engines to mount vector fonts correctly
+    setTimeout(() => {
+      window.print();
       
       setTimeout(() => {
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(blobUrl);
-      }, 200);
-
-    } catch (err) {
-      console.error("PDF generation failed:", err);
-      alert("Failed to download PDF. Please try again.");
-    } finally {
-      setIsDownloading(false);
-    }
+        document.title = prevTitle;
+        setIsDownloading(false);
+      }, 500);
+    }, 250);
   }, [isDownloading, memory]);
 
   useEffect(() => {
@@ -266,11 +229,11 @@ const PublicMemory = () => {
                 </div>
 
                 <button
-                    onClick={handleServerPDFDownload}
+                    onClick={handleNativePrint}
                     disabled={isDownloading}
                     className="flex items-center gap-2 bg-[#3559D4] text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer disabled:opacity-60 disabled:cursor-wait"
                 >
-                    <Download size={16} /> <span className="hidden sm:inline">{isDownloading ? "Generating PDF..." : "Save PDF / Print"}</span>
+                    <Download size={16} /> <span className="hidden sm:inline">{isDownloading ? "Preparing..." : "Save PDF / Print"}</span>
                 </button>
             </div>
 
