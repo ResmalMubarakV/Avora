@@ -41,11 +41,18 @@ const MapInvalidator = () => {
 };
 
 // ==========================================
-// MOBILE DETECTION (used ONLY to pick which download path to use —
-// desktop's window.print() flow is completely untouched)
+// MOBILE DETECTION — layered, not just UA sniffing.
+// UA sniffing alone breaks under "Request Desktop Site" mode, in-app
+// WebViews (Instagram/FB/WhatsApp browsers), and newer devices with
+// unusual UA strings. We combine UA + touch capability + viewport width
+// so a false negative here (mistakenly treating a phone as "desktop")
+// can't happen — a false negative is exactly what sends a device down
+// the fragile window.print() path instead of the reliable canvas-PDF
+// path, which is what causes the "prints whole window" regression.
 // ==========================================
 const isMobileOrTabletDevice = () => {
-  if (typeof navigator === "undefined") return false;
+  if (typeof navigator === "undefined" || typeof window === "undefined") return false;
+
   const ua = navigator.userAgent || navigator.vendor || window.opera || "";
 
   const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
@@ -53,8 +60,20 @@ const isMobileOrTabletDevice = () => {
   // this catches iPads that would otherwise be misdetected as desktop Mac.
   const isIPadOS = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
   const isAndroid = /Android/i.test(ua);
+  const isUAMobile = isIOS || isIPadOS || isAndroid;
 
-  return isIOS || isIPadOS || isAndroid;
+  // Capability-based fallback: primary input is touch/coarse pointer AND
+  // no hover capability AND a phone/tablet-sized viewport. This catches
+  // devices where UA sniffing lies (desktop-mode requests, odd WebViews)
+  // but the device is still physically a touchscreen phone/tablet.
+  const isCoarsePointer =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(pointer: coarse)").matches &&
+    window.matchMedia("(hover: none)").matches;
+
+  const isSmallViewport = window.innerWidth <= 1024;
+
+  return isUAMobile || (isCoarsePointer && isSmallViewport);
 };
 
 const PublicMemory = () => {
@@ -99,7 +118,7 @@ const PublicMemory = () => {
   ].filter(Boolean))).map(url => ({ url }));
 
   // ==========================================
-  // DESKTOP PATH — UNCHANGED. Native print, exactly as before.
+  // DESKTOP PATH — native print. Unchanged behavior.
   // ==========================================
   const handleNativePrint = useCallback(async () => {
     if (isDownloading) return;
@@ -130,7 +149,7 @@ const PublicMemory = () => {
   }, [isDownloading, memory]);
 
   // ==========================================
-  // MOBILE PATH — NEW. Canvas-captured PDF, no browser print pipeline
+  // MOBILE PATH — canvas-captured PDF, no browser print pipeline
   // involved at all, so there's nothing for iOS/Android to misfire on:
   // no viewport rasterization, no leaked toolbar, no black frame.
   // ==========================================
@@ -150,7 +169,7 @@ const PublicMemory = () => {
       }
 
       const node = printComponentRef.current;
-      if (!node) throw new Error("Print target not found");
+      if (!node) throw new Error("Print target not found — try again after the template finishes loading.");
 
       const canvas = await html2canvas(node, {
         width: 800,
@@ -177,6 +196,13 @@ const PublicMemory = () => {
       pdf.save(`${memory?.slug || "memory"}-diary.pdf`);
     } catch (error) {
       console.error("Mobile PDF generation failed:", error);
+      // Surface this instead of failing silently — a silent failure is
+      // what pushes people toward the browser's own Print/Share button,
+      // which reintroduces the whole-window bug since it bypasses this
+      // code entirely.
+      window.alert(
+        "Couldn't generate the PDF. Please check your connection and try again — avoid using your browser's own Print or Share button, as it will not produce a correct result."
+      );
     } finally {
       setIsDownloading(false);
     }
@@ -184,7 +210,6 @@ const PublicMemory = () => {
 
   // ==========================================
   // SINGLE ENTRY POINT — routes to the right path per device.
-  // Desktop behavior is 100% identical to before; only mobile is new.
   // ==========================================
   const handleDownloadClick = useCallback(() => {
     if (isMobileOrTabletDevice()) {
