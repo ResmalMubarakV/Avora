@@ -12,6 +12,8 @@ import PrintableView from "../../components/memory/PrintableView";
 
 import { Compass, Download, X, ChevronLeft, ChevronRight, ZoomIn, RefreshCcw, MousePointerClick, Settings2, MoveHorizontal, MoveVertical } from "lucide-react";
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 
 // ==========================================
 // FIX LEAFLET MARKER BUG IN PRODUCTION
@@ -71,59 +73,38 @@ const PublicMemory = () => {
   ].filter(Boolean))).map(url => ({ url }));
 
   // ==========================================
-  // SERVER-SIDE PUPPETEER PDF DOWNLOAD HANDLER
+  // BULLETPROOF CLIENT-SIDE PDF DOWNLOAD ENGINE
   // ==========================================
-  const handleServerPDFDownload = useCallback(async () => {
+  const handleClientPDFDownload = useCallback(async () => {
     if (isDownloading || !printComponentRef.current) return;
     setIsDownloading(true);
-    setActiveSlot(null); // Clear editing frames
+    setActiveSlot(null); // Clear editing handles
 
     try {
-      const htmlContent = `
-        <html>
-          <head>
-            <meta name="color-scheme" content="light">
-            <style>
-              @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
-              :root {
-                color-scheme: light !important;
-              }
-              html, body {
-                font-family: "Outfit", sans-serif;
-                margin: 0;
-                padding: 0;
-                background: #ffffff !important;
-                color-scheme: light !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-              }
-            </style>
-          </head>
-          <body>
-            ${printComponentRef.current.innerHTML}
-          </body>
-        </html>
-      `;
+      const element = printComponentRef.current;
 
-      const response = await api.post('/api/export-pdf', { htmlContent }, { responseType: 'blob' });
+      // Capture high-definition canvas snapshot of the isolated 800x1131 container
+      const canvas = await html2canvas(element, {
+        scale: 2, // 2x scaling for high-resolution print quality
+        useCORS: true, // Allows cross-origin cloud images to render
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+      });
 
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const blobUrl = window.URL.createObjectURL(blob);
+      const imgData = canvas.toDataURL('image/png');
       
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.setAttribute('download', `${memory?.slug || 'memory'}-diary.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      
-      setTimeout(() => {
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(blobUrl);
-      }, 200);
+      // Initialize jsPDF with exact template proportions (800px x 1131px)
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [800, 1131]
+      });
 
+      pdf.addImage(imgData, 'PNG', 0, 0, 800, 1131);
+      pdf.save(`${memory?.slug || 'memory'}-diary.pdf`);
     } catch (err) {
       console.error("PDF generation failed:", err);
-      alert("Failed to download PDF. Please try again.");
+      alert("Failed to generate PDF. Please try again.");
     } finally {
       setIsDownloading(false);
     }
@@ -266,7 +247,7 @@ const PublicMemory = () => {
                 </div>
 
                 <button
-                    onClick={handleServerPDFDownload}
+                    onClick={handleClientPDFDownload}
                     disabled={isDownloading}
                     className="flex items-center gap-2 bg-[#3559D4] text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer disabled:opacity-60 disabled:cursor-wait"
                 >
