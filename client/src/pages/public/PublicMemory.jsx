@@ -66,9 +66,14 @@ const PublicMemory = () => {
 
   // --- NATIVE PRINT ENGINE (PRODUCTION SECURE) ---
   const handlePrint = useReactToPrint({
-    // FIX: Use the standard v2.x 'content' function instead of 'contentRef'
     content: () => printComponentRef.current, 
     documentTitle: `${memory?.slug || 'memory'}-diary`,
+    // 🚨 FIX: Changed to onBeforeGetContent and lowered timeout to 15ms. 
+    // This stops the button from freezing and prevents mobile browsers from blocking the popup!
+    onBeforeGetContent: () => {
+      setActiveSlot(null);
+      return new Promise((resolve) => setTimeout(resolve, 15));
+    },
     pageStyle: `
       @page { size: 800px 1131px; margin: 0; }
       @media print {
@@ -109,11 +114,7 @@ const PublicMemory = () => {
             min-height: 0 !important;
         }
       }
-    `,
-    onBeforePrint: () => {
-      setActiveSlot(null);
-      return new Promise((resolve) => setTimeout(resolve, 500));
-    },
+    `
   });
 
   const imageParam = searchParams.get("image");
