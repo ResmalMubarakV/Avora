@@ -73,28 +73,59 @@ const PublicMemory = () => {
   ].filter(Boolean))).map(url => ({ url }));
 
   // ==========================================
-  // FINAL LIVE-DOM PRINT HANDLER
+  // BULLETPROOF PRINT HANDLER (MOBILE + DESKTOP)
   // ==========================================
   const handlePrint = useCallback(() => {
     if (isPrinting) return;
     setIsPrinting(true);
-
-    // Clear editing outlines / handles so they never appear in the PDF export
     setActiveSlot(null);
 
     const prevTitle = document.title;
     document.title = `${memory?.slug || 'memory'}-diary`;
 
+    // MOBILE DOM ISOLATION HACK: 
+    // Temporarily hide all non-print elements from the real DOM so mobile browsers cannot capture them
+    const rootElement = document.getElementById("root");
+    const printContainer = printComponentRef.current;
+    let originalParent = null;
+    let nextSibling = null;
+
+    const isMobile = window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
+
+    if (isMobile && printContainer && rootElement) {
+      originalParent = printContainer.parentNode;
+      nextSibling = printContainer.nextSibling;
+      // Move print container directly to body and hide root
+      document.body.appendChild(printContainer);
+      rootElement.style.display = 'none';
+    }
+
     const restore = () => {
+      if (isMobile && printContainer && rootElement) {
+        rootElement.style.display = '';
+        if (originalParent) {
+          if (nextSibling) {
+            originalParent.insertBefore(printContainer, nextSibling);
+          } else {
+            originalParent.appendChild(printContainer);
+          }
+        }
+      }
       document.title = prevTitle;
       setIsPrinting(false);
       window.removeEventListener("afterprint", restore);
     };
+
     window.addEventListener("afterprint", restore);
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        const go = () => window.print();
+        const go = () => {
+          window.print();
+          // Fallback timer to restore DOM if afterprint event fails on mobile browsers
+          setTimeout(restore, 1000);
+        };
+
         if (document.fonts && document.fonts.ready) {
           document.fonts.ready.then(go).catch(go);
         } else {
@@ -385,7 +416,7 @@ const PublicMemory = () => {
               <h3 className="text-xl font-black text-slate-900 mb-6">Location Map</h3>
               <div className="w-full aspect-[16/9] sm:h-[400px] rounded-3xl overflow-hidden shadow-md border border-slate-200 z-0 relative">
                 <MapContainer key={mapCoords.join(',')} center={mapCoords} zoom={11} className="h-full w-full" scrollWheelZoom={false}>
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}../../{x}/{y}.png" />
                   <Marker position={mapCoords} />
                   <MapInvalidator />
                 </MapContainer>
