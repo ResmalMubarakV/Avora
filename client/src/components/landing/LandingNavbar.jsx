@@ -65,34 +65,51 @@ const Navbar = () => {
                         Login
                     </Link>
 
-                    {/* Get Started Registration Button */}
+                    {/* Mobile Get Started Button (Goes to Login) */}
                     <Link
-                        to="/register"
+                        to="/login"
                         className="
                             rounded-full
-
                             bg-slate-900
-
                             px-4
                             py-2.5
-
                             text-sm
                             font-semibold
                             text-white
-
                             shadow-sm
-
                             transition-all
                             duration-300
-
                             hover:-translate-y-0.5
                             hover:bg-slate-800
                             hover:shadow-md
+                            sm:hidden
+                        "
+                    >
+                        Get Started
+                    </Link>
 
+                    {/* Tablet & Desktop Get Started Button (Goes to Register) */}
+                    <Link
+                        to="/register"
+                        className="
+                            hidden
+                            sm:rounded-full
+                            sm:bg-slate-900
                             sm:px-5
+                            sm:py-2.5
+                            sm:text-sm
+                            sm:font-semibold
+                            sm:text-white
+                            sm:shadow-sm
+                            sm:transition-all
+                            sm:duration-300
+                            sm:hover:-translate-y-0.5
+                            sm:hover:bg-slate-800
+                            sm:hover:shadow-md
                             md:px-6
                             md:py-3
                             md:text-base
+                            sm:inline-block
                         "
                     >
                         Get Started
