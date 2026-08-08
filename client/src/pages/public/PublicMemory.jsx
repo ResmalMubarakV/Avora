@@ -76,20 +76,20 @@ const PublicMemory = () => {
   const handleNativePrint = useCallback(() => {
     if (isDownloading) return;
     setIsDownloading(true);
-    setActiveSlot(null); // Clear editing handles
+    setActiveSlot(null); // Clear editing handles & control boxes
 
     const prevTitle = document.title;
     document.title = `${memory?.slug || 'memory'}-diary`;
 
-    // Slight timeout allows mobile layout engines to mount vector fonts correctly
+    // Slight delay allows mobile layout engines to clear UI buttons before capturing
     setTimeout(() => {
       window.print();
       
       setTimeout(() => {
         document.title = prevTitle;
         setIsDownloading(false);
-      }, 500);
-    }, 250);
+      }, 600);
+    }, 300);
   }, [isDownloading, memory]);
 
   useEffect(() => {
