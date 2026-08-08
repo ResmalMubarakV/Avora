@@ -636,23 +636,25 @@ const Lightbox = ({
             </div>
 
             {/* Main Content Body */}
-            <div
-                className="
-                    flex-1
-                    min-h-0
-                    flex
-                    items-center
-                    justify-center
-                    px-4
-                "
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-            >
+                        <div
+                            className="
+                                flex-1
+                                min-h-0
+                                flex
+                                items-center
+                                justify-center
+                                px-4
+                                touch-none 
+                            "
+                            onTouchStart={handleTouchStart}
+                            onTouchMove={handleTouchMove}
+                            onTouchEnd={handleTouchEnd}
+                            onTouchCancel={handleTouchEnd} 
+                            onMouseDown={handleMouseDown}
+                            onMouseMove={handleMouseMove}
+                            onMouseUp={handleMouseUp}
+                            onMouseLeave={handleMouseUp}
+                        >
                 <div
                     className="
                         flex

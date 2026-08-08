@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import LandingNavbar from "../../components/landing/LandingNavbar";
 import LandingHero from "../../components/landing/LandingHero";
 import LandingHighlights from "../../components/landing/LandingHighlights";
@@ -15,6 +18,22 @@ import PageTitle from "../../components/common/PageTitle";
  * a call-to-action section, navigation bar, and footer.
  */
 const Landing = () => {
+  const navigate = useNavigate();
+
+  // Guard: If the user is already authenticated, redirect them away from the landing page
+  useEffect(() => {
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    const userRole = localStorage.getItem("userRole");
+
+    if (token) {
+      if (userRole === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  }, [navigate]);
+
   return (
     <>
       <PageTitle title="Travel Diary Platform" />

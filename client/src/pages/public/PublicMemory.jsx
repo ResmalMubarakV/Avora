@@ -14,6 +14,22 @@ import { Compass, Download, X, ChevronLeft, ChevronRight, ZoomIn, RefreshCcw, Mo
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import { useReactToPrint } from "react-to-print";
 
+// ==========================================
+// FIX LEAFLET MARKER BUG IN PRODUCTION
+// ==========================================
+import L from 'leaflet';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIcon2x,
+  shadowUrl: markerShadow,
+});
+// ==========================================
+
 // Helper component to fix Leaflet sizing bugs in production hosting (Vercel)
 const MapInvalidator = () => {
   const map = useMap();
@@ -48,18 +64,57 @@ const PublicMemory = () => {
   const previewContainerRef = useRef(null);
   const printComponentRef = useRef(null); 
 
-  // --- NATIVE PRINT ENGINE ---
+  // --- NATIVE PRINT ENGINE (PRODUCTION SECURE) ---
   const handlePrint = useReactToPrint({
     contentRef: printComponentRef,
     documentTitle: `${memory?.slug || 'memory'}-diary`,
     pageStyle: `
+      @page { size: 800px 1131px; margin: 0; }
       @media print {
-        body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; margin: 0 !important; background-color: #ffffff !important; }
-        @page { size: 800px 1131px; margin: 0; }
-        #actual-print-container { width: 800px !important; height: 1131px !important; overflow: hidden !important; display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; }
+        body, html { 
+          -webkit-print-color-adjust: exact !important; 
+          print-color-adjust: exact !important; 
+          margin: 0 !important; 
+          padding: 0 !important;
+          background-color: #ffffff !important; 
+        }
+        #actual-print-container { 
+          width: 800px !important; 
+          height: 1131px !important; 
+          overflow: hidden !important; 
+          display: block !important; 
+          position: absolute !important; 
+          left: 0 !important; 
+          top: 0 !important; 
+        }
+        
+        /* 1. DEFEAT TAILWIND'S PRODUCTION PRINT RESETS */
+        /* The 'revert' keyword forces the browser to ignore Tailwind's !important resets and fall back to our inline component styles */
+        *, ::before, ::after {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            background-color: revert !important;
+            color: revert !important;
+            box-shadow: revert !important;
+            text-shadow: revert !important;
+            border-color: revert !important;
+        }
+        
+        /* 2. PREVENT FLEXBOX IMAGE STRETCHING IN PRINT ENGINES */
+        img {
+            max-width: none !important;
+            max-height: none !important;
+            object-fit: cover !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+        }
       }
     `,
-    onBeforePrint: () => Promise.resolve(setActiveSlot(null)),
+    onBeforePrint: () => {
+      setActiveSlot(null);
+      // Give Vercel's production network 500ms to paint the images inside the hidden print iframe
+      return new Promise((resolve) => setTimeout(resolve, 500));
+    },
   });
 
   const imageParam = searchParams.get("image");

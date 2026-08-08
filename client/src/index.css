@@ -58,3 +58,35 @@ body {
   transform-origin: center;
   animation: avoraFlight 4s ease-in-out infinite;
 }
+
+/* ==========================================
+   PRODUCTION PRINT SAFEGUARDS (VERCEL/TAILWIND)
+   ========================================== */
+@media print {
+  /* Force all browsers to render background colors and images */
+  html, body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Defeat Tailwind's aggressive print resets for the template container */
+  #actual-print-container *,
+  #actual-print-container ::before,
+  #actual-print-container ::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background-color: revert !important;
+    color: revert !important;
+    box-shadow: revert !important;
+    border-color: revert !important;
+  }
+
+  /* Hard-lock image dimensions so network latency doesn't cause flexbox stretching */
+  #actual-print-container img {
+    max-width: none !important;
+    max-height: none !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    object-fit: cover !important;
+  }
+}

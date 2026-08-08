@@ -16,8 +16,19 @@ const useCurrentUser = () => {
 
   /**
    * Fetches the user profile from the API and updates local state.
+   * Aborts immediately if no authentication token is present.
    */
   const fetchUser = async () => {
+    // 1. Check for token first!
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    
+    if (!token) {
+      setLoading(false);
+      setUser(null);
+      return; // Instantly abort without making a network request
+    }
+
+    // 2. Only proceed with the fetch if a token exists
     try {
       setLoading(true);
       const data = await getMyProfile();
@@ -26,6 +37,7 @@ const useCurrentUser = () => {
     } catch (err) {
       console.error("Error fetching current user:", err);
       setError(err.response?.data?.message || "Unable to fetch profile.");
+      setUser(null);
     } finally {
       setLoading(false);
     }
