@@ -125,7 +125,7 @@ const Sidebar = ({
                     aria-label="Close Sidebar"
                     className="h-10 w-10 rounded-xl transition-all duration-300 hover:bg-[#1E3A8A]/5 hover:text-[#1E3A8A] flex items-center justify-center cursor-pointer text-slate-700"
                   >
-                    <X size={20} />
+                    <X size={22} />
                   </button>
                 </div>
               ) : (
@@ -135,13 +135,13 @@ const Sidebar = ({
                   aria-label="Open Sidebar"
                   className="h-10 w-10 rounded-xl transition-all duration-300 hover:bg-[#1E3A8A]/5 hover:text-[#1E3A8A] flex items-center justify-center cursor-pointer text-slate-700 mx-auto"
                 >
-                  <Menu size={20} />
+                  <Menu size={22} />
                 </button>
               )}
             </div>
 
-            {/* Navigation Links List (No vertical scroll required) */}
-            <nav className="px-3 pt-2 space-y-1.5 overflow-y-auto shrink-0">
+            {/* Navigation Links List (Increased spacing from hamburger header and between icons) */}
+            <nav className="px-3 pt-4 space-y-3 overflow-y-auto shrink-0">
               {menus.map((menu) => {
                 const Icon = menu.icon;
 
@@ -159,7 +159,7 @@ const Sidebar = ({
                     title={!sidebarOpen ? menu.title : ""}
                     onClick={() => setSidebarOpen(false)}
                     className={({ isActive }) => `
-                      flex items-center h-11 rounded-xl transition-all duration-300 ${
+                      flex items-center h-12 rounded-xl transition-all duration-300 ${
                         sidebarOpen ? "justify-start gap-3.5 px-3.5" : "justify-center"
                       } ${
                         isActive && menu.title !== "Profile"
@@ -168,7 +168,7 @@ const Sidebar = ({
                       }
                     `}
                   >
-                    <Icon size={20} className="shrink-0" />
+                    <Icon size={sidebarOpen ? 20 : 24} className="shrink-0 transition-all duration-300" />
                     <span
                       className={`overflow-hidden whitespace-nowrap transition-all duration-300 text-sm font-medium ${
                         sidebarOpen ? "opacity-100 w-auto" : "opacity-0 w-0"
@@ -193,7 +193,7 @@ const Sidebar = ({
                     }
                   }}
                   title={!sidebarOpen ? "Settings" : ""}
-                  className={`w-full flex items-center h-11 rounded-xl transition-all duration-300 cursor-pointer ${
+                  className={`w-full flex items-center h-12 rounded-xl transition-all duration-300 cursor-pointer ${
                     sidebarOpen ? "justify-between px-3.5" : "justify-center"
                   } ${
                     isSettingsActive
@@ -202,7 +202,7 @@ const Sidebar = ({
                   }`}
                 >
                   <div className={`flex items-center ${sidebarOpen ? "gap-3.5" : "justify-center w-full"}`}>
-                    <Settings size={20} className="shrink-0" />
+                    <Settings size={sidebarOpen ? 20 : 24} className="shrink-0 transition-all duration-300" />
                     <span
                       className={`overflow-hidden whitespace-nowrap transition-all duration-300 text-sm font-medium ${
                         sidebarOpen ? "opacity-100 w-auto" : "opacity-0 w-0"
@@ -249,7 +249,7 @@ const Sidebar = ({
             </nav>
           </div>
 
-          {/* Logout Action Footer (Fixed at the bottom, perfectly visible without scrolling) */}
+          {/* Logout Action Footer */}
           <div className="px-3 pt-2 border-t border-slate-200/70 shrink-0">
             <button
               type="button"
@@ -259,7 +259,7 @@ const Sidebar = ({
                 sidebarOpen ? "justify-start gap-3.5 px-3.5" : "justify-center"
               } text-red-600 hover:bg-red-50 hover:text-red-700`}
             >
-              <LogOut size={20} className="shrink-0" />
+              <LogOut size={sidebarOpen ? 20 : 24} className="shrink-0 transition-all duration-300" />
               <span
                 className={`overflow-hidden whitespace-nowrap transition-all duration-300 text-sm font-medium ${
                   sidebarOpen ? "opacity-100 w-auto" : "opacity-0 w-0"

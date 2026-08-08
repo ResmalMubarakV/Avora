@@ -28,22 +28,24 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
   };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
+    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white shrink-0">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-3 sm:px-6 gap-2">
-        {/* Left Section: Mobile/Tablet Hamburger Menu & Brand Logo */}
+        {/* Left Section: Mobile Hamburger Menu & Brand Logo */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {!hideHamburger && (
             <button
               type="button"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               aria-label="Toggle Sidebar"
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100 cursor-pointer shadow-sm xl:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100 cursor-pointer shadow-sm md:hidden shrink-0"
             >
               <Menu size={20} />
             </button>
           )}
 
-          <Logo to="/dashboard" size="sm" />
+          <div className="scale-90 sm:scale-100 origin-left">
+            <Logo to="/dashboard" size="sm" />
+          </div>
         </div>
 
         {/* Center Section: Search Bar (Hidden on small tablets, visible on large tablets & desktops) */}
@@ -52,10 +54,20 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
         </div>
 
         {/* Right Section: User Menu & Logout Button */}
-        <div className="flex items-center justify-end gap-2 shrink-0">
+        <div className="flex items-center justify-end gap-1.5 sm:gap-2 shrink-0">
           <UserMenu />
 
-          {/* Logout button for tablets and desktops */}
+          {/* Icon-only Logout for mobile screens right next to the user menu */}
+          <button
+            type="button"
+            onClick={() => setShowLogoutModal(true)}
+            aria-label="Logout"
+            className="flex sm:hidden h-9 w-9 items-center justify-center rounded-xl border border-red-200 bg-white p-2 text-sm font-medium text-red-600 transition-all duration-300 hover:border-red-300 hover:bg-red-50 hover:text-red-700 cursor-pointer shadow-sm shrink-0"
+          >
+            <LogOut size={15} />
+          </button>
+
+          {/* Logout button with text for tablets and desktops */}
           <button
             type="button"
             onClick={() => setShowLogoutModal(true)}
@@ -65,23 +77,11 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
             <LogOut size={16} />
             <span className="hidden md:inline">Logout</span>
           </button>
-
-          {/* Icon-only Logout for compact viewports if needed */}
-          {hideHamburger && (
-            <button
-              type="button"
-              onClick={() => setShowLogoutModal(true)}
-              aria-label="Logout"
-              className="flex sm:hidden h-10 w-10 items-center justify-center rounded-xl border border-red-200 bg-white p-2 text-sm font-medium text-red-600 transition-all duration-300 hover:border-red-300 hover:bg-red-50 hover:text-red-700 cursor-pointer shadow-sm shrink-0"
-            >
-              <LogOut size={16} />
-            </button>
-          )}
         </div>
       </div>
 
       {/* Mobile & Small Tablet Search Bar View */}
-      <div className="px-4 pb-4 sm:px-6 md:hidden">
+      <div className="px-4 pb-3 sm:px-6 md:hidden">
         <SearchBar />
       </div>
 
