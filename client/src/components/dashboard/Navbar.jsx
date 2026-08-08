@@ -28,22 +28,22 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
   };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white shrink-0">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-3 sm:px-6 gap-2">
+    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white shrink-0 overflow-x-hidden">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-2.5 sm:px-6 gap-1">
         {/* Left Section: Mobile Hamburger Menu & Brand Logo */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 min-w-0">
           {!hideHamburger && (
             <button
               type="button"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               aria-label="Toggle Sidebar"
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100 cursor-pointer shadow-sm md:hidden shrink-0"
+              className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100 cursor-pointer shadow-sm md:hidden shrink-0"
             >
-              <Menu size={20} />
+              <Menu size={18} />
             </button>
           )}
 
-          <div className="scale-90 sm:scale-100 origin-left">
+          <div className="shrink-0 scale-95 sm:scale-100 origin-left">
             <Logo to="/dashboard" size="sm" />
           </div>
         </div>
@@ -54,7 +54,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
         </div>
 
         {/* Right Section: User Menu & Logout Button */}
-        <div className="flex items-center justify-end gap-1.5 sm:gap-2 shrink-0">
+        <div className="flex items-center justify-end gap-1.5 shrink-0">
           <UserMenu />
 
           {/* Icon-only Logout for mobile screens right next to the user menu */}
