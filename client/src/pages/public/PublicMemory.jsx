@@ -71,9 +71,9 @@ const PublicMemory = () => {
   ].filter(Boolean))).map(url => ({ url }));
 
   // ==========================================
-  // NATIVE VECTOR PRINT / PDF HANDLER
+  // BULLETPROOF FONT-AWARE NATIVE PRINT / PDF HANDLER
   // ==========================================
-  const handleNativePrint = useCallback(() => {
+  const handleNativePrint = useCallback(async () => {
     if (isDownloading) return;
     setIsDownloading(true);
     setActiveSlot(null); // Clear editing handles
@@ -81,15 +81,24 @@ const PublicMemory = () => {
     const prevTitle = document.title;
     document.title = `${memory?.slug || 'memory'}-diary`;
 
-    // Slight timeout allows mobile layout engines to mount vector fonts correctly
-    setTimeout(() => {
-      window.print();
-      
+    try {
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+
       setTimeout(() => {
-        document.title = prevTitle;
-        setIsDownloading(false);
-      }, 500);
-    }, 250);
+        window.print();
+        
+        setTimeout(() => {
+          document.title = prevTitle;
+          setIsDownloading(false);
+        }, 500);
+      }, 250);
+    } catch (error) {
+      console.error("Print generation failed:", error);
+      document.title = prevTitle;
+      setIsDownloading(false);
+    }
   }, [isDownloading, memory]);
 
   useEffect(() => {
@@ -243,7 +252,14 @@ const PublicMemory = () => {
                       style={{ transform: `scale(${previewScale})`, transformOrigin: 'center center', width: '800px', height: '1131px', transition: 'transform 0s' }}
                       className="shadow-[0_20px_25px_rgba(0,0,0,0.5)] ring-1 ring-white/10 rounded-sm bg-[#ffffff] flex-shrink-0"
                     >
-                        <div ref={printComponentRef} id="actual-print-container" style={{ width: '800px', height: '1131px', backgroundColor: '#ffffff', overflow: 'hidden', position: 'relative', boxSizing: 'border-box' }}>
+                        {/* INJECTED FONT STYLE TAG TO GUARANTEE PRINT & PREVIEW FONT MATCH */}
+                        <div ref={printComponentRef} id="actual-print-container" style={{ width: '800px', height: '1131px', backgroundColor: '#ffffff', overflow: 'hidden', position: 'relative', boxSizing: 'border-box', fontFamily: '"Outfit", sans-serif' }}>
+                            <style type="text/css" dangerouslySetInnerHTML={{ __html: `
+                              @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+                              #actual-print-container, #actual-print-container * {
+                                font-family: 'Outfit', sans-serif !important;
+                              }
+                            `}} />
                             <PrintableView
                                 memory={memory}
                                 layoutIndex={layoutIndex}
@@ -370,13 +386,35 @@ const PublicMemory = () => {
               {memory.description}
             </div>
             <div className="mt-14">
-              <h3 className="text-xl font-black text-slate-900 mb-6">Location Map</h3>
-              <div className="w-full aspect-[16/9] sm:h-[400px] rounded-3xl overflow-hidden shadow-md border border-slate-200 z-0 relative">
-                <MapContainer key={mapCoords.join(',')} center={mapCoords} zoom={11} className="h-full w-full" scrollWheelZoom={false}>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-black text-slate-900">Location Map</h3>
+                <a 
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(memory.location || mapCoords.join(','))}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-xs font-bold text-[#3559D4] hover:underline flex items-center gap-1"
+                >
+                  Open in Google Maps ↗
+                </a>
+              </div>
+              <div 
+                className="w-full aspect-[16/9] sm:h-[400px] rounded-3xl overflow-hidden shadow-md border border-slate-200 z-0 relative cursor-pointer group"
+                onClick={() => {
+                  const query = encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`);
+                  window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+                }}
+                title="Click to open in Google Maps"
+              >
+                <MapContainer key={mapCoords.join(',')} center={mapCoords} zoom={11} className="h-full w-full pointer-events-none" scrollWheelZoom={false}>
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                   <Marker position={mapCoords} />
                   <MapInvalidator />
                 </MapContainer>
+                <div className="absolute inset-0 bg-blue-900/0 group-hover:bg-blue-900/10 transition-colors flex items-end justify-end p-4 pointer-events-none">
+                  <span className="bg-white/90 backdrop-blur-md text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-md pointer-events-auto">
+                    Tap to Navigate 🧭
+                  </span>
+                </div>
               </div>
             </div>
         </div>
