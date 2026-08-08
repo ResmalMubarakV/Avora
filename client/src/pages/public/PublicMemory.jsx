@@ -12,8 +12,6 @@ import PrintableView from "../../components/memory/PrintableView";
 
 import { Compass, Download, X, ChevronLeft, ChevronRight, ZoomIn, RefreshCcw, MousePointerClick, Settings2, MoveHorizontal, MoveVertical } from "lucide-react";
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 
 // ==========================================
 // FIX LEAFLET MARKER BUG IN PRODUCTION
@@ -40,54 +38,11 @@ const MapInvalidator = () => {
   return null;
 };
 
-// ==========================================
-// MOBILE DETECTION — layered, not just UA sniffing.
-// UA sniffing alone breaks under "Request Desktop Site" mode, in-app
-// WebViews, and unusual UA strings. Combining UA + touch capability +
-// viewport width ensures a false negative (treating a phone as
-// "desktop") can't happen — a false negative is what sends a device
-// down the fragile window.print() path instead of the canvas-PDF path.
-// ==========================================
-const isMobileOrTabletDevice = () => {
-  if (typeof navigator === "undefined" || typeof window === "undefined") return false;
-
-  const ua = navigator.userAgent || navigator.vendor || window.opera || "";
-
-  const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
-  // iPadOS 13+ reports its UA as "Macintosh" but exposes multi-touch —
-  // this catches iPads that would otherwise be misdetected as desktop Mac.
-  const isIPadOS = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
-  const isAndroid = /Android/i.test(ua);
-  const isUAMobile = isIOS || isIPadOS || isAndroid;
-
-  // Capability-based fallback: primary input is touch/coarse pointer AND
-  // no hover capability AND a phone/tablet-sized viewport. Catches
-  // devices where UA sniffing lies but the hardware is still a touch
-  // device.
-  const isCoarsePointer =
-    typeof window.matchMedia === "function" &&
-    window.matchMedia("(pointer: coarse)").matches &&
-    window.matchMedia("(hover: none)").matches;
-
-  const isSmallViewport = window.innerWidth <= 1024;
-
-  return isUAMobile || (isCoarsePointer && isSmallViewport);
-};
-
 const PublicMemory = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { username, slug } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-
-  // Scroll to top automatically when component mounts or path/redirect changes
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "instant",
-    });
-  }, [location.pathname]);
 
   const [currentUser, setCurrentUser] = useState(null);
   const [memory, setMemory] = useState(null);
@@ -116,9 +71,9 @@ const PublicMemory = () => {
   ].filter(Boolean))).map(url => ({ url }));
 
   // ==========================================
-  // DESKTOP PATH — native print. Unchanged, working behavior.
+  // NATIVE VECTOR PRINT / PDF HANDLER
   // ==========================================
-  const handleNativePrint = useCallback(async () => {
+  const handleNativePrint = useCallback(() => {
     if (isDownloading) return;
     setIsDownloading(true);
     setActiveSlot(null); // Clear editing handles
@@ -126,141 +81,16 @@ const PublicMemory = () => {
     const prevTitle = document.title;
     document.title = `${memory?.slug || 'memory'}-diary`;
 
-    try {
-      if (document.fonts && document.fonts.ready) {
-        await document.fonts.ready;
-      }
-
+    // Slight timeout allows mobile layout engines to mount vector fonts correctly
+    setTimeout(() => {
+      window.print();
+      
       setTimeout(() => {
-        window.print();
-
-        setTimeout(() => {
-          document.title = prevTitle;
-          setIsDownloading(false);
-        }, 500);
-      }, 250);
-    } catch (error) {
-      console.error("Print generation failed:", error);
-      document.title = prevTitle;
-      setIsDownloading(false);
-    }
+        document.title = prevTitle;
+        setIsDownloading(false);
+      }, 500);
+    }, 250);
   }, [isDownloading, memory]);
-
-  // ==========================================
-  // MOBILE PATH — canvas-captured PDF, delivered via the native Share
-  // sheet where possible instead of a silent anchor-download. The
-  // jsPDF .save() anchor-click trick is what caused the "flop" (silent,
-  // no-feedback) behavior on mobile. navigator.share() with a File
-  // object hands off to the OS's real share/save UI. If unavailable,
-  // fall back to opening the PDF in a new tab so the user gets a real
-  // visible preview with the browser's own save controls.
-  // ==========================================
-  const handleMobilePdfDownload = useCallback(async () => {
-    if (isDownloading) return;
-    setIsDownloading(true);
-    setActiveSlot(null); // Clear editing overlay before capture
-
-    try {
-      // Wait for React to actually remove the overlay from the DOM.
-      await new Promise((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(resolve))
-      );
-
-      if (document.fonts && document.fonts.ready) {
-        await document.fonts.ready;
-      }
-
-      const node = printComponentRef.current;
-      if (!node) throw new Error("Print target not found — try again after the template finishes loading.");
-
-      const canvas = await html2canvas(node, {
-        width: 800,
-        height: 1131,
-        windowWidth: 800,
-        windowHeight: 1131,
-        scale: 3,               // high-res output (~2400x3393px raster)
-        useCORS: true,          // required for cross-origin memory images
-        allowTaint: false,
-        backgroundColor: "#ffffff",
-        logging: false,
-      });
-
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
-
-      const pdf = new jsPDF({
-        unit: "px",
-        format: [800, 1131],
-        orientation: "portrait",
-        compress: true,
-      });
-
-      pdf.addImage(imgData, "JPEG", 0, 0, 800, 1131, undefined, "FAST");
-
-      const fileName = `${memory?.slug || "memory"}-diary.pdf`;
-      const pdfBlob = pdf.output("blob");
-
-      // --- Path 1: Web Share API with a real File object. Opens the
-      // native OS share sheet (Save to Files, Drive, AirDrop, etc).
-      // Requires HTTPS (secure context) and file-sharing support, not
-      // just navigator.share existing.
-      const file = new File([pdfBlob], fileName, { type: "application/pdf" });
-      const canUseShareSheet =
-        typeof navigator !== "undefined" &&
-        navigator.canShare &&
-        navigator.canShare({ files: [file] });
-
-      if (canUseShareSheet) {
-        await navigator.share({
-          files: [file],
-          title: fileName,
-        });
-        return; // user picked Save/Share/Cancel in the native sheet — done.
-      }
-
-      // --- Path 2: Fallback — open the PDF in a new tab so the
-      // browser's own PDF viewer renders it with a visible preview and
-      // its own save/share controls, instead of an invisible download.
-      const blobUrl = URL.createObjectURL(pdfBlob);
-      const opened = window.open(blobUrl, "_blank");
-
-      if (!opened) {
-        // Popup blocked — last resort: classic anchor-download trick.
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-
-      // Give the new tab / download time to pick up the blob before revoking.
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
-    } catch (error) {
-      // AbortError fires when the user just cancels the native share
-      // sheet — that's expected, not a real failure.
-      if (error?.name === "AbortError") {
-        console.log("User cancelled the share sheet.");
-      } else {
-        console.error("Mobile PDF generation failed:", error);
-        window.alert(
-          "Couldn't generate the PDF. Please check your connection and try again — avoid using your browser's own Print or Share button, as it will not produce a correct result."
-        );
-      }
-    } finally {
-      setIsDownloading(false);
-    }
-  }, [isDownloading, memory]);
-
-  // ==========================================
-  // SINGLE ENTRY POINT — routes to the right path per device.
-  // ==========================================
-  const handleDownloadClick = useCallback(() => {
-    if (isMobileOrTabletDevice()) {
-      handleMobilePdfDownload();
-    } else {
-      handleNativePrint();
-    }
-  }, [handleMobilePdfDownload, handleNativePrint]);
 
   useEffect(() => {
     if (memory?.latitude && memory?.longitude) {
@@ -356,14 +186,8 @@ const PublicMemory = () => {
         const response = await api.get(`/api/public/${username}/${slug}`);
         setMemory(response.data);
       } catch (error) {
-        // If the profile is locked (403), redirect directly back to the locked profile page instead of an error view
-        if (error.response?.status === 403) {
-          navigate(`/u/${username}`, { replace: true });
-          return;
-        }
-        if (error.response?.status === 404) {
-          navigate("/404", { replace: true });
-        }
+        if (error.response?.status === 403) navigate("/403", { replace: true });
+        if (error.response?.status === 404) navigate("/404", { replace: true });
       } finally { setLoading(false); }
     };
     fetchMemory();
@@ -405,7 +229,7 @@ const PublicMemory = () => {
                 </div>
 
                 <button
-                    onClick={handleDownloadClick}
+                    onClick={handleNativePrint}
                     disabled={isDownloading}
                     className="flex items-center gap-2 bg-[#3559D4] text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer disabled:opacity-60 disabled:cursor-wait"
                 >
@@ -419,14 +243,7 @@ const PublicMemory = () => {
                       style={{ transform: `scale(${previewScale})`, transformOrigin: 'center center', width: '800px', height: '1131px', transition: 'transform 0s' }}
                       className="shadow-[0_20px_25px_rgba(0,0,0,0.5)] ring-1 ring-white/10 rounded-sm bg-[#ffffff] flex-shrink-0"
                     >
-                        {/* INJECTED FONT STYLE TAG TO GUARANTEE PRINT & PREVIEW FONT MATCH */}
-                        <div ref={printComponentRef} id="actual-print-container" style={{ width: '800px', height: '1131px', backgroundColor: '#ffffff', overflow: 'hidden', position: 'relative', boxSizing: 'border-box', fontFamily: '"Outfit", sans-serif' }}>
-                            <style type="text/css" dangerouslySetInnerHTML={{ __html: `
-                              @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
-                              #actual-print-container, #actual-print-container * {
-                                font-family: 'Outfit', sans-serif !important;
-                              }
-                            `}} />
+                        <div ref={printComponentRef} id="actual-print-container" style={{ width: '800px', height: '1131px', backgroundColor: '#ffffff', overflow: 'hidden', position: 'relative', boxSizing: 'border-box' }}>
                             <PrintableView
                                 memory={memory}
                                 layoutIndex={layoutIndex}
