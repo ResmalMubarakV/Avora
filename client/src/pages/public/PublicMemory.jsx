@@ -389,7 +389,7 @@ const PublicMemory = () => {
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xl font-black text-slate-900">Location Map</h3>
                 <a 
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(memory.location || mapCoords.join(','))}`} 
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`)}`} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-xs font-bold text-[#3559D4] hover:underline flex items-center gap-1"
@@ -397,22 +397,26 @@ const PublicMemory = () => {
                   Open in Google Maps ↗
                 </a>
               </div>
-              <div 
-                className="w-full aspect-[16/9] sm:h-[400px] rounded-3xl overflow-hidden shadow-md border border-slate-200 z-0 relative cursor-pointer group"
-                onClick={() => {
-                  const query = encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`);
-                  window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
-                }}
-                title="Click to open in Google Maps"
-              >
-                <MapContainer key={mapCoords.join(',')} center={mapCoords} zoom={11} className="h-full w-full pointer-events-none" scrollWheelZoom={false}>
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  <Marker position={mapCoords} />
-                  <MapInvalidator />
-                </MapContainer>
-                <div className="absolute inset-0 bg-blue-900/0 group-hover:bg-blue-900/10 transition-colors flex items-end justify-end p-4 pointer-events-none">
-                  <span className="bg-white/90 backdrop-blur-md text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-md pointer-events-auto">
-                    Tap to Navigate 🧭
+              <div className="w-full aspect-[16/9] sm:h-[400px] rounded-3xl overflow-hidden shadow-md border border-slate-200 z-0 relative group bg-slate-100">
+                <iframe
+                  title="Google Map Location"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  allowFullScreen
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`)}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                />
+                <a 
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute inset-0 bg-transparent cursor-pointer"
+                  title="Click to open full Google Maps"
+                />
+                <div className="absolute bottom-4 right-4 pointer-events-none">
+                  <span className="bg-white/90 backdrop-blur-md text-slate-900 text-xs font-bold px-3.5 py-2 rounded-full shadow-lg border border-slate-200 flex items-center gap-1.5">
+                    View on Google Maps 🧭
                   </span>
                 </div>
               </div>

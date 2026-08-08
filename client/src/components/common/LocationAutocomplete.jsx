@@ -18,10 +18,9 @@ const LocationAutocomplete = ({ value, onChange, name = "location" }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch suggestions from OpenStreetMap Nominatim API
+  // Fetch suggestions instantly as the user types
   useEffect(() => {
-    // Only fetch if the dropdown is open and the user has typed at least 2 characters
-    if (!isOpen || !value || value.length < 2) {
+    if (!isOpen || !value || value.trim().length < 1) {
       setSuggestions([]);
       return;
     }
@@ -32,7 +31,7 @@ const LocationAutocomplete = ({ value, onChange, name = "location" }) => {
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
             value
-          )}&format=json&addressdetails=1&limit=5`
+          )}&format=json&addressdetails=1&countrycodes=in&limit=6&accept-language=en`
         );
         const data = await response.json();
         setSuggestions(data);
@@ -43,34 +42,53 @@ const LocationAutocomplete = ({ value, onChange, name = "location" }) => {
       }
     };
 
-    // Debounce the API call by 500ms to prevent spamming the OSM API
+    // Fast 300ms debounce for snappy suggestions
     const debounceTimer = setTimeout(() => {
       fetchLocations();
-    }, 500);
+    }, 300);
 
     return () => clearTimeout(debounceTimer);
   }, [value, isOpen]);
 
   const handleInputChange = (e) => {
     setIsOpen(true);
-    // Send the raw typed value to the parent immediately so Live Preview works
     onChange(e);
   };
 
   const handleSelectSuggestion = (suggestion) => {
-    // Format the display name to be a bit cleaner (e.g., City, State, Country)
-    const address = suggestion.address;
-    const cleanLocation = [
-      address.city || address.town || address.village || address.name,
-      address.state,
-      address.country
-    ].filter(Boolean).join(", ");
+    const address = suggestion.address || {};
 
-    const finalLocation = cleanLocation || suggestion.display_name;
+    const locality = 
+      address.tourism || 
+      address.attraction || 
+      address.hamlet || 
+      address.village || 
+      address.suburb || 
+      address.neighbourhood || 
+      address.town || 
+      address.city || 
+      address.name;
+
+    const district = address.county || address.city || address.state_district;
+    const state = address.state;
+    const country = address.country;
+
+    const rawParts = [locality, district, state, country];
+    const uniqueCleanParts = [];
+
+    rawParts.forEach((part) => {
+      if (
+        part && 
+        !uniqueCleanParts.includes(part) && 
+        !/^\d{6}$/.test(part)
+      ) {
+        uniqueCleanParts.push(part);
+      }
+    });
+
+    const finalLocation = uniqueCleanParts.slice(0, 3).join(", ");
 
     setIsOpen(false);
-
-    // Send selected value to parent CreateMemory/EditMemory state
     onChange({ target: { name, value: finalLocation } });
   };
 
@@ -83,7 +101,7 @@ const LocationAutocomplete = ({ value, onChange, name = "location" }) => {
           value={value || ""}
           onChange={handleInputChange}
           onFocus={() => value && setIsOpen(true)}
-          placeholder="Where did you go? (e.g., Paris, France)"
+          placeholder="e.g., Goa, India"
           className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 px-4 py-3 pl-10 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100 placeholder:text-slate-400"
           autoComplete="off"
         />

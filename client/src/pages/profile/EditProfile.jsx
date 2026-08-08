@@ -215,6 +215,16 @@ const EditProfile = () => {
             formData={formData}
             handleChange={handleChange}
           />
+
+          {/* Mobile & Tablet Action Buttons */}
+          <div className="xl:hidden bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 mt-6">
+            <ActionButtons
+              loading={loading}
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+              buttonText="Save Changes"
+            />
+          </div>
         </div>
 
         <div className="hidden xl:block xl:col-span-1">

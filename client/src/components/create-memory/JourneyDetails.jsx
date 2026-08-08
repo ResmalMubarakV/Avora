@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import MemoryAIModal from "./MemoryAIModal";
 import LocationAutocomplete from "../common/LocationAutocomplete";
 
@@ -13,6 +13,14 @@ import LocationAutocomplete from "../common/LocationAutocomplete";
  */
 const JourneyDetails = ({ formData, setFormData, handleChange }) => {
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+
+  // Helper to clear specific fields
+  const handleClear = (fieldName) => {
+    setFormData((prev) => ({
+      ...prev,
+      [fieldName]: "",
+    }));
+  };
 
   return (
     <div className="rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 lg:p-8 shadow-sm space-y-5 sm:space-y-6">
@@ -31,14 +39,26 @@ const JourneyDetails = ({ formData, setFormData, handleChange }) => {
         <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
           Memory Title <span className="text-red-500">*</span>
         </label>
-        <input
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          placeholder="e.g., Weekend Escape to Munnar"
-          className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100 placeholder:text-slate-400"
-        />
+        <div className="relative">
+          <input
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            placeholder="e.g., Ultimate Goa Beach Hopping Expedition"
+            className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 px-4 py-3 pr-10 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100 placeholder:text-slate-400"
+          />
+          {formData.title && (
+            <button
+              type="button"
+              onClick={() => handleClear("title")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-lg transition cursor-pointer"
+              title="Clear title"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Location Field (Live Autocomplete) */}
@@ -46,11 +66,23 @@ const JourneyDetails = ({ formData, setFormData, handleChange }) => {
         <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
           Location <span className="text-red-500">*</span>
         </label>
-        <LocationAutocomplete
-          name="location"
-          value={formData.location}
-          onChange={handleChange}
-        />
+        <div className="relative">
+          <LocationAutocomplete
+            name="location"
+            value={formData.location}
+            onChange={handleChange}
+          />
+          {formData.location && (
+            <button
+              type="button"
+              onClick={() => handleClear("location")}
+              className="absolute right-10 top-1/2 -translate-y-1/2 z-10 text-slate-400 hover:text-slate-600 p-1 rounded-lg transition cursor-pointer"
+              title="Clear location"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Dates Grid */}
@@ -59,26 +91,50 @@ const JourneyDetails = ({ formData, setFormData, handleChange }) => {
           <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
             Start Date <span className="text-red-500">*</span>
           </label>
-          <input
-            type="date"
-            name="startDate"
-            value={formData.startDate}
-            onChange={handleChange}
-            className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100"
-          />
+          <div className="relative">
+            <input
+              type="date"
+              name="startDate"
+              value={formData.startDate}
+              onChange={handleChange}
+              className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 px-4 py-3 pr-10 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100"
+            />
+            {formData.startDate && (
+              <button
+                type="button"
+                onClick={() => handleClear("startDate")}
+                className="absolute right-10 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-lg transition cursor-pointer"
+                title="Clear start date"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
         </div>
 
         <div>
           <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
             End Date <span className="text-red-500">*</span>
           </label>
-          <input
-            type="date"
-            name="endDate"
-            value={formData.endDate}
-            onChange={handleChange}
-            className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100"
-          />
+          <div className="relative">
+            <input
+              type="date"
+              name="endDate"
+              value={formData.endDate}
+              onChange={handleChange}
+              className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 px-4 py-3 pr-10 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100"
+            />
+            {formData.endDate && (
+              <button
+                type="button"
+                onClick={() => handleClear("endDate")}
+                className="absolute right-10 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-lg transition cursor-pointer"
+                title="Clear end date"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -87,23 +143,35 @@ const JourneyDetails = ({ formData, setFormData, handleChange }) => {
         <label className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
           Mode of Travel <span className="text-red-500">*</span>
         </label>
-        <select
-          name="modeOfTravel"
-          value={formData.modeOfTravel}
-          onChange={handleChange}
-          className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100"
-        >
-          <option value="" disabled>Select Travel Mode</option>
-          <option value="Car">Car</option>
-          <option value="Bike">Bike</option>
-          <option value="Bus">Bus</option>
-          <option value="Train">Train</option>
-          <option value="Flight">Flight</option>
-          <option value="Walk">Walk</option>
-          <option value="Cycle">Cycle</option>
-          <option value="Boat">Boat</option>
-          <option value="Other">Other</option>
-        </select>
+        <div className="relative">
+          <select
+            name="modeOfTravel"
+            value={formData.modeOfTravel}
+            onChange={handleChange}
+            className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 px-4 py-3 pr-10 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100 appearance-none"
+          >
+            <option value="" disabled>Select Travel Mode</option>
+            <option value="Car">Car</option>
+            <option value="Bike">Bike</option>
+            <option value="Bus">Bus</option>
+            <option value="Train">Train</option>
+            <option value="Flight">Flight</option>
+            <option value="Walk">Walk</option>
+            <option value="Cycle">Cycle</option>
+            <option value="Boat">Boat</option>
+            <option value="Other">Other</option>
+          </select>
+          {formData.modeOfTravel && (
+            <button
+              type="button"
+              onClick={() => handleClear("modeOfTravel")}
+              className="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 rounded-lg transition cursor-pointer"
+              title="Clear travel mode"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Story / Description Field with Embedded AI Magic Fill Button */}
@@ -124,14 +192,26 @@ const JourneyDetails = ({ formData, setFormData, handleChange }) => {
           </button>
         </div>
 
-        <textarea
-          rows={5}
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          placeholder="Share your experience, highlights, and feelings about the journey..."
-          className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100 resize-none placeholder:text-slate-400"
-        />
+        <div className="relative">
+          <textarea
+            rows={5}
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="e.g., Share your full Goa trip experience, beach hopping highlights, coastal drives, and unforgettable sunsets..."
+            className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 pr-10 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100 resize-none placeholder:text-slate-400"
+          />
+          {formData.description && (
+            <button
+              type="button"
+              onClick={() => handleClear("description")}
+              className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 p-1 rounded-lg transition cursor-pointer"
+              title="Clear story"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* AI Assistant Modal for Story Generation */}

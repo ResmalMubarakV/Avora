@@ -14,9 +14,6 @@ import LivePreview from "../../components/create-memory/LivePreview";
 import DiscardMemoryModal from "../../components/create-memory/DiscardMemoryModal";
 import PageTitle from "../../components/common/PageTitle";
 
-// ==========================================
-// CREATE MEMORY PAGE COMPONENT
-// ==========================================
 const CreateMemory = () => {
   const navigate = useNavigate();
 
@@ -30,7 +27,7 @@ const CreateMemory = () => {
     endDate: "",
     modeOfTravel: "",
     description: "",
-    isPublic: false,
+    isPublic: true,
     coverImage: null,
     gallery: [],
   });
@@ -108,6 +105,7 @@ const CreateMemory = () => {
       }
 
       await createMemory(data);
+      setShowDiscardModal(false);
       toast.success("Memory created successfully!");
 
       navigate("/dashboard");
@@ -161,6 +159,7 @@ const CreateMemory = () => {
       <PageHeader />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+        {/* Form Inputs Container */}
         <div className="xl:col-span-2 xl:h-[calc(100vh-10rem)] xl:overflow-y-auto xl:pr-4 space-y-6 scrollbar-hide">
           <JourneyDetails
             formData={formData}
@@ -179,8 +178,19 @@ const CreateMemory = () => {
             formData={formData}
             setFormData={setFormData}
           />
+
+          {/* Mobile & Tablet Action Buttons */}
+          <div className="xl:hidden bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 mt-6">
+            <ActionButtons
+              loading={loading}
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+              buttonText="Publish Memory"
+            />
+          </div>
         </div>
 
+        {/* Desktop Sidebar Preview & Buttons */}
         <div className="hidden xl:block xl:col-span-1">
           <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 flex flex-col h-[calc(100vh-10rem)]">
             <div className="overflow-y-auto scrollbar-hide flex-1 pr-1 pb-4">
@@ -201,8 +211,10 @@ const CreateMemory = () => {
 
       <DiscardMemoryModal
         open={showDiscardModal}
+        loading={loading}
         onClose={() => setShowDiscardModal(false)}
         onDiscard={discardMemory}
+        onPublish={handleSubmit}
       />
     </div>
   );

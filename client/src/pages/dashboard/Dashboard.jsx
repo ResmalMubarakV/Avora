@@ -1,4 +1,3 @@
-import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import DashboardHero from "../../components/dashboard/DashboardHero";
@@ -40,15 +39,7 @@ const Dashboard = () => {
     return (
       <div className="space-y-4">
         <PageTitle title="Dashboard" />
-        <div className="flex items-center justify-end">
-          <button
-            onClick={() => navigate("/dashboard/create-memory")}
-            className="inline-flex sm:hidden items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98]"
-          >
-            <Plus size={15} />
-            <span>New</span>
-          </button>
-        </div>
+        <DashboardHero />
         <EmptyDashboard />
       </div>
     );
@@ -73,16 +64,6 @@ const Dashboard = () => {
   return (
     <div className="space-y-5 sm:space-y-8 pb-16">
       <PageTitle title="Dashboard" />
-      <div className="flex items-center justify-end">
-        <button
-          type="button"
-          onClick={() => navigate("/dashboard/create-memory")}
-          className="group inline-flex sm:hidden items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 active:scale-[0.98]"
-        >
-          <Plus size={15} className="transition-transform duration-300 group-hover:rotate-90" />
-          <span>New Memory</span>
-        </button>
-      </div>
 
       <DashboardHero />
 

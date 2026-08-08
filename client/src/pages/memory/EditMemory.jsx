@@ -43,7 +43,7 @@ const EditMemory = () => {
     endDate: "",
     modeOfTravel: "",
     description: "",
-    isPublic: false,
+    isPublic: true,
     coverImage: null,
     gallery: [],
     existingCover: "",
@@ -71,7 +71,7 @@ const EditMemory = () => {
           endDate: memory.endDate.split("T")[0],
           modeOfTravel: memory.modeOfTravel,
           description: memory.description,
-          isPublic: memory.isPublic,
+          isPublic: memory.isPublic ?? true,
           coverImage: null,
           gallery: [],
           existingCover: memory.coverImage,
@@ -198,6 +198,7 @@ const EditMemory = () => {
       }
 
       const response = await updateMemory(id, data);
+      setShowDiscardModal(false);
       toast.success("Memory updated successfully!");
 
       if (response?.slug && response?.user?.username) {
@@ -254,6 +255,16 @@ const EditMemory = () => {
             formData={formData}
             setFormData={setFormData}
           />
+
+          {/* Mobile & Tablet Action Buttons */}
+          <div className="xl:hidden bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 mt-6">
+            <ActionButtons
+              loading={loading}
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+              buttonText="Save Changes"
+            />
+          </div>
         </div>
 
         <div className="hidden xl:block xl:col-span-1">
@@ -276,8 +287,10 @@ const EditMemory = () => {
 
       <DiscardMemoryModal
         open={showDiscardModal}
+        loading={loading}
         onClose={() => setShowDiscardModal(false)}
         onDiscard={discardMemory}
+        onPublish={handleSubmit}
       />
 
       <DeleteMediaModal

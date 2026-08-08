@@ -103,7 +103,7 @@ const CoverUploader = ({
       coverScale: 1,
       coverPosition: { x: 0, y: 0 },
     }));
-    setIsAdjusting(true);
+    setIsAdjusting(false); // Starts false, requires explicit edit click
   };
 
   const removeCover = () => {
@@ -122,14 +122,15 @@ const CoverUploader = ({
     }
   };
 
-  // --- Drag / Pan Handlers ---
+  // --- Drag / Pan Handlers (Guarded by isAdjusting) ---
   const handleMouseDown = (e) => {
+    if (!isAdjusting) return;
     setIsDragging(true);
     setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
   };
 
   const handleMouseMove = (e) => {
-    if (!isDragging) return;
+    if (!isAdjusting || !isDragging) return;
     setPosition({
       x: e.clientX - dragStart.x,
       y: e.clientY - dragStart.y,
@@ -137,17 +138,18 @@ const CoverUploader = ({
   };
 
   const handleMouseUp = () => {
+    if (!isAdjusting) return;
     setIsDragging(false);
   };
 
   const handleTouchStart = (e) => {
-    if (!e.touches[0]) return;
+    if (!isAdjusting || !e.touches[0]) return;
     setIsDragging(true);
     setDragStart({ x: e.touches[0].clientX - position.x, y: e.touches[0].clientY - position.y });
   };
 
   const handleTouchMove = (e) => {
-    if (!isDragging || !e.touches[0]) return;
+    if (!isAdjusting || !isDragging || !e.touches[0]) return;
     setPosition({
       x: e.touches[0].clientX - dragStart.x,
       y: e.touches[0].clientY - dragStart.y,
@@ -155,6 +157,7 @@ const CoverUploader = ({
   };
 
   const handleTouchEnd = () => {
+    if (!isAdjusting) return;
     setIsDragging(false);
   };
 
@@ -229,7 +232,7 @@ const CoverUploader = ({
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             className={`relative overflow-hidden rounded-xl sm:rounded-2xl border border-slate-200/80 bg-slate-900 aspect-video w-full select-none ${
-              isAdjusting ? "cursor-grab active:cursor-grabbing ring-2 ring-[#3559D4]" : ""
+              isAdjusting ? "cursor-grab active:cursor-grabbing ring-2 ring-[#3559D4]" : "cursor-default"
             }`}
           >
             <img

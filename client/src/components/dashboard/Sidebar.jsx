@@ -95,7 +95,7 @@ const Sidebar = ({
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed left-0 top-0 z-50 h-screen bg-white/90 backdrop-blur-xl border-r border-slate-200/80 shadow-[0_10px_35px_rgba(30,58,138,0.08)] transition-all duration-300 ease-in-out flex flex-col ${
+        className={`fixed left-0 top-0 z-50 h-[100dvh] bg-white/90 backdrop-blur-xl border-r border-slate-200/80 shadow-[0_10px_35px_rgba(30,58,138,0.08)] transition-all duration-300 ease-in-out flex flex-col overflow-hidden ${
           sidebarOpen
             ? "translate-x-0 w-72 shadow-2xl"
             : "-translate-x-full md:translate-x-0 w-20"
@@ -108,156 +108,160 @@ const Sidebar = ({
         </div>
 
         {/* Sidebar Inner Content */}
-        <div className="relative z-10 flex h-full flex-col">
-          {/* Toggle Header Button */}
-          <div className="h-20 flex items-center px-4">
-            {sidebarOpen ? (
-              <div className="w-full flex items-center justify-between">
-                <span className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-500 pl-2">
-                  Menu
-                </span>
+        <div className="relative z-10 flex h-full flex-col justify-between py-2">
+          
+          {/* Top Section: Toggle Header + Navigation Links */}
+          <div className="flex flex-col flex-1 overflow-hidden">
+            {/* Toggle Header Button */}
+            <div className="h-14 flex items-center px-4 shrink-0">
+              {sidebarOpen ? (
+                <div className="w-full flex items-center justify-between">
+                  <span className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500 pl-2">
+                    Menu
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSidebarOpen(false)}
+                    aria-label="Close Sidebar"
+                    className="h-10 w-10 rounded-xl transition-all duration-300 hover:bg-[#1E3A8A]/5 hover:text-[#1E3A8A] flex items-center justify-center cursor-pointer text-slate-700"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              ) : (
                 <button
                   type="button"
-                  onClick={() => setSidebarOpen(false)}
-                  aria-label="Close Sidebar"
-                  className="h-12 w-12 rounded-2xl transition-all duration-300 hover:bg-[#1E3A8A]/5 hover:text-[#1E3A8A] flex items-center justify-center cursor-pointer text-slate-700"
+                  onClick={() => setSidebarOpen(true)}
+                  aria-label="Open Sidebar"
+                  className="h-10 w-10 rounded-xl transition-all duration-300 hover:bg-[#1E3A8A]/5 hover:text-[#1E3A8A] flex items-center justify-center cursor-pointer text-slate-700 mx-auto"
                 >
-                  <X size={22} />
+                  <Menu size={20} />
                 </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setSidebarOpen(true)}
-                aria-label="Open Sidebar"
-                className="h-12 w-12 rounded-2xl transition-all duration-300 hover:bg-[#1E3A8A]/5 hover:text-[#1E3A8A] flex items-center justify-center cursor-pointer text-slate-700 mx-auto"
-              >
-                <Menu size={22} />
-              </button>
-            )}
-          </div>
-
-          {/* Navigation Links List */}
-          <nav className="flex-1 px-3 pt-4 space-y-2 overflow-y-auto">
-            {menus.map((menu) => {
-              const Icon = menu.icon;
-
-              const destination =
-                menu.title === "Profile"
-                  ? user?.username
-                    ? `/u/${user.username}`
-                    : "/dashboard"
-                  : menu.path;
-
-              return (
-                <NavLink
-                  key={menu.title}
-                  to={destination}
-                  title={!sidebarOpen ? menu.title : ""}
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) => `
-                    flex items-center h-14 rounded-2xl transition-all duration-300 ${
-                      sidebarOpen ? "justify-start gap-4 px-4" : "justify-center"
-                    } ${
-                      isActive && menu.title !== "Profile"
-                        ? "bg-gradient-to-r from-[#1E3A8A] to-[#3559D4] text-white shadow-lg shadow-[#1E3A8A]/20"
-                        : "text-slate-600 hover:bg-[#1E3A8A]/5 hover:text-[#1E3A8A]"
-                    }
-                  `}
-                >
-                  <Icon size={22} className="shrink-0" />
-                  <span
-                    className={`overflow-hidden whitespace-nowrap transition-all duration-300 font-medium ${
-                      sidebarOpen ? "opacity-100 w-auto" : "opacity-0 w-0"
-                    }`}
-                  >
-                    {menu.title}
-                  </span>
-                </NavLink>
-              );
-            })}
-
-            {/* Settings Accordion Section */}
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (!sidebarOpen) {
-                    setSidebarOpen(true);
-                    setSettingsOpen(true);
-                  } else {
-                    setSettingsOpen(!settingsOpen);
-                  }
-                }}
-                title={!sidebarOpen ? "Settings" : ""}
-                className={`w-full flex items-center h-14 rounded-2xl transition-all duration-300 cursor-pointer ${
-                  sidebarOpen ? "justify-between px-4" : "justify-center"
-                } ${
-                  isSettingsActive
-                    ? "bg-slate-100 text-[#1E3A8A] font-bold"
-                    : "text-slate-600 hover:bg-[#1E3A8A]/5 hover:text-[#1E3A8A]"
-                }`}
-              >
-                <div className={`flex items-center ${sidebarOpen ? "gap-4" : "justify-center w-full"}`}>
-                  <Settings size={22} className="shrink-0" />
-                  <span
-                    className={`overflow-hidden whitespace-nowrap transition-all duration-300 font-medium ${
-                      sidebarOpen ? "opacity-100 w-auto" : "opacity-0 w-0"
-                    }`}
-                  >
-                    Settings
-                  </span>
-                </div>
-                {sidebarOpen && (
-                  <ChevronDown
-                    size={16}
-                    className={`transition-transform duration-200 ${settingsOpen ? "rotate-180" : ""}`}
-                  />
-                )}
-              </button>
-
-              {sidebarOpen && settingsOpen && (
-                <div className="pl-6 pt-2 space-y-1.5 border-l-2 border-slate-200 ml-6 my-1">
-                  <button
-                    type="button"
-                    onClick={() => handleNavigation("/dashboard/settings/profile")}
-                    className={`w-full flex items-center gap-3 h-11 px-3 rounded-xl text-sm transition-all text-left cursor-pointer ${
-                      location.pathname === "/dashboard/settings/profile" 
-                        ? "bg-[#1E3A8A] text-white font-semibold" 
-                        : "text-slate-600 hover:bg-slate-100"
-                    }`}
-                  >
-                    <User size={16} /> Edit Profile
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleNavigation("/dashboard/settings/security")}
-                    className={`w-full flex items-center gap-3 h-11 px-3 rounded-xl text-sm transition-all text-left cursor-pointer ${
-                      location.pathname === "/dashboard/settings/security" 
-                        ? "bg-[#1E3A8A] text-white font-semibold" 
-                        : "text-slate-600 hover:bg-slate-100"
-                    }`}
-                  >
-                    <Lock size={16} /> Security & Password
-                  </button>
-                </div>
               )}
             </div>
-          </nav>
 
-          {/* Logout Action Footer */}
-          <div className="p-3 border-t border-slate-200/70">
+            {/* Navigation Links List (No vertical scroll required) */}
+            <nav className="px-3 pt-2 space-y-1.5 overflow-y-auto shrink-0">
+              {menus.map((menu) => {
+                const Icon = menu.icon;
+
+                const destination =
+                  menu.title === "Profile"
+                    ? user?.username
+                      ? `/u/${user.username}`
+                      : "/dashboard"
+                    : menu.path;
+
+                return (
+                  <NavLink
+                    key={menu.title}
+                    to={destination}
+                    title={!sidebarOpen ? menu.title : ""}
+                    onClick={() => setSidebarOpen(false)}
+                    className={({ isActive }) => `
+                      flex items-center h-11 rounded-xl transition-all duration-300 ${
+                        sidebarOpen ? "justify-start gap-3.5 px-3.5" : "justify-center"
+                      } ${
+                        isActive && menu.title !== "Profile"
+                          ? "bg-gradient-to-r from-[#1E3A8A] to-[#3559D4] text-white shadow-md shadow-[#1E3A8A]/20"
+                          : "text-slate-600 hover:bg-[#1E3A8A]/5 hover:text-[#1E3A8A]"
+                      }
+                    `}
+                  >
+                    <Icon size={20} className="shrink-0" />
+                    <span
+                      className={`overflow-hidden whitespace-nowrap transition-all duration-300 text-sm font-medium ${
+                        sidebarOpen ? "opacity-100 w-auto" : "opacity-0 w-0"
+                      }`}
+                    >
+                      {menu.title}
+                    </span>
+                  </NavLink>
+                );
+              })}
+
+              {/* Settings Accordion Section */}
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!sidebarOpen) {
+                      setSidebarOpen(true);
+                      setSettingsOpen(true);
+                    } else {
+                      setSettingsOpen(!settingsOpen);
+                    }
+                  }}
+                  title={!sidebarOpen ? "Settings" : ""}
+                  className={`w-full flex items-center h-11 rounded-xl transition-all duration-300 cursor-pointer ${
+                    sidebarOpen ? "justify-between px-3.5" : "justify-center"
+                  } ${
+                    isSettingsActive
+                      ? "bg-slate-100 text-[#1E3A8A] font-bold"
+                      : "text-slate-600 hover:bg-[#1E3A8A]/5 hover:text-[#1E3A8A]"
+                  }`}
+                >
+                  <div className={`flex items-center ${sidebarOpen ? "gap-3.5" : "justify-center w-full"}`}>
+                    <Settings size={20} className="shrink-0" />
+                    <span
+                      className={`overflow-hidden whitespace-nowrap transition-all duration-300 text-sm font-medium ${
+                        sidebarOpen ? "opacity-100 w-auto" : "opacity-0 w-0"
+                      }`}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                  {sidebarOpen && (
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform duration-200 ${settingsOpen ? "rotate-180" : ""}`}
+                    />
+                  )}
+                </button>
+
+                {sidebarOpen && settingsOpen && (
+                  <div className="pl-5 pt-1 space-y-1 border-l-2 border-slate-200 ml-5 my-1">
+                    <button
+                      type="button"
+                      onClick={() => handleNavigation("/dashboard/settings/profile")}
+                      className={`w-full flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-xs transition-all text-left cursor-pointer ${
+                        location.pathname === "/dashboard/settings/profile" 
+                          ? "bg-[#1E3A8A] text-white font-semibold" 
+                          : "text-slate-600 hover:bg-slate-100"
+                      }`}
+                    >
+                      <User size={15} /> Edit Profile
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleNavigation("/dashboard/settings/security")}
+                      className={`w-full flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-xs transition-all text-left cursor-pointer ${
+                        location.pathname === "/dashboard/settings/security" 
+                          ? "bg-[#1E3A8A] text-white font-semibold" 
+                          : "text-slate-600 hover:bg-slate-100"
+                      }`}
+                    >
+                      <Lock size={15} /> Security & Password
+                    </button>
+                  </div>
+                )}
+              </div>
+            </nav>
+          </div>
+
+          {/* Logout Action Footer (Fixed at the bottom, perfectly visible without scrolling) */}
+          <div className="px-3 pt-2 border-t border-slate-200/70 shrink-0">
             <button
               type="button"
               onClick={() => setShowLogoutModal(true)}
               title={!sidebarOpen ? "Logout" : ""}
-              className={`w-full h-14 rounded-2xl cursor-pointer transition-all duration-300 flex items-center ${
-                sidebarOpen ? "justify-start gap-4 px-4" : "justify-center"
+              className={`w-full h-12 rounded-xl cursor-pointer transition-all duration-300 flex items-center ${
+                sidebarOpen ? "justify-start gap-3.5 px-3.5" : "justify-center"
               } text-red-600 hover:bg-red-50 hover:text-red-700`}
             >
-              <LogOut size={22} className="shrink-0" />
+              <LogOut size={20} className="shrink-0" />
               <span
-                className={`overflow-hidden whitespace-nowrap transition-all duration-300 font-medium ${
+                className={`overflow-hidden whitespace-nowrap transition-all duration-300 text-sm font-medium ${
                   sidebarOpen ? "opacity-100 w-auto" : "opacity-0 w-0"
                 }`}
               >
