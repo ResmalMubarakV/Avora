@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams, useSearchParams, useLocation } from "react-router-dom";
 import api from "../../api/axios";
 import { getMyProfile } from "../../api/userApi";
@@ -11,6 +11,28 @@ import PageTitle from "../../components/common/PageTitle";
 import PrintableView from "../../components/memory/PrintableView";
 
 import { Compass, Download, X, ChevronLeft, ChevronRight, ZoomIn, RefreshCcw, MousePointerClick, Settings2, MoveHorizontal, MoveVertical } from "lucide-react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+
+const isMobileOrTabletDevice = () => {
+  if (typeof navigator === "undefined" || typeof window === "undefined") return false;
+
+  const ua = navigator.userAgent || navigator.vendor || window.opera || "";
+
+  const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+  const isIPadOS = navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  const isAndroid = /Android/i.test(ua);
+  const isUAMobile = isIOS || isIPadOS || isAndroid;
+
+  const isCoarsePointer =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(pointer: coarse)").matches &&
+    window.matchMedia("(hover: none)").matches;
+
+  const isSmallViewport = window.innerWidth <= 1024;
+
+  return isUAMobile || (isCoarsePointer && isSmallViewport);
+};
 
 const PublicMemory = () => {
   const navigate = useNavigate();
@@ -30,8 +52,11 @@ const PublicMemory = () => {
   const layoutIndex = searchParams.has("layout") ? Number(searchParams.get("layout")) : 0;
 
   const [mapCoords, setMapCoords] = useState([20.5937, 78.9629]);
+
   const [previewScale, setPreviewScale] = useState(1);
   const previewContainerRef = useRef(null);
+  const printComponentRef = useRef(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const imageParam = searchParams.get("image");
   const [isOpen, setIsOpen] = useState(imageParam !== null);
@@ -45,60 +70,124 @@ const PublicMemory = () => {
       ...(memory?.media?.filter(m => m.type === 'image').map(m => m.url) || [])
   ].filter(Boolean))).map(url => ({ url }));
 
-  // ==========================================
-  // INJECT PRINT STYLES DIRECTLY TO <HEAD>
-  // Prevents Vite from deleting the color-adjust rules in production.
-  // ==========================================
-  useEffect(() => {
-    if (!isPreviewMode) return;
-    
-    const styleId = "avora-print-styles";
-    if (!document.getElementById(styleId)) {
-        const style = document.createElement("style");
-        style.id = styleId;
-        style.innerHTML = `
-          @media print {
-            @page { 
-              size: 800px 1131px !important; 
-              margin: 0 !important; 
-            }
-            html, body { 
-              margin: 0 !important; 
-              padding: 0 !important; 
-              background-color: white !important; 
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-              color-adjust: exact !important;
-            }
-            *, *::before, *::after {
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-              color-adjust: exact !important;
-            }
-          }
-        `;
-        document.head.appendChild(style);
-    }
+  const handleNativePrint = useCallback(async () => {
+    if (isDownloading) return;
+    setIsDownloading(true);
+    setActiveSlot(null);
 
-    return () => {
-        const style = document.getElementById(styleId);
-        if (style) document.head.removeChild(style);
-    };
-  }, [isPreviewMode]);
-
-  // ==========================================
-  // NATIVE PRINT HANDLER
-  // ==========================================
-  const handleNativePrint = () => {
-    setActiveSlot(null); 
     const prevTitle = document.title;
     document.title = `${memory?.slug || 'memory'}-diary`;
 
-    setTimeout(() => {
-      window.print();
+    try {
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+
+      setTimeout(() => {
+        window.print();
+
+        setTimeout(() => {
+          document.title = prevTitle;
+          setIsDownloading(false);
+        }, 500);
+      }, 250);
+    } catch (error) {
+      console.error("Print generation failed:", error);
       document.title = prevTitle;
-    }, 200);
-  };
+      setIsDownloading(false);
+    }
+  }, [isDownloading, memory]);
+
+  const handleMobilePdfDownload = useCallback(async () => {
+    if (isDownloading) return;
+    setIsDownloading(true);
+    setActiveSlot(null);
+
+    try {
+      await new Promise((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(resolve))
+      );
+
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+
+      const node = printComponentRef.current;
+      if (!node) throw new Error("Print target not found — try again after the template finishes loading.");
+
+      const canvas = await html2canvas(node, {
+        x: 0,
+        y: 0,
+        width: 800,
+        height: 1131,
+        windowWidth: 800,
+        windowHeight: 1131,
+        scale: 3,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+
+      const pdf = new jsPDF({
+        unit: "px",
+        format: [800, 1131],
+        orientation: "portrait",
+        compress: true,
+      });
+
+      pdf.addImage(imgData, "JPEG", 0, 0, 800, 1131, undefined, "FAST");
+
+      const fileName = `${memory?.slug || "memory"}-diary.pdf`;
+      const pdfBlob = pdf.output("blob");
+
+      const file = new File([pdfBlob], fileName, { type: "application/pdf" });
+      const canUseShareSheet =
+        typeof navigator !== "undefined" &&
+        navigator.canShare &&
+        navigator.canShare({ files: [file] });
+
+      if (canUseShareSheet) {
+        await navigator.share({ files: [file], title: fileName });
+        return;
+      }
+
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      const opened = window.open(blobUrl, "_blank");
+
+      if (!opened) {
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
+    } catch (error) {
+      if (error?.name === "AbortError") {
+        console.log("User cancelled the share sheet.");
+      } else {
+        console.error("Mobile PDF generation failed:", error);
+        window.alert(
+          "Couldn't generate the PDF. Please check your connection and try again — avoid using your browser's own Print or Share button, as it will not produce a correct result."
+        );
+      }
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [isDownloading, memory]);
+
+  const handleDownloadClick = useCallback(() => {
+    if (isMobileOrTabletDevice()) {
+      handleMobilePdfDownload();
+    } else {
+      handleNativePrint();
+    }
+  }, [handleMobilePdfDownload, handleNativePrint]);
 
   useEffect(() => {
     if (memory?.latitude && memory?.longitude) {
@@ -129,27 +218,20 @@ const PublicMemory = () => {
   }, [isPreviewMode, memory, mediaConfig, allImages]);
 
   useEffect(() => {
-    if (!isPreviewMode) return;
-    
-    const container = previewContainerRef.current;
-    if (!container) return;
-
-    const observer = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        const { width, height } = entry.contentRect;
-        const availableWidth = width - 32; 
-        const availableHeight = height - 32;
-
-        if (availableWidth > 0 && availableHeight > 0) {
+    if (isPreviewMode) {
+      const calculateScale = () => {
+        if (previewContainerRef.current) {
+          const availableWidth = previewContainerRef.current.offsetWidth - 32;
+          const availableHeight = previewContainerRef.current.offsetHeight - 32;
           const scaleX = availableWidth / 800;
           const scaleY = availableHeight / 1131;
           setPreviewScale(Math.min(scaleX, scaleY, 1));
         }
-      }
-    });
-
-    observer.observe(container);
-    return () => observer.disconnect();
+      };
+      calculateScale();
+      window.addEventListener("resize", calculateScale);
+      return () => window.removeEventListener("resize", calculateScale);
+    }
   }, [isPreviewMode, layoutIndex, activeSlot]);
 
   const handleConfigChange = (slotId, key, value) => {
@@ -201,7 +283,7 @@ const PublicMemory = () => {
         const response = await api.get(`/api/public/${username}/${slug}`);
         setMemory(response.data);
       } catch (error) {
-        if (error.response?.status === 403) navigate(`/u/${username}`, { replace: true });
+        if (error.response?.status === 403) navigate("/403", { replace: true });
         if (error.response?.status === 404) navigate("/404", { replace: true });
       } finally { setLoading(false); }
     };
@@ -222,30 +304,7 @@ const PublicMemory = () => {
 
   if (isPreviewMode) {
     return (
-      <>
-        {/* ========================================== */}
-        {/* EXACT PDF EXPORT TARGET (VISIBLE ONLY TO PRINTER) */}
-        {/* Renders far off-screen instead of display:none to guarantee background colors are computed */}
-        {/* ========================================== */}
-        <div 
-          className="fixed top-[-20000px] left-[-20000px] print:top-0 print:left-0 z-[999999] m-0 p-0 overflow-hidden bg-white" 
-          style={{ width: "800px", height: "1131px" }}
-        >
-            <PrintableView
-                memory={memory}
-                layoutIndex={layoutIndex}
-                mediaConfig={mediaConfig}
-                isEditing={false} 
-                activeSlot={null}
-                onSlotClick={() => {}}
-                onUpdateConfig={() => {}}
-            />
-        </div>
-
-        {/* ========================================== */}
-        {/* INTERACTIVE UI (HIDDEN DURING PRINT) */}
-        {/* ========================================== */}
-        <div className="print:hidden min-h-[100dvh] h-screen bg-slate-900 flex flex-col overflow-hidden fixed inset-0 z-[100]">
+        <div className="min-h-[100dvh] h-screen bg-slate-900 flex flex-col overflow-hidden fixed inset-0 z-[100]">
             <div className="flex-none flex items-center justify-between bg-slate-950/90 backdrop-blur-md px-4 sm:px-8 py-4 border-b border-slate-800 shadow-xl z-50">
                 <button onClick={exitPreviewMode} className="flex items-center gap-1 sm:gap-2 text-white/80 hover:text-white font-medium cursor-pointer">
                     <X size={20} /> <span className="hidden sm:inline">Back</span>
@@ -253,55 +312,51 @@ const PublicMemory = () => {
 
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2 sm:gap-4">
-                        <span className="text-white/60 text-[10px] sm:text-xs font-semibold tracking-wider uppercase hidden md:flex items-center gap-2">
+                        <span className="text-white/60 text-[10px] sm:text-xs font-semibold tracking-wider uppercase flex items-center gap-2">
                             <MousePointerClick size={14}/> Drag & Pinch Photo
                         </span>
-                        
-                        <div className="hidden md:block w-px h-4 bg-slate-800 mx-1"></div>
-                        
-                        <span className="text-white/60 text-[10px] sm:text-xs font-semibold tracking-wider uppercase">
-                            <span className="hidden sm:inline">Template </span>{layoutIndex + 1}/20
-                        </span>
-                        
+                        <div className="hidden sm:block w-px h-4 bg-slate-800 mx-1"></div>
+                        <span className="text-white/60 text-[10px] sm:text-xs font-semibold tracking-wider uppercase hidden md:block">Template {layoutIndex + 1}/20</span>
                         <div className="flex items-center bg-white/10 rounded-full border border-white/10 overflow-hidden">
-                            <button onClick={prevLayout} className="p-1.5 sm:p-2 hover:bg-white/20 text-white transition" title="Previous Template"><ChevronLeft size={16} /></button>
+                            <button onClick={prevLayout} className="p-2 hover:bg-white/20 text-white transition" title="Previous Template"><ChevronLeft size={16} /></button>
                             <div className="w-px h-4 bg-white/20"></div>
-                            <button onClick={nextLayout} className="p-1.5 sm:p-2 hover:bg-white/20 text-white transition" title="Next Template"><ChevronRight size={16} /></button>
+                            <button onClick={nextLayout} className="p-2 hover:bg-white/20 text-white transition" title="Next Template"><ChevronRight size={16} /></button>
                         </div>
                     </div>
                 </div>
 
                 <button
-                    onClick={handleNativePrint}
-                    className="flex items-center gap-2 bg-[#3559D4] text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer"
+                    onClick={handleDownloadClick}
+                    disabled={isDownloading}
+                    className="flex items-center gap-2 bg-[#3559D4] text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer disabled:opacity-60 disabled:cursor-wait"
                 >
-                    <Download size={16} /> <span className="hidden sm:inline">Save PDF / Print</span>
+                    <Download size={16} /> <span className="hidden sm:inline">{isDownloading ? "Preparing..." : "Save PDF / Print"}</span>
                 </button>
             </div>
 
             <div className="flex-1 w-full flex flex-col md:flex-row overflow-hidden relative" onClick={() => setActiveSlot(null)}>
                 <div ref={previewContainerRef} className="flex-1 overflow-hidden flex justify-center items-center bg-slate-900 relative p-4">
-                    
-                    {/* SCALED PREVIEW WRAPPER */}
                     <div
-                      style={{ 
-                        transform: `scale(${previewScale})`, 
-                        transformOrigin: 'center center', 
-                        width: '800px', 
-                        height: '1131px', 
-                        transition: 'transform 0.1s ease-out' 
-                      }}
-                      className="shadow-[0_20px_25px_rgba(0,0,0,0.5)] ring-1 ring-white/10 flex-shrink-0 bg-white"
+                      style={{ transform: `scale(${previewScale})`, transformOrigin: 'center center', width: '800px', height: '1131px', transition: 'transform 0s' }}
+                      className="shadow-[0_20px_25px_rgba(0,0,0,0.5)] ring-1 ring-white/10 rounded-sm bg-[#ffffff] flex-shrink-0"
                     >
-                        <PrintableView
-                            memory={memory}
-                            layoutIndex={layoutIndex}
-                            mediaConfig={mediaConfig}
-                            isEditing={true}
-                            activeSlot={activeSlot}
-                            onSlotClick={(id) => setActiveSlot(id)}
-                            onUpdateConfig={handleConfigChange}
-                        />
+                        <div ref={printComponentRef} id="actual-print-container" style={{ width: '800px', height: '1131px', backgroundColor: '#ffffff', overflow: 'hidden', position: 'relative', boxSizing: 'border-box', fontFamily: '"Outfit", sans-serif' }}>
+                            <style type="text/css" dangerouslySetInnerHTML={{ __html: `
+                              @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+                              #actual-print-container, #actual-print-container * {
+                                font-family: 'Outfit', sans-serif !important;
+                              }
+                            `}} />
+                            <PrintableView
+                                memory={memory}
+                                layoutIndex={layoutIndex}
+                                mediaConfig={mediaConfig}
+                                isEditing={true}
+                                activeSlot={activeSlot}
+                                onSlotClick={(id) => setActiveSlot(id)}
+                                onUpdateConfig={handleConfigChange}
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -387,13 +442,11 @@ const PublicMemory = () => {
                 )}
             </div>
         </div>
-      </>
     );
   }
 
-  // STANDARD PUBLIC MEMORY VIEW (Hidden during print)
   return (
-    <main className="print:hidden min-h-screen bg-slate-50 pb-16 relative z-10">
+    <main className="min-h-screen bg-slate-50 pb-16 relative">
       <PageTitle title={memory.title} />
       {isOwner ? <Navbar /> : <AppHeader isOwner={false} isLoggedIn={!!currentUser} />}
       <section className="relative overflow-hidden">
@@ -431,29 +484,27 @@ const PublicMemory = () => {
                   Open in Google Maps ↗
                 </a>
               </div>
-              <div className="flex items-center justify-center w-full">
-                <div className="w-full max-w-4xl aspect-[16/9] sm:h-[400px] rounded-3xl overflow-hidden shadow-md border border-slate-200 z-0 relative group bg-slate-100 mx-auto">
-                  <iframe
-                    title="Google Map Location"
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    loading="lazy"
-                    allowFullScreen
-                    src={`https://maps.google.com/maps?q=${encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`)}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
-                  />
-                  <a 
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute inset-0 bg-transparent cursor-pointer"
-                    title="Click to open full Google Maps"
-                  />
-                  <div className="absolute bottom-4 right-4 pointer-events-none">
-                    <span className="bg-white/90 backdrop-blur-md text-slate-900 text-xs font-bold px-3.5 py-2 rounded-full shadow-lg border border-slate-200 flex items-center gap-1.5">
-                      View on Google Maps 🧭
-                    </span>
-                  </div>
+              <div className="w-full aspect-[16/9] sm:h-[400px] rounded-3xl overflow-hidden shadow-md border border-slate-200 z-0 relative group bg-slate-100">
+                <iframe
+                  title="Google Map Location"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  allowFullScreen
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`)}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                />
+                <a 
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute inset-0 bg-transparent cursor-pointer"
+                  title="Click to open full Google Maps"
+                />
+                <div className="absolute bottom-4 right-4 pointer-events-none">
+                  <span className="bg-white/90 backdrop-blur-md text-slate-900 text-xs font-bold px-3.5 py-2 rounded-full shadow-lg border border-slate-200 flex items-center gap-1.5">
+                    View on Google Maps 🧭
+                  </span>
                 </div>
               </div>
             </div>
