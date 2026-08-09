@@ -184,6 +184,24 @@ const PublicMemory = () => {
       setSearchParams({ preview: "true", layout: ((layoutIndex - 1 + 20) % 20).toString() }, { replace: true });
   };
 
+  // --- Keyboard Arrow Listeners for Template Swapping ---
+  useEffect(() => {
+    if (!isPreviewMode) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "ArrowLeft") {
+        prevLayout();
+      } else if (e.key === "ArrowRight") {
+        nextLayout();
+      } else if (e.key === "Escape") {
+        exitPreviewMode();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isPreviewMode, layoutIndex]);
+
   const openGallery = (index) => { setSelectedIndex(index); setIsOpen(true); setSearchParams({ image: index.toString() }, { replace: false }); };
   const goToImage = (index) => { setSelectedIndex(index); setSearchParams({ image: index.toString() }, { replace: false }); };
   const nextImage = () => { setSelectedIndex((prev) => { const next = prev + 1; setSearchParams({ image: next.toString() }, { replace: false }); return next; }); };
@@ -252,24 +270,12 @@ const PublicMemory = () => {
                     <X size={20} /> <span className="hidden sm:inline">Back</span>
                 </button>
 
-                <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 sm:gap-4">
-                        <span className="text-white/60 text-[10px] sm:text-xs font-semibold tracking-wider uppercase hidden md:flex items-center gap-2">
-                            <MousePointerClick size={14}/> Drag & Pinch Photo
-                        </span>
-                        
-                        <div className="hidden md:block w-px h-4 bg-slate-800 mx-1"></div>
-                        
-                        <span className="text-white/60 text-[10px] sm:text-xs font-semibold tracking-wider uppercase">
-                            <span className="hidden sm:inline">Template </span>{layoutIndex + 1}/20
-                        </span>
-                        
-                        <div className="flex items-center bg-white/10 rounded-full border border-white/10 overflow-hidden">
-                            <button onClick={prevLayout} className="p-1.5 sm:p-2 hover:bg-white/20 text-white transition" title="Previous Template"><ChevronLeft size={16} /></button>
-                            <div className="w-px h-4 bg-white/20"></div>
-                            <button onClick={nextLayout} className="p-1.5 sm:p-2 hover:bg-white/20 text-white transition" title="Next Template"><ChevronRight size={16} /></button>
-                        </div>
-                    </div>
+                {/* Centered instruction visible on all screen sizes */}
+                <div className="flex items-center justify-center text-center">
+                    <span className="text-white/70 text-[9px] sm:text-xs font-semibold tracking-wider uppercase flex items-center gap-1.5">
+                        <MousePointerClick size={14} className="text-[#3559D4] shrink-0"/> 
+                        <span>Drag & Pinch Photo</span>
+                    </span>
                 </div>
 
                 <button
@@ -281,7 +287,7 @@ const PublicMemory = () => {
             </div>
 
             <div className="flex-1 w-full flex flex-col md:flex-row overflow-hidden relative" onClick={() => setActiveSlot(null)}>
-                <div ref={previewContainerRef} className="flex-1 overflow-hidden flex justify-center items-center bg-slate-900 relative p-4">
+                <div ref={previewContainerRef} className="flex-1 overflow-hidden flex flex-col justify-center items-center bg-slate-900 relative p-4 pb-16">
                     
                     {/* SCALED PREVIEW WRAPPER */}
                     <div
@@ -303,6 +309,29 @@ const PublicMemory = () => {
                             onSlotClick={(id) => setActiveSlot(id)}
                             onUpdateConfig={handleConfigChange}
                         />
+                    </div>
+
+                    {/* FIXED PAGINATION & ARROWS BELOW THE TEMPLATE FOR ALL SCREENS */}
+                    <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-4 z-30 pointer-events-auto">
+                        <button 
+                            onClick={prevLayout} 
+                            className="p-2.5 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white shadow-lg backdrop-blur-md transition cursor-pointer active:scale-95" 
+                            title="Previous Template (Left Arrow)"
+                        >
+                            <ChevronLeft size={20} />
+                        </button>
+
+                        <div className="bg-slate-950/80 backdrop-blur-md border border-slate-800 text-white px-5 py-2 rounded-full text-xs font-bold shadow-xl tracking-wider uppercase">
+                            Template {layoutIndex + 1} / 20
+                        </div>
+
+                        <button 
+                            onClick={nextLayout} 
+                            className="p-2.5 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white shadow-lg backdrop-blur-md transition cursor-pointer active:scale-95" 
+                            title="Next Template (Right Arrow)"
+                        >
+                            <ChevronRight size={20} />
+                        </button>
                     </div>
                 </div>
 
@@ -379,7 +408,7 @@ const PublicMemory = () => {
 
                             <button
                                 onClick={() => { handleConfigChange(activeSlot, 'zoom', 1); handleConfigChange(activeSlot, 'x', 0); handleConfigChange(activeSlot, 'y', 0); }}
-                                className="w-full flex items-center justify-center gap-2 text-xs font-bold bg-slate-800/50 hover:bg-slate-800 border border-slate-700 py-3 rounded-xl text-slate-300 hover:text-white transition"
+                                className="w-full flex items-center justify-center gap-2 text-xs font-bold bg-slate-800/50 hover:bg-slate-800 border border-slate-700 py-3 rounded-xl text-slate-300 hover:text-white transition cursor-pointer"
                             >
                                 <RefreshCcw size={14} /> Reset Position
                             </button>

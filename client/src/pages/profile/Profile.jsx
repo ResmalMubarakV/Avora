@@ -89,20 +89,30 @@ const Profile = () => {
     <main className="min-h-screen bg-slate-50 pb-16">
       <PageTitle title={user ? `${user.name} (@${user.username})` : "Travel Profile"} />
 
-      {isOwner ? (
+      {/* Show logged-in Navbar if user is logged in (either owner or viewing someone else), otherwise show guest header */}
+      {currentUser ? (
         <Navbar />
       ) : (
-        <AppHeader isOwner={false} isLoggedIn={!!currentUser} />
+        <AppHeader isOwner={false} isLoggedIn={false} />
       )}
 
       <div className="relative">
-        {isOwner && (
+        {/* Back button for Owner (Back to Dashboard) or Viewer searching for another user (Back to previous page) */}
+        {isOwner ? (
           <button
             onClick={() => navigate("/dashboard")}
             className="absolute top-3 left-3 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-1 sm:gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur-xl px-2.5 py-1 text-[11px] sm:px-4 sm:py-2.5 sm:text-sm font-medium text-white shadow-lg shadow-black/25 transition-all duration-300 hover:scale-105 hover:bg-white/20 hover:border-white/40 cursor-pointer"
           >
             <ArrowLeft size={14} className="sm:w-[18px] sm:h-[18px]" />
             <span>Back to Dashboard</span>
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate(-1)}
+            className="absolute top-3 left-3 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-1 sm:gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur-xl px-2.5 py-1 text-[11px] sm:px-4 sm:py-2.5 sm:text-sm font-medium text-white shadow-lg shadow-black/25 transition-all duration-300 hover:scale-105 hover:bg-white/20 hover:border-white/40 cursor-pointer"
+          >
+            <ArrowLeft size={14} className="sm:w-[18px] sm:h-[18px]" />
+            <span>Back</span>
           </button>
         )}
 

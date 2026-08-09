@@ -1,7 +1,7 @@
 import MemoryInfo from "./MemoryInfo";
 import CoverImage from "./CoverImage";
 import MediaPreview from "./MediaPreview";
-import { ArrowLeft, Pencil, FileText } from "lucide-react";
+import { ArrowLeft, Pencil, Download } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 // ==========================================
@@ -12,7 +12,7 @@ const MemoryHero = ({
     memory,
     openGallery,
     isOwner,
-    isLoggedIn, // ADDED: Must accept isLoggedIn
+    isLoggedIn,
     locationState,
     onDownloadClick,
 }) => {
@@ -83,7 +83,7 @@ const MemoryHero = ({
                                 active:scale-95
                             "
                         >
-                            <FileText size={15} />
+                            <Download size={15} />
                             <span className="hidden sm:inline">Export PDF</span>
                             <span className="sm:hidden">PDF</span>
                         </button>
@@ -148,7 +148,6 @@ const MemoryHero = ({
                 <div className="xl:col-span-5">
                     <div className="rounded-[32px] border border-slate-200/80 bg-white shadow-xl shadow-sky-950/[0.03] overflow-hidden">
                         <div className="p-6 sm:p-8 lg:p-10">
-                            {/* ADDED: Pass auth props securely down to the Info block */}
                             <MemoryInfo memory={memory} isOwner={isOwner} isLoggedIn={isLoggedIn} />
                         </div>
                     </div>
