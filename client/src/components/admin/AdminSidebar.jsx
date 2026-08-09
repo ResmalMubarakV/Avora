@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import {
     LayoutDashboard,
     Users,
@@ -15,14 +15,17 @@ import LogoutModal from "../navigation/LogoutModal";
 // ADMIN SIDEBAR COMPONENT
 // ==========================================
 const AdminSidebar = ({ sidebarOpen, setSidebarOpen, isMobile }) => {
-    const navigate = useNavigate();
     const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     const handleLogout = () => {
         setShowLogoutModal(false);
-        localStorage.removeItem("token");
-        sessionStorage.removeItem("token");
-        navigate("/admin/login", { replace: true });
+        
+        // Completely clear all storage items and session data
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Force a complete redirect to admin login and clear browser memory state
+        window.location.href = "/admin/login";
     };
 
     const navItems = [

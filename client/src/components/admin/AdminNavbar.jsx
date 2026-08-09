@@ -1,5 +1,4 @@
 import { LogOut, Menu, ShieldCheck } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 import LogoutModal from "../navigation/LogoutModal";
@@ -9,14 +8,17 @@ import Logo from "../common/Logo";
 // ADMIN NAVBAR COMPONENT
 // ==========================================
 const AdminNavbar = ({ sidebarOpen, setSidebarOpen }) => {
-  const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
     setShowLogoutModal(false);
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
-    navigate("/admin/login", { replace: true });
+    
+    // Completely clear all storage items and session data
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Force a complete redirect to admin login and clear browser memory state
+    window.location.href = "/admin/login";
   };
 
   return (
