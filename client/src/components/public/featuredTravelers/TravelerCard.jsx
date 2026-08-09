@@ -7,7 +7,7 @@ import { FiArrowRight, FiMapPin } from "react-icons/fi";
 const TravelerCard = ({ traveler }) => {
     return (
         <Link
-            to={`/u/${traveler.username}`}
+            to={`/${traveler.username}`}
             className="
                 group
                 relative

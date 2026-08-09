@@ -45,11 +45,11 @@ const getDashboard = async (req, res) => {
 };
 
 // ==========================================
-// GET USERS
+// GET USERS (WITH SEARCH FILTER SUPPORT)
 // ==========================================
 const getUsers = async (req, res) => {
   try {
-    const status = req.query.status;
+    const { status, search } = req.query;
     const validStatuses = ["pending", "approved", "suspended"];
 
     const query = { role: { $ne: "admin" } };
@@ -59,6 +59,16 @@ const getUsers = async (req, res) => {
         return res.status(400).json({ message: "Invalid status" });
       }
       query.status = status;
+    }
+
+    // Added search query matching for name, username, or email
+    if (search && search.trim() !== "") {
+      const searchRegex = new RegExp(search.trim(), "i");
+      query.$or = [
+        { name: searchRegex },
+        { username: searchRegex },
+        { email: searchRegex },
+      ];
     }
 
     const users = await User.find(query)
@@ -136,6 +146,37 @@ const suspendUser = async (req, res) => {
     });
   } catch (error) {
     console.error("Reject Update Error", error.message);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
+// ==========================================
+// DELETE USER
+// ==========================================
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Id" });
+    }
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.role === "admin") {
+      return res.status(400).json({ message: "Cannot delete admin user through this route" });
+    }
+
+    await Memory.deleteMany({ user: id });
+    await user.deleteOne();
+
+    return res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Delete User Error", error.message);
     return res.status(500).json({ message: "Server Error" });
   }
 };
@@ -224,6 +265,7 @@ module.exports = {
   getUsers,
   approveUser,
   suspendUser,
+  deleteUser,
   getMemories,
   deleteMemory,
   updateAdminPassword,

@@ -19,7 +19,7 @@ const MemoryHero = ({
     const navigate = useNavigate();
     const location = useLocation();
 
-    const from = locationState?.from || `/u/${username}`;
+    const from = locationState?.from || `/${username}`;
     const label = locationState?.label || "Profile";
 
     return (

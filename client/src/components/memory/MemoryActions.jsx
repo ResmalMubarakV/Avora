@@ -99,7 +99,7 @@ const MemoryActions = ({
         setOpen(false);
 
         const url =
-            `${window.location.origin}/u/${memory.user.username}/${memory.slug}`;
+            `${window.location.origin}/${memory.user.username}/${memory.slug}`;
 
         try {
             if (navigator.share) {

@@ -10,7 +10,7 @@ import Lightbox from "../../components/memory/Lightbox";
 import PageTitle from "../../components/common/PageTitle";
 import PrintableView from "../../components/memory/PrintableView";
 
-import { Compass, Download, X, ChevronLeft, ChevronRight, ZoomIn, RefreshCcw, MousePointerClick, Settings2, MoveHorizontal, MoveVertical } from "lucide-react";
+import { Compass, Download, X, ChevronLeft, ChevronRight, ZoomIn, RefreshCcw, MousePointerClick, Settings2, MoveHorizontal, MoveVertical, Shield, ArrowLeft } from "lucide-react";
 
 const PublicMemory = () => {
   const navigate = useNavigate();
@@ -25,6 +25,8 @@ const PublicMemory = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [memory, setMemory] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const isAdminViewer = currentUser?.role === "admin";
 
   const isPreviewMode = searchParams.get("preview") === "true";
   const layoutIndex = searchParams.has("layout") ? Number(searchParams.get("layout")) : 0;
@@ -47,7 +49,6 @@ const PublicMemory = () => {
 
   // ==========================================
   // INJECT PRINT STYLES DIRECTLY TO <HEAD>
-  // Updated with explicit zero margins to remove mobile print borders
   // ==========================================
   useEffect(() => {
     if (!isPreviewMode) return;
@@ -70,12 +71,10 @@ const PublicMemory = () => {
               background-color: white !important; 
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
-              color-adjust: exact !important;
             }
             *, *::before, *::after {
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
-              color-adjust: exact !important;
             }
           }
         `;
@@ -88,9 +87,6 @@ const PublicMemory = () => {
     };
   }, [isPreviewMode]);
 
-  // ==========================================
-  // NATIVE PRINT HANDLER
-  // ==========================================
   const handleNativePrint = () => {
     setActiveSlot(null); 
     const prevTitle = document.title;
@@ -140,7 +136,7 @@ const PublicMemory = () => {
       for (let entry of entries) {
         const { width, height } = entry.contentRect;
         const availableWidth = width - 32; 
-        const availableHeight = height - 90; // Offset for bottom pagination bar
+        const availableHeight = height - 90;
 
         if (availableWidth > 0 && availableHeight > 0) {
           const scaleX = availableWidth / 800;
@@ -184,18 +180,13 @@ const PublicMemory = () => {
       setSearchParams({ preview: "true", layout: ((layoutIndex - 1 + 20) % 20).toString() }, { replace: true });
   };
 
-  // --- Keyboard Arrow Listeners for Template Swapping ---
   useEffect(() => {
     if (!isPreviewMode) return;
 
     const handleKeyDown = (e) => {
-      if (e.key === "ArrowLeft") {
-        prevLayout();
-      } else if (e.key === "ArrowRight") {
-        nextLayout();
-      } else if (e.key === "Escape") {
-        exitPreviewMode();
-      }
+      if (e.key === "ArrowLeft") prevLayout();
+      else if (e.key === "ArrowRight") nextLayout();
+      else if (e.key === "Escape") exitPreviewMode();
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -221,7 +212,7 @@ const PublicMemory = () => {
         const response = await api.get(`/api/public/${username}/${slug}`);
         setMemory(response.data);
       } catch (error) {
-        if (error.response?.status === 403) navigate(`/u/${username}`, { replace: true });
+        if (error.response?.status === 403) navigate(`/${username}`, { replace: true });
         if (error.response?.status === 404) navigate("/404", { replace: true });
       } finally { setLoading(false); }
     };
@@ -243,9 +234,6 @@ const PublicMemory = () => {
   if (isPreviewMode) {
     return (
       <>
-        {/* ========================================== */}
-        {/* EXACT PDF EXPORT TARGET (VISIBLE ONLY TO PRINTER) */}
-        {/* ========================================== */}
         <div 
           className="fixed top-[-20000px] left-[-20000px] print:top-0 print:left-0 z-[999999] m-0 p-0 overflow-hidden bg-white" 
           style={{ width: "800px", height: "1131px" }}
@@ -261,16 +249,12 @@ const PublicMemory = () => {
             />
         </div>
 
-        {/* ========================================== */}
-        {/* INTERACTIVE UI (HIDDEN DURING PRINT) */}
-        {/* ========================================== */}
         <div className="print:hidden min-h-[100dvh] h-screen bg-slate-900 flex flex-col overflow-hidden fixed inset-0 z-[100]">
             <div className="flex-none flex items-center justify-between bg-slate-950/90 backdrop-blur-md px-4 sm:px-8 py-3.5 border-b border-slate-800 shadow-xl z-50">
                 <button onClick={exitPreviewMode} className="flex items-center gap-1 sm:gap-2 text-white/80 hover:text-white font-medium cursor-pointer">
                     <X size={20} /> <span className="hidden sm:inline">Back</span>
                 </button>
 
-                {/* Centered instruction */}
                 <div className="flex items-center justify-center text-center">
                     <span className="text-white/70 text-[9px] sm:text-xs font-semibold tracking-wider uppercase flex items-center gap-1.5">
                         <MousePointerClick size={14} className="text-[#3559D4] shrink-0"/> 
@@ -287,10 +271,7 @@ const PublicMemory = () => {
             </div>
 
             <div className="flex-1 w-full flex flex-col md:flex-row overflow-hidden relative pb-16" onClick={() => setActiveSlot(null)}>
-                {/* Unscrollable container so everything fits in the full window view */}
                 <div ref={previewContainerRef} className="flex-1 overflow-hidden flex flex-col justify-center items-center bg-slate-900 relative p-2">
-                    
-                    {/* SCALED PREVIEW WRAPPER */}
                     <div
                       style={{ 
                         transform: `scale(${previewScale})`, 
@@ -313,120 +294,51 @@ const PublicMemory = () => {
                     </div>
                 </div>
 
-                {/* FIXED BOTTOM PAGINATION BAR VISIBLE ON ALL SCREENS */}
                 <div className="fixed bottom-3 inset-x-0 flex items-center justify-center gap-3 z-40 pointer-events-auto px-4">
-                    <button 
-                        onClick={prevLayout} 
-                        className="p-2.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white shadow-xl border border-slate-700 backdrop-blur-md transition cursor-pointer active:scale-95" 
-                        title="Previous Template"
-                    >
+                    <button onClick={prevLayout} className="p-2.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white shadow-xl border border-slate-700 transition cursor-pointer active:scale-95">
                         <ChevronLeft size={18} />
                     </button>
-
                     <div className="bg-slate-950/90 backdrop-blur-md border border-slate-800 text-white px-4 py-2 rounded-full text-xs font-bold shadow-2xl tracking-wider uppercase">
                         Template {layoutIndex + 1} / 20
                     </div>
-
-                    <button 
-                        onClick={nextLayout} 
-                        className="p-2.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white shadow-xl border border-slate-700 backdrop-blur-md transition cursor-pointer active:scale-95" 
-                        title="Next Template"
-                    >
+                    <button onClick={nextLayout} className="p-2.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white shadow-xl border border-slate-700 transition cursor-pointer active:scale-95">
                         <ChevronRight size={18} />
                     </button>
                 </div>
-
-                {activeSlot !== null && currentEditorConfig && (
-                    <div
-                        className="w-full md:w-[350px] bg-slate-950 border-t md:border-t-0 md:border-l border-slate-800 flex flex-col z-50 flex-shrink-0 h-[40vh] md:h-auto shadow-[0_-10px_40px_rgba(0,0,0,0.5)] md:shadow-none animate-in slide-in-from-bottom md:slide-in-from-right duration-200"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
-                            <h3 className="text-white font-bold text-sm tracking-wide flex items-center gap-2">
-                                <Settings2 size={16} className="text-[#3559D4]"/>
-                                {activeSlot === 'cover' ? 'Editing Cover Photo' : `Editing Image Slot ${activeSlot + 1}`}
-                            </h3>
-                            <button onClick={() => setActiveSlot(null)} className="text-slate-400 hover:text-white bg-white/5 p-1.5 rounded-full transition"><X size={16}/></button>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto p-5 space-y-8 custom-scrollbar">
-                            <div>
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">1. Select Photo</label>
-                                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-3 gap-2">
-                                    {allImages.map((img, i) => (
-                                        <div
-                                          key={i}
-                                          onClick={() => {
-                                              handleConfigChange(activeSlot, 'url', img.url);
-                                              handleConfigChange(activeSlot, 'zoom', 1);
-                                              handleConfigChange(activeSlot, 'x', 0);
-                                              handleConfigChange(activeSlot, 'y', 0);
-                                          }}
-                                          className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${currentEditorConfig.url === img.url ? 'border-[#3559D4] scale-95 opacity-100 shadow-[0_0_15px_rgba(59,130,246,0.4)]' : 'border-transparent hover:border-slate-600 opacity-50 hover:opacity-100'}`}
-                                        >
-                                            <img src={img.url} crossOrigin="anonymous" className="w-full h-full object-cover" />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="space-y-6 bg-slate-900/50 p-4 rounded-xl border border-slate-800/50">
-                                <div>
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 flex justify-between items-center">
-                                        <span className="flex items-center gap-1.5"><ZoomIn size={12}/> Zoom Level</span>
-                                        <span className="text-[#3559D4] bg-[#3559D4]/10 px-2 py-0.5 rounded font-mono">{currentEditorConfig.zoom.toFixed(1)}x</span>
-                                    </label>
-                                    <input
-                                      type="range" min="1" max="5" step="0.1"
-                                      value={currentEditorConfig.zoom}
-                                      onChange={(e) => {
-                                          const newZoom = parseFloat(e.target.value);
-                                          const newMaxPan = getMaxPan(newZoom);
-                                          handleConfigChange(activeSlot, 'zoom', newZoom);
-                                          handleConfigChange(activeSlot, 'x', Math.max(-newMaxPan, Math.min(newMaxPan, currentEditorConfig.x)));
-                                          handleConfigChange(activeSlot, 'y', Math.max(-newMaxPan, Math.min(newMaxPan, currentEditorConfig.y)));
-                                      }}
-                                      className="w-full accent-[#3559D4]"
-                                    />
-                                </div>
-
-                                <div className="pt-2 border-t border-slate-800">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 flex justify-between items-center">
-                                        <span className="flex items-center gap-1.5"><MoveHorizontal size={12}/> Horizontal Pan</span>
-                                        <span className="text-[#3559D4] bg-[#3559D4]/10 px-2 py-0.5 rounded font-mono">{currentEditorConfig.x.toFixed(0)}%</span>
-                                    </label>
-                                    <input type="range" min={-currentMaxPan} max={currentMaxPan} step="1" value={currentEditorConfig.x} onChange={(e) => handleConfigChange(activeSlot, 'x', parseFloat(e.target.value))} className="w-full accent-[#3559D4]" disabled={currentEditorConfig.zoom <= 1} />
-                                </div>
-
-                                <div className="pt-2 border-t border-slate-800">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 flex justify-between items-center">
-                                        <span className="flex items-center gap-1.5"><MoveVertical size={12}/> Vertical Pan</span>
-                                        <span className="text-[#3559D4] bg-[#3559D4]/10 px-2 py-0.5 rounded font-mono">{currentEditorConfig.y.toFixed(0)}%</span>
-                                    </label>
-                                    <input type="range" min={-currentMaxPan} max={currentMaxPan} step="1" value={currentEditorConfig.y} onChange={(e) => handleConfigChange(activeSlot, 'y', parseFloat(e.target.value))} className="w-full accent-[#3559D4]" disabled={currentEditorConfig.zoom <= 1} />
-                                </div>
-                            </div>
-
-                            <button
-                                onClick={() => { handleConfigChange(activeSlot, 'zoom', 1); handleConfigChange(activeSlot, 'x', 0); handleConfigChange(activeSlot, 'y', 0); }}
-                                className="w-full flex items-center justify-center gap-2 text-xs font-bold bg-slate-800/50 hover:bg-slate-800 border border-slate-700 py-3 rounded-xl text-slate-300 hover:text-white transition cursor-pointer"
-                            >
-                                <RefreshCcw size={14} /> Reset Position
-                            </button>
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
       </>
     );
   }
 
-  // STANDARD PUBLIC MEMORY VIEW (Hidden during print)
+  // STANDARD PUBLIC MEMORY VIEW
   return (
     <main className="print:hidden min-h-screen bg-slate-50 pb-16 relative z-10">
       <PageTitle title={memory.title} />
-      {isOwner ? <Navbar /> : <AppHeader isOwner={false} isLoggedIn={!!currentUser} />}
+      
+      {/* Professional Header Management */}
+      {isAdminViewer ? (
+        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/90 px-6 py-3.5 backdrop-blur-md shadow-xs">
+          <button
+            type="button"
+            onClick={() => navigate("/admin", { replace: true })}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-xs transition hover:bg-slate-50 cursor-pointer active:scale-95"
+          >
+            <ArrowLeft size={15} />
+            <span>Back to Admin Panel</span>
+          </button>
+
+          <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700 shadow-xs">
+            <Shield size={13} />
+            <span>Admin Inspection Mode</span>
+          </div>
+        </header>
+      ) : isOwner ? (
+        <Navbar />
+      ) : (
+        <AppHeader isOwner={false} isLoggedIn={!!currentUser} />
+      )}
+
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none z-0">
           <div className="absolute inset-x-0 top-0 h-[380px] bg-gradient-to-b from-sky-100/60 via-blue-50/30 to-transparent" />
@@ -435,6 +347,7 @@ const PublicMemory = () => {
           <MemoryHero memory={memory} username={username} openGallery={openGallery} isOwner={isOwner} locationState={location.state} onDownloadClick={enterPreviewMode} />
         </div>
       </section>
+
       <section className="relative z-10 mx-auto max-w-[1500px] px-5 sm:px-8 lg:px-10 xl:px-14 pb-24">
         <div className="relative overflow-hidden rounded-[36px] border border-slate-200/80 bg-white shadow-xl shadow-sky-950/[0.03] p-6 sm:p-14">
             <div className="flex items-center gap-4">
@@ -490,6 +403,7 @@ const PublicMemory = () => {
             </div>
         </div>
       </section>
+
       {isOpen && (
         <Lightbox media={memory.media} selectedIndex={selectedIndex} nextImage={nextImage} previousImage={previousImage} goToImage={goToImage} canDownload={isOwner} memoryTitle={memory.title} onClose={() => { setIsOpen(false); setSearchParams({}, { replace: false }); }} />
       )}

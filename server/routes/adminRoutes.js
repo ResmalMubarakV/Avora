@@ -7,6 +7,7 @@ const {
   getUsers,
   approveUser,
   suspendUser,
+  deleteUser,
   getMemories,
   deleteMemory,
   updateAdminPassword,
@@ -19,6 +20,7 @@ router.get("/dashboard", protect, admin, getDashboard);
 router.get("/users", protect, admin, getUsers);
 router.patch("/users/:id/approve", protect, admin, approveUser);
 router.patch("/users/:id/suspend", protect, admin, suspendUser);
+router.delete("/users/:id", protect, admin, deleteUser); // Added Delete User Route
 
 router.get("/memories", protect, admin, getMemories);
 router.delete("/memories/:id", protect, admin, deleteMemory);

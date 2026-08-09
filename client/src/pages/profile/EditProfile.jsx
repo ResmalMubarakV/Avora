@@ -267,7 +267,7 @@ const EditProfile = () => {
       setHasChanges(false);
       setShowDiscardModal(false);
       toast.success("Profile updated successfully.");
-      navigate(`/u/${updatedUser.username}`, { replace: true });
+      navigate(`/${updatedUser.username}`, { replace: true });
     } catch (error) {
       console.error(error);
       toast.error("Unable to update profile.");

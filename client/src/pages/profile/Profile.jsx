@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Lock } from "lucide-react";
+import { ArrowLeft, Lock, Shield } from "lucide-react";
 
 import api from "../../api/axios";
 import { getMyProfile } from "../../api/userApi";
@@ -26,6 +26,7 @@ const Profile = () => {
 
   const profileUsername = username || currentUser?.username;
   const isOwner = currentUser?.username === profileUsername;
+  const isAdminViewer = currentUser?.role === "admin";
 
   // Automatically scroll to top on initial page load or redirect
   useEffect(() => {
@@ -74,6 +75,16 @@ const Profile = () => {
     fetchProfile();
   }, [profileUsername, location.key, navigate]);
 
+  const handleBack = () => {
+    if (isAdminViewer) {
+      navigate("/admin", { replace: true });
+    } else if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/dashboard", { replace: true });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
@@ -89,31 +100,50 @@ const Profile = () => {
     <main className="min-h-screen bg-slate-50 pb-16">
       <PageTitle title={user ? `${user.name} (@${user.username})` : "Travel Profile"} />
 
-      {/* Show logged-in Navbar if user is logged in (either owner or viewing someone else), otherwise show guest header */}
-      {currentUser ? (
+      {/* Navigation Header Management */}
+      {isAdminViewer ? (
+        // Professional Minimalist Admin Inspection Header Bar
+        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/90 px-6 py-3.5 backdrop-blur-md shadow-xs">
+          <button
+            type="button"
+            onClick={handleBack}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-xs transition hover:bg-slate-50 cursor-pointer active:scale-95"
+          >
+            <ArrowLeft size={15} />
+            <span>Back to Admin Panel</span>
+          </button>
+
+          <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700 shadow-xs">
+            <Shield size={13} />
+            <span>Admin Inspection Mode</span>
+          </div>
+        </header>
+      ) : currentUser ? (
         <Navbar />
       ) : (
         <AppHeader isOwner={false} isLoggedIn={false} />
       )}
 
       <div className="relative">
-        {/* Back button for Owner (Back to Dashboard) or Viewer searching for another user (Back to previous page) */}
-        {isOwner ? (
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="absolute top-3 left-3 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-1 sm:gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur-xl px-2.5 py-1 text-[11px] sm:px-4 sm:py-2.5 sm:text-sm font-medium text-white shadow-lg shadow-black/25 transition-all duration-300 hover:scale-105 hover:bg-white/20 hover:border-white/40 cursor-pointer"
-          >
-            <ArrowLeft size={14} className="sm:w-[18px] sm:h-[18px]" />
-            <span>Back to Dashboard</span>
-          </button>
-        ) : (
-          <button
-            onClick={() => navigate(-1)}
-            className="absolute top-3 left-3 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-1 sm:gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur-xl px-2.5 py-1 text-[11px] sm:px-4 sm:py-2.5 sm:text-sm font-medium text-white shadow-lg shadow-black/25 transition-all duration-300 hover:scale-105 hover:bg-white/20 hover:border-white/40 cursor-pointer"
-          >
-            <ArrowLeft size={14} className="sm:w-[18px] sm:h-[18px]" />
-            <span>Back</span>
-          </button>
+        {/* Render floating back button only if the user is not an admin viewer */}
+        {!isAdminViewer && (
+          isOwner ? (
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="absolute top-3 left-3 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-1 sm:gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur-xl px-2.5 py-1 text-[11px] sm:px-4 sm:py-2.5 sm:text-sm font-medium text-white shadow-lg shadow-black/25 transition-all duration-300 hover:scale-105 hover:bg-white/20 hover:border-white/40 cursor-pointer"
+            >
+              <ArrowLeft size={14} className="sm:w-[18px] sm:h-[18px]" />
+              <span>Back to Dashboard</span>
+            </button>
+          ) : (
+            <button
+              onClick={handleBack}
+              className="absolute top-3 left-3 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-1 sm:gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur-xl px-2.5 py-1 text-[11px] sm:px-4 sm:py-2.5 sm:text-sm font-medium text-white shadow-lg shadow-black/25 transition-all duration-300 hover:scale-105 hover:bg-white/20 hover:border-white/40 cursor-pointer"
+            >
+              <ArrowLeft size={14} className="sm:w-[18px] sm:h-[18px]" />
+              <span>Back</span>
+            </button>
+          )
         )}
 
         <ProfileHero

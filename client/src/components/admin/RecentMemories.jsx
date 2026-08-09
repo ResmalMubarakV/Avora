@@ -67,15 +67,18 @@ const RecentMemories = ({ memories = [], onView, onDelete }) => {
 
                                 {/* Action Buttons with Tooltips */}
                                 <div className="flex items-center gap-1.5 shrink-0 ml-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => onView(memory)}
-                                        title="Preview Story"
-                                        aria-label="Preview Story"
-                                        className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-blue-600 cursor-pointer shadow-xs transition active:scale-95"
-                                    >
-                                        <Eye size={16} />
-                                    </button>
+                                    {/* Show View button only if the memory is public */}
+                                    {isPublic && (
+                                        <button
+                                            type="button"
+                                            onClick={() => onView(memory)}
+                                            title="Preview Story"
+                                            aria-label="Preview Story"
+                                            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-blue-600 cursor-pointer shadow-xs transition active:scale-95"
+                                        >
+                                            <Eye size={16} />
+                                        </button>
+                                    )}
                                     <button
                                         type="button"
                                         onClick={() => onDelete(memory._id)}

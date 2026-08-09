@@ -276,7 +276,7 @@ const MemoriesSection = ({
                                     username={username}
                                     isOwner={isOwner}
                                     redirectTo={{
-                                        from: `/u/${username}`,
+                                        from: `/${username}`,
                                         label: "Profile",
                                     }}
                                     onPinUpdated={handlePinUpdated}

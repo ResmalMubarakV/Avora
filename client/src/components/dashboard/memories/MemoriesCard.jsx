@@ -123,7 +123,7 @@ const MemoriesCard = ({
 
     if (!profileUsername || !memory.slug) return;
 
-    navigate(`/u/${profileUsername}/${memory.slug}`, {
+    navigate(`/${profileUsername}/${memory.slug}`, {
       state: redirectTo || undefined,
     });
   };

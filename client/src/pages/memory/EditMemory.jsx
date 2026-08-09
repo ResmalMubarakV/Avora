@@ -242,7 +242,7 @@ const EditMemory = () => {
       toast.success("Memory updated successfully!");
 
       if (response?.slug && response?.user?.username) {
-        navigate(`/u/${response.user.username}/${response.slug}`, { replace: true });
+        navigate(`/${response.user.username}/${response.slug}`, { replace: true });
       } else {
         navigate("/dashboard", { replace: true });
       }

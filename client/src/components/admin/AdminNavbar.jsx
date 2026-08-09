@@ -21,35 +21,35 @@ const AdminNavbar = ({ sidebarOpen, setSidebarOpen }) => {
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/80 backdrop-blur-md">
-      <div className="mx-auto flex h-20 max-w-7xl items-center px-4 sm:px-8">
+      <div className="mx-auto flex h-16 sm:h-20 max-w-7xl items-center justify-between px-4 sm:px-8 gap-3">
         {/* Left Section */}
-        <div className="flex flex-1 items-center gap-4">
+        <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => setSidebarOpen(!sidebarOpen)}
             aria-label="Toggle Sidebar"
-            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100 cursor-pointer shadow-sm md:hidden"
+            className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl sm:rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100 cursor-pointer shadow-sm md:hidden shrink-0"
           >
-            <Menu size={20} />
+            <Menu size={18} />
           </button>
 
-          <div className="hidden sm:block">
+          <div className="block">
             <Logo to="/admin" size="sm" />
           </div>
         </div>
 
         {/* Right Section: Administrator Profile Badge & Logout Button */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl py-2 px-3.5 shadow-sm">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#1E3A8A] to-[#3559D4] text-white font-bold shadow-md shadow-blue-500/20">
+        <div className="flex items-center gap-2.5 sm:gap-4">
+          <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200/80 rounded-xl sm:rounded-2xl py-1.5 px-2.5 sm:px-3.5 shadow-sm">
+            <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br from-[#1E3A8A] to-[#3559D4] text-white text-xs sm:text-sm font-bold shadow-md shadow-blue-500/20 shrink-0">
               A
             </div>
-            <div className="hidden sm:block text-left">
+            <div className="hidden xs:block text-left">
               <div className="flex items-center gap-1.5">
-                <h3 className="text-xs font-bold text-slate-900">Administrator</h3>
-                <ShieldCheck size={14} className="text-blue-600" />
+                <h3 className="text-[11px] sm:text-xs font-bold text-slate-900">Administrator</h3>
+                <ShieldCheck size={13} className="text-blue-600 shrink-0" />
               </div>
-              <p className="text-[11px] font-medium text-slate-500">Super Admin Gateway</p>
+              <p className="text-[10px] sm:text-[11px] font-medium text-slate-500 leading-tight">Super Admin</p>
             </div>
           </div>
 
@@ -57,10 +57,10 @@ const AdminNavbar = ({ sidebarOpen, setSidebarOpen }) => {
             type="button"
             onClick={() => setShowLogoutModal(true)}
             aria-label="Logout"
-            className="flex h-11 items-center justify-center gap-2 rounded-2xl border border-red-200 bg-white px-4 text-xs font-bold text-red-600 transition-all hover:border-red-300 hover:bg-red-50 hover:text-red-700 active:scale-95 cursor-pointer shadow-sm"
+            className="flex h-9 sm:h-11 items-center justify-center gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl border border-red-200 bg-white px-3 sm:px-4 text-xs font-bold text-red-600 transition-all hover:border-red-300 hover:bg-red-50 hover:text-red-700 active:scale-95 cursor-pointer shadow-sm shrink-0"
           >
-            <LogOut size={16} />
-            <span className="hidden sm:inline">Logout</span>
+            <LogOut size={15} />
+            <span className="hidden xs:inline">Logout</span>
           </button>
         </div>
       </div>

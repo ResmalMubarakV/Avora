@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Lock, Mail, Loader2, ShieldAlert } from "lucide-react";
+import { Lock, Mail, Loader2, ShieldAlert, Eye, EyeOff } from "lucide-react";
 import api from "../../api/axios";
 
 // ==========================================
@@ -10,6 +10,7 @@ const AdminLogin = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -92,13 +93,21 @@ const AdminLogin = () => {
                         <div className="relative">
                             <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 placeholder="••••••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3 pl-11 pr-4 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-2 focus:ring-blue-100"
+                                className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3 pl-11 pr-12 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-2 focus:ring-blue-100"
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                                tabIndex={-1}
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
                         </div>
                     </div>
 

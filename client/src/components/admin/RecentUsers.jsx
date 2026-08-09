@@ -1,12 +1,14 @@
-import { Eye, Users, Mail, Calendar, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Users, Mail, Sparkles, ChevronRight } from "lucide-react";
 
 // ==========================================
 // RECENT USERS COMPONENT
 // ==========================================
 const RecentUsers = ({
     users = [],
-    onView = () => {},
 }) => {
+    const navigate = useNavigate();
+
     return (
         <div className="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-sm flex flex-col h-full">
             {/* Header */}
@@ -51,7 +53,9 @@ const RecentUsers = ({
                         return (
                             <div
                                 key={user._id}
-                                className="group flex items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 transition-all hover:bg-white hover:border-slate-300 hover:shadow-md"
+                                onClick={() => navigate(`/admin/users?search=${encodeURIComponent(user.username)}`)}
+                                title="Click to view user in User Management"
+                                className="group flex items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 transition-all hover:bg-white hover:border-slate-300 hover:shadow-md cursor-pointer"
                             >
                                 <div className="flex items-center gap-3.5 min-w-0">
                                     <img
@@ -65,7 +69,7 @@ const RecentUsers = ({
                                     />
                                     <div className="min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <h3 className="font-bold text-slate-900 truncate text-sm">
+                                            <h3 className="font-bold text-slate-900 truncate text-sm group-hover:text-blue-600 transition">
                                                 {user.name}
                                             </h3>
                                             <span
@@ -99,13 +103,18 @@ const RecentUsers = ({
                                         </p>
                                     </div>
 
+                                    {/* Action button leading to admin users page */}
                                     <button
                                         type="button"
-                                        onClick={() => onView(user)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/admin/users?search=${encodeURIComponent(user.username)}`);
+                                        }}
+                                        title="Manage User in Admin Panel"
                                         className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300 cursor-pointer active:scale-95"
                                     >
-                                        <Eye size={14} className="text-slate-500" />
-                                        <span className="hidden sm:inline">View</span>
+                                        <span className="hidden sm:inline">Manage</span>
+                                        <ChevronRight size={14} className="text-slate-400" />
                                     </button>
                                 </div>
                             </div>

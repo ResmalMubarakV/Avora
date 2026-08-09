@@ -81,8 +81,8 @@ function App() {
       <Route path="/admin/login" element={<AdminLogin />} />
 
      {/* Public Profile & Memory Routes */}
-      <Route path="/u/:username" element={<Profile />} />
-      <Route path="/u/:username/:slug" element={<PublicMemory />} />
+      <Route path="/:username" element={<Profile />} />
+      <Route path="/:username/:slug" element={<PublicMemory />} />
 
       {/* Protected App Routes (Unified under DashboardLayout) */}
       <Route element={<ProtectedRoute />}>
@@ -99,11 +99,11 @@ function App() {
 
       {/* Protected Admin Routes */}
       <Route element={<AdminRoute />}>
-        <Route element={<AdminLayout />}>
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="/admin/memories" element={<AdminMemories />} />
-          <Route path="/admin/settings" element={<AdminSettings />} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="memories" element={<AdminMemories />} />
+          <Route path="settings" element={<AdminSettings />} />
         </Route>
       </Route>
 

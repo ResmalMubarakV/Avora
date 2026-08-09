@@ -68,7 +68,7 @@ const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false 
         <div
             onClick={() =>
                 navigate(
-                    `/u/${memory.user.username}/${memory.slug}`,
+                    `/${memory.user.username}/${memory.slug}`,
                     {
                         state: {
                             from: "/dashboard",

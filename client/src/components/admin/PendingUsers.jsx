@@ -1,17 +1,13 @@
-import { Check, ShieldAlert, UserCheck } from "lucide-react";
+import { Check, ShieldAlert, UserCheck, ExternalLink } from "lucide-react";
 
 // ==========================================
 // PENDING USERS COMPONENT
 // ==========================================
-/**
- * Renders the queue of pending user verifications with polished empty states 
- * and action triggers.
- */
 const PendingUsers = ({ users = [], onApprove, onSuspend }) => {
     return (
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm">
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-sm overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <div>
                     <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
                         Pending Approvals Queue
@@ -21,7 +17,7 @@ const PendingUsers = ({ users = [], onApprove, onSuspend }) => {
                     </p>
                 </div>
                 {users.length > 0 && (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold shadow-xs">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold shadow-xs self-start sm:self-auto">
                         <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
                         {users.length} Pending Review{users.length === 1 ? "" : "s"}
                     </span>
@@ -38,12 +34,12 @@ const PendingUsers = ({ users = [], onApprove, onSuspend }) => {
                         All Caught Up!
                     </h4>
                     <p className="text-xs text-slate-500 max-w-sm">
-                        Everyone is approved. There are currently no pending user accounts waiting for verification in the queue.
+                        Everyone is approved. There are currently no pending user accounts waiting for verification.
                     </p>
                 </div>
             ) : (
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                <div className="w-full overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+                    <table className="w-full text-left border-collapse min-w-[650px]">
                         <thead>
                             <tr className="border-b border-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                                 <th className="pb-3 font-bold">User Details</th>
@@ -56,32 +52,42 @@ const PendingUsers = ({ users = [], onApprove, onSuspend }) => {
                             {users.map((user) => (
                                 <tr key={user._id} className="group hover:bg-slate-50/50 transition">
                                     <td className="py-4 pr-4">
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-3 min-w-[180px]">
                                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 border border-blue-100 text-blue-600 font-bold shrink-0">
                                                 {user.username ? user.username.charAt(0).toUpperCase() : "U"}
                                             </div>
-                                            <div>
-                                                <p className="font-bold text-slate-900 leading-tight">
+                                            <div className="min-w-0">
+                                                <p className="font-bold text-slate-900 leading-tight truncate">
                                                     {user.name || user.username}
                                                 </p>
-                                                <p className="text-xs text-slate-500">
+                                                <p className="text-xs text-slate-500 truncate">
                                                     @{user.username}
                                                 </p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="py-4 pr-4 text-slate-600 text-xs font-medium">
+                                    <td className="py-4 pr-4 text-slate-600 text-xs font-medium truncate max-w-[200px]">
                                         {user.email}
                                     </td>
-                                    <td className="py-4 pr-4 text-slate-500 text-xs font-medium">
+                                    <td className="py-4 pr-4 text-slate-500 text-xs font-medium whitespace-nowrap">
                                         {new Date(user.createdAt).toLocaleDateString()}
                                     </td>
-                                    <td className="py-4 text-right">
+                                    <td className="py-4 text-right whitespace-nowrap">
                                         <div className="inline-flex items-center gap-2">
+                                            {/* Profile Link Button */}
+                                            <button
+                                                type="button"
+                                                onClick={() => window.open(`/${user.username}`, "_blank")}
+                                                title="View Profile"
+                                                className="inline-flex items-center gap-1 rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer active:scale-95 shadow-xs"
+                                            >
+                                                <ExternalLink size={14} />
+                                                <span>Profile</span>
+                                            </button>
                                             <button
                                                 type="button"
                                                 onClick={() => onApprove(user._id)}
-                                                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition cursor-pointer active:scale-95 shadow-xs"
+                                                className="inline-flex items-center gap-1 rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition cursor-pointer active:scale-95 shadow-xs"
                                             >
                                                 <UserCheck size={14} />
                                                 <span>Approve</span>
@@ -89,7 +95,7 @@ const PendingUsers = ({ users = [], onApprove, onSuspend }) => {
                                             <button
                                                 type="button"
                                                 onClick={() => onSuspend(user._id)}
-                                                className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-xs font-bold text-red-700 hover:bg-red-100 transition cursor-pointer active:scale-95 shadow-xs"
+                                                className="inline-flex items-center gap-1 rounded-xl bg-red-50 border border-red-200 px-3 py-2 text-xs font-bold text-red-700 hover:bg-red-100 transition cursor-pointer active:scale-95 shadow-xs"
                                             >
                                                 <ShieldAlert size={14} />
                                                 <span>Suspend</span>

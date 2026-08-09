@@ -18,7 +18,7 @@ const ActionButtons = ({
 
   // --- Handle Cancel Navigation (Fallback to Profile or Dashboard) ---
   const handleCancel = () => {
-    const profilePath = user?.username ? `/u/${user.username}` : "/dashboard";
+    const profilePath = user?.username ? `/${user.username}` : "/dashboard";
     navigate(profilePath);
   };
 

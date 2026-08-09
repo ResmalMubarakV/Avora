@@ -1,22 +1,29 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Search, Eye, Trash2, Globe, Lock, Images, ShieldAlert, Loader2, X, ArrowLeft, MapPin, User, Calendar } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Search, Eye, Trash2, Globe, Lock, Images, ArrowLeft, ArrowUpDown, X } from "lucide-react";
 import { getMemories, deleteMemory } from "../../api/adminApi";
-import api from "../../api/axios";
+import DeleteMemoryModal from "../../components/admin/DeleteMemoryModal";
 
 // ==========================================
 // ADMIN MEMORIES PAGE
 // ==========================================
 const AdminMemories = () => {
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [search, setSearch] = useState("");
     const [memories, setMemories] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const [selectedMemory, setSelectedMemory] = useState(null);
-    const [password, setPassword] = useState("");
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [deleteError, setDeleteError] = useState("");
+
+    const currentVisibility = searchParams.get("visibility") || "all";
+    const currentSort = searchParams.get("sort") || "newest";
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }, []);
 
     useEffect(() => {
         const fetchMemories = async () => {
@@ -38,14 +45,13 @@ const AdminMemories = () => {
         const username = memory.user?.username;
         const slug = memory.slug || memory._id;
         if (username) {
-            window.open(`/${username}/${slug}`, "_blank");
+            window.open(`/${username}/${slug}`, "_blank", "noopener,noreferrer");
         } else {
             console.error("Author username missing for redirection.");
         }
     };
 
-    const confirmAndDelete = async (e) => {
-        e.preventDefault();
+    const confirmAndDeleteMemory = async (password) => {
         if (!password) {
             setDeleteError("Password is required to confirm deletion.");
             return;
@@ -55,299 +61,242 @@ const AdminMemories = () => {
             setDeleteLoading(true);
             setDeleteError("");
 
-            await api.post("/api/auth/login", {
-                email: "admin@avora.com",
-                password: password,
-            });
-
             await deleteMemory(selectedMemory._id);
             setMemories((prev) => prev.filter((m) => m._id !== selectedMemory._id));
-            
             setSelectedMemory(null);
-            setPassword("");
         } catch (err) {
-            setDeleteError(err.response?.data?.message || "Incorrect password or authentication failed.");
+            setDeleteError(err.response?.data?.message || "Deletion failed. Please try again.");
         } finally {
             setDeleteLoading(false);
         }
     };
 
+    const handleVisibilityChange = (visibility) => {
+        const newParams = new URLSearchParams(searchParams);
+        if (visibility === "all") newParams.delete("visibility");
+        else newParams.set("visibility", visibility);
+        setSearchParams(newParams);
+    };
+
+    const handleSortChange = (e) => {
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set("sort", e.target.value);
+        setSearchParams(newParams);
+    };
+
     const filteredMemories = memories.filter((memory) => {
+        const isPublic = memory.isPublic || memory.visibility === "public";
+        if (currentVisibility === "public" && !isPublic) return false;
+        if (currentVisibility === "private" && isPublic) return false;
+
         return (
             memory.title?.toLowerCase().includes(search.toLowerCase()) ||
             memory.location?.toLowerCase().includes(search.toLowerCase()) ||
             memory.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
             memory.user?.username?.toLowerCase().includes(search.toLowerCase())
         );
+    }).sort((a, b) => {
+        if (currentSort === "newest") return new Date(b.createdAt) - new Date(a.createdAt);
+        if (currentSort === "oldest") return new Date(a.createdAt) - new Date(b.createdAt);
+        if (currentSort === "title") return (a.title || "").localeCompare(b.title || "");
+        return 0;
     });
 
     return (
-        <div className="space-y-8 pb-16 relative animate-in fade-in duration-300">
-            {/* Header Section */}
+        <div className="space-y-6 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 animate-in fade-in duration-300">
             <div className="space-y-4">
                 <button
                     type="button"
                     onClick={() => navigate("/admin")}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-slate-200/80 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300 cursor-pointer active:scale-95"
+                    className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-900 transition w-fit cursor-pointer"
                 >
-                    <ArrowLeft size={15} />
-                    <span>Back to Dashboard</span>
+                    <ArrowLeft size={16} />
+                    <span>Dashboard</span>
                 </button>
 
-                <div>
-                    <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-                        Memories Moderation
-                    </h1>
-                    <p className="mt-1 text-sm sm:text-base text-slate-500">
-                        Oversee, inspect, and moderate published travel stories across the platform.
-                    </p>
-                </div>
-            </div>
-
-            {/* Search Bar Toolbar */}
-            <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/80 shadow-sm">
-                <div className="relative max-w-md">
-                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                        type="text"
-                        placeholder="Search memories by title, location, or author..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3 pl-11 pr-4 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100"
-                    />
-                </div>
-            </div>
-
-            {/* Memories Container Card */}
-            <div className="rounded-3xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
-                {loading ? (
-                    <div className="flex h-64 items-center justify-center">
-                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400 animate-pulse">Loading memories...</p>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/60 pb-5">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">Memories Moderation</h1>
+                        <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Oversee and moderate published platform travel stories.</p>
                     </div>
-                ) : filteredMemories.length === 0 ? (
-                    <div className="flex h-64 flex-col items-center justify-center p-6 text-center">
-                        <Images size={32} className="text-slate-300 mb-3" />
-                        <h3 className="text-base font-bold text-slate-800">No Memories Found</h3>
-                        <p className="text-xs text-slate-500 mt-1">There are no matching memories matching your filter.</p>
-                    </div>
-                ) : (
-                    <>
-                        {/* Mobile/Tablet Card Layout (< 1024px) */}
-                        <div className="grid grid-cols-1 gap-4 p-4 lg:hidden">
-                            {filteredMemories.map((memory) => (
-                                <div key={memory._id} className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 space-y-4 shadow-sm">
-                                    <div className="flex items-start gap-3.5">
-                                        <img
-                                            src={memory.coverImage || "https://placehold.co/300x200"}
-                                            alt={memory.title}
-                                            className="h-20 w-28 shrink-0 rounded-xl object-cover border border-slate-200 shadow-sm"
-                                        />
-                                        <div className="min-w-0 flex-1 space-y-1">
-                                            <div className="flex items-start justify-between gap-2">
-                                                <h3 className="font-bold text-slate-900 truncate">{memory.title}</h3>
-                                                {memory.isPublic ? (
-                                                    <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold text-blue-700 shrink-0">
-                                                        <Globe size={11} /> Public
-                                                    </span>
-                                                ) : (
-                                                    <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-[10px] font-semibold text-slate-700 shrink-0">
-                                                        <Lock size={11} /> Private
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <p className="text-xs text-slate-500 flex items-center gap-1 truncate">
-                                                <MapPin size={12} className="shrink-0 text-slate-400" /> {memory.location || "No location"}
-                                            </p>
-                                            <p className="text-xs font-semibold text-slate-700 flex items-center gap-1 truncate pt-0.5">
-                                                <User size={12} className="text-[#3559D4] shrink-0" /> {memory.user?.name || "Unknown"} (@{memory.user?.username || "unknown"})
-                                            </p>
-                                        </div>
-                                    </div>
 
-                                    <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-xs text-slate-500">
-                                        <span className="flex items-center gap-1">
-                                            <Calendar size={13} /> {memory.createdAt ? new Date(memory.createdAt).toLocaleDateString() : "N/A"}
-                                        </span>
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => handleViewMemory(memory)}
-                                                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 cursor-pointer"
-                                            >
-                                                <Eye size={14} /> View
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setSelectedMemory(memory)}
-                                                className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-red-600 shadow-sm transition hover:bg-red-50 cursor-pointer"
-                                            >
-                                                <Trash2 size={14} /> Delete
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div className="flex items-center justify-between md:justify-end gap-2.5 w-full md:w-auto">
+                        <div className="flex items-center gap-1 overflow-x-auto bg-slate-100/80 p-1 rounded-xl">
+                            {[
+                                { label: "All", value: "all" },
+                                { label: "Public", value: "public" },
+                                { label: "Private", value: "private" },
+                            ].map((tab) => (
+                                <button
+                                    key={tab.value}
+                                    onClick={() => handleVisibilityChange(tab.value)}
+                                    className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-bold transition cursor-pointer shrink-0 ${
+                                        currentVisibility === tab.value
+                                            ? "bg-white text-slate-900 shadow-sm"
+                                            : "text-slate-500 hover:text-slate-900"
+                                    }`}
+                                >
+                                    {tab.label}
+                                </button>
                             ))}
                         </div>
 
-                        {/* Desktop Table Layout (>= 1024px) */}
-                        <div className="hidden lg:block overflow-x-hidden">
-                            <table className="min-w-full text-left border-collapse">
-                                <thead className="bg-slate-50/75 border-b border-slate-200">
-                                    <tr>
-                                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Memory Story</th>
-                                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Author Details</th>
-                                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Visibility</th>
-                                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-400">Published</th>
-                                        <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-400">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100 text-sm">
-                                    {filteredMemories.map((memory) => (
-                                        <tr key={memory._id} className="transition-colors hover:bg-slate-50/80">
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-4">
-                                                    <img
-                                                        src={memory.coverImage || "https://placehold.co/300x200"}
-                                                        alt={memory.title}
-                                                        className="h-14 w-20 shrink-0 rounded-xl object-cover border border-slate-200 shadow-sm"
-                                                    />
-                                                    <div className="min-w-0 max-w-[220px]">
-                                                        <h3 className="font-bold text-slate-900 truncate">{memory.title}</h3>
-                                                        <p className="text-xs text-slate-500 truncate flex items-center gap-1 mt-0.5">
-                                                            <MapPin size={11} /> {memory.location}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 max-w-[180px]">
-                                                <div>
-                                                    <h3 className="font-bold text-slate-800 truncate">{memory.user?.name || "Unknown"}</h3>
-                                                    <p className="text-xs font-semibold text-[#3559D4] truncate">@{memory.user?.username || "unknown"}</p>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {memory.isPublic ? (
-                                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200/60 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                                                        <Globe size={13} /> Public
-                                                    </span>
-                                                ) : (
-                                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                                                        <Lock size={13} /> Private
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4 text-xs font-medium text-slate-500">
-                                                {memory.createdAt ? new Date(memory.createdAt).toLocaleDateString() : "N/A"}
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex justify-end gap-2">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleViewMemory(memory)}
-                                                        aria-label="View Memory"
-                                                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 cursor-pointer shadow-sm active:scale-95"
-                                                    >
-                                                        <Eye size={16} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setSelectedMemory(memory)}
-                                                        aria-label="Delete Memory"
-                                                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-200 bg-white text-red-600 transition hover:bg-red-50 cursor-pointer shadow-sm active:scale-95"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                        <div className="relative flex items-center bg-slate-100/80 p-2.5 sm:px-3.5 sm:py-2 rounded-xl group cursor-pointer shrink-0" title="Sort Order">
+                            <ArrowUpDown size={16} className="text-slate-500 group-hover:text-slate-900 transition sm:mr-1.5" />
+                            <span className="hidden sm:inline text-xs sm:text-sm font-bold text-slate-700 capitalize">
+                                {currentSort === "newest" ? "Newest" : currentSort === "oldest" ? "Oldest" : "Title A-Z"}
+                            </span>
+                            <select
+                                value={currentSort}
+                                onChange={handleSortChange}
+                                aria-label="Sort memories by"
+                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                            >
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="title">Title A-Z</option>
+                            </select>
                         </div>
-                    </>
+                    </div>
+                </div>
+            </div>
+
+            <div className="relative max-w-md">
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                    type="text"
+                    placeholder="Search by title, location, or author..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-11 pr-10 text-xs sm:text-sm font-medium text-slate-800 outline-none transition focus:border-[#3559D4] focus:ring-2 focus:ring-blue-100 shadow-xs"
+                />
+                {search && (
+                    <button
+                        onClick={() => setSearch("")}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                        <X size={16} />
+                    </button>
                 )}
             </div>
 
-            {/* Password Confirmation Modal */}
-            {selectedMemory && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
-                    <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-7 shadow-2xl">
-                        <div className="flex items-center justify-between mb-5">
-                            <div className="flex items-center gap-3 text-red-600">
-                                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 border border-red-100">
-                                    <ShieldAlert size={22} />
-                                </div>
-                                <h3 className="text-lg font-bold text-slate-900">Confirm Deletion</h3>
-                            </div>
-                            <button
-                                onClick={() => {
-                                    setSelectedMemory(null);
-                                    setPassword("");
-                                    setDeleteError("");
-                                }}
-                                className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer transition"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-
-                        <p className="text-sm text-slate-600 mb-5 leading-relaxed">
-                            You are about to permanently delete <span className="font-bold text-slate-900">"{selectedMemory.title}"</span>. Please enter your administrator password to confirm.
-                        </p>
-
-                        {deleteError && (
-                            <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-3.5 text-xs font-semibold text-red-700">
-                                {deleteError}
-                            </div>
-                        )}
-
-                        <form onSubmit={confirmAndDelete} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                                    Admin Password
-                                </label>
-                                <input
-                                    type="password"
-                                    placeholder="Enter your password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    autoFocus
-                                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3.5 px-4 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100"
-                                />
-                            </div>
-
-                            <div className="flex items-center justify-end gap-3 pt-3">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setSelectedMemory(null);
-                                        setPassword("");
-                                        setDeleteError("");
-                                    }}
-                                    className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 cursor-pointer active:scale-95"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={deleteLoading}
-                                    className="inline-flex items-center gap-2 rounded-2xl bg-red-600 px-5 py-3 text-xs font-semibold text-white shadow-lg shadow-red-500/20 transition hover:bg-red-700 active:scale-95 cursor-pointer disabled:opacity-50"
-                                >
-                                    {deleteLoading ? (
-                                        <>
-                                            <Loader2 size={16} className="animate-spin" />
-                                            <span>Deleting...</span>
-                                        </>
-                                    ) : (
-                                        <span>Confirm Delete</span>
-                                    )}
-                                </button>
-                            </div>
-                        </form>
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                {loading ? (
+                    <div className="flex h-48 items-center justify-center">
+                        <p className="text-xs sm:text-sm font-bold text-slate-400 animate-pulse">Loading memories...</p>
                     </div>
-                </div>
-            )}
+                ) : filteredMemories.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <Images size={24} className="text-slate-300 mb-2" />
+                        <h3 className="text-sm font-bold text-slate-800">No memories found</h3>
+                    </div>
+                ) : (
+                    <div className="divide-y divide-slate-100">
+                        {filteredMemories.map((memory) => {
+                            const isPublic = memory.isPublic || memory.visibility === "public";
+                            return (
+                                <div key={memory._id} className="relative flex flex-col md:grid md:grid-cols-[auto_1fr_160px_140px_100px] items-center p-3.5 sm:p-4 lg:p-5 gap-3.5 md:gap-6 hover:bg-slate-50/60 transition">
+                                    {/* Absolute Delete Button for Mobile on Top Right */}
+                                    <div className="absolute top-3.5 right-3.5 md:hidden">
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedMemory(memory)}
+                                            className="p-2 rounded-xl text-red-600 hover:bg-red-50 border border-red-200 bg-red-50 transition cursor-pointer"
+                                            title="Delete Memory"
+                                            aria-label="Delete Memory"
+                                        >
+                                            <Trash2 size={15} />
+                                        </button>
+                                    </div>
+
+                                    {/* Column 1: Thumbnail Image */}
+                                    <div className="shrink-0 w-full md:w-auto">
+                                        <img
+                                            src={memory.coverImage || "https://placehold.co/300x200"}
+                                            alt={memory.title}
+                                            className="h-24 w-full md:h-12 md:w-16 rounded-xl object-cover border border-slate-200 shadow-xs"
+                                        />
+                                    </div>
+
+                                    {/* Column 2: Memory Title & Location */}
+                                    <div className="min-w-0 space-y-0.5 w-full">
+                                        <h3 className="font-extrabold text-xs sm:text-sm lg:text-base text-slate-900 truncate pr-8 md:pr-0">{memory.title}</h3>
+                                        <p className="text-[11px] sm:text-xs lg:text-sm text-slate-500 font-medium truncate">
+                                            {memory.location || "No location"}
+                                        </p>
+                                    </div>
+
+                                    {/* Column 3: Username (With status inline on mobile) */}
+                                    <div className="min-w-0 w-full md:w-auto text-left md:text-center flex items-center justify-between md:block">
+                                        <p className="text-[11px] sm:text-xs lg:text-sm font-bold text-slate-600 truncate">
+                                            @{memory.user?.username || "unknown"}
+                                        </p>
+                                        {/* Mobile status inline with username */}
+                                        <div className="md:hidden">
+                                            {isPublic ? (
+                                                <span className="inline-flex items-center gap-1 text-[9px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100 uppercase tracking-wider">
+                                                    <Globe size={10} /> Public
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1 text-[9px] font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200 uppercase tracking-wider">
+                                                    <Lock size={10} /> Private
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Column 4: Status Badge (Hidden on mobile since it's inline with username, centered on desktop) */}
+                                    <div className="hidden md:flex items-center justify-center w-full">
+                                        {isPublic ? (
+                                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50 px-3.5 py-1 rounded-full border border-blue-100 uppercase tracking-wider">
+                                                <Globe size={11} /> Public
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-700 bg-slate-100 px-3.5 py-1 rounded-full border border-slate-200 uppercase tracking-wider">
+                                                <Lock size={11} /> Private
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Column 5: Desktop Action Buttons */}
+                                    <div className="hidden md:flex items-center justify-end shrink-0 gap-2">
+                                        {isPublic ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleViewMemory(memory)}
+                                                className="p-2 sm:p-2.5 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 bg-slate-50 transition cursor-pointer"
+                                                title="View Memory"
+                                                aria-label="View Memory"
+                                            >
+                                                <Eye size={16} />
+                                            </button>
+                                        ) : (
+                                            <div className="w-[38px]" />
+                                        )}
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedMemory(memory)}
+                                            className="p-2 sm:p-2.5 rounded-xl text-red-600 hover:bg-red-50 border border-red-200 bg-red-50 transition cursor-pointer"
+                                            title="Delete Memory"
+                                            aria-label="Delete Memory"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+
+            <DeleteMemoryModal
+                selectedMemory={selectedMemory}
+                onClose={() => { setSelectedMemory(null); setDeleteError(""); }}
+                onConfirm={confirmAndDeleteMemory}
+                deleteLoading={deleteLoading}
+                deleteError={deleteError}
+            />
         </div>
     );
 };

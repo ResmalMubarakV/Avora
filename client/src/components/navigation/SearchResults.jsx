@@ -74,7 +74,7 @@ const SearchResults = ({ open, query, results, loading }) => {
                         {users.map((user) => (
                             <Link
                                 key={user._id}
-                                to={`/u/${user.username}`}
+                                to={`/${user.username}`}
                                 className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200 hover:bg-slate-50"
                             >
                                 {user.profileImage ? (
@@ -115,7 +115,7 @@ const SearchResults = ({ open, query, results, loading }) => {
                         {memories.map((memory) => (
                             <Link
                                 key={memory._id}
-                                to={`/u/${memory.user.username}/${memory.slug}`}
+                                to={`/${memory.user.username}/${memory.slug}`}
                                 className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200 hover:bg-slate-50"
                             >
                                 <img
