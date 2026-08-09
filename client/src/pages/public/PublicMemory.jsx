@@ -140,7 +140,7 @@ const PublicMemory = () => {
       for (let entry of entries) {
         const { width, height } = entry.contentRect;
         const availableWidth = width - 32; 
-        const availableHeight = height - 72;
+        const availableHeight = height - 90; // Offset for bottom pagination bar
 
         if (availableWidth > 0 && availableHeight > 0) {
           const scaleX = availableWidth / 800;
@@ -265,54 +265,30 @@ const PublicMemory = () => {
         {/* INTERACTIVE UI (HIDDEN DURING PRINT) */}
         {/* ========================================== */}
         <div className="print:hidden min-h-[100dvh] h-screen bg-slate-900 flex flex-col overflow-hidden fixed inset-0 z-[100]">
-            <div className="flex-none flex flex-col sm:flex-row items-center justify-between bg-slate-950/95 backdrop-blur-md px-4 sm:px-8 py-3.5 border-b border-slate-800 shadow-xl gap-3 z-50">
-                <div className="flex items-center justify-between w-full sm:w-auto gap-4">
-                    <button onClick={exitPreviewMode} className="flex items-center gap-1 sm:gap-2 text-white/80 hover:text-white font-medium cursor-pointer">
-                        <X size={20} /> <span className="hidden sm:inline">Back</span>
-                    </button>
-
-                    {/* Mobile Template Selector visible only on small screens */}
-                    <div className="flex sm:hidden items-center gap-2 bg-slate-900 border border-slate-800 text-white px-3 py-1.5 rounded-full text-xs font-bold">
-                        <button onClick={prevLayout} className="text-white/80 hover:text-white"><ChevronLeft size={16}/></button>
-                        <span className="tracking-wider uppercase">{layoutIndex + 1} / 20</span>
-                        <button onClick={nextLayout} className="text-white/80 hover:text-white"><ChevronRight size={16}/></button>
-                    </div>
-
-                    <button
-                        onClick={handleNativePrint}
-                        className="flex sm:hidden items-center gap-1.5 bg-[#3559D4] text-white px-3.5 py-1.5 rounded-full text-xs font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer"
-                    >
-                        <Download size={14} /> <span>PDF</span>
-                    </button>
-                </div>
+            <div className="flex-none flex items-center justify-between bg-slate-950/90 backdrop-blur-md px-4 sm:px-8 py-3.5 border-b border-slate-800 shadow-xl z-50">
+                <button onClick={exitPreviewMode} className="flex items-center gap-1 sm:gap-2 text-white/80 hover:text-white font-medium cursor-pointer">
+                    <X size={20} /> <span className="hidden sm:inline">Back</span>
+                </button>
 
                 {/* Centered instruction */}
-                <div className="hidden md:flex items-center justify-center text-center">
-                    <span className="text-white/70 text-xs font-semibold tracking-wider uppercase flex items-center gap-1.5">
+                <div className="flex items-center justify-center text-center">
+                    <span className="text-white/70 text-[9px] sm:text-xs font-semibold tracking-wider uppercase flex items-center gap-1.5">
                         <MousePointerClick size={14} className="text-[#3559D4] shrink-0"/> 
                         <span>Drag & Pinch Photo</span>
                     </span>
                 </div>
 
-                {/* Tablet / Desktop Pagination & Print */}
-                <div className="hidden sm:flex items-center gap-4">
-                    <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-md">
-                        <button onClick={prevLayout} className="p-1 rounded-full hover:bg-slate-800 text-white transition"><ChevronLeft size={16}/></button>
-                        <span className="tracking-wider uppercase px-1">Template {layoutIndex + 1} / 20</span>
-                        <button onClick={nextLayout} className="p-1 rounded-full hover:bg-slate-800 text-white transition"><ChevronRight size={16}/></button>
-                    </div>
-
-                    <button
-                        onClick={handleNativePrint}
-                        className="flex items-center gap-2 bg-[#3559D4] text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer"
-                    >
-                        <Download size={16} /> <span>Save PDF / Print</span>
-                    </button>
-                </div>
+                <button
+                    onClick={handleNativePrint}
+                    className="flex items-center gap-2 bg-[#3559D4] text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer"
+                >
+                    <Download size={16} /> <span className="hidden sm:inline">Save PDF / Print</span>
+                </button>
             </div>
 
-            <div className="flex-1 w-full flex flex-col md:flex-row overflow-hidden relative" onClick={() => setActiveSlot(null)}>
-                <div ref={previewContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col justify-center items-center bg-slate-900 relative p-4">
+            <div className="flex-1 w-full flex flex-col md:flex-row overflow-hidden relative pb-16" onClick={() => setActiveSlot(null)}>
+                {/* Unscrollable container so everything fits in the full window view */}
+                <div ref={previewContainerRef} className="flex-1 overflow-hidden flex flex-col justify-center items-center bg-slate-900 relative p-2">
                     
                     {/* SCALED PREVIEW WRAPPER */}
                     <div
@@ -323,7 +299,7 @@ const PublicMemory = () => {
                         height: '1131px', 
                         transition: 'transform 0.1s ease-out' 
                       }}
-                      className="shadow-[0_20px_25px_rgba(0,0,0,0.5)] ring-1 ring-white/10 flex-shrink-0 bg-white my-auto"
+                      className="shadow-[0_20px_25px_rgba(0,0,0,0.5)] ring-1 ring-white/10 flex-shrink-0 bg-white"
                     >
                         <PrintableView
                             memory={memory}
@@ -337,32 +313,32 @@ const PublicMemory = () => {
                     </div>
                 </div>
 
-                {/* DESKTOP FLOATING PAGINATION DOCK */}
-                <div className="hidden sm:flex absolute bottom-5 left-0 right-0 items-center justify-center gap-3 z-40 pointer-events-auto px-4">
+                {/* FIXED BOTTOM PAGINATION BAR VISIBLE ON ALL SCREENS */}
+                <div className="fixed bottom-3 inset-x-0 flex items-center justify-center gap-3 z-40 pointer-events-auto px-4">
                     <button 
                         onClick={prevLayout} 
-                        className="p-3 rounded-full bg-slate-800/90 hover:bg-slate-700 text-white shadow-2xl border border-slate-700 backdrop-blur-md transition cursor-pointer active:scale-95" 
+                        className="p-2.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white shadow-xl border border-slate-700 backdrop-blur-md transition cursor-pointer active:scale-95" 
                         title="Previous Template"
                     >
-                        <ChevronLeft size={20} />
+                        <ChevronLeft size={18} />
                     </button>
 
-                    <div className="bg-slate-950/95 backdrop-blur-md border border-slate-700 text-white px-5 py-2.5 rounded-full text-xs font-bold shadow-2xl tracking-wider uppercase">
+                    <div className="bg-slate-950/90 backdrop-blur-md border border-slate-800 text-white px-4 py-2 rounded-full text-xs font-bold shadow-2xl tracking-wider uppercase">
                         Template {layoutIndex + 1} / 20
                     </div>
 
                     <button 
                         onClick={nextLayout} 
-                        className="p-3 rounded-full bg-slate-800/90 hover:bg-slate-700 text-white shadow-2xl border border-slate-700 backdrop-blur-md transition cursor-pointer active:scale-95" 
+                        className="p-2.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white shadow-xl border border-slate-700 backdrop-blur-md transition cursor-pointer active:scale-95" 
                         title="Next Template"
                     >
-                        <ChevronRight size={20} />
+                        <ChevronRight size={18} />
                     </button>
                 </div>
 
                 {activeSlot !== null && currentEditorConfig && (
                     <div
-                        className="w-full md:w-[350px] bg-slate-950 border-t md:border-t-0 md:border-l border-slate-800 flex flex-col z-50 flex-shrink-0 h-[45vh] md:h-auto shadow-[0_-10px_40px_rgba(0,0,0,0.5)] md:shadow-none animate-in slide-in-from-bottom md:slide-in-from-right duration-200"
+                        className="w-full md:w-[350px] bg-slate-950 border-t md:border-t-0 md:border-l border-slate-800 flex flex-col z-50 flex-shrink-0 h-[40vh] md:h-auto shadow-[0_-10px_40px_rgba(0,0,0,0.5)] md:shadow-none animate-in slide-in-from-bottom md:slide-in-from-right duration-200"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
