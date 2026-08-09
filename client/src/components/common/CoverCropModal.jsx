@@ -33,6 +33,7 @@ const CoverCropModal = ({ file, onCancel, onSave }) => {
     return () => URL.revokeObjectURL(url);
   }, [file]);
 
+  // Base scale ensures the image fully covers the 16:9 box completely without gaps
   const baseScale =
     naturalSize.w && naturalSize.h
       ? Math.max(
@@ -45,16 +46,15 @@ const CoverCropModal = ({ file, onCancel, onSave }) => {
   const displayWidth = naturalSize.w * displayScale;
   const displayHeight = naturalSize.h * displayScale;
 
+  // Strict boundary clamping so image NEVER shows blank borders
   const clampOffset = useCallback(
     (x, y, width = displayWidth, height = displayHeight) => {
-      const minX = Math.min(0, VIEWPORT_WIDTH - width);
-      const minY = Math.min(0, VIEWPORT_HEIGHT - height);
-      const maxX = Math.max(0, VIEWPORT_WIDTH - width);
-      const maxY = Math.max(0, VIEWPORT_HEIGHT - height);
+      const minX = VIEWPORT_WIDTH - width;
+      const minY = VIEWPORT_HEIGHT - height;
 
       return {
-        x: Math.max(minX, Math.min(maxX, x)),
-        y: Math.max(minY, Math.min(maxY, y)),
+        x: Math.min(0, Math.max(minX, x)),
+        y: Math.min(0, Math.max(minY, y)),
       };
     },
     [displayWidth, displayHeight]
@@ -68,16 +68,16 @@ const CoverCropModal = ({ file, onCancel, onSave }) => {
     const h = img.naturalHeight;
     setNaturalSize({ w, h });
 
-    const scaleFitW = VIEWPORT_WIDTH / w;
-    const scaleFitH = VIEWPORT_HEIGHT / h;
-    const initialZoom = Math.max(scaleFitW, scaleFitH) / Math.max(scaleFitW, scaleFitH); 
-    const absoluteMinZoom = Math.min(scaleFitW / baseScale, scaleFitH / baseScale);
+    // Calculate absolute minimum zoom required to completely fill the 16:9 container with zero blank space
+    const scaleCoverW = VIEWPORT_WIDTH / w;
+    const scaleCoverH = VIEWPORT_HEIGHT / h;
+    const absoluteMinZoom = Math.max(scaleCoverW, scaleCoverH) / baseScale;
 
-    setMinZoom(Math.max(0.5, absoluteMinZoom));
-    setZoom(1);
+    setMinZoom(absoluteMinZoom);
+    setZoom(absoluteMinZoom);
 
-    const dw = w * baseScale;
-    const dh = h * baseScale;
+    const dw = w * baseScale * absoluteMinZoom;
+    const dh = h * baseScale * absoluteMinZoom;
 
     setOffset({
       x: (VIEWPORT_WIDTH - dw) / 2,
@@ -136,9 +136,6 @@ const CoverCropModal = ({ file, onCancel, onSave }) => {
     canvas.width = OUTPUT_WIDTH;
     canvas.height = OUTPUT_HEIGHT;
     const ctx = canvas.getContext("2d");
-
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
 
     const sx = -offset.x / displayScale;
     const sy = -offset.y / displayScale;
@@ -217,7 +214,7 @@ const CoverCropModal = ({ file, onCancel, onSave }) => {
         </div>
 
         <p className="mt-3 text-center text-xs text-slate-400">
-          Drag to frame your desired section • Use slider to zoom in & out
+          Drag to frame your desired section • Use slider to zoom
         </p>
 
         <div className="mt-4 flex items-center gap-3">
