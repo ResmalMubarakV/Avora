@@ -545,7 +545,7 @@ const Lightbox = ({
             "
         >
             {/* Top Control Bar */}
-            <div className="flex justify-end items-center gap-4 p-6 pointer-events-auto relative z-50">
+            <div className="flex justify-end items-center gap-4 px-4 sm:px-6 py-3 pointer-events-auto relative z-50 shrink-0">
                 {canDownload && (
                     <button
                         type="button"
@@ -565,7 +565,7 @@ const Lightbox = ({
                         "
                         title="Download"
                     >
-                        <Download size={28} />
+                        <Download size={26} />
                     </button>
                 )}
 
@@ -596,9 +596,9 @@ const Lightbox = ({
                     }
                 >
                     {isFullscreen ? (
-                        <Minimize2 size={28} />
+                        <Minimize2 size={26} />
                     ) : (
-                        <Maximize2 size={28} />
+                        <Maximize2 size={26} />
                     )}
                 </button>
 
@@ -619,7 +619,7 @@ const Lightbox = ({
                         transition
                     "
                 >
-                    <X size={32} />
+                    <X size={28} />
                 </button>
             </div>
 
@@ -792,6 +792,8 @@ const Lightbox = ({
                             items-center
                             justify-center
                             h-full
+                            pb-16
+                            sm:pb-12
                         "
                     >
                         {/* Media Viewport */}
@@ -871,7 +873,7 @@ const Lightbox = ({
                                         onError={() => setImageLoading(false)}
                                         draggable={false}
                                         className={`
-                                            max-h-[calc(100vh-170px)]
+                                            max-h-[calc(100vh-210px)]
                                             max-w-full
                                             object-contain
                                             transition-opacity
@@ -899,7 +901,7 @@ const Lightbox = ({
                                         onPlaying={() => setImageLoading(false)}
                                         onError={() => setImageLoading(false)}
                                         className="
-                                            max-h-[calc(100vh-170px)]
+                                            max-h-[calc(100vh-210px)]
                                             max-w-full
                                             object-contain
                                             rounded-lg
@@ -915,21 +917,19 @@ const Lightbox = ({
                             <div
                                 className="
                                     absolute
-                                    bottom-0
+                                    bottom-2
                                     left-0
                                     right-0
                                     z-10
                                     flex
                                     flex-col
                                     items-center
-                                    gap-3
-                                    pb-4
-                                    sm:pb-0
+                                    gap-2
                                     pointer-events-none
                                 "
                             >
                                 {!isVideoItem(selectedMedia) && (
-                                    <div className="flex items-center justify-center gap-12 sm:gap-16 md:gap-20 pointer-events-auto relative z-50">
+                                    <div className="flex items-center justify-center gap-10 sm:gap-16 md:gap-20 pointer-events-auto relative z-50">
                                         <button
                                             type="button"
                                             onClick={(e) => {
@@ -942,14 +942,18 @@ const Lightbox = ({
                                                 transition
                                                 duration-200
                                                 cursor-pointer
+                                                bg-black/40
+                                                p-2
+                                                rounded-full
+                                                backdrop-blur-sm
                                                 ${
                                                     selectedIndex === 0
-                                                        ? "opacity-30 cursor-not-allowed"
-                                                        : "text-white hover:text-white/70"
+                                                        ? "opacity-20 cursor-not-allowed"
+                                                        : "text-white hover:text-white/70 hover:bg-black/60"
                                                 }
                                             `}
                                         >
-                                            <ChevronLeft className="w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10" />
+                                            <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
                                         </button>
 
                                         <button
@@ -964,14 +968,18 @@ const Lightbox = ({
                                                 transition
                                                 duration-200
                                                 cursor-pointer
+                                                bg-black/40
+                                                p-2
+                                                rounded-full
+                                                backdrop-blur-sm
                                                 ${
                                                     selectedIndex === media.length - 1
-                                                        ? "opacity-30 cursor-not-allowed"
-                                                        : "text-white hover:text-white/70"
+                                                        ? "opacity-20 cursor-not-allowed"
+                                                        : "text-white hover:text-white/70 hover:bg-black/60"
                                                 }
                                             `}
                                         >
-                                            <ChevronRight className="w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10" />
+                                            <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
                                         </button>
                                     </div>
                                 )}
@@ -981,13 +989,13 @@ const Lightbox = ({
                                         rounded-full
                                         border
                                         border-white/20
-                                        bg-white/10
-                                        px-5
-                                        py-1.5
-                                        text-sm
-                                        font-medium
+                                        bg-black/60
+                                        px-4
+                                        py-1
+                                        text-xs
+                                        font-semibold
                                         text-white
-                                        backdrop-blur-sm
+                                        backdrop-blur-md
                                         pointer-events-auto
                                     "
                                 >
