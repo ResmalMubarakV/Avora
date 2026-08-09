@@ -7,7 +7,7 @@ const OUTPUT_WIDTH = 1280;
 const OUTPUT_HEIGHT = 720;
 
 // ==========================================
-// COVER CROP MODAL COMPONENT
+// COVER CROP MODAL COMPONENT (WITH BOUNDED ZOOM)
 // ==========================================
 const CoverCropModal = ({ file, onCancel, onSave }) => {
   const imgRef = useRef(null);
@@ -33,20 +33,12 @@ const CoverCropModal = ({ file, onCancel, onSave }) => {
     return () => URL.revokeObjectURL(url);
   }, [file]);
 
-  // Base scale ensures the image fully covers the 16:9 box completely without gaps
-  const baseScale =
-    naturalSize.w && naturalSize.h
-      ? Math.max(
-          VIEWPORT_WIDTH / naturalSize.w,
-          VIEWPORT_HEIGHT / naturalSize.h
-        )
-      : 0;
+  const baseScale = naturalSize.w ? VIEWPORT_WIDTH / naturalSize.w : 0;
 
   const displayScale = baseScale * zoom;
   const displayWidth = naturalSize.w * displayScale;
   const displayHeight = naturalSize.h * displayScale;
 
-  // Strict boundary clamping so image NEVER shows blank borders
   const clampOffset = useCallback(
     (x, y, width = displayWidth, height = displayHeight) => {
       const minX = VIEWPORT_WIDTH - width;
@@ -68,20 +60,21 @@ const CoverCropModal = ({ file, onCancel, onSave }) => {
     const h = img.naturalHeight;
     setNaturalSize({ w, h });
 
-    // Calculate absolute minimum zoom required to completely fill the 16:9 container with zero blank space
-    const scaleCoverW = VIEWPORT_WIDTH / w;
-    const scaleCoverH = VIEWPORT_HEIGHT / h;
-    const absoluteMinZoom = Math.max(scaleCoverW, scaleCoverH) / baseScale;
+    const scaleW = VIEWPORT_WIDTH / w;
+    const scaleH = VIEWPORT_HEIGHT / h;
 
-    setMinZoom(absoluteMinZoom);
-    setZoom(absoluteMinZoom);
+    // Calculate the absolute minimum zoom scale where the image completely fills the 16:9 box with zero blank space
+    const absMinZoom = Math.max(scaleW, scaleH) / scaleW;
 
-    const dw = w * baseScale * absoluteMinZoom;
-    const dh = h * baseScale * absoluteMinZoom;
+    setMinZoom(absMinZoom);
+    setZoom(absMinZoom);
+
+    const dw = w * scaleW * absMinZoom;
+    const dh = h * scaleW * absMinZoom;
 
     setOffset({
-      x: (VIEWPORT_WIDTH - dw) / 2,
-      y: (VIEWPORT_HEIGHT - dh) / 2,
+      x: Math.min(0, Math.max(VIEWPORT_WIDTH - dw, (VIEWPORT_WIDTH - dw) / 2)),
+      y: Math.min(0, Math.max(VIEWPORT_HEIGHT - dh, (VIEWPORT_HEIGHT - dh) / 2)),
     });
   };
 
@@ -170,7 +163,7 @@ const CoverCropModal = ({ file, onCancel, onSave }) => {
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
       <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">Crop Cover Image</h2>
+          <h2 className="text-lg font-semibold text-slate-900">Position Cover Image</h2>
           <button
             type="button"
             onClick={onCancel}
@@ -199,7 +192,7 @@ const CoverCropModal = ({ file, onCancel, onSave }) => {
               src={imageUrl}
               onLoad={handleImageLoad}
               draggable={false}
-              alt="Cover crop preview"
+              alt="Cover preview"
               style={{
                 position: "absolute",
                 left: offset.x,
@@ -214,7 +207,7 @@ const CoverCropModal = ({ file, onCancel, onSave }) => {
         </div>
 
         <p className="mt-3 text-center text-xs text-slate-400">
-          Drag to frame your desired section • Use slider to zoom
+          Drag to frame your section • Use slider to zoom in/out
         </p>
 
         <div className="mt-4 flex items-center gap-3">
