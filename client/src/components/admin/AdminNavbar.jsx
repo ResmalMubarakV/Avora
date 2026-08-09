@@ -13,12 +13,12 @@ const AdminNavbar = ({ sidebarOpen, setSidebarOpen }) => {
   const handleLogout = () => {
     setShowLogoutModal(false);
     
-    // Completely clear all storage items and session data
+    // Completely clear all session data and tokens
     localStorage.clear();
     sessionStorage.clear();
     
-    // Force a complete redirect to admin login and clear browser memory state
-    window.location.href = "/admin/login";
+    // Use replace to drop the admin page from the browser history stack completely
+    window.location.replace("/admin/login");
   };
 
   return (
