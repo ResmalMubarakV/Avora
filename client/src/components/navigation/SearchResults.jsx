@@ -22,7 +22,7 @@ const SearchResults = ({ open, query, results, loading }) => {
     // --- Loading State ---
     if (loading) {
         return (
-            <div className="absolute left-0 right-0 top-14 z-50 rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
+            <div className="absolute left-0 right-0 top-full mt-3 z-50 rounded-2xl border border-slate-200 bg-white p-8 shadow-2xl">
                 <p className="text-center text-sm font-medium text-slate-500">
                     Searching...
                 </p>
@@ -33,7 +33,7 @@ const SearchResults = ({ open, query, results, loading }) => {
     // --- Empty State ---
     if (!hasResults) {
         return (
-            <div className="absolute left-0 right-0 top-14 z-50 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-xl">
+            <div className="absolute left-0 right-0 top-full mt-3 z-50 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-2xl">
                 <h3 className="text-lg font-semibold text-slate-900">
                     No results found
                 </h3>
@@ -51,7 +51,8 @@ const SearchResults = ({ open, query, results, loading }) => {
                 absolute
                 left-0
                 right-0
-                top-14
+                top-full
+                mt-3
                 z-50
                 max-h-[480px]
                 overflow-y-auto

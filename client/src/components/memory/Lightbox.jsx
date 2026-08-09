@@ -6,7 +6,6 @@ import {
     Maximize2,
     Minimize2,
     Play,
-    Video,
 } from "lucide-react";
 
 import { useEffect, useRef, useState } from "react";
@@ -81,7 +80,6 @@ const Lightbox = ({
     };
 
     const handleTouchStart = (event) => {
-        // Two fingers -> start pinch-to-zoom
         if (event.touches.length === 2) {
             hadMultiTouch.current = true;
             pinchStartDistance.current = getTouchDistance(event.touches);
@@ -97,7 +95,6 @@ const Lightbox = ({
                 y: event.touches[0].clientY,
             };
 
-            // One finger while zoomed in -> pan instead of swipe/navigate
             if (scale > 1) {
                 isPanning.current = true;
                 setIsInteractingZoom(true);
@@ -109,8 +106,6 @@ const Lightbox = ({
                 return;
             }
 
-            if (isVideoItem(selectedMedia)) return;
-
             isSwipeTracking.current = false;
             touchStartX.current = event.touches[0].clientX;
             touchStartY.current = event.touches[0].clientY;
@@ -120,7 +115,6 @@ const Lightbox = ({
     };
 
     const handleTouchMove = (event) => {
-        // Pinch zooming
         if (event.touches.length === 2 && pinchStartDistance.current) {
             const newDistance = getTouchDistance(event.touches);
             const ratio = newDistance / pinchStartDistance.current;
@@ -134,7 +128,6 @@ const Lightbox = ({
             return;
         }
 
-        // Panning while zoomed in
         if (event.touches.length === 1 && isPanning.current) {
             const dx = event.touches[0].clientX - panStart.current.x;
             const dy = event.touches[0].clientY - panStart.current.y;
@@ -146,8 +139,7 @@ const Lightbox = ({
             return;
         }
 
-        // Visual Gallery Swipe Tracking
-        if (event.touches.length === 1 && scale === 1 && !isVideoItem(selectedMedia)) {
+        if (event.touches.length === 1 && scale === 1) {
             const currentX = event.touches[0].clientX;
             const currentY = event.touches[0].clientY;
             const dx = currentX - touchStartX.current;
@@ -160,7 +152,7 @@ const Lightbox = ({
             if (isSwipeTracking.current) {
                 let visualX = dx;
                 if ((selectedIndex === 0 && dx > 0) || (selectedIndex === media.length - 1 && dx < 0)) {
-                    visualX = dx * 0.3; // Rubber-band edge resistance
+                    visualX = dx * 0.3;
                 }
                 setTranslate({ x: visualX, y: 0 });
             }
@@ -198,7 +190,6 @@ const Lightbox = ({
         isPanning.current = false;
         setIsInteractingZoom(false);
 
-        // Double-tap-to-zoom check
         if (!hadMultiTouch.current && !wasPinching) {
             const endTouch = event.changedTouches && event.changedTouches[0];
 
@@ -237,7 +228,6 @@ const Lightbox = ({
             return; 
         }
 
-        // Handle Gallery Swipe Completion
         if (isSwipeTracking.current) {
             const deltaX = touchStartX.current - touchEndX.current;
             const SWIPE_THRESHOLD = 45;
@@ -255,14 +245,13 @@ const Lightbox = ({
                     previousImage();
                 }, 150);
             } else {
-                setTranslate({ x: 0, y: 0 }); // Snap back
+                setTranslate({ x: 0, y: 0 });
             }
             
             isSwipeTracking.current = false;
             return;
         }
 
-        // Fallback for quick flicks
         const deltaX = touchStartX.current - touchEndX.current;
         const deltaY = touchStartY.current - touchEndY.current;
         const MIN_SWIPE_DISTANCE = 45;
@@ -330,7 +319,6 @@ const Lightbox = ({
     };
 
     const handleMouseDown = (e) => {
-        if (isVideoItem(selectedMedia)) return;
         if (scale > 1) return;
 
         isDragging.current = true;
@@ -636,25 +624,25 @@ const Lightbox = ({
             </div>
 
             {/* Main Content Body */}
-                        <div
-                            className="
-                                flex-1
-                                min-h-0
-                                flex
-                                items-center
-                                justify-center
-                                px-4
-                                touch-none 
-                            "
-                            onTouchStart={handleTouchStart}
-                            onTouchMove={handleTouchMove}
-                            onTouchEnd={handleTouchEnd}
-                            onTouchCancel={handleTouchEnd} 
-                            onMouseDown={handleMouseDown}
-                            onMouseMove={handleMouseMove}
-                            onMouseUp={handleMouseUp}
-                            onMouseLeave={handleMouseUp}
-                        >
+            <div
+                className="
+                    flex-1
+                    min-h-0
+                    flex
+                    items-center
+                    justify-center
+                    px-4
+                    touch-none 
+                "
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onTouchCancel={handleTouchEnd} 
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+            >
                 <div
                     className="
                         flex
@@ -719,6 +707,7 @@ const Lightbox = ({
                                             border-2
                                             transition-all
                                             duration-300
+                                            bg-slate-900
                                             ${
                                                 selectedIndex === index
                                                     ? "border-white opacity-100 scale-105"
@@ -728,30 +717,13 @@ const Lightbox = ({
                                     >
                                         {isVideoItem(item) ? (
                                             <>
-                                                {item.thumbnailUrl || item.poster ? (
-                                                    <img
-                                                        src={item.thumbnailUrl || item.poster}
-                                                        alt={`Thumbnail ${index + 1} of ${media.length}`}
-                                                        decoding="async"
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <div
-                                                        className="
-                                                            w-full
-                                                            h-full
-                                                            bg-slate-800
-                                                            flex
-                                                            items-center
-                                                            justify-center
-                                                        "
-                                                    >
-                                                        <Video
-                                                            size={24}
-                                                            className="text-white/50"
-                                                        />
-                                                    </div>
-                                                )}
+                                                <video
+                                                    src={item.url}
+                                                    muted
+                                                    playsInline
+                                                    preload="metadata"
+                                                    className="w-full h-full object-cover pointer-events-none"
+                                                />
 
                                                 <div
                                                     className="
@@ -760,7 +732,8 @@ const Lightbox = ({
                                                         flex
                                                         items-center
                                                         justify-center
-                                                        bg-black/25
+                                                        bg-black/30
+                                                        pointer-events-none
                                                     "
                                                 >
                                                     <div
@@ -772,6 +745,7 @@ const Lightbox = ({
                                                             flex
                                                             items-center
                                                             justify-center
+                                                            shadow-md
                                                         "
                                                     >
                                                         <Play
@@ -786,7 +760,7 @@ const Lightbox = ({
                                                 src={item.url}
                                                 alt={`Thumbnail ${index + 1} of ${media.length}`}
                                                 decoding="async"
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full object-cover pointer-events-none"
                                             />
                                         )}
                                     </button>
@@ -929,6 +903,7 @@ const Lightbox = ({
                                             max-w-full
                                             object-contain
                                             rounded-lg
+                                            pointer-events-auto
                                         "
                                     />
                                 )}

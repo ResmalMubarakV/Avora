@@ -5,10 +5,6 @@ import api from "../../api/axios";
 // ==========================================
 // SEARCH BAR COMPONENT
 // ==========================================
-/**
- * Renders an interactive header search bar component with debounced API search triggers, 
- * clear query buttons, click-outside dismissal handlers, and search results popup dropdowns.
- */
 const SearchBar = () => {
     const [query, setQuery] = useState("");
     const wrapperRef = useRef(null);
@@ -71,15 +67,12 @@ const SearchBar = () => {
     }, [query]);
 
     return (
-        <div className="hidden flex-1 px-8 lg:flex">
-            <div
-                ref={wrapperRef}
-                className="relative w-full max-w-3xl"
-            >
+        <div className="w-full relative" ref={wrapperRef}>
+            <div className="relative w-full">
                 {/* Search Icon SVG */}
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+                    className="pointer-events-none absolute left-4 sm:left-5 top-1/2 h-4 w-4 sm:h-5 sm:w-5 -translate-y-1/2 text-slate-400"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -100,15 +93,19 @@ const SearchBar = () => {
                     onFocus={() => setFocused(true)}
                     placeholder="Search memories, places, travelers..."
                     className="
-                        h-12
+                        h-11
+                        sm:h-12
                         w-full
                         rounded-full
                         border
                         border-slate-200
                         bg-slate-50
-                        pl-14
-                        pr-12
-                        text-sm
+                        pl-12
+                        pr-10
+                        sm:pl-14
+                        sm:pr-12
+                        text-xs
+                        sm:text-sm
                         text-slate-700
                         outline-none
                         transition-all
@@ -129,7 +126,8 @@ const SearchBar = () => {
                         aria-label="Clear search"
                         className="
                             absolute
-                            right-4
+                            right-3
+                            sm:right-4
                             top-1/2
                             -translate-y-1/2
                             rounded-full
@@ -144,15 +142,19 @@ const SearchBar = () => {
                         ✕
                     </button>
                 )}
-
-                {/* Search Results Dropdown Component */}
-                <SearchResults
-                    open={focused}
-                    query={query}
-                    results={results}
-                    loading={loading}
-                />
             </div>
+
+            {/* Search Results Dropdown Overlay - Positioned outside the navbar flow */}
+            {focused && (query.trim() || loading || results.users.length > 0 || results.memories.length > 0 || results.places.length > 0) && (
+                <div className="absolute left-0 right-0 top-full mt-3 z-[100] w-full shadow-2xl">
+                    <SearchResults
+                        open={focused}
+                        query={query}
+                        results={results}
+                        loading={loading}
+                    />
+                </div>
+            )}
         </div>
     );
 };

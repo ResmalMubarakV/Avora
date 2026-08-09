@@ -1,4 +1,4 @@
-import { LogOut, Menu } from "lucide-react";
+import { LogOut, Menu, Search, X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 
@@ -14,6 +14,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const pathSegments = location.pathname.split("/").filter(Boolean);
   const isProfilePage = pathSegments.length === 1 && pathSegments[0] !== "dashboard" && pathSegments[0] !== "profile";
@@ -28,8 +29,27 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
   };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white shrink-0 overflow-x-hidden">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-2.5 sm:px-6 gap-1">
+    /* Changed overflow-x-hidden to relative overflow-visible z-40 so search results can overlap page content freely */
+    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white shrink-0 overflow-visible">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-2.5 sm:px-6 gap-1 relative overflow-visible">
+        
+        {/* Expanded Mobile Search Overlay */}
+        {mobileSearchOpen ? (
+          <div className="absolute inset-0 bg-white px-3 flex items-center justify-between z-50 md:hidden w-full">
+            <div className="flex-1 pr-2">
+              <SearchBar />
+            </div>
+            <button
+              type="button"
+              onClick={() => setMobileSearchOpen(false)}
+              aria-label="Close search"
+              className="h-10 w-10 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 flex items-center justify-center shrink-0 cursor-pointer hover:bg-slate-100"
+            >
+              <X size={20} />
+            </button>
+          </div>
+        ) : null}
+
         {/* Left Section: Mobile Hamburger Menu & Brand Logo */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 min-w-0">
           {!hideHamburger && (
@@ -48,16 +68,26 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
           </div>
         </div>
 
-        {/* Center Section: Search Bar (Hidden on small tablets, visible on large tablets & desktops) */}
-        <div className="hidden md:flex flex-1 max-w-md lg:max-xl:max-w-xs justify-center px-2">
+        {/* Center Section: Search Bar Container (Relative with no clipping) */}
+        <div className="hidden md:flex flex-1 max-w-md lg:max-xl:max-w-xs justify-center px-2 relative overflow-visible">
           <SearchBar />
         </div>
 
-        {/* Right Section: User Menu & Logout Button */}
+        {/* Right Section: Mobile Search Toggle, User Menu & Logout Button */}
         <div className="flex items-center justify-end gap-1.5 shrink-0">
+          {/* Mobile Search Icon Button */}
+          <button
+            type="button"
+            onClick={() => setMobileSearchOpen(true)}
+            aria-label="Open search"
+            className="flex md:hidden h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 cursor-pointer shadow-sm shrink-0"
+          >
+            <Search size={16} />
+          </button>
+
           <UserMenu />
 
-          {/* Icon-only Logout for mobile screens right next to the user menu */}
+          {/* Icon-only Logout for mobile screens right next to user menu */}
           <button
             type="button"
             onClick={() => setShowLogoutModal(true)}
@@ -67,7 +97,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
             <LogOut size={15} />
           </button>
 
-          {/* Logout button with text for tablets and desktops */}
+          {/* Logout button for tablets and desktops */}
           <button
             type="button"
             onClick={() => setShowLogoutModal(true)}
@@ -78,11 +108,6 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
             <span className="hidden md:inline">Logout</span>
           </button>
         </div>
-      </div>
-
-      {/* Mobile & Small Tablet Search Bar View */}
-      <div className="px-4 pb-3 sm:px-6 md:hidden">
-        <SearchBar />
       </div>
 
       <LogoutModal

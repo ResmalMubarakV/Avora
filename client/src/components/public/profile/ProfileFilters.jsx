@@ -1,20 +1,18 @@
-import { Check } from "lucide-react";
+import { Check, LayoutGrid, Rows3 } from "lucide-react";
 
 // ==========================================
 // PROFILE FILTERS COMPONENT
 // ==========================================
 /**
- * Renders multi-select filter controls for a traveler's profile memories list,
- * featuring explicit click handlers and touch responsiveness.
- * Owners see all filters, Viewers see only the 'Liked' filter.
+ * Renders multi-select filter controls and mobile-only layout toggle buttons.
  */
 const ProfileFilters = ({
     isOwner,
     selectedFilters = [],
     toggleFilter,
+    viewMode,
+    setViewMode,
 }) => {
-    // 1. Untouched for Owners (Users)
-    // 2. Only 'Liked' filter for Viewers
     const filterOptions = isOwner
         ? [
               { label: "Public", value: "public" },
@@ -26,10 +24,12 @@ const ProfileFilters = ({
           ];
 
     return (
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-sm">
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-sm">
             
-            <div className="flex items-center gap-1.5 flex-wrap">
+            {/* Filter Buttons & Mobile-Only Layout Toggles */}
+            <div className="flex items-center gap-1.5 flex-wrap w-full sm:w-auto">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">Filter:</span>
+                
                 {filterOptions.map((item) => {
                     const isActive = selectedFilters.includes(item.value);
                     return (
@@ -52,6 +52,35 @@ const ProfileFilters = ({
                         </button>
                     );
                 })}
+
+                {/* Layout Toggles - Visible ONLY on Mobile screens (sm:hidden) */}
+                <div className="flex sm:hidden items-center gap-1.5 ml-auto">
+                    <button
+                        type="button"
+                        onClick={() => setViewMode("grid")}
+                        title="Grid View (2 in a line)"
+                        className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
+                            viewMode === "grid"
+                                ? "bg-slate-900 text-white shadow-sm"
+                                : "bg-slate-50 border border-slate-200/80 text-slate-600 hover:bg-slate-100"
+                        }`}
+                    >
+                        <LayoutGrid size={14} />
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => setViewMode("inline")}
+                        title="Inline View (1 in a line)"
+                        className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
+                            viewMode === "inline"
+                                ? "bg-slate-900 text-white shadow-sm"
+                                : "bg-slate-50 border border-slate-200/80 text-slate-600 hover:bg-slate-100"
+                        }`}
+                    >
+                        <Rows3 size={14} />
+                    </button>
+                </div>
             </div>
 
         </div>

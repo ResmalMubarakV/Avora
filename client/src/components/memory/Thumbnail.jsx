@@ -8,28 +8,10 @@ const isVideoItem = (item) =>
     /\.(mp4|webm|ogg|ogv|mov|m4v)(\?.*)?$/i.test(item?.url || "");
 
 // ==========================================
-// CLOUDINARY VIDEO THUMBNAIL TRANSFORMER
-// ==========================================
-/**
- * Safely converts a Cloudinary video URL into an image snapshot URL 
- * by swapping /video/upload/ to /image/upload/ and changing extension to .jpg
- */
-const getCloudinaryVideoThumbnail = (url) => {
-    if (!url) return "";
-    if (url.includes("/video/upload/")) {
-        return url
-            .replace("/video/upload/", "/image/upload/so_0/")
-            .replace(/\.[^/.]+$/, ".jpg");
-    }
-    return url;
-};
-
-// ==========================================
 // THUMBNAIL COMPONENT
 // ==========================================
 const Thumbnail = ({ item, onClick }) => {
     const isVideo = isVideoItem(item);
-    const posterUrl = item?.posterUrl || getCloudinaryVideoThumbnail(item?.url);
 
     return (
         <button
@@ -44,13 +26,17 @@ const Thumbnail = ({ item, onClick }) => {
                 focus:outline-none
                 cursor-pointer
                 bg-slate-900
+                w-full
+                h-full
             "
         >
             {isVideo ? (
-                <img
-                    src={posterUrl}
-                    alt="Memory Video Thumbnail"
-                    decoding="async"
+                /* Use a native video tag with preload metadata so the browser automatically captures frame 0 */
+                <video
+                    src={item.url}
+                    muted
+                    playsInline
+                    preload="metadata"
                     className="
                         h-full
                         w-full

@@ -5,27 +5,25 @@ import ProfileSearch from "./ProfileSearch";
 import ProfileFilters from "./ProfileFilters";
 import ProfilePagination from "./ProfilePagination";
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE_GRID = 12;
+const ITEMS_PER_PAGE_INLINE = 6;
 
 // ==========================================
 // MEMORIES SECTION COMPONENT
 // ==========================================
-/**
- * Renders the traveler's memories collection section with live search filtering, 
- * multi-select visibility/liked filters, and responsive grid presentation.
- */
 const MemoriesSection = ({
     memories,
     username,
     isOwner,
 }) => {
     const [search, setSearch] = useState("");
-    // Changed from single string visibility to array of selected filters for multi-select support
     const [selectedFilters, setSelectedFilters] = useState([]);
     const [sortBy, setSortBy] = useState("newest");
     const [currentPage, setCurrentPage] = useState(1);
+    const [viewMode, setViewMode] = useState("grid");
 
-    // --- Toggle Filter Handler for Multi-Select ---
+    const itemsPerPage = viewMode === "inline" ? ITEMS_PER_PAGE_INLINE : ITEMS_PER_PAGE_GRID;
+
     const toggleFilter = (filterValue) => {
         setSelectedFilters((prev) =>
             prev.includes(filterValue)
@@ -34,7 +32,6 @@ const MemoriesSection = ({
         );
     };
 
-    // --- Filter & Sort Memories via UseMemo ---
     const filteredMemories = useMemo(() => {
         const keyword = search.toLowerCase();
 
@@ -45,16 +42,12 @@ const MemoriesSection = ({
 
             if (!matchesSearch) return false;
 
-            // If not owner, strictly force public only. 
-            // (Use an early return for false, rather than true, so we can still process filters)
             if (!isOwner && !memory.isPublic) {
                 return false;
             }
 
-            // If no filters selected, match everything that passed the visibility check above
             if (selectedFilters.length === 0) return true;
 
-            // Intersection logic: Memory must satisfy ALL selected filter criteria (e.g., Public AND Liked)
             const matchesAll = selectedFilters.every((f) => {
                 if (f === "public") return memory.isPublic;
                 if (f === "private") return !memory.isPublic;
@@ -65,7 +58,6 @@ const MemoriesSection = ({
             return matchesAll;
         });
 
-        // --- Sorting Logic ---
         switch (sortBy) {
             case "oldest":
                 filtered.sort(
@@ -88,20 +80,18 @@ const MemoriesSection = ({
         return filtered;
     }, [memories, search, selectedFilters, sortBy, isOwner]);
 
-    // --- Reset to Page 1 on Filter Changes ---
     useEffect(() => {
         setCurrentPage(1);
-    }, [search, selectedFilters, sortBy]);
+    }, [search, selectedFilters, sortBy, viewMode]);
 
-    // --- Pagination Calculations ---
     const totalPages = Math.max(
         1,
-        Math.ceil(filteredMemories.length / ITEMS_PER_PAGE)
+        Math.ceil(filteredMemories.length / itemsPerPage)
     );
 
     const paginatedMemories = filteredMemories.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
     );
 
     useEffect(() => {
@@ -166,7 +156,6 @@ const MemoriesSection = ({
                     )}
                 </div>
 
-                {/* Search Bar & Single Sort Dropdown Group */}
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                     <div className="flex-1 sm:flex-initial">
                         <ProfileSearch
@@ -175,7 +164,6 @@ const MemoriesSection = ({
                         />
                     </div>
 
-                    {/* Single Sort Dropdown */}
                     <div className="shrink-0">
                         <select
                             value={sortBy}
@@ -207,14 +195,14 @@ const MemoriesSection = ({
                 </div>
             </div>
 
-            {/* Multi-Select Filter Bar Component - Now unconditionally rendered */}
             <ProfileFilters
                 isOwner={isOwner}
                 selectedFilters={selectedFilters}
                 toggleFilter={toggleFilter}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
             />
 
-            {/* Empty State or Grid Content */}
             {paginatedMemories.length === 0 ? (
                 <div
                     className="
@@ -260,32 +248,32 @@ const MemoriesSection = ({
                 </div>
             ) : (
                 <>
-                    {/* Memory Cards Grid */}
+                    {/* Responsive Grid: 2 per line on mobile (grid-cols-2), 2 per line on Tablet (sm:grid-cols-2), 4 per line on Desktop (xl:grid-cols-4) */}
                     <div
-                        className="
-                            grid
-                            grid-cols-1
-                            sm:grid-cols-2
-                            xl:grid-cols-3
-                            gap-4
-                            sm:gap-6
-                        "
+                        className={
+                            viewMode === "inline"
+                                ? "flex flex-col max-w-3xl mx-auto gap-6"
+                                : "grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-2 xl:grid-cols-4"
+                        }
                     >
                         {paginatedMemories.map((memory) => (
-                            <MemoriesCard
+                            <div
                                 key={memory._id}
-                                memory={memory}
-                                username={username}
-                                isOwner={isOwner}
-                                redirectTo={{
-                                    from: `/u/${username}`,
-                                    label: "Profile",
-                                }}
-                            />
+                                className="w-full"
+                            >
+                                <MemoriesCard
+                                    memory={memory}
+                                    username={username}
+                                    isOwner={isOwner}
+                                    redirectTo={{
+                                        from: `/u/${username}`,
+                                        label: "Profile",
+                                    }}
+                                />
+                            </div>
                         ))}
                     </div>
 
-                    {/* Pagination Controls Component */}
                     <ProfilePagination
                         currentPage={currentPage}
                         totalPages={totalPages}
