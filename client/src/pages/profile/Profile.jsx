@@ -102,20 +102,21 @@ const Profile = () => {
 
       {/* Navigation Header Management */}
       {isAdminViewer ? (
-        // Professional Minimalist Admin Inspection Header Bar
-        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/90 px-6 py-3.5 backdrop-blur-md shadow-xs">
+        // Responsive, compact Admin Inspection Header Bar
+        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/90 px-3 sm:px-6 py-2.5 sm:py-3.5 backdrop-blur-md shadow-xs gap-2">
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 shadow-xs transition hover:bg-slate-50 cursor-pointer active:scale-95"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-slate-700 shadow-xs transition hover:bg-slate-50 cursor-pointer active:scale-95 shrink-0"
           >
-            <ArrowLeft size={15} />
-            <span>Back to Admin Panel</span>
+            <ArrowLeft size={14} className="sm:w-[15px] sm:h-[15px]" />
+            <span className="hidden xs:inline sm:inline">Back to Admin Panel</span>
+            <span className="inline xs:hidden sm:hidden">Back</span>
           </button>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-xs font-bold text-purple-700 shadow-xs">
-            <Shield size={13} />
-            <span>Admin Inspection Mode</span>
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-2.5 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold text-purple-700 shadow-xs truncate">
+            <Shield size={12} className="sm:w-[13px] sm:h-[13px] shrink-0" />
+            <span className="truncate">Admin Inspection Mode</span>
           </div>
         </header>
       ) : currentUser ? (
