@@ -68,23 +68,21 @@ function App() {
 
   return (
     <Routes>
-      {/* Public Auth & Marketing Routes */}
-      <Route index element={<Landing />} />
+      {/* ========================================== */}
+      {/* 1. STATIC PUBLIC & AUTH ROUTES (Must be first) */}
+      {/* ========================================== */}
+      <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/pending-approval" element={<PendingApproval />} />
       <Route path="/suspended" element={<Suspended />} />
-
-      {/* Admin Auth Route */}
       <Route path="/admin/login" element={<AdminLogin />} />
 
-     {/* Public Profile & Memory Routes */}
-      <Route path="/:username" element={<Profile />} />
-      <Route path="/:username/:slug" element={<PublicMemory />} />
-
-      {/* Protected App Routes (Unified under DashboardLayout) */}
+      {/* ========================================== */}
+      {/* 2. PROTECTED DASHBOARD ROUTES */}
+      {/* ========================================== */}
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
@@ -97,7 +95,9 @@ function App() {
         </Route>
       </Route>
 
-      {/* Protected Admin Routes */}
+      {/* ========================================== */}
+      {/* 3. PROTECTED ADMIN ROUTES */}
+      {/* ========================================== */}
       <Route element={<AdminRoute />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
@@ -106,6 +106,12 @@ function App() {
           <Route path="settings" element={<AdminSettings />} />
         </Route>
       </Route>
+
+      {/* ========================================== */}
+      {/* 4. DYNAMIC PROFILE & PUBLIC MEMORY ROUTES (Reverted to root /) */}
+      {/* ========================================== */}
+      <Route path="/:username" element={<Profile />} />
+      <Route path="/:username/:slug" element={<PublicMemory />} />
 
       {/* Error Routes */}
       <Route path="/403" element={<Forbidden />} />

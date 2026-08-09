@@ -17,8 +17,8 @@ const AdminNavbar = ({ sidebarOpen, setSidebarOpen }) => {
     localStorage.clear();
     sessionStorage.clear();
     
-    // Use replace to drop the admin page from the browser history stack completely
-    window.location.replace("/admin/login");
+    // Redirect directly to the landing page and clear history stack
+    window.location.replace("/");
   };
 
   return (

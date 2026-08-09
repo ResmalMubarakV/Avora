@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { ArrowLeft, Lock, Shield } from "lucide-react";
 
 import api from "../../api/axios";
@@ -18,6 +18,12 @@ const Profile = () => {
   const { username } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // GUARD: If username matches reserved auth keywords, immediately redirect out to prevent route collisions
+  const reservedWords = ["login", "register", "forgot-password", "reset-password", "dashboard", "admin", "pending-approval", "suspended"];
+  if (username && reservedWords.includes(username.toLowerCase())) {
+    return <Navigate to={`/${username.toLowerCase()}`} replace />;
+  }
 
   const [user, setUser] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
