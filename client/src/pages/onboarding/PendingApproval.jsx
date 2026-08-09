@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 
@@ -13,6 +14,15 @@ import PageTitle from "../../components/common/PageTitle";
 const PendingApproval = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Automatically scroll to top on initial page load or redirect
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [location.pathname]);
 
   // --- Route Guard: Restrict direct URL access without registration state ---
   if (!location.state?.registrationSuccess) {

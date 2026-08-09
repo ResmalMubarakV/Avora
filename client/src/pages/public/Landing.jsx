@@ -20,6 +20,15 @@ import PageTitle from "../../components/common/PageTitle";
 const Landing = () => {
   const navigate = useNavigate();
 
+  // Automatically scroll to top on initial page load or redirect
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, []);
+
   // Guard: If the user is already authenticated, redirect them away from the landing page
   useEffect(() => {
     const token = localStorage.getItem("token") || sessionStorage.getItem("token");
