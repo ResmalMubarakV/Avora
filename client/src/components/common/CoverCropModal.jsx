@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check, X, ZoomIn } from "lucide-react";
+import { Check, X, ZoomIn, ZoomOut } from "lucide-react";
 
 const VIEWPORT_WIDTH = 320;
 const VIEWPORT_HEIGHT = 180; // 16:9 Aspect Ratio
@@ -15,6 +15,7 @@ const CoverCropModal = ({ file, onCancel, onSave }) => {
   const [imageUrl, setImageUrl] = useState("");
   const [naturalSize, setNaturalSize] = useState({ w: 0, h: 0 });
   const [zoom, setZoom] = useState(1);
+  const [minZoom, setMinZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [saving, setSaving] = useState(false);
 
@@ -46,12 +47,14 @@ const CoverCropModal = ({ file, onCancel, onSave }) => {
 
   const clampOffset = useCallback(
     (x, y, width = displayWidth, height = displayHeight) => {
-      const minX = VIEWPORT_WIDTH - width;
-      const minY = VIEWPORT_HEIGHT - height;
+      const minX = Math.min(0, VIEWPORT_WIDTH - width);
+      const minY = Math.min(0, VIEWPORT_HEIGHT - height);
+      const maxX = Math.max(0, VIEWPORT_WIDTH - width);
+      const maxY = Math.max(0, VIEWPORT_HEIGHT - height);
 
       return {
-        x: Math.min(0, Math.max(minX, x)),
-        y: Math.min(0, Math.max(minY, y)),
+        x: Math.max(minX, Math.min(maxX, x)),
+        y: Math.max(minY, Math.min(maxY, y)),
       };
     },
     [displayWidth, displayHeight]
@@ -65,15 +68,21 @@ const CoverCropModal = ({ file, onCancel, onSave }) => {
     const h = img.naturalHeight;
     setNaturalSize({ w, h });
 
-    const scale = Math.max(VIEWPORT_WIDTH / w, VIEWPORT_HEIGHT / h);
-    const dw = w * scale;
-    const dh = h * scale;
+    const scaleFitW = VIEWPORT_WIDTH / w;
+    const scaleFitH = VIEWPORT_HEIGHT / h;
+    const initialZoom = Math.max(scaleFitW, scaleFitH) / Math.max(scaleFitW, scaleFitH); 
+    const absoluteMinZoom = Math.min(scaleFitW / baseScale, scaleFitH / baseScale);
+
+    setMinZoom(Math.max(0.5, absoluteMinZoom));
+    setZoom(1);
+
+    const dw = w * baseScale;
+    const dh = h * baseScale;
 
     setOffset({
       x: (VIEWPORT_WIDTH - dw) / 2,
       y: (VIEWPORT_HEIGHT - dh) / 2,
     });
-    setZoom(1);
   };
 
   const handlePointerDown = (e) => {
@@ -127,6 +136,9 @@ const CoverCropModal = ({ file, onCancel, onSave }) => {
     canvas.width = OUTPUT_WIDTH;
     canvas.height = OUTPUT_HEIGHT;
     const ctx = canvas.getContext("2d");
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
 
     const sx = -offset.x / displayScale;
     const sy = -offset.y / displayScale;
@@ -205,20 +217,21 @@ const CoverCropModal = ({ file, onCancel, onSave }) => {
         </div>
 
         <p className="mt-3 text-center text-xs text-slate-400">
-          Drag to frame your desired section • Use slider to zoom
+          Drag to frame your desired section • Use slider to zoom in & out
         </p>
 
         <div className="mt-4 flex items-center gap-3">
-          <ZoomIn size={18} className="shrink-0 text-slate-400" />
+          <ZoomOut size={16} className="shrink-0 text-slate-400" />
           <input
             type="range"
-            min="1"
+            min={minZoom}
             max="3"
             step="0.01"
             value={zoom}
             onChange={handleZoomChange}
             className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-[#3559D4]"
           />
+          <ZoomIn size={16} className="shrink-0 text-slate-400" />
         </div>
 
         <div className="mt-7 flex gap-3">
