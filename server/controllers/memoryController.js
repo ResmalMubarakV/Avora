@@ -133,7 +133,7 @@ const createMemory = async (req, res) => {
 // GET MEMORIES
 // ==========================================
 /**
- * Retrieves user memories with optional search filtering.
+ * Retrieves user memories with optional search filtering and pin prioritization.
  */
 const getMemories = async (req, res) => {
   try {
@@ -149,9 +149,12 @@ const getMemories = async (req, res) => {
       ];
     }
 
+    // Sort by pinned status first (only if no search query is active), then newest first
+    const sortOption = search ? { createdAt: -1 } : { isPinned: -1, createdAt: -1 };
+
     const memories = await Memory.find(query)
       .populate("user", "username")
-      .sort({ createdAt: -1 });
+      .sort(sortOption);
 
     return res.status(200).json(memories);
   } catch (error) {
@@ -211,6 +214,42 @@ const toggleLikeMemory = async (req, res) => {
     return res.status(200).json({ success: true, isLiked: memory.isLiked });
   } catch (error) {
     console.error("Toggle Like Error:", error.message);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
+// ==========================================
+// TOGGLE PIN MEMORY
+// ==========================================
+/**
+ * Toggles the pin status of a memory, enforcing a maximum limit of 4 pinned memories.
+ */
+const togglePinMemory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Memory ID" });
+    }
+
+    const memory = await Memory.findOne({ _id: id, user: req.user._id });
+    if (!memory) {
+      return res.status(404).json({ message: "Memory not found" });
+    }
+
+    if (!memory.isPinned) {
+      const pinnedCount = await Memory.countDocuments({ user: req.user._id, isPinned: true });
+      if (pinnedCount >= 4) {
+        return res.status(400).json({ message: "You can only pin up to 4 memories. Please unpin one first." });
+      }
+    }
+
+    memory.isPinned = !memory.isPinned;
+    await memory.save();
+
+    return res.status(200).json({ success: true, isPinned: memory.isPinned });
+  } catch (error) {
+    console.error("Toggle Pin Error:", error.message);
     return res.status(500).json({ message: "Server Error" });
   }
 };
@@ -523,6 +562,7 @@ module.exports = {
   getMemories,
   getMemoryById,
   toggleLikeMemory,
+  togglePinMemory,
   updateMemory,
   deleteMemory,
   deleteMedia,

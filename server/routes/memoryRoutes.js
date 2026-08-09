@@ -8,6 +8,7 @@ const {
   createMemory,
   getMemoryById,
   toggleLikeMemory,
+  togglePinMemory,
   updateMemory,
   downloadMedia,
   deleteMemory,
@@ -17,9 +18,6 @@ const {
 // ==========================================
 // MEMORY ROUTES
 // ==========================================
-// All routes are protected. Create and Update routes handle multipart/form-data 
-// expecting a max of 1 cover image and 20 gallery media items.
-
 router.post(
   "/",
   protect,
@@ -34,6 +32,7 @@ router.get("/", protect, getMemories);
 router.get("/:id", protect, getMemoryById);
 
 router.patch("/:id/like", protect, toggleLikeMemory);
+router.patch("/:id/pin", protect, togglePinMemory);
 
 router.put(
   "/:id",
@@ -45,7 +44,6 @@ router.put(
   updateMemory
 );
 
-// Specific media operations
 router.get("/download/:memoryId/:mediaId", protect, downloadMedia);
 router.delete("/:id", protect, deleteMemory);
 router.delete("/:id/media", protect, deleteMedia);

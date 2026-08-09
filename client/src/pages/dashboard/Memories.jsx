@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 
 import { getMemories } from "../../api/memoryApi";
 import MemoriesHeader from "../../components/dashboard/memories/MemoriesHeader";
@@ -75,7 +75,7 @@ const Memories = () => {
     fetchMemories();
   }, []);
 
-  // --- Multi-Condition Filter and Sort Memo ---
+  // --- Multi-Condition Filter and Sort Memo (Standard sorting, ignores pinning here) ---
   const filteredMemories = useMemo(() => {
     const filtered = memories.filter((memory) => {
       const keyword = search.toLowerCase();
@@ -99,7 +99,7 @@ const Memories = () => {
       return matchesAll;
     });
 
-    // Apply sorting criteria
+    // Apply standard sorting criteria only
     switch (sortBy) {
       case "oldest":
         filtered.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
@@ -142,8 +142,8 @@ const Memories = () => {
     <div className="space-y-6 sm:space-y-8 pb-16">
       <PageTitle title="My Memories" />
 
-      {/* Back Button Navigation Header */}
-      <div>
+      {/* Top Bar: Back Button & New Memory Action aligned in one line */}
+      <div className="flex items-center justify-between gap-4">
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -151,6 +151,19 @@ const Memories = () => {
         >
           <ArrowLeft size={16} />
           <span>Back</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate("/dashboard/create-memory")}
+          className="group inline-flex cursor-pointer items-center justify-center gap-1.5 sm:gap-2 rounded-xl bg-slate-900 px-3.5 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-800 active:scale-[0.98]"
+        >
+          <Plus
+            size={16}
+            className="transition-transform duration-300 group-hover:rotate-90"
+          />
+          <span className="hidden sm:inline">New Memory</span>
+          <span className="inline sm:hidden">New</span>
         </button>
       </div>
 
@@ -200,11 +213,12 @@ const Memories = () => {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {/* Responsive Grid: 1 per line on mobile, 2 per line on tablet, 4 per line on desktop */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4">
             {paginatedMemories.map((memory) => (
               <MemoriesCard
                 key={memory._id}
-                memory={memory}
+                memory={{ ...memory, isPinned: false }}
                 isOwner={true}
                 redirectTo={{
                   from: "/dashboard/memories",

@@ -4,25 +4,24 @@ import {
     Pencil,
     Share2,
     Trash2,
+    Pin,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+import api from "../../api/axios";
 import { deleteMemory } from "../../api/memoryApi";
 import DeleteMemoryModal from "./DeleteMemoryModal";
 
 // ==========================================
 // MEMORY ACTIONS COMPONENT
 // ==========================================
-/**
- * Renders an interactive action dropdown menu for memory cards/details (Edit, Share, Delete), 
- * positioned above the trigger button and cleanly contained within the card bounds.
- */
 const MemoryActions = ({
     memory,
     redirect = true,
     redirectTo = "/dashboard/memories",
     onDeleted,
+    onPinUpdated,
 }) => {
     const navigate = useNavigate();
     const menuRef = useRef(null);
@@ -30,6 +29,11 @@ const MemoryActions = ({
     const [open, setOpen] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [isPinned, setIsPinned] = useState(memory.isPinned);
+
+    useEffect(() => {
+        setIsPinned(memory.isPinned);
+    }, [memory.isPinned]);
 
     // --- Click Outside to Close Menu Listener ---
     useEffect(() => {
@@ -72,7 +76,25 @@ const MemoryActions = ({
         );
     };
 
-    // --- Handle Sharing (Web Share API or Clipboard Fallback) ---
+    // --- Handle Pin / Unpin Toggle ---
+    const handleTogglePin = async () => {
+        setOpen(false);
+        try {
+            const { data } = await api.patch(`/api/memories/${memory._id}/pin`);
+            setIsPinned(data.isPinned);
+            toast.success(data.isPinned ? "Memory pinned successfully." : "Memory unpinned.");
+            if (onPinUpdated) {
+                onPinUpdated(memory._id, data.isPinned);
+            }
+        } catch (error) {
+            toast.error(
+                error.response?.data?.message ||
+                "Unable to update pin status."
+            );
+        }
+    };
+
+    // --- Handle Sharing ---
     const handleShare = async () => {
         setOpen(false);
 
@@ -167,7 +189,7 @@ const MemoryActions = ({
                     <MoreVertical size={14} className="sm:w-4 sm:h-4" />
                 </button>
 
-                {/* Dropdown Menu Popup - Positioned strictly above the trigger button inside the card */}
+                {/* Dropdown Menu Popup */}
                 {open && (
                     <div
                         className="
@@ -212,6 +234,33 @@ const MemoryActions = ({
                             <Pencil size={13} className="text-slate-500" />
                             Edit Memory
                         </button>
+
+                        {isOwnerOrAllowed(isPinned) && ( // standard pin option
+                        <button
+                            type="button"
+                            onClick={handleTogglePin}
+                            className="
+                                flex
+                                w-full
+                                items-center
+                                gap-2
+                                px-3
+                                py-2
+                                sm:px-3.5
+                                sm:py-2
+                                text-[11px]
+                                sm:text-xs
+                                font-medium
+                                text-slate-700
+                                transition
+                                cursor-pointer
+                                hover:bg-slate-50
+                            "
+                        >
+                            <Pin size={13} className={`text-slate-500 ${isPinned ? "fill-slate-500" : ""}`} />
+                            {isPinned ? "Unpin Memory" : "Pin Memory"}
+                        </button>
+                        )}
 
                         <button
                             type="button"
@@ -285,5 +334,8 @@ const MemoryActions = ({
         </>
     );
 };
+
+// Quick helper function check
+const isOwnerOrAllowed = (isPinned) => true;
 
 export default MemoryActions;

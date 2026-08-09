@@ -1,21 +1,17 @@
-import {
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // ==========================================
 // MEMORIES PAGINATION COMPONENT
 // ==========================================
 /**
- * Renders pagination controls for navigating across paginated memory lists.
- * Includes Previous/Next buttons and numbered page selection buttons with active styling.
+ * Renders a compact, e-commerce style (Amazon/Flipkart) centered pagination bar.
+ * Automatically scrolls to the top smoothly when clicked.
  */
 const MemoriesPagination = ({
   currentPage,
   totalPages,
   setCurrentPage,
 }) => {
-  // Hide pagination if there is 1 or fewer pages
   if (totalPages <= 1) return null;
 
   const pages = [];
@@ -23,46 +19,73 @@ const MemoriesPagination = ({
     pages.push(i);
   }
 
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages) return;
+
+    setCurrentPage(newPage);
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }, 50);
+  };
+
   return (
-    <div className="mt-14 flex flex-wrap items-center justify-center gap-2">
-      {/* Previous Button */}
-      <button
-        type="button"
-        disabled={currentPage === 1}
-        onClick={() => setCurrentPage(currentPage - 1)}
-        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-all duration-300 hover:bg-slate-50 hover:shadow disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        <ChevronLeft size={16} />
-        Previous
-      </button>
-
-      {/* Page Numbers */}
-      {pages.map((page) => (
+    <nav
+      aria-label="Memories Pagination"
+      className="mt-10 sm:mt-12 flex items-center justify-center"
+    >
+      <div className="inline-flex items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-white px-3 py-2 shadow-sm">
+        {/* Previous Button */}
         <button
-          key={page}
           type="button"
-          onClick={() => setCurrentPage(page)}
-          className={`h-11 w-11 rounded-xl text-sm font-semibold transition-all duration-300 ${
-            currentPage === page
-              ? "bg-gradient-to-r from-[#1E3A8A] to-[#3559D4] text-white shadow-md"
-              : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:shadow-sm"
-          }`}
+          disabled={currentPage === 1}
+          onClick={() => handlePageChange(currentPage - 1)}
+          className="inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
         >
-          {page}
+          <ChevronLeft size={14} />
+          <span className="hidden xs:inline">Prev</span>
         </button>
-      ))}
 
-      {/* Next Button */}
-      <button
-        type="button"
-        disabled={currentPage === totalPages}
-        onClick={() => setCurrentPage(currentPage + 1)}
-        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-all duration-300 hover:bg-slate-50 hover:shadow disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        Next
-        <ChevronRight size={16} />
-      </button>
-    </div>
+        <div className="h-4 w-[1px] bg-slate-200 mx-1" />
+
+        {/* Page Number Buttons */}
+        <div className="flex items-center gap-1">
+          {pages.map((page) => {
+            const isCurrent = page === currentPage;
+            return (
+              <button
+                key={page}
+                type="button"
+                onClick={() => handlePageChange(page)}
+                aria-current={isCurrent ? "page" : undefined}
+                className={`flex h-8 w-8 items-center justify-center rounded-xl text-xs font-bold transition cursor-pointer ${
+                  isCurrent
+                    ? "bg-[#1E3A8A] text-white shadow-sm"
+                    : "text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                {page}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="h-4 w-[1px] bg-slate-200 mx-1" />
+
+        {/* Next Button */}
+        <button
+          type="button"
+          disabled={currentPage === totalPages}
+          onClick={() => handlePageChange(currentPage + 1)}
+          className="inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-30 cursor-pointer"
+        >
+          <span className="hidden xs:inline">Next</span>
+          <ChevronRight size={14} />
+        </button>
+      </div>
+    </nav>
   );
 };
 

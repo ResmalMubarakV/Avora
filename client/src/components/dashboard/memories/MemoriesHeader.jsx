@@ -1,4 +1,3 @@
-import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 // ==========================================
@@ -6,8 +5,7 @@ import { useNavigate } from "react-router-dom";
 // ==========================================
 /**
  * Renders the top header section for the user's memories dashboard.
- * Displays the title, total memory count badge, dynamic summary text, 
- * and a primary call-to-action button to create a new memory.
+ * Displays the title, total memory count badge, and dynamic summary text.
  */
 const MemoriesHeader = ({ total = 0 }) => {
   const navigate = useNavigate();
@@ -31,16 +29,6 @@ const MemoriesHeader = ({ total = 0 }) => {
             : `${total} ${total === 1 ? "journey" : "journeys"} documented.`}
         </p>
       </div>
-
-      {/* Create Memory Action Button */}
-      <button
-        type="button"
-        onClick={() => navigate("/dashboard/create-memory")}
-        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#1E3A8A] to-[#3559D4] px-6 py-3 font-semibold text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
-      >
-        <Plus size={18} />
-        Create Memory
-      </button>
     </div>
   );
 };

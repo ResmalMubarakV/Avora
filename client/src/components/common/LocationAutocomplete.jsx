@@ -58,7 +58,9 @@ const LocationAutocomplete = ({ value, onChange, name = "location" }) => {
   const handleSelectSuggestion = (suggestion) => {
     const address = suggestion.address || {};
 
-    const locality = 
+    // 1. Get the exact primary name clicked (e.g., "Ooty" instead of forcing "Udhagamandalam")
+    const primaryName = 
+      suggestion.name ||
       address.tourism || 
       address.attraction || 
       address.hamlet || 
@@ -67,26 +69,39 @@ const LocationAutocomplete = ({ value, onChange, name = "location" }) => {
       address.neighbourhood || 
       address.town || 
       address.city || 
-      address.name;
+      address.state_district ||
+      address.state;
 
     const district = address.county || address.city || address.state_district;
     const state = address.state;
     const country = address.country;
 
-    const rawParts = [locality, district, state, country];
-    const uniqueCleanParts = [];
+    let finalLocation = "";
 
-    rawParts.forEach((part) => {
-      if (
-        part && 
-        !uniqueCleanParts.includes(part) && 
-        !/^\d{6}$/.test(part)
-      ) {
-        uniqueCleanParts.push(part);
-      }
-    });
+    // Check if the user searched/selected a State level entity
+    const isStateLevel = suggestion.addresstype === "state" || (!address.city && !address.town && !address.village && !address.county && state === primaryName);
 
-    const finalLocation = uniqueCleanParts.slice(0, 3).join(", ");
+    // Check if the user searched/selected a District level entity
+    const isDistrictLevel = suggestion.addresstype === "county" || suggestion.addresstype === "state_district" || (district === primaryName && !["village", "town", "city", "suburb", "hamlet", "tourism", "attraction"].includes(suggestion.addresstype));
+
+    if (isStateLevel) {
+      // State -> State, Country
+      const parts = [primaryName, country].filter(Boolean);
+      finalLocation = parts.join(", ");
+    } else if (isDistrictLevel) {
+      // District -> District, State, Country
+      const parts = [primaryName, state, country].filter(Boolean);
+      // Remove consecutive duplicates if state and district match
+      finalLocation = [...new Set(parts)].join(", ");
+    } else {
+      // Specific place/landmark/town/city -> Place, District, State
+      // Fallback district to state if district is missing
+      const middleLevel = district && district !== primaryName ? district : state;
+      const parts = [primaryName, middleLevel, state].filter(Boolean);
+      // Remove consecutive duplicates
+      const uniqueParts = parts.filter((item, index) => index === 0 || item !== parts[index - 1]);
+      finalLocation = uniqueParts.slice(0, 3).join(", ");
+    }
 
     setIsOpen(false);
     onChange({ target: { name, value: finalLocation } });

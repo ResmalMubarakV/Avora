@@ -8,6 +8,7 @@ import {
   Video,
   ArrowRight,
   Heart,
+  Pin,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -46,6 +47,7 @@ const MemoriesCard = ({
   isLoggedIn = false,
   redirectTo = "",
   onLikeToggle,
+  onPinUpdated,
 }) => {
   const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(memory.isLiked || false);
@@ -74,6 +76,21 @@ const MemoriesCard = ({
     } catch (error) {
       setIsLiked(!isLiked); // Revert on failure
       toast.error("Failed to update favorite status");
+    }
+  };
+
+  // --- Direct Unpin Handler from Badge ---
+  const handleUnpinFromBadge = async (e) => {
+    e.stopPropagation(); // Prevent opening memory details view
+    try {
+      const { data } = await api.patch(`/api/memories/${memory._id}/pin`);
+      memory.isPinned = data.isPinned;
+      toast.success("Memory unpinned.");
+      if (onPinUpdated) {
+        onPinUpdated(memory._id, data.isPinned);
+      }
+    } catch (error) {
+      toast.error("Unable to unpin memory.");
     }
   };
 
@@ -118,7 +135,7 @@ const MemoriesCard = ({
       className="group relative cursor-pointer overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col justify-between select-none"
     >
       <div>
-        {/* Cover Image & Visibility Badge */}
+        {/* Cover Image & Badges Container */}
         <div className="relative h-36 sm:h-60 overflow-hidden">
           <img
             src={memory.coverImage}
@@ -129,22 +146,38 @@ const MemoriesCard = ({
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
 
-          {/* Visibility Badge: Shown only if isOwner is true, or if it's private */}
-          {(isOwner || !memory.isPublic) && (
-            <div className="absolute left-2 top-2 sm:left-4 sm:top-4">
-              {memory.isPublic ? (
-                <div className="flex items-center gap-1 sm:gap-2 rounded-full bg-white/95 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-slate-700 backdrop-blur shadow">
-                  <Globe size={12} className="sm:w-3.5 sm:h-3.5" />
-                  <span className="hidden xs:inline">Public</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1 sm:gap-2 rounded-full bg-white/95 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-slate-700 backdrop-blur shadow">
-                  <Lock size={12} className="sm:w-3.5 sm:h-3.5" />
-                  <span className="hidden xs:inline">Private</span>
-                </div>
-              )}
-            </div>
-          )}
+          {/* Badges Row: Visibility and Pinned Status */}
+          <div className="absolute left-2 top-2 sm:left-4 sm:top-4 flex items-center gap-1.5 z-10">
+            {/* Visibility Badge: Shown only if isOwner is true, or if it's private */}
+            {(isOwner || !memory.isPublic) && (
+              <div>
+                {memory.isPublic ? (
+                  <div className="flex items-center gap-1 sm:gap-2 rounded-full bg-white/95 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-slate-700 backdrop-blur shadow">
+                    <Globe size={12} className="sm:w-3.5 sm:h-3.5" />
+                    <span className="hidden xs:inline">Public</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1 sm:gap-2 rounded-full bg-white/95 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-slate-700 backdrop-blur shadow">
+                    <Lock size={12} className="sm:w-3.5 sm:h-3.5" />
+                    <span className="hidden xs:inline">Private</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Clickable Pinned Badge Indicator (Clicking unpins) */}
+            {memory.isPinned && (
+              <button
+                type="button"
+                onClick={handleUnpinFromBadge}
+                title="Click to unpin memory"
+                className="flex items-center gap-1 rounded-full bg-slate-900/90 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-bold text-white backdrop-blur shadow border border-white/20 transition hover:bg-red-600 cursor-pointer group/pin"
+              >
+                <Pin size={11} className="fill-white text-white sm:w-3 sm:h-3 transition group-hover/pin:rotate-45" />
+                <span>Pinned</span>
+              </button>
+            )}
+          </div>
 
           {/* Persistent Favorite / Placeholder Heart Button */}
           {/* Hide entirely if the visitor cannot like and the memory is unliked */}
@@ -212,6 +245,7 @@ const MemoriesCard = ({
                 <MemoryActions
                   memory={memory}
                   redirectTo={redirectTo}
+                  onPinUpdated={onPinUpdated}
                 />
               </div>
             )}

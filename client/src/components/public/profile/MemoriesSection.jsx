@@ -12,10 +12,11 @@ const ITEMS_PER_PAGE_INLINE = 6;
 // MEMORIES SECTION COMPONENT
 // ==========================================
 const MemoriesSection = ({
-    memories,
+    memories: initialMemories,
     username,
     isOwner,
 }) => {
+    const [memories, setMemories] = useState(initialMemories);
     const [search, setSearch] = useState("");
     const [selectedFilters, setSelectedFilters] = useState([]);
     const [sortBy, setSortBy] = useState("newest");
@@ -32,8 +33,15 @@ const MemoriesSection = ({
         );
     };
 
+    const handlePinUpdated = (id, newPinnedState) => {
+        setMemories((prev) =>
+            prev.map((m) => (m._id === id ? { ...m, isPinned: newPinnedState } : m))
+        );
+    };
+
     const filteredMemories = useMemo(() => {
         const keyword = search.toLowerCase();
+        const hasActiveFilterOrSearch = keyword.length > 0 || selectedFilters.length > 0;
 
         const filtered = memories.filter((memory) => {
             const matchesSearch =
@@ -58,23 +66,26 @@ const MemoriesSection = ({
             return matchesAll;
         });
 
-        switch (sortBy) {
-            case "oldest":
-                filtered.sort(
-                    (a, b) =>
-                        new Date(a.startDate) - new Date(b.startDate)
-                );
-                break;
-            case "title":
-                filtered.sort((a, b) =>
-                    a.title.localeCompare(b.title)
-                );
-                break;
-            default:
-                filtered.sort(
-                    (a, b) =>
-                        new Date(b.startDate) - new Date(a.startDate)
-                );
+        // If search or filters are active, ignore pin priority and use selected sort or default search order
+        if (hasActiveFilterOrSearch) {
+            switch (sortBy) {
+                case "oldest":
+                    filtered.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+                    break;
+                case "title":
+                    filtered.sort((a, b) => a.title.localeCompare(b.title));
+                    break;
+                default:
+                    filtered.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+            }
+        } else {
+            // When NO filters or search are active, sort with Pinned items strictly first (up to 4)
+            filtered.sort((a, b) => {
+                if (a.isPinned === b.isPinned) {
+                    return new Date(b.startDate) - new Date(a.startDate);
+                }
+                return a.isPinned ? -1 : 1;
+            });
         }
 
         return filtered;
@@ -248,7 +259,6 @@ const MemoriesSection = ({
                 </div>
             ) : (
                 <>
-                    {/* Responsive Grid: 2 per line on mobile (grid-cols-2), 2 per line on Tablet (sm:grid-cols-2), 4 per line on Desktop (xl:grid-cols-4) */}
                     <div
                         className={
                             viewMode === "inline"
@@ -269,6 +279,7 @@ const MemoriesSection = ({
                                         from: `/u/${username}`,
                                         label: "Profile",
                                     }}
+                                    onPinUpdated={handlePinUpdated}
                                 />
                             </div>
                         ))}

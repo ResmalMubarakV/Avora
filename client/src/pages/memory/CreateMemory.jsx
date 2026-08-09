@@ -150,7 +150,8 @@ const CreateMemory = () => {
       setHasChanges(false);
       toast.success("Memory created successfully!");
 
-      navigate("/dashboard", { replace: true });
+      // Go back to exact previous page upon successful publish
+      navigate(-1);
     } catch (error) {
       console.error(error);
       toast.error(
@@ -163,7 +164,7 @@ const CreateMemory = () => {
 
   const handleCancel = () => {
     if (!hasChanges) {
-      navigate("/dashboard");
+      navigate(-1);
       return;
     }
     setShowDiscardModal(true);
@@ -172,7 +173,7 @@ const CreateMemory = () => {
   const discardMemory = () => {
     setShowDiscardModal(false);
     setHasChanges(false);
-    navigate("/dashboard");
+    navigate(-1);
   };
 
   return (

@@ -140,7 +140,7 @@ const PublicMemory = () => {
       for (let entry of entries) {
         const { width, height } = entry.contentRect;
         const availableWidth = width - 32; 
-        const availableHeight = height - 32;
+        const availableHeight = height - 72; // Adjusted to safely account for bottom pagination bar
 
         if (availableWidth > 0 && availableHeight > 0) {
           const scaleX = availableWidth / 800;
@@ -287,7 +287,7 @@ const PublicMemory = () => {
             </div>
 
             <div className="flex-1 w-full flex flex-col md:flex-row overflow-hidden relative" onClick={() => setActiveSlot(null)}>
-                <div ref={previewContainerRef} className="flex-1 overflow-hidden flex flex-col justify-center items-center bg-slate-900 relative p-4 pb-16">
+                <div ref={previewContainerRef} className="flex-1 overflow-hidden flex flex-col justify-center items-center bg-slate-900 relative p-4 pb-20">
                     
                     {/* SCALED PREVIEW WRAPPER */}
                     <div
@@ -310,29 +310,29 @@ const PublicMemory = () => {
                             onUpdateConfig={handleConfigChange}
                         />
                     </div>
+                </div>
 
-                    {/* FIXED PAGINATION & ARROWS BELOW THE TEMPLATE FOR ALL SCREENS */}
-                    <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-4 z-30 pointer-events-auto">
-                        <button 
-                            onClick={prevLayout} 
-                            className="p-2.5 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white shadow-lg backdrop-blur-md transition cursor-pointer active:scale-95" 
-                            title="Previous Template (Left Arrow)"
-                        >
-                            <ChevronLeft size={20} />
-                        </button>
+                {/* FIXED PAGINATION & ARROWS PLACED IN THE MAIN VIEWER BAR (NO SCROLL REQUIRED) */}
+                <div className="absolute bottom-3 inset-x-0 flex items-center justify-center gap-4 z-40 pointer-events-auto px-4">
+                    <button 
+                        onClick={prevLayout} 
+                        className="p-2.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white shadow-xl border border-slate-700 backdrop-blur-md transition cursor-pointer active:scale-95" 
+                        title="Previous Template (Left Arrow)"
+                    >
+                        <ChevronLeft size={20} />
+                    </button>
 
-                        <div className="bg-slate-950/80 backdrop-blur-md border border-slate-800 text-white px-5 py-2 rounded-full text-xs font-bold shadow-xl tracking-wider uppercase">
-                            Template {layoutIndex + 1} / 20
-                        </div>
-
-                        <button 
-                            onClick={nextLayout} 
-                            className="p-2.5 rounded-full bg-slate-800/80 hover:bg-slate-700 text-white shadow-lg backdrop-blur-md transition cursor-pointer active:scale-95" 
-                            title="Next Template (Right Arrow)"
-                        >
-                            <ChevronRight size={20} />
-                        </button>
+                    <div className="bg-slate-950/90 backdrop-blur-md border border-slate-800 text-white px-5 py-2 rounded-full text-xs font-bold shadow-2xl tracking-wider uppercase">
+                        Template {layoutIndex + 1} / 20
                     </div>
+
+                    <button 
+                        onClick={nextLayout} 
+                        className="p-2.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white shadow-xl border border-slate-700 backdrop-blur-md transition cursor-pointer active:scale-95" 
+                        title="Next Template (Right Arrow)"
+                    >
+                        <ChevronRight size={20} />
+                    </button>
                 </div>
 
                 {activeSlot !== null && currentEditorConfig && (

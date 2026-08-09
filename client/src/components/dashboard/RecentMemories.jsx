@@ -1,15 +1,25 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MemoriesCard from "./memories/MemoriesCard";
 
 // ==========================================
 // RECENT MEMORIES COMPONENT
 // ==========================================
-/**
- * Renders a grid section showcasing the user's most recent travel memories on the dashboard 
- * with compact mobile sizing (2 columns) and uniform card heights.
- */
-const RecentMemories = ({ memories }) => {
+const RecentMemories = ({ memories: initialMemories }) => {
   const navigate = useNavigate();
+  const [memories, setMemories] = useState(initialMemories);
+
+  // Handle local pin state changes
+  const handlePinUpdated = (id, newPinnedState) => {
+    setMemories((prev) => {
+      const updated = prev.map((m) => (m._id === id ? { ...m, isPinned: newPinnedState } : m));
+      // Sort pinned to top if no search filters are active
+      return updated.sort((a, b) => {
+        if (a.isPinned === b.isPinned) return new Date(b.startDate) - new Date(a.startDate);
+        return a.isPinned ? -1 : 1;
+      });
+    });
+  };
 
   return (
     <section>
@@ -25,26 +35,21 @@ const RecentMemories = ({ memories }) => {
         <button
           type="button"
           onClick={() => navigate("/dashboard/memories")}
-          className="text-xs sm:text-sm font-semibold text-[#1E3A8A] transition hover:underline"
+          className="text-xs sm:text-sm font-semibold text-[#1E3A8A] transition hover:underline cursor-pointer"
         >
           View All
         </button>
       </div>
 
-      {/* Memories Grid - 2 columns on mobile, uniform card heights */}
+      {/* Memories Grid */}
       <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-2 xl:grid-cols-4">
         {memories.slice(0, 8).map((memory, index) => (
           <div
             key={memory._id}
             className={`
               ${
-                index >= 4 && index < 6
-                  ? "hidden md:block"
-                  : ""
-              }
-              ${
                 index >= 6
-                  ? "hidden xl:block"
+                  ? "hidden sm:block"
                   : ""
               }
             `}
@@ -56,6 +61,7 @@ const RecentMemories = ({ memories }) => {
                 from: "/dashboard",
                 label: "Dashboard",
               }}
+              onPinUpdated={handlePinUpdated}
             />
           </div>
         ))}
