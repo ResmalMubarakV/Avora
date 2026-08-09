@@ -23,9 +23,13 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
 
   const handleLogout = () => {
     setShowLogoutModal(false);
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
-    navigate("/login", { replace: true });
+    
+    // Completely clear all session data and tokens
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Force a clean hard redirect to the login page to reset React memory state
+    window.location.href = "/login";
   };
 
   return (

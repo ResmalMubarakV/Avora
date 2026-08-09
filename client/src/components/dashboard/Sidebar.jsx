@@ -73,9 +73,13 @@ const Sidebar = ({
 
   const handleLogout = () => {
     setShowLogoutModal(false);
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
-    navigate("/login", { replace: true });
+    
+    // Completely clear all session data and tokens
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Force a clean hard redirect to the login page to reset React memory state
+    window.location.href = "/login";
   };
 
   const handleNavigation = (path) => {
@@ -140,7 +144,7 @@ const Sidebar = ({
               )}
             </div>
 
-            {/* Navigation Links List (Increased spacing from hamburger header and between icons) */}
+            {/* Navigation Links List */}
             <nav className="px-3 pt-4 space-y-3 overflow-y-auto shrink-0">
               {menus.map((menu) => {
                 const Icon = menu.icon;
