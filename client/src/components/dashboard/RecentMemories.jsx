@@ -1,13 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MemoriesCard from "./memories/MemoriesCard";
 
 // ==========================================
 // RECENT MEMORIES COMPONENT
 // ==========================================
-const RecentMemories = ({ memories: initialMemories }) => {
+const RecentMemories = ({ memories: initialMemories, onLikeToggle }) => {
   const navigate = useNavigate();
   const [memories, setMemories] = useState(initialMemories);
+
+  // Sync local state whenever parent props update
+  useEffect(() => {
+    setMemories(initialMemories);
+  }, [initialMemories]);
 
   // Handle local pin state changes
   const handlePinUpdated = (id, newPinnedState) => {
@@ -62,6 +67,7 @@ const RecentMemories = ({ memories: initialMemories }) => {
                 label: "Dashboard",
               }}
               onPinUpdated={handlePinUpdated}
+              onLikeToggle={onLikeToggle}
             />
           </div>
         ))}

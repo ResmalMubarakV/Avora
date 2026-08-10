@@ -19,7 +19,6 @@ import LivePreview from "../../components/create-memory/LivePreview";
 import DiscardMemoryModal from "../../components/create-memory/DiscardMemoryModal";
 import DeleteMediaModal from "../../components/edit-memory/DeleteMediaModal";
 import PageTitle from "../../components/common/PageTitle";
-import { notifyOtherTabs } from "../../hooks/useMemories";
 
 const RETURN_KEY = "avora_edit_return_to";
 
@@ -240,7 +239,6 @@ const EditMemory = () => {
       await updateMemory(id, data);
 
       toast.success("Memory updated successfully!");
-      notifyOtherTabs();
       setHasChanges(false);
       sessionStorage.removeItem(RETURN_KEY);
 

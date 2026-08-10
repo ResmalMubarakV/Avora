@@ -47,7 +47,10 @@ const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false,
 
     // --- Handle Like Toggle API Call ---
     const handleLikeClick = async (e) => {
-        e.stopPropagation(); // Prevent card navigation click
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
         if (!canLike || likeLoading) return;
 
         try {
@@ -55,15 +58,18 @@ const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false,
             const nextState = !liked;
             setLiked(nextState); // Optimistic UI update
 
-            await api.patch(`/api/memories/${memory._id}/like`);
-            
+            memory.isLiked = nextState;
             if (onLikeToggle) {
                 onLikeToggle(memory._id, nextState);
             }
 
-            toast.success(nextState ? "Added to liked memories" : "Removed from liked memories");
+            await api.patch(`/api/memories/${memory._id}/like`);
         } catch (error) {
             setLiked(!liked); // Revert on error
+            memory.isLiked = !liked;
+            if (onLikeToggle) {
+                onLikeToggle(memory._id, !liked);
+            }
             console.error(error);
             toast.error("Unable to update like status.");
         } finally {
@@ -122,7 +128,7 @@ const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false,
                     <div className="absolute top-3 left-3 z-10">
                         <button
                             type="button"
-                            onClick={canLike ? handleLikeClick : undefined}
+                            onClick={handleLikeClick}
                             aria-label="Like Memory"
                             disabled={!canLike || likeLoading}
                             className={`

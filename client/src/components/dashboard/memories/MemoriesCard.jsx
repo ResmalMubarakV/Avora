@@ -15,7 +15,6 @@ import { toast } from "sonner";
 
 import MemoryActions from "../../memory/MemoryActions";
 import api from "../../../api/axios";
-import { notifyOtherTabs } from "../../../hooks/useMemories";
 
 const RETURN_KEY = "avora_edit_return_to";
 
@@ -48,32 +47,41 @@ const MemoriesCard = ({
   const location = useLocation();
   const [isLiked, setIsLiked] = useState(memory.isLiked || false);
   const [animatingHeart, setAnimatingHeart] = useState(false);
+  const [likeLoading, setLikeLoading] = useState(false);
   
   const lastTapRef = useRef(0);
   const canLike = isOwner || isLoggedIn;
 
   const handleToggleLike = async (e) => {
-    if (e) e.stopPropagation();
-    if (!canLike) return;
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (!canLike || likeLoading) return;
 
     try {
+      setLikeLoading(true);
       const newStatus = !isLiked;
       setIsLiked(newStatus);
       setAnimatingHeart(true);
       setTimeout(() => setAnimatingHeart(false), 600);
 
-      await api.patch(`/api/memories/${memory._id}/like`);
       memory.isLiked = newStatus;
-      notifyOtherTabs();
-
       if (onLikeToggle) onLikeToggle(memory._id, newStatus);
+
+      await api.patch(`/api/memories/${memory._id}/like`);
     } catch (error) {
       setIsLiked(!isLiked);
+      memory.isLiked = !isLiked;
+      if (onLikeToggle) onLikeToggle(memory._id, !isLiked);
       toast.error("Failed to update favorite status");
+    } finally {
+      setLikeLoading(false);
     }
   };
 
   const handleUnpinFromBadge = async (e) => {
+    e.preventDefault();
     e.stopPropagation();
     try {
       const { data } = await api.patch(`/api/memories/${memory._id}/pin`);
@@ -95,7 +103,7 @@ const MemoriesCard = ({
     
     if (tapLength < 300 && tapLength > 0) {
       e.preventDefault();
-      handleToggleLike();
+      handleToggleLike(e);
     }
     lastTapRef.current = currentTime;
   };
@@ -118,9 +126,6 @@ const MemoriesCard = ({
 
     if (!profileUsername || !memory.slug) return;
 
-    // Securely save to sessionStorage before opening memory detail view,
-    // so "Edit Memory" from the detail view (MemoryHero) can fall back to
-    // this exact path + pagination if router state ever gets lost.
     sessionStorage.setItem(RETURN_KEY, finalFrom);
 
     navigate(`/${profileUsername}/${memory.slug}`, {
@@ -182,8 +187,8 @@ const MemoriesCard = ({
             <div className="absolute right-2 top-2 sm:right-4 sm:top-4 z-10">
               <button
                 type="button"
-                onClick={canLike ? handleToggleLike : undefined}
-                disabled={!canLike}
+                onClick={handleToggleLike}
+                disabled={!canLike || likeLoading}
                 className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border transition-all shadow-sm ${
                   canLike ? "cursor-pointer" : "cursor-default"
                 } ${

@@ -496,14 +496,19 @@ const Lightbox = ({
         });
     }, [selectedIndex]);
 
+    // Reset scale/translate when changing index, and auto-play unmuted if it's a video
     useEffect(() => {
-        if (videoRef.current) {
-            videoRef.current.pause();
-            videoRef.current.currentTime = 0;
-        }
         setScale(1);
         setTranslate({ x: 0, y: 0 });
-    }, [selectedIndex]);
+
+        if (videoRef.current && isVideoItem(selectedMedia)) {
+            videoRef.current.currentTime = 0;
+            videoRef.current.muted = false; // Play unmuted
+            videoRef.current.play().catch((err) => {
+                console.log("Autoplay prevented by browser:", err);
+            });
+        }
+    }, [selectedIndex, selectedMedia]);
 
     useEffect(() => {
         if (selectedIndex > 0) {
@@ -893,7 +898,6 @@ const Lightbox = ({
                                         controls
                                         controlsList="nodownload"
                                         autoPlay
-                                        muted
                                         playsInline
                                         preload="metadata"
                                         onLoadedData={() => setImageLoading(false)}

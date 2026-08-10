@@ -14,8 +14,15 @@ import PageTitle from "../../components/common/PageTitle";
 const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { memories, loading, error, refetch } = useMemories();
-  const [refreshKey, setRefreshKey] = useState(0);
+  const { memories: initialMemories, loading, error } = useMemories();
+  const [memories, setMemories] = useState([]);
+
+  // Sync initial hook data to local state safely
+  useEffect(() => {
+    if (initialMemories) {
+      setMemories(initialMemories);
+    }
+  }, [initialMemories]);
 
   // Automatically scroll to top on initial page load or redirect
   useEffect(() => {
@@ -26,22 +33,14 @@ const Dashboard = () => {
     });
   }, [location.pathname]);
 
-  // Listen for live updates triggered by like actions across the app
-  useEffect(() => {
-    const handleLiveSync = () => {
-      if (typeof refetch === "function") {
-        refetch();
-      } else {
-        setRefreshKey((prev) => prev + 1);
-      }
-    };
-
-    window.addEventListener("storage", handleLiveSync);
-
-    return () => {
-      window.removeEventListener("storage", handleLiveSync);
-    };
-  }, [refetch]);
+  // Instant local state mutator for like toggles (Instagram-like, zero refresh)
+  const handleLikeToggle = (memoryId, newStatus) => {
+    setMemories((prevMemories) =>
+      prevMemories.map((m) =>
+        m._id === memoryId ? { ...m, isLiked: newStatus } : m
+      )
+    );
+  };
 
   if (loading && memories.length === 0) {
     return (
@@ -91,7 +90,7 @@ const Dashboard = () => {
   });
 
   return (
-    <div className="space-y-5 sm:space-y-8 pb-16" key={refreshKey}>
+    <div className="space-y-5 sm:space-y-8 pb-16">
       <PageTitle title="Dashboard" />
 
       <DashboardHero />
@@ -103,7 +102,7 @@ const Dashboard = () => {
         likedMemories={likedMemories}
       />
 
-      <RecentMemories memories={memories} />
+      <RecentMemories memories={memories} onLikeToggle={handleLikeToggle} />
     </div>
   );
 };
