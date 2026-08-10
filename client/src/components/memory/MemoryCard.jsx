@@ -6,11 +6,13 @@ import {
     Lock,
     Heart,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 
 import MemoryActions from "../memory/MemoryActions";
 import api from "../../../api/axios";
+
+const RETURN_KEY = "avora_edit_return_to";
 
 // ==========================================
 // DATE FORMATTER UTILITY
@@ -31,12 +33,17 @@ const formatDate = (date) => {
 // ==========================================
 // MEMORY CARD COMPONENT
 // ==========================================
-const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false }) => {
+const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false, redirectTo = "" }) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [liked, setLiked] = useState(memory?.isLiked || false);
     const [likeLoading, setLikeLoading] = useState(false);
 
     const canLike = isOwner || isLoggedIn;
+
+    // --- Compute Exact Return Path Including Pagination (e.g., ?page=4) ---
+    const originPath = typeof redirectTo === "object" ? redirectTo?.from : redirectTo;
+    const finalFrom = originPath || location.pathname + location.search;
 
     // --- Handle Like Toggle API Call ---
     const handleLikeClick = async (e) => {
@@ -66,17 +73,18 @@ const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false 
 
     return (
         <div
-            onClick={() =>
+            onClick={() => {
+                sessionStorage.setItem(RETURN_KEY, finalFrom);
                 navigate(
                     `/${memory.user.username}/${memory.slug}`,
                     {
                         state: {
-                            from: "/dashboard",
-                            label: "Dashboard",
+                            from: finalFrom,
+                            label: finalFrom.includes("/dashboard") ? "Dashboard" : "Profile",
                         },
                     }
-                )
-            }
+                );
+            }}
             className="
                 group
                 relative
@@ -222,7 +230,7 @@ const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false 
                 >
                     <MemoryActions
                         memory={memory}
-                        redirectTo="/dashboard"
+                        redirectTo={{ from: finalFrom, label: redirectTo?.label || (finalFrom.includes("/dashboard") ? "Dashboard" : "Profile") }}
                     />
                 </div>
             </div>

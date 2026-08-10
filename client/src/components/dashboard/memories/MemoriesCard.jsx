@@ -17,12 +17,11 @@ import MemoryActions from "../../memory/MemoryActions";
 import api from "../../../api/axios";
 import { notifyOtherTabs } from "../../../hooks/useMemories";
 
+const RETURN_KEY = "avora_edit_return_to";
+
 // ==========================================
 // UTILITY: FORMAT DATE
 // ==========================================
-/**
- * Formats ISO date strings into Indian standard display format (e.g., "12 Oct 2026").
- */
 const formatDate = (date) => {
   if (!date) return "";
 
@@ -36,11 +35,6 @@ const formatDate = (date) => {
 // ==========================================
 // MEMORIES CARD COMPONENT
 // ==========================================
-/**
- * Renders a travel memory card for listing pages with hidden descriptions on mobile,
- * limited 3-line description clamping for tablet and above screens.
- * Contains role-based liking features ensuring viewers see no placeholders.
- */
 const MemoriesCard = ({
   memory,
   username,
@@ -55,13 +49,9 @@ const MemoriesCard = ({
   const [isLiked, setIsLiked] = useState(memory.isLiked || false);
   const [animatingHeart, setAnimatingHeart] = useState(false);
   
-  // Ref to track last tap time for touch screen double-tap detection
   const lastTapRef = useRef(0);
-
-  // Permission check: Can interact if they are the owner or a logged in user
   const canLike = isOwner || isLoggedIn;
 
-  // --- Toggle Like Handler ---
   const handleToggleLike = async (e) => {
     if (e) e.stopPropagation();
     if (!canLike) return;
@@ -73,21 +63,18 @@ const MemoriesCard = ({
       setTimeout(() => setAnimatingHeart(false), 600);
 
       await api.patch(`/api/memories/${memory._id}/like`);
-      memory.isLiked = newStatus; // update local ref
-      
-      // Trigger live sync across dashboard stats and open views/tabs
+      memory.isLiked = newStatus;
       notifyOtherTabs();
 
       if (onLikeToggle) onLikeToggle(memory._id, newStatus);
     } catch (error) {
-      setIsLiked(!isLiked); // Revert on failure
+      setIsLiked(!isLiked);
       toast.error("Failed to update favorite status");
     }
   };
 
-  // --- Direct Unpin Handler from Badge ---
   const handleUnpinFromBadge = async (e) => {
-    e.stopPropagation(); // Prevent opening memory details view
+    e.stopPropagation();
     try {
       const { data } = await api.patch(`/api/memories/${memory._id}/pin`);
       memory.isPinned = data.isPinned;
@@ -100,7 +87,6 @@ const MemoriesCard = ({
     }
   };
 
-  // --- Touch Screen Double-Tap Listener ---
   const handleTouchEnd = (e) => {
     if (!canLike) return;
 
@@ -114,13 +100,16 @@ const MemoriesCard = ({
     lastTapRef.current = currentTime;
   };
 
-  // --- Calculate Media Item Counts ---
   const totalPhotos =
     memory.media?.filter((item) => item.type === "image").length || 0;
   const totalVideos =
     memory.media?.filter((item) => item.type === "video").length || 0;
 
-  // --- Handle Navigation to Detailed Memory View (Preserving Pagination State) ---
+  // --- Pre-calculate finalFrom including query string/pagination ---
+  const originPath = typeof redirectTo === "object" ? redirectTo?.from : redirectTo;
+  const finalFrom = originPath || location.pathname + location.search;
+
+  // --- Handle Navigation ---
   const handleOpenMemory = () => {
     const profileUsername =
       typeof memory.user === "object"
@@ -129,10 +118,15 @@ const MemoriesCard = ({
 
     if (!profileUsername || !memory.slug) return;
 
+    // Securely save to sessionStorage before opening memory detail view,
+    // so "Edit Memory" from the detail view (MemoryHero) can fall back to
+    // this exact path + pagination if router state ever gets lost.
+    sessionStorage.setItem(RETURN_KEY, finalFrom);
+
     navigate(`/${profileUsername}/${memory.slug}`, {
       state: {
-        from: redirectTo || location.pathname + location.search,
-        label: "Back",
+        from: finalFrom,
+        label: typeof redirectTo === "object" && redirectTo?.label ? redirectTo.label : "Back",
       },
     });
   };
@@ -144,7 +138,6 @@ const MemoriesCard = ({
       className="group relative cursor-pointer overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col justify-between select-none"
     >
       <div>
-        {/* Cover Image & Badges Container */}
         <div className="relative h-36 sm:h-60 overflow-hidden">
           <img
             src={memory.coverImage}
@@ -155,9 +148,7 @@ const MemoriesCard = ({
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
 
-          {/* Badges Row: Visibility and Pinned Status */}
           <div className="absolute left-2 top-2 sm:left-4 sm:top-4 flex items-center gap-1.5 z-10">
-            {/* Visibility Badge: Shown only if isOwner is true, or if it's private */}
             {(isOwner || !memory.isPublic) && (
               <div>
                 {memory.isPublic ? (
@@ -174,7 +165,6 @@ const MemoriesCard = ({
               </div>
             )}
 
-            {/* Clickable Pinned Badge Indicator (Clicking unpins) */}
             {memory.isPinned && (
               <button
                 type="button"
@@ -188,8 +178,6 @@ const MemoriesCard = ({
             )}
           </div>
 
-          {/* Persistent Favorite / Placeholder Heart Button */}
-          {/* Hide entirely if the visitor cannot like and the memory is unliked */}
           {(canLike || isLiked) && (
             <div className="absolute right-2 top-2 sm:right-4 sm:top-4 z-10">
               <button
@@ -214,9 +202,7 @@ const MemoriesCard = ({
           )}
         </div>
 
-        {/* Card Body */}
         <div className="relative p-3 sm:p-5">
-          {/* Title */}
           <h2
             className={`text-sm sm:text-xl font-bold tracking-tight text-slate-900 line-clamp-1 ${
               isOwner ? "pr-8 sm:pr-12" : ""
@@ -225,14 +211,11 @@ const MemoriesCard = ({
             {memory.title}
           </h2>
 
-          {/* Description Excerpt: Hidden on mobile (hidden), clamped to 3 lines on sm screens and above */}
           <p className="hidden sm:-webkit-box mt-2 text-sm leading-relaxed text-slate-600 overflow-hidden [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
             {memory.description}
           </p>
 
-          {/* Metadata & Actions Row Container */}
           <div className="mt-2.5 sm:mt-4 flex items-end justify-between gap-2">
-            {/* Metadata (Location & Date) */}
             <div className="space-y-1 sm:space-y-1.5 text-xs sm:text-sm flex-1 min-w-0">
               <div className="flex items-center gap-1.5 sm:gap-2 text-slate-500">
                 <MapPin size={14} className="shrink-0 sm:w-4 sm:h-4 text-slate-400" />
@@ -245,7 +228,6 @@ const MemoriesCard = ({
               </div>
             </div>
 
-            {/* Owner Actions Toolbar */}
             {isOwner && (
               <div
                 className="shrink-0 translate-y-0.5 sm:translate-y-1"
@@ -253,7 +235,7 @@ const MemoriesCard = ({
               >
                 <MemoryActions
                   memory={memory}
-                  redirectTo={redirectTo}
+                  redirectTo={{ from: finalFrom, label: redirectTo?.label }}
                   onPinUpdated={onPinUpdated}
                 />
               </div>
@@ -262,24 +244,20 @@ const MemoriesCard = ({
         </div>
       </div>
 
-      {/* Card Footer */}
       <div className="px-3 pb-3 sm:px-5 sm:pb-5 pt-0">
         <div className="border-t border-slate-100 pt-3 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Photos Count */}
             <div className="flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-xs text-slate-700">
               <Image size={12} className="sm:w-3.5 sm:h-3.5" />
               {totalPhotos}
             </div>
 
-            {/* Videos Count */}
             <div className="flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[11px] sm:text-xs text-slate-700">
               <Video size={12} className="sm:w-3.5 sm:h-3.5" />
               {totalVideos}
             </div>
           </div>
 
-          {/* Read Memory Link */}
           <div className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-[#3559D4] transition-transform duration-300 group-hover:translate-x-1">
             <span>View</span>
             <ArrowRight size={14} className="sm:w-4 sm:h-4" />

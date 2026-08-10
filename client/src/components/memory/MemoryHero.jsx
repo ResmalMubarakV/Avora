@@ -4,9 +4,8 @@ import MediaPreview from "./MediaPreview";
 import { ArrowLeft, Pencil, Download } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-// ==========================================
-// MEMORY HERO COMPONENT
-// ==========================================
+const RETURN_KEY = "avora_edit_return_to";
+
 const MemoryHero = ({
     username,
     memory,
@@ -19,14 +18,18 @@ const MemoryHero = ({
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Safely capture the exact origin path (including pagination and filters) from state history
-    const incomingFrom = locationState?.from || location.state?.from;
+    const incomingFrom = locationState?.from || location.state?.from || sessionStorage.getItem(RETURN_KEY);
     const from = incomingFrom || `/${username}`;
     const label = locationState?.label || (incomingFrom?.includes("/dashboard/memories") ? "Memories" : "Profile");
 
+    // The Edit button should return here — to this exact memory page —
+    // not to wherever the user originally came from (that's only for
+    // the "Back to ..." button above). Keep the current URL, including
+    // any query string (e.g. ?image=2), so we land back exactly here.
+    const currentMemoryPath = location.pathname + location.search;
+
     return (
         <div className="flex flex-col gap-6">
-            {/* Top Navigation Bar Outside the Cards */}
             <div className="flex items-center justify-between gap-4">
                 <button
                     type="button"
@@ -61,7 +64,6 @@ const MemoryHero = ({
 
                 {isOwner && (
                     <div className="flex items-center gap-3">
-                        {/* Export PDF Button (Navigates to Preview Screen) */}
                         <button
                             type="button"
                             onClick={onDownloadClick}
@@ -90,20 +92,23 @@ const MemoryHero = ({
                             <span className="sm:hidden">PDF</span>
                         </button>
 
-                        {/* Existing Edit Memory Button (Passes along original from state) */}
                         <button
                             type="button"
-                            onClick={() =>
+                            onClick={() => {
+                                // Capture THIS memory page as the return target, immediately,
+                                // before navigating — so after saving, EditMemory sends the
+                                // user back here rather than to the list they came from.
+                                sessionStorage.setItem(RETURN_KEY, currentMemoryPath);
                                 navigate(
                                     `/dashboard/edit-memory/${memory._id}`,
                                     {
                                         state: {
-                                            from: from, // Pass exact pagination/filters forward to edit page!
-                                            label: label,
+                                            from: currentMemoryPath,
+                                            label: "Memory",
                                         },
                                     }
-                                )
-                            }
+                                );
+                            }}
                             className="
                                 inline-flex
                                 items-center
@@ -137,7 +142,6 @@ const MemoryHero = ({
                 )}
             </div>
 
-            {/* Main Hero Grid */}
             <section
                 className="
                     grid

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
@@ -21,6 +21,8 @@ import DeleteMediaModal from "../../components/edit-memory/DeleteMediaModal";
 import PageTitle from "../../components/common/PageTitle";
 import { notifyOtherTabs } from "../../hooks/useMemories";
 
+const RETURN_KEY = "avora_edit_return_to";
+
 // ==========================================
 // EDIT MEMORY PAGE COMPONENT
 // ==========================================
@@ -29,9 +31,20 @@ const EditMemory = () => {
   const { id } = useParams();
   const location = useLocation();
 
-  const returnTo = location.state?.from || "/dashboard";
+  // Freeze the return path (including exact ?page=X etc.) once, on first
+  // render only. sessionStorage is written by the card/hero the instant the
+  // user clicks "Edit Memory", so it's already correct by the time we mount.
+  const returnToRef = useRef();
+  if (returnToRef.current === undefined) {
+    returnToRef.current =
+      sessionStorage.getItem(RETURN_KEY) ||
+      location.state?.from ||
+      "/dashboard";
+  }
+  const returnTo = returnToRef.current;
 
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
   const [showDeleteMediaModal, setShowDeleteMediaModal] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
@@ -52,7 +65,7 @@ const EditMemory = () => {
     existingGallery: [],
   });
 
-  // Automatically scroll to top on initial page load or redirect
+  // Automatically scroll to top on mount
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -61,35 +74,7 @@ const EditMemory = () => {
     });
   }, [location.pathname]);
 
-  // Intercept browser back button / swipe gestures
-  useEffect(() => {
-    window.history.pushState(null, "", window.location.href);
-
-    const handlePopState = () => {
-      if (hasChanges) {
-        window.history.pushState(null, "", window.location.href);
-        setShowDiscardModal(true);
-      } else {
-        navigate(-1);
-      }
-    };
-
-    const handleBeforeUnload = (e) => {
-      if (hasChanges) {
-        e.preventDefault();
-        e.returnValue = "";
-      }
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [hasChanges, navigate]);
-
+  // Fetch memory data on page load
   useEffect(() => {
     const fetchMemory = async () => {
       try {
@@ -97,22 +82,23 @@ const EditMemory = () => {
         const memory = await getMemoryById(id);
 
         setFormData({
-          title: memory.title,
-          location: memory.location,
-          startDate: memory.startDate.split("T")[0],
-          endDate: memory.endDate.split("T")[0],
-          modeOfTravel: memory.modeOfTravel,
-          description: memory.description,
+          title: memory.title || "",
+          location: memory.location || "",
+          startDate: memory.startDate ? memory.startDate.split("T")[0] : "",
+          endDate: memory.endDate ? memory.endDate.split("T")[0] : "",
+          modeOfTravel: memory.modeOfTravel || "",
+          description: memory.description || "",
           isPublic: memory.isPublic ?? true,
           coverImage: null,
           gallery: [],
-          existingCover: memory.coverImage,
-          existingGallery: memory.media,
+          existingCover: memory.coverImage || "",
+          existingGallery: memory.media || [],
         });
         setHasChanges(false);
       } catch (error) {
-        console.error(error);
+        console.error("Fetch memory error:", error);
         toast.error("Unable to load memory.");
+        sessionStorage.removeItem(RETURN_KEY);
         navigate(returnTo, { replace: true });
       } finally {
         setLoading(false);
@@ -120,14 +106,16 @@ const EditMemory = () => {
     };
 
     fetchMemory();
-  }, [id, navigate, returnTo]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
+  // Form Validation Handler
   const validateForm = () => {
-    if (!formData.title.trim()) {
+    if (!formData.title || !formData.title.trim()) {
       toast.error("Please enter a memory title.");
       return false;
     }
-    if (!formData.location.trim()) {
+    if (!formData.location || !formData.location.trim()) {
       toast.error("Please enter a location.");
       return false;
     }
@@ -143,7 +131,7 @@ const EditMemory = () => {
       toast.error("Please select a mode of travel.");
       return false;
     }
-    if (!formData.description.trim()) {
+    if (!formData.description || !formData.description.trim()) {
       toast.error("Please write your story.");
       return false;
     }
@@ -158,14 +146,16 @@ const EditMemory = () => {
     if (hasChanges) {
       setShowDiscardModal(true);
     } else {
-      navigate(returnTo);
+      sessionStorage.removeItem(RETURN_KEY);
+      navigate(returnTo, { replace: true });
     }
   };
 
   const discardMemory = () => {
     setShowDiscardModal(false);
     setHasChanges(false);
-    navigate(returnTo);
+    sessionStorage.removeItem(RETURN_KEY);
+    navigate(returnTo, { replace: true });
   };
 
   const handleDeleteExistingMedia = (media) => {
@@ -200,13 +190,18 @@ const EditMemory = () => {
     }
   };
 
+  // --- Handle Save: single clean handler, no duplicate global listeners.
+  // Awaits the actual network call before navigating away, so the save is
+  // guaranteed to have gone out (and either lands or reports an error)
+  // before we redirect on the very first click.
   const handleSubmit = async () => {
+    if (saving) return; // guard against accidental double-invocation
     if (!validateForm()) return;
 
-    try {
-      setLoading(true);
-      const data = new FormData();
+    setSaving(true);
 
+    try {
+      const data = new FormData();
       data.append("title", formData.title);
       data.append("location", formData.location);
       data.append("startDate", formData.startDate);
@@ -215,10 +210,14 @@ const EditMemory = () => {
       data.append("description", formData.description);
       data.append("isPublic", formData.isPublic);
 
-      data.append(
-        "existingGallery",
-        JSON.stringify(formData.existingGallery.map((item) => item.publicId))
-      );
+      if (Array.isArray(formData.existingGallery)) {
+        data.append(
+          "existingGallery",
+          JSON.stringify(
+            formData.existingGallery.map((item) => item.publicId || item)
+          )
+        );
+      }
 
       if (!formData.coverImage && !formData.existingCover) {
         data.append("removeCover", "true");
@@ -237,27 +236,31 @@ const EditMemory = () => {
         });
       }
 
+      // Wait for the update to actually complete before doing anything else.
       await updateMemory(id, data);
-      setShowDiscardModal(false);
-      setHasChanges(false);
+
       toast.success("Memory updated successfully!");
-
-      // Trigger global live sync across stats and views
       notifyOtherTabs();
+      setHasChanges(false);
+      sessionStorage.removeItem(RETURN_KEY);
 
-      // Navigate back directly to the exact origin page (preserving pagination & filters)
+      // Instant SPA navigation back to the exact origin path + pagination —
+      // no full page reload, so no freeze and no race with the request above.
       navigate(returnTo, { replace: true });
     } catch (error) {
-      console.error(error);
-      toast.error("Unable to update memory.");
+      console.error("Update memory error:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Unable to update memory. Please try again."
+      );
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
   return (
     <div className="space-y-6 pb-12">
-      <PageTitle title="Avora - Edit Memory" />
+      <PageTitle title="Edit Memory" />
       <div>
         <button
           type="button"
@@ -316,7 +319,7 @@ const EditMemory = () => {
           {/* Mobile & Tablet Action Buttons */}
           <div className="xl:hidden bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 mt-6">
             <ActionButtons
-              loading={loading}
+              loading={loading || saving}
               onSubmit={handleSubmit}
               onCancel={handleCancel}
               buttonText="Save Changes"
@@ -324,15 +327,16 @@ const EditMemory = () => {
           </div>
         </div>
 
+        {/* Desktop Sidebar Action Buttons */}
         <div className="hidden xl:block xl:col-span-1">
           <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 flex flex-col h-[calc(100vh-10rem)]">
-            <div className="overflow-y-auto scrollbar-hide flex-1 pr-1 pb-4">
+            <div className="overflow-y-auto scrollbar-hide flex-1 pr-1 pb-2">
               <LivePreview formData={formData} />
             </div>
 
-            <div className="pt-4 border-t border-slate-100 bg-white shrink-0">
+            <div className="pt-2 bg-white shrink-0">
               <ActionButtons
-                loading={loading}
+                loading={loading || saving}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
                 buttonText="Save Changes"
@@ -344,7 +348,7 @@ const EditMemory = () => {
 
       <DiscardMemoryModal
         open={showDiscardModal}
-        loading={loading}
+        loading={saving}
         onClose={() => setShowDiscardModal(false)}
         onDiscard={discardMemory}
         onPublish={handleSubmit}

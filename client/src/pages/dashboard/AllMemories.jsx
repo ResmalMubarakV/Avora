@@ -221,7 +221,7 @@ const AllMemories = () => {
                 memory={memory}
                 isOwner={true}
                 redirectTo={{
-                  from: "/dashboard/memories",
+                  from: location.pathname + location.search,
                   label: "My Memories",
                 }}
               />

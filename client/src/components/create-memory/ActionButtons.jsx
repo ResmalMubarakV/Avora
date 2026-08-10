@@ -11,13 +11,17 @@ const ActionButtons = ({
   loadingText = "Please wait...",
 }) => {
   return (
-    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+    <div className="flex flex-col-reverse gap-2.5 sm:flex-row sm:items-center w-full">
       {/* Cancel Button */}
       <button
         type="button"
-        onClick={onCancel}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (onCancel) onCancel();
+        }}
         disabled={loading}
-        className="cursor-pointer w-full sm:w-auto rounded-2xl border border-slate-200 px-8 py-3 font-medium text-slate-700 transition-all duration-300 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 text-center"
+        className="cursor-pointer w-full sm:flex-1 rounded-2xl border border-slate-200 py-3 font-medium text-slate-700 transition-all duration-300 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 text-center"
       >
         Cancel
       </button>
@@ -25,9 +29,15 @@ const ActionButtons = ({
       {/* Primary Action Button */}
       <button
         type="button"
-        onClick={onSubmit}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!loading && onSubmit) {
+            onSubmit();
+          }
+        }}
         disabled={loading}
-        className="flex cursor-pointer w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#1E3A8A] to-[#3559D4] px-8 py-3 font-semibold text-white shadow-lg shadow-[#1E3A8A]/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 text-center"
+        className="flex cursor-pointer w-full sm:flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#1E3A8A] to-[#3559D4] py-3 font-semibold text-white shadow-lg shadow-[#1E3A8A]/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70 text-center"
       >
         {loading ? (
           <>

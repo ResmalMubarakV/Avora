@@ -58,13 +58,17 @@ const Profile = () => {
   useEffect(() => {
     if (!profileUsername) return;
 
+    let isMounted = true;
     const fetchProfile = async () => {
       try {
         setLoading(true);
         const { data } = await api.get(`/api/public/${profileUsername}`);
-        setUser(data.user);
-        setMemories(data.memories);
+        if (isMounted) {
+          setUser(data.user);
+          setMemories(data.memories);
+        }
       } catch (error) {
+        if (!isMounted) return;
         if (error.response?.status === 403) {
           navigate("/403", { replace: true });
           return;
@@ -74,12 +78,18 @@ const Profile = () => {
           return;
         }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchProfile();
-  }, [profileUsername, location.key, navigate]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [profileUsername, navigate]); // Removed location.key to prevent infinite refetching loops!
 
   const handleBack = () => {
     if (isAdminViewer) {
@@ -91,7 +101,7 @@ const Profile = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <PageTitle title="Loading Profile" />

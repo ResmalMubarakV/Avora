@@ -239,11 +239,11 @@ const CreateMemory = () => {
         {/* Desktop Sidebar Preview & Buttons */}
         <div className="hidden xl:block xl:col-span-1">
           <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 flex flex-col h-[calc(100vh-10rem)]">
-            <div className="overflow-y-auto scrollbar-hide flex-1 pr-1 pb-4">
+            <div className="overflow-y-auto scrollbar-hide flex-1 pr-1 pb-2">
               <LivePreview formData={formData} />
             </div>
 
-            <div className="pt-4 border-t border-slate-100 bg-white shrink-0">
+            <div className="pt-2 bg-white shrink-0">
               <ActionButtons
                 loading={loading}
                 onSubmit={handleSubmit}

@@ -6,12 +6,14 @@ import {
     Trash2,
     Pin,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 
 import api from "../../api/axios";
 import { deleteMemory } from "../../api/memoryApi";
 import DeleteMemoryModal from "./DeleteMemoryModal";
+
+const RETURN_KEY = "avora_edit_return_to";
 
 // ==========================================
 // MEMORY ACTIONS COMPONENT
@@ -19,11 +21,12 @@ import DeleteMemoryModal from "./DeleteMemoryModal";
 const MemoryActions = ({
     memory,
     redirect = true,
-    redirectTo = "/dashboard/memories",
+    redirectTo,
     onDeleted,
     onPinUpdated,
 }) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const menuRef = useRef(null);
 
     const [open, setOpen] = useState(false);
@@ -59,18 +62,24 @@ const MemoryActions = ({
         };
     }, []);
 
-    // --- Handle Edit Navigation ---
+    // --- Handle Edit Navigation (Preserves exact pagination search parameters) ---
     const handleEdit = () => {
         setOpen(false);
+
+        // Resolve path from prop, or fallback precisely to current path + query string (e.g. ?page=4)
+        const originPath = typeof redirectTo === "object" ? redirectTo?.from : redirectTo;
+        const finalFrom = originPath || location.pathname + location.search;
+
+        // Persist immediately in sessionStorage so EditMemory can read it on mount,
+        // even before the React Router navigation state is available.
+        sessionStorage.setItem(RETURN_KEY, finalFrom);
+
         navigate(
             `/dashboard/edit-memory/${memory._id}`,
             {
                 state: {
-                    from: redirectTo,
-                    label:
-                        redirectTo === "/dashboard"
-                            ? "Dashboard"
-                            : "Profile",
+                    from: finalFrom,
+                    label: finalFrom.includes("/dashboard") ? "Dashboard" : "Profile",
                 },
             }
         );
@@ -133,8 +142,9 @@ const MemoryActions = ({
             }
 
             if (redirect) {
+                const fallbackRedirect = typeof redirectTo === "object" ? redirectTo?.from : redirectTo;
                 navigate(
-                    redirectTo,
+                    fallbackRedirect || "/dashboard/memories",
                     {
                         replace: true,
                     }
@@ -235,7 +245,6 @@ const MemoryActions = ({
                             Edit Memory
                         </button>
 
-                        {isOwnerOrAllowed(isPinned) && ( // standard pin option
                         <button
                             type="button"
                             onClick={handleTogglePin}
@@ -260,7 +269,6 @@ const MemoryActions = ({
                             <Pin size={13} className={`text-slate-500 ${isPinned ? "fill-slate-500" : ""}`} />
                             {isPinned ? "Unpin Memory" : "Pin Memory"}
                         </button>
-                        )}
 
                         <button
                             type="button"
@@ -334,8 +342,5 @@ const MemoryActions = ({
         </>
     );
 };
-
-// Quick helper function check
-const isOwnerOrAllowed = (isPinned) => true;
 
 export default MemoryActions;

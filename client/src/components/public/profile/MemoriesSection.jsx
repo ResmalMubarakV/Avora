@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 import MemoriesCard from "../../../components/dashboard/memories/MemoriesCard";
 import ProfileSearch from "./ProfileSearch";
@@ -16,11 +17,16 @@ const MemoriesSection = ({
     username,
     isOwner,
 }) => {
+    const location = useLocation();
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const pageParam = Number(searchParams.get("page")) || 1;
+
     const [memories, setMemories] = useState(initialMemories);
     const [search, setSearch] = useState("");
     const [selectedFilters, setSelectedFilters] = useState([]);
     const [sortBy, setSortBy] = useState("newest");
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(pageParam);
     const [viewMode, setViewMode] = useState("grid");
 
     const itemsPerPage = viewMode === "inline" ? ITEMS_PER_PAGE_INLINE : ITEMS_PER_PAGE_GRID;
@@ -66,7 +72,6 @@ const MemoriesSection = ({
             return matchesAll;
         });
 
-        // If search or filters are active, ignore pin priority and use selected sort or default search order
         if (hasActiveFilterOrSearch) {
             switch (sortBy) {
                 case "oldest":
@@ -79,7 +84,6 @@ const MemoriesSection = ({
                     filtered.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
             }
         } else {
-            // When NO filters or search are active, sort with Pinned items strictly first (up to 4)
             filtered.sort((a, b) => {
                 if (a.isPinned === b.isPinned) {
                     return new Date(b.startDate) - new Date(a.startDate);
@@ -93,12 +97,24 @@ const MemoriesSection = ({
 
     useEffect(() => {
         setCurrentPage(1);
+        searchParams.delete("page");
+        setSearchParams(searchParams, { replace: true });
     }, [search, selectedFilters, sortBy, viewMode]);
 
     const totalPages = Math.max(
         1,
         Math.ceil(filteredMemories.length / itemsPerPage)
     );
+
+    const handlePageChange = (newPage) => {
+        setCurrentPage(newPage);
+        if (newPage > 1) {
+            setSearchParams({ page: newPage.toString() }, { replace: true });
+        } else {
+            searchParams.delete("page");
+            setSearchParams(searchParams, { replace: true });
+        }
+    };
 
     const paginatedMemories = filteredMemories.slice(
         (currentPage - 1) * itemsPerPage,
@@ -107,7 +123,7 @@ const MemoriesSection = ({
 
     useEffect(() => {
         if (currentPage > totalPages) {
-            setCurrentPage(totalPages);
+            handlePageChange(totalPages);
         }
     }, [currentPage, totalPages]);
 
@@ -124,7 +140,6 @@ const MemoriesSection = ({
                 space-y-6
             "
         >
-            {/* Header & Controls Toolbar */}
             <div
                 className="
                     flex
@@ -276,7 +291,7 @@ const MemoriesSection = ({
                                     username={username}
                                     isOwner={isOwner}
                                     redirectTo={{
-                                        from: `/${username}`,
+                                        from: location.pathname + location.search,
                                         label: "Profile",
                                     }}
                                     onPinUpdated={handlePinUpdated}
@@ -288,7 +303,7 @@ const MemoriesSection = ({
                     <ProfilePagination
                         currentPage={currentPage}
                         totalPages={totalPages}
-                        setCurrentPage={setCurrentPage}
+                        setCurrentPage={handlePageChange}
                     />
                 </>
             )}
