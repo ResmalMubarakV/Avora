@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Sparkles, X, Wand2, Loader2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Sparkles, X, Wand2, Loader2, Mic, MicOff } from "lucide-react";
 import { toast } from "sonner";
 import { askAI } from "../../api/aiApi";
 
@@ -9,27 +9,82 @@ import { askAI } from "../../api/aiApi";
 const MemoryAIModal = ({ open, onClose, onApply }) => {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef(null);
 
   if (!open) return null;
 
+  // Initialize Speech Recognition on mount
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "en-US"; // Change to "ml-IN" if you want to speak in Malayalam!
+
+      recognition.onresult = (event) => {
+        let transcript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        setPrompt((prev) => prev + " " + transcript);
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error", event.error);
+        toast.error("Microphone error. Please try typing.");
+        setIsRecording(false);
+      };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
+  }, []);
+
+  const toggleRecording = () => {
+    if (!recognitionRef.current) {
+      toast.error("Speech recognition is not supported in your browser.");
+      return;
+    }
+
+    if (isRecording) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    } else {
+      setPrompt(""); // Clear previous text or keep it depending on preference
+      try {
+        recognitionRef.current.start();
+        setIsRecording(true);
+        toast.success("Listening... Speak now!");
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
   const handleGenerate = async () => {
+    if (isRecording && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    }
+
     if (!prompt.trim()) {
-      toast.error("Please enter a brief description of your trip.");
+      toast.error("Please enter or record a brief description of your trip.");
       return;
     }
 
     try {
       setLoading(true);
 
-      // Completely different opening and closing frameworks to ensure 100% variety
       const narrativeblueprints = [
-        `BLUEPRINT A (Start at the End): Start the story right at the very end—sitting late at night over plates of Mandhi back in Palakkad, looking back at how crazy the last 24 hours were. Then recount the trip as a flashback starting from the December 10 departure.`,
-        
-        `BLUEPRINT B (Start Mid-Journey): Start the story right in the middle of the action—standing by Kodaikanal Lake with a hot cup of tea in the evening. Then weave in how you got there from the December 10 road trip and exploring Suicide Point and Kookal.`,
-        
-        `BLUEPRINT C (Chronological & Casual): Start directly with the midnight car ride on December 10 with Kochu, Ansil, Chachu, and Salman. Keep it moving fast through the morning arrival, the cave visits, and wrap up with the late-night return home.`,
-        
-        `BLUEPRINT D (Focus on the Road & Vibe): Start the story by focusing on the feeling of being cramped in the car on the way up the mountain. Let the narrative flow naturally through the spots visited and end on the quiet drive back under the stars.`
+        `BLUEPRINT A (Start at the End): Start the story right at the very end—sitting late at night over food back home, looking back at how crazy the journey was. Then recount the trip as a flashback.`,
+        `BLUEPRINT B (Start Mid-Journey): Start the story right in the middle of the action—standing at a scenic spot or having tea. Then weave in how you got there from the departure.`,
+        `BLUEPRINT C (Chronological & Casual): Start directly with the departure time and setting off on the road. Keep it moving fast through the stops and wrap up with the return home.`,
+        `BLUEPRINT D (Focus on the Road & Vibe): Start the story by focusing on the feeling of being in the car on the way. Let the narrative flow naturally through the spots visited.`
       ];
       
       const randomBlueprint = narrativeblueprints[Math.floor(Math.random() * narrativeblueprints.length)];
@@ -82,11 +137,14 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900">Avora AI Storyteller</h3>
-              <p className="text-xs text-slate-500">Dynamic, non-repetitive travel narratives</p>
+              <p className="text-xs text-slate-500">Type or speak your travel details</p>
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={() => {
+              if (isRecording && recognitionRef.current) recognitionRef.current.stop();
+              onClose();
+            }}
             className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
           >
             <X size={20} />
@@ -96,16 +154,33 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
         {/* Body */}
         <div className="py-5 space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">
-              What happened during your trip?
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">
+                What happened during your trip?
+              </label>
+
+              {/* Voice Record Toggle Button */}
+              <button
+                type="button"
+                onClick={toggleRecording}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition shadow-sm cursor-pointer ${
+                  isRecording 
+                    ? "bg-rose-500 text-white animate-pulse shadow-rose-500/30" 
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                }`}
+              >
+                {isRecording ? <MicOff size={14} /> : <Mic size={14} />}
+                <span>{isRecording ? "Listening..." : "Record Voice"}</span>
+              </button>
+            </div>
+
             <textarea
               rows={4}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={handleKeyDown}
               autoFocus
-              placeholder="e.g., A trip to Kodaikanal from Palakkad with friends, visiting viewpoints, drinking tea by the lake, and eating mandhi..."
+              placeholder="Click 'Record Voice' and speak freely about your trip, or type it here..."
               className="w-full rounded-2xl border border-slate-200 p-4 text-sm text-slate-800 outline-none focus:border-[#3559D4] focus:ring-4 focus:ring-blue-100 transition resize-none placeholder:text-slate-400"
             />
           </div>
@@ -119,7 +194,10 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => {
+                if (isRecording && recognitionRef.current) recognitionRef.current.stop();
+                onClose();
+              }}
               className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition cursor-pointer"
             >
               Cancel
