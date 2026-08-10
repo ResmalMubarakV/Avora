@@ -19,7 +19,7 @@ const MemoryHero = ({
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Preserve the incoming origin state (e.g. pagination/filters from profile or memories list)
+    // Safely capture the exact origin path (including pagination and filters) from state history
     const incomingFrom = locationState?.from || location.state?.from;
     const from = incomingFrom || `/${username}`;
     const label = locationState?.label || (incomingFrom?.includes("/dashboard/memories") ? "Memories" : "Profile");
@@ -98,7 +98,7 @@ const MemoryHero = ({
                                     `/dashboard/edit-memory/${memory._id}`,
                                     {
                                         state: {
-                                            from: from, // Pass the original list/profile path forward!
+                                            from: from, // Pass exact pagination/filters forward to edit page!
                                             label: label,
                                         },
                                     }

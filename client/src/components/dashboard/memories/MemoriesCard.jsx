@@ -10,7 +10,7 @@ import {
   Heart,
   Pin,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 
 import MemoryActions from "../../memory/MemoryActions";
@@ -51,6 +51,7 @@ const MemoriesCard = ({
   onPinUpdated,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLiked, setIsLiked] = useState(memory.isLiked || false);
   const [animatingHeart, setAnimatingHeart] = useState(false);
   
@@ -119,7 +120,7 @@ const MemoriesCard = ({
   const totalVideos =
     memory.media?.filter((item) => item.type === "video").length || 0;
 
-  // --- Handle Navigation to Detailed Memory View ---
+  // --- Handle Navigation to Detailed Memory View (Preserving Pagination State) ---
   const handleOpenMemory = () => {
     const profileUsername =
       typeof memory.user === "object"
@@ -129,7 +130,10 @@ const MemoriesCard = ({
     if (!profileUsername || !memory.slug) return;
 
     navigate(`/${profileUsername}/${memory.slug}`, {
-      state: redirectTo || undefined,
+      state: {
+        from: redirectTo || location.pathname + location.search,
+        label: "Back",
+      },
     });
   };
 

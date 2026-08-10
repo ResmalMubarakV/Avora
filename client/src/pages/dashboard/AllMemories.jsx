@@ -218,7 +218,7 @@ const AllMemories = () => {
             {paginatedMemories.map((memory) => (
               <MemoriesCard
                 key={memory._id}
-                memory={{ ...memory, isPinned: false }}
+                memory={memory}
                 isOwner={true}
                 redirectTo={{
                   from: "/dashboard/memories",

@@ -245,7 +245,7 @@ const EditMemory = () => {
       // Trigger global live sync across stats and views
       notifyOtherTabs();
 
-      // Navigate back directly to the exact origin page (preserving filters/pagination)
+      // Navigate back directly to the exact origin page (preserving pagination & filters)
       navigate(returnTo, { replace: true });
     } catch (error) {
       console.error(error);
