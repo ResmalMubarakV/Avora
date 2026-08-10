@@ -19,6 +19,7 @@ import LivePreview from "../../components/create-memory/LivePreview";
 import DiscardMemoryModal from "../../components/create-memory/DiscardMemoryModal";
 import DeleteMediaModal from "../../components/edit-memory/DeleteMediaModal";
 import PageTitle from "../../components/common/PageTitle";
+import { notifyOtherTabs } from "../../hooks/useMemories";
 
 // ==========================================
 // EDIT MEMORY PAGE COMPONENT
@@ -241,10 +242,13 @@ const EditMemory = () => {
       setHasChanges(false);
       toast.success("Memory updated successfully!");
 
+      // Trigger global live sync across stats and views
+      notifyOtherTabs();
+
       if (response?.slug && response?.user?.username) {
         navigate(`/${response.user.username}/${response.slug}`, { replace: true });
       } else {
-        navigate("/dashboard", { replace: true });
+        navigate(returnTo, { replace: true });
       }
     } catch (error) {
       console.error(error);
@@ -256,7 +260,7 @@ const EditMemory = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      <PageTitle title="Edit Memory" />
+      <PageTitle title="Avora - Edit Memory" />
       <div>
         <button
           type="button"
