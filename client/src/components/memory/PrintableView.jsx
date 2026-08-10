@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { MapPin, CalendarDays, Navigation, Plane, Car, Train, Ship, Move } from "lucide-react";
 
-// SafeImage: PRODUCTION PRINT-SAFE ENGINE (Explicit Pixel Locking & Reset)
+// SafeImage: Direct Hand-Pan & Zoom Engine for Any Aspect Ratio
 const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditing, activeSlot, onSlotClick, onUpdateConfig, style = {}, imgStyle = {} }) => {
   if (!config || !config.url) return <div className={className} style={{ width: '100%', height: '100%', backgroundColor: '#e2e8f0', ...style }} />;
   const { url, zoom = 1, x = 0, y = 0 } = config;
@@ -95,15 +95,11 @@ const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditin
 
   return (
     <div
-      className={className}
+      className={`group relative overflow-hidden block isolation-auto ${className}`}
       style={{ 
-        position: 'relative', 
-        overflow: 'hidden', 
         width: '100%', 
         height: '100%', 
-        display: 'block', 
-        isolation: 'isolate',
-        cursor: isEditing ? (isDragging ? 'grabbing' : 'pointer') : 'default', 
+        cursor: isEditing ? (isDragging ? 'grabbing' : 'grab') : 'default', 
         touchAction: isEditing ? 'none' : 'auto', 
         ...style 
       }}
@@ -135,9 +131,21 @@ const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditin
         draggable={false} 
       />
       
-      {isActive && (
-        <div style={{ position: 'absolute', inset: 0, border: '4px solid #3559D4', backgroundColor: 'rgba(53, 89, 212, 0.1)', boxShadow: 'inset 0 0 0 2px rgba(255,255,255,0.5)', zIndex: 50, pointerEvents: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            {isDragging && <div style={{ backgroundColor: 'rgba(0,0,0,0.6)', color: '#ffffff', padding: '12px', borderRadius: '9999px', backdropFilter: 'blur(12px)' }}><Move size={24} /></div>}
+      {/* Desktop hover badge hint and active edit frame */}
+      {isEditing && (
+        <div className={`absolute inset-0 pointer-events-none transition-all duration-200 ${isActive ? 'border-4 border-[#3559D4] bg-[#3559D4]/10 shadow-inner' : 'border border-transparent group-hover:border-[#3559D4]/60'}`}>
+            {!isActive && (
+              <span className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow-md uppercase tracking-wider flex items-center gap-1">
+                Click to Edit
+              </span>
+            )}
+            {isActive && isDragging && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="bg-slate-950/80 text-white p-3 rounded-full backdrop-blur-md shadow-2xl">
+                  <Move size={20} />
+                </div>
+              </div>
+            )}
         </div>
       )}
     </div>
@@ -175,7 +183,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
   const sharedImgProps = { isEditing, activeSlot, onSlotClick, onUpdateConfig };
 
   // ==========================================
-  // TEMPLATES 0-19 (LARGER FONTS & SAFE LINE-HEIGHTS)
+  // TEMPLATES 0-19
   // ==========================================
 
   if (layoutIndex === 0) {
@@ -191,7 +199,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', padding: '0 32px', marginTop: 'auto', marginBottom: '24px' }}>
              {slotConfigs.slice(0, 4).map((cfg, i) => (
                  <div key={i} style={{ backgroundColor: '#ffffff', padding: '10px', paddingBottom: '36px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0', position: 'relative', height: '180px', boxSizing: 'border-box' }}>
-                      <div style={{ width: '100%', height: '120px', backgroundColor: '#f8fafc', overflow: 'hidden' }}>
+                      <div style={{ width: '100%', height: '120px', backgroundColor: '#f8fafc', overflow: 'hidden', position: 'relative' }}>
                           <SafeImage config={cfg} slotId={i} imgStyle={{ filter: 'grayscale(15%)', WebkitFilter: 'grayscale(15%)' }} {...sharedImgProps} />
                       </div>
                       <div style={{ position: 'absolute', bottom: '8px', left: 0, width: '100%', textAlign: 'center', fontFamily: 'serif', fontSize: '12px', color: '#94a3b8', fontStyle: 'italic' }}>Memory {i+1}</div>
@@ -225,7 +233,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
              </div>
              <div style={{ width: '58.3%', display: 'flex', flexDirection: 'column', gap: '20px', height: '100%' }}>
                  {slotConfigs.slice(0,2).map((cfg, i) => (
-                     <div key={i} style={{ flex: 1, width: '100%', backgroundColor: '#f1f5f9', boxShadow: '0 10px 15px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+                     <div key={i} style={{ flex: 1, width: '100%', backgroundColor: '#f1f5f9', boxShadow: '0 10px 15px rgba(0,0,0,0.1)', overflow: 'hidden', position: 'relative' }}>
                          <SafeImage config={cfg} slotId={i} {...sharedImgProps} />
                      </div>
                  ))}
@@ -256,7 +264,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
             </div>
             <div style={{ display: 'flex', gap: '12px', height: '160px', backgroundColor: '#000000', padding: '12px', boxSizing: 'border-box', flexShrink: 0, overflow: 'hidden' }}>
                  {slotConfigs.slice(0, 4).map((cfg, i) => (
-                     <div key={i} style={{ flex: 1, height: '100%', backgroundColor: '#1a1a1a', overflow: 'hidden' }}>
+                     <div key={i} style={{ flex: 1, height: '100%', backgroundColor: '#1a1a1a', overflow: 'hidden', position: 'relative' }}>
                          <SafeImage config={cfg} slotId={i} imgStyle={{ filter: 'sepia(20%)', WebkitFilter: 'sepia(20%)' }} {...sharedImgProps} />
                      </div>
                  ))}
@@ -285,7 +293,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
                   </div>
                   <div style={{ width: '50%', display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'center', overflow: 'hidden' }}>
                        {slotConfigs.slice(0,3).map((cfg, i) => (
-                           <div key={i} style={{ flex: 1, width: '100%', maxHeight: '160px', backgroundColor: '#0f172a', border: '4px solid #1e293b', boxShadow: '0 15px 30px rgba(0,0,0,0.25)', overflow: 'hidden' }}>
+                           <div key={i} style={{ flex: 1, width: '100%', maxHeight: '160px', backgroundColor: '#0f172a', border: '4px solid #1e293b', boxShadow: '0 15px 30px rgba(0,0,0,0.25)', overflow: 'hidden', position: 'relative' }}>
                                <SafeImage config={cfg} slotId={i} {...sharedImgProps} />
                            </div>
                        ))}
@@ -319,7 +327,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
                   </div>
                   <div style={{ width: '33.333%', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       {slotConfigs.slice(0, 2).map((cfg, i) => (
-                          <div key={i} style={{ width: '100%', height: '110px', backgroundColor: '#222222', border: '3px solid #ffffff', borderRadius: '8px', overflow: 'hidden' }}>
+                          <div key={i} style={{ width: '100%', height: '110px', backgroundColor: '#222222', border: '3px solid #ffffff', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
                               <SafeImage config={cfg} slotId={i} {...sharedImgProps} />
                           </div>
                       ))}
@@ -349,7 +357,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
               </div>
               <div style={{ flex: 1, display: 'flex', gap: '36px', overflow: 'hidden' }}>
                   <div style={{ width: '50%', display: 'flex', flexDirection: 'column', gap: '24px', height: '100%', overflow: 'hidden' }}>
-                      <div style={{ width: '100%', height: '220px', flexShrink: 0, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+                      <div style={{ width: '100%', height: '220px', flexShrink: 0, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', overflow: 'hidden', position: 'relative' }}>
                           <SafeImage config={coverConfig} slotId="cover" imgStyle={{ filter: 'grayscale(100%) contrast(125%)', WebkitFilter: 'grayscale(100%) contrast(125%)' }} {...sharedImgProps} />
                       </div>
                       <div style={{ fontSize: '13px', lineHeight: '1.65', fontFamily: 'serif', color: '#1f2937', textAlign: 'justify', maxHeight: '350px', overflow: 'hidden' }}>
@@ -359,7 +367,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
                   <div style={{ width: '50%', display: 'flex', flexDirection: 'column', gap: '24px', height: '100%', overflow: 'hidden' }}>
                       {slotConfigs.slice(0, 2).map((cfg, i) => (
                           <div key={i} style={{ display: 'flex', flexDirection: 'column', width: '100%', flex: 1, overflow: 'hidden' }}>
-                              <div style={{ flex: 1, minHeight: 0, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+                              <div style={{ flex: 1, minHeight: 0, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', overflow: 'hidden', position: 'relative' }}>
                                   <SafeImage config={cfg} slotId={i} imgStyle={{ filter: 'grayscale(100%) contrast(125%)', WebkitFilter: 'grayscale(100%) contrast(125%)' }} {...sharedImgProps} />
                               </div>
                               <p style={{ fontSize: '8px', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '6px', textAlign: 'right', color: '#9ca3af', fontFamily: 'monospace', margin: 0 }}>Fig. {i+1}</p>
@@ -385,7 +393,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
               </p>
               <div style={{ display: 'flex', gap: '24px', marginBottom: '24px', height: '180px', flexShrink: 0 }}>
                   {slotConfigs.slice(0, 2).map((cfg, i) => (
-                      <div key={i} style={{ flex: 1, height: '100%', backgroundColor: '#ffffff', borderRadius: '20px', border: '3px solid #d87c4a', overflow: 'hidden' }}>
+                      <div key={i} style={{ flex: 1, height: '100%', backgroundColor: '#ffffff', borderRadius: '20px', border: '3px solid #d87c4a', overflow: 'hidden', position: 'relative' }}>
                           <SafeImage config={cfg} slotId={i} {...sharedImgProps} />
                       </div>
                   ))}
@@ -426,7 +434,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
                   </div>
                   <div style={{ width: '58.3%', display: 'flex', flexDirection: 'column', gap: '16px', height: '100%', overflow: 'hidden' }}>
                       {slotConfigs.slice(0, 3).map((cfg, i) => (
-                          <div key={i} style={{ flex: 1, minHeight: 0, border: '2px solid #1e3a8a', padding: '6px', backgroundColor: '#ffffff', overflow: 'hidden' }}>
+                          <div key={i} style={{ flex: 1, minHeight: 0, border: '2px solid #1e3a8a', padding: '6px', backgroundColor: '#ffffff', overflow: 'hidden', position: 'relative' }}>
                               <SafeImage config={cfg} slotId={i} {...sharedImgProps} />
                           </div>
                       ))}
@@ -447,7 +455,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
                   <p style={{ fontSize: '11px', fontWeight: 'bold', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#94a3b8', margin: 0 }}>{location}</p>
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
-                  <div style={{ width: '100%', height: '320px', padding: '12px', backgroundColor: '#ffffff', boxShadow: '0 15px 30px rgba(0,0,0,0.1)', borderRadius: '4px', marginBottom: '32px', transform: 'rotate(1deg)', flexShrink: 0, overflow: 'hidden' }}>
+                  <div style={{ width: '100%', height: '320px', padding: '12px', backgroundColor: '#ffffff', boxShadow: '0 15px 30px rgba(0,0,0,0.1)', borderRadius: '4px', marginBottom: '32px', transform: 'rotate(1deg)', flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
                       <SafeImage config={coverConfig} slotId="cover" {...sharedImgProps} />
                   </div>
                   <div style={{ fontSize: '15px', lineHeight: '1.65', fontFamily: 'serif', color: '#475569', textAlign: 'center', padding: '0 24px', maxHeight: '180px', overflow: 'hidden' }}>
@@ -463,7 +471,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
     return (
       <Wrapper style={{ backgroundColor: '#f8fafc', padding: '40px', color: '#0f172a', display: 'flex', flexDirection: 'column' }}>
           <header style={{ position: 'absolute', top: '40px', left: '40px', width: '720px', height: '100px', display: 'flex', alignItems: 'center', gap: '16px', backgroundColor: '#ffffff', padding: '16px 20px', borderRadius: '20px', boxSizing: 'border-box', border: '1px solid #f1f5f9' }}>
-              <div style={{ width: '60px', height: '60px', borderRadius: '50%', flexShrink: 0, overflow: 'hidden', backgroundColor: '#f8fafc' }}>
+              <div style={{ width: '60px', height: '60px', borderRadius: '50%', flexShrink: 0, overflow: 'hidden', backgroundColor: '#f8fafc', position: 'relative' }}>
                   <SafeImage config={coverConfig} slotId="cover" {...sharedImgProps} />
               </div>
               <div style={{ overflow: 'hidden', flex: 1 }}>
@@ -520,7 +528,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
           </div>
           <div style={{ display: 'flex', gap: '16px', height: '220px', flexShrink: 0, marginTop: 'auto' }}>
              {slotConfigs.slice(0,2).map((cfg, i) => (
-                 <div key={i} style={{ flex: 1, height: '100%', border: '2px solid #111111', padding: '6px', backgroundColor: '#ffffff', overflow: 'hidden' }}>
+                 <div key={i} style={{ flex: 1, height: '100%', border: '2px solid #111111', padding: '6px', backgroundColor: '#ffffff', overflow: 'hidden', position: 'relative' }}>
                      <SafeImage config={cfg} slotId={i} imgStyle={{ filter: 'grayscale(100%)', WebkitFilter: 'grayscale(100%)' }} {...sharedImgProps} />
                  </div>
              ))}
@@ -565,7 +573,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
               <p style={{ fontSize: '11px', letterSpacing: '0.4em', textTransform: 'uppercase', color: '#c19a6b', marginBottom: '20px', marginTop: '12px', margin: '12px 0 20px 0', flexShrink: 0 }}>{dateStr}</p>
               <h1 style={{ fontSize: '38px', fontFamily: 'serif', fontWeight: '300', letterSpacing: '0.05em', marginBottom: '24px', lineHeight: '1.2', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', margin: '0 0 24px 0', flexShrink: 0 }}>{title}</h1>
               
-              <div style={{ width: '100%', height: '220px', marginBottom: '24px', backgroundColor: '#fdfbf7', padding: '6px', border: '1px solid #eaeaea', boxShadow: '0 10px 20px rgba(0,0,0,0.05)', flexShrink: 0, overflow: 'hidden' }}>
+              <div style={{ width: '100%', height: '220px', marginBottom: '24px', backgroundColor: '#fdfbf7', padding: '6px', border: '1px solid #eaeaea', boxShadow: '0 10px 20px rgba(0,0,0,0.05)', flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
                   <SafeImage config={coverConfig} slotId="cover" {...sharedImgProps} />
               </div>
 
@@ -604,7 +612,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
                       {story}
                   </div>
               </div>
-              <div style={{ width: '50%', backgroundColor: '#8ecae6', padding: '24px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <div style={{ width: '50%', backgroundColor: '#8ecae6', padding: '24px', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
                   <SafeImage config={coverConfig} slotId="cover" imgStyle={{ mixBlendMode: 'multiply' }} {...sharedImgProps} />
               </div>
           </div>
@@ -616,7 +624,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
     return (
       <Wrapper style={{ backgroundColor: '#e9efe7', padding: '48px', color: '#2c4c3b', display: 'flex', flexDirection: 'column' }}>
           <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
-              <div style={{ width: '100%', height: '340px', border: '6px solid #ffffff', boxShadow: '0 15px 30px rgba(44,76,59,0.1)', marginBottom: '24px', backgroundColor: '#dce5da', borderTopLeftRadius: '160px', borderTopRightRadius: '160px', overflow: 'hidden', padding: '6px', flexShrink: 0 }}>
+              <div style={{ width: '100%', height: '340px', border: '6px solid #ffffff', boxShadow: '0 15px 30px rgba(44,76,59,0.1)', marginBottom: '24px', backgroundColor: '#dce5da', borderTopLeftRadius: '160px', borderTopRightRadius: '160px', overflow: 'hidden', padding: '6px', flexShrink: 0, position: 'relative' }}>
                   <SafeImage config={coverConfig} slotId="cover" style={{ borderTopLeftRadius: '154px', borderTopRightRadius: '154px' }} imgStyle={{ borderTopLeftRadius: '154px', borderTopRightRadius: '154px' }} {...sharedImgProps} />
               </div>
               <h1 style={{ fontSize: '38px', fontFamily: 'serif', textAlign: 'center', marginBottom: '16px', lineHeight: '1.2', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', margin: '0 0 16px 0', flexShrink: 0 }}>{title}</h1>
@@ -644,7 +652,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
               </div>
               <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', height: '160px', flexShrink: 0 }}>
                   {slotConfigs.slice(0, 3).map((cfg, i) => (
-                      <div key={i} style={{ flex: 1, height: '100%', borderRadius: '16px', backgroundColor: '#fef1f5', padding: '6px', overflow: 'hidden' }}>
+                      <div key={i} style={{ flex: 1, height: '100%', borderRadius: '16px', backgroundColor: '#fef1f5', padding: '6px', overflow: 'hidden', position: 'relative' }}>
                           <SafeImage config={cfg} slotId={i} style={{ borderRadius: '12px' }} imgStyle={{ borderRadius: '12px' }} {...sharedImgProps} />
                       </div>
                   ))}
@@ -674,7 +682,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
               <div style={{ display: 'flex', gap: '32px', flex: 1, overflow: 'hidden' }}>
                   <div style={{ width: '33.3%', display: 'flex', flexDirection: 'column', gap: '20px', height: '100%', overflow: 'hidden' }}>
                       {slotConfigs.slice(0, 2).map((cfg, i) => (
-                          <div key={i} style={{ flex: 1, width: '100%', minHeight: 0, backgroundColor: '#f0f0f0', padding: '10px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+                          <div key={i} style={{ flex: 1, width: '100%', minHeight: 0, backgroundColor: '#f0f0f0', padding: '10px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)', overflow: 'hidden', position: 'relative' }}>
                               <SafeImage config={cfg} slotId={i} {...sharedImgProps} />
                           </div>
                       ))}
@@ -724,7 +732,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
               </div>
               <div style={{ width: '25%', padding: '20px', backgroundColor: '#f4f4f4', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', overflow: 'hidden' }}>
                   <p style={{ fontSize: '24px', fontWeight: '900', transform: 'rotate(-90deg)', transformOrigin: 'center', whiteSpace: 'nowrap', color: '#cccccc', margin: '60px 0 0 0' }}>ADMIT ONE</p>
-                  <div style={{ width: '80px', height: '80px', borderRadius: '50%', border: '3px solid #ffffff', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', padding: '4px', flexShrink: 0, overflow: 'hidden' }}>
+                  <div style={{ width: '80px', height: '80px', borderRadius: '50%', border: '3px solid #ffffff', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', backgroundColor: '#ffffff', padding: '4px', flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
                       <SafeImage config={coverConfig} slotId="cover" style={{ borderRadius: '50%' }} imgStyle={{ borderRadius: '50%' }} {...sharedImgProps} />
                   </div>
                   <div style={{ display: 'flex', gap: '4px', height: '36px', flexShrink: 0 }}>
@@ -755,7 +763,7 @@ const PrintableView = ({ memory, layoutIndex = 0, mediaConfig = null, isEditing 
               <div style={{ overflow: 'hidden' }}>
                   <div style={{ display: 'flex', gap: '20px', marginBottom: '24px', height: '180px', width: '100%', flexShrink: 0 }}>
                       {slotConfigs.slice(0, 2).map((cfg, i) => (
-                          <div key={i} style={{ flex: 1, height: '100%', backgroundColor: '#eeeeee', padding: '6px', border: '1px solid #dddddd', overflow: 'hidden' }}>
+                          <div key={i} style={{ flex: 1, height: '100%', backgroundColor: '#eeeeee', padding: '6px', border: '1px solid #dddddd', overflow: 'hidden', position: 'relative' }}>
                               <SafeImage config={cfg} slotId={i} imgStyle={{ filter: 'grayscale(100%)', WebkitFilter: 'grayscale(100%)' }} {...sharedImgProps} />
                           </div>
                       ))}

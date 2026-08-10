@@ -10,8 +10,11 @@ import Lightbox from "../../components/memory/Lightbox";
 import PageTitle from "../../components/common/PageTitle";
 import PrintableView from "../../components/memory/PrintableView";
 
-import { Compass, Download, X, ChevronLeft, ChevronRight, ZoomIn, RefreshCcw, MousePointerClick, Settings2, MoveHorizontal, MoveVertical, Shield, ArrowLeft } from "lucide-react";
+import { Compass, Download, X, ChevronLeft, ChevronRight, MousePointerClick, Shield, ArrowLeft, ZoomIn, ZoomOut, MoveHorizontal, MoveVertical, RefreshCcw, Image as ImageIcon, Check, Sliders } from "lucide-react";
 
+// ==========================================
+// PUBLIC MEMORY COMPONENT
+// ==========================================
 const PublicMemory = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -40,7 +43,8 @@ const PublicMemory = () => {
   const [selectedIndex, setSelectedIndex] = useState(imageParam ? Number(imageParam) : 0);
 
   const [mediaConfig, setMediaConfig] = useState(null);
-  const [activeSlot, setActiveSlot] = useState(null);
+  const [activeSlot, setActiveSlot] = useState(0); 
+  const [showImagePickerModal, setShowImagePickerModal] = useState(false);
 
   const allImages = Array.from(new Set([
       memory?.coverImage,
@@ -48,7 +52,7 @@ const PublicMemory = () => {
   ].filter(Boolean))).map(url => ({ url }));
 
   // ==========================================
-  // INJECT PRINT STYLES DIRECTLY TO <HEAD>
+  // INJECT CLEAN PRINT STYLES DIRECTLY TO <HEAD>
   // ==========================================
   useEffect(() => {
     if (!isPreviewMode) return;
@@ -76,6 +80,10 @@ const PublicMemory = () => {
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
             }
+            .print-hidden-outlines * {
+              outline: none !important;
+              border: none !important;
+            }
           }
         `;
         document.head.appendChild(style);
@@ -88,7 +96,7 @@ const PublicMemory = () => {
   }, [isPreviewMode]);
 
   const handleNativePrint = () => {
-    setActiveSlot(null); 
+    setShowImagePickerModal(false);
     const prevTitle = document.title;
     document.title = `${memory?.slug || 'memory'}-diary`;
 
@@ -113,7 +121,7 @@ const PublicMemory = () => {
   }, [memory]);
 
   useEffect(() => {
-    if (isPreviewMode && memory && !mediaConfig) {
+    if (memory && !mediaConfig) {
         const baseCover = memory.coverImage || (allImages.length > 0 ? allImages[0].url : "");
         const initialSlots = Array.from({ length: 9 }).map((_, i) => {
             const fallbackImg = allImages[i % allImages.length];
@@ -124,8 +132,9 @@ const PublicMemory = () => {
             slots: initialSlots
         });
     }
-  }, [isPreviewMode, memory, mediaConfig, allImages]);
+  }, [memory, mediaConfig, allImages]);
 
+  // Non-scrollable strict single-window scaling calculation accommodating the desktop right-side panel
   useEffect(() => {
     if (!isPreviewMode) return;
     
@@ -135,20 +144,20 @@ const PublicMemory = () => {
     const observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
         const { width, height } = entry.contentRect;
-        const availableWidth = width - 32; 
-        const availableHeight = height - 90;
+        const availableWidth = width - (window.innerWidth >= 1024 ? 340 : 32); 
+        const availableHeight = height - 20;
 
         if (availableWidth > 0 && availableHeight > 0) {
           const scaleX = availableWidth / 800;
           const scaleY = availableHeight / 1131;
-          setPreviewScale(Math.min(scaleX, scaleY, 1));
+          setPreviewScale(Math.min(scaleX, scaleY));
         }
       }
     });
 
     observer.observe(container);
     return () => observer.disconnect();
-  }, [isPreviewMode, layoutIndex, activeSlot]);
+  }, [isPreviewMode, layoutIndex]);
 
   const handleConfigChange = (slotId, key, value) => {
       if (slotId === 'cover') {
@@ -162,9 +171,8 @@ const PublicMemory = () => {
       }
   };
 
-  const currentEditorConfig = activeSlot === 'cover' ? mediaConfig?.cover : mediaConfig?.slots[activeSlot];
-  const getMaxPan = (z) => (z > 1 ? ((z - 1) / z) * 50 : 0);
-  const currentMaxPan = currentEditorConfig ? getMaxPan(currentEditorConfig.zoom) : 0;
+  const currentEditorConfig = activeSlot === 'cover' ? mediaConfig?.cover : (activeSlot !== null && activeSlot !== undefined ? mediaConfig?.slots[activeSlot] : null);
+  const getMaxPan = (z) => 50 * Math.max(1, z);
 
   const enterPreviewMode = () => {
       const randomLayout = Math.floor(Math.random() * 20);
@@ -172,11 +180,11 @@ const PublicMemory = () => {
   };
   const exitPreviewMode = () => setSearchParams({}, { replace: true });
   const nextLayout = () => {
-      setActiveSlot(null);
+      setShowImagePickerModal(false);
       setSearchParams({ preview: "true", layout: ((layoutIndex + 1) % 20).toString() }, { replace: true });
   };
   const prevLayout = () => {
-      setActiveSlot(null);
+      setShowImagePickerModal(false);
       setSearchParams({ preview: "true", layout: ((layoutIndex - 1 + 20) % 20).toString() }, { replace: true });
   };
 
@@ -184,14 +192,17 @@ const PublicMemory = () => {
     if (!isPreviewMode) return;
 
     const handleKeyDown = (e) => {
-      if (e.key === "ArrowLeft") prevLayout();
-      else if (e.key === "ArrowRight") nextLayout();
-      else if (e.key === "Escape") exitPreviewMode();
+      if (e.key === "ArrowLeft" && !showImagePickerModal) prevLayout();
+      else if (e.key === "ArrowRight" && !showImagePickerModal) nextLayout();
+      else if (e.key === "Escape") {
+        if (showImagePickerModal) setShowImagePickerModal(false);
+        else exitPreviewMode();
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isPreviewMode, layoutIndex]);
+  }, [isPreviewMode, layoutIndex, showImagePickerModal]);
 
   const openGallery = (index) => { setSelectedIndex(index); setIsOpen(true); setSearchParams({ image: index.toString() }, { replace: false }); };
   const goToImage = (index) => { setSelectedIndex(index); setSearchParams({ image: index.toString() }, { replace: false }); };
@@ -232,10 +243,13 @@ const PublicMemory = () => {
   if (!memory) return null;
 
   if (isPreviewMode) {
+    const isDesktop = window.innerWidth >= 1024;
+
     return (
       <>
+        {/* Hidden Clean Printable DOM Element for Export PDF / Print */}
         <div 
-          className="fixed top-[-20000px] left-[-20000px] print:top-0 print:left-0 z-[999999] m-0 p-0 overflow-hidden bg-white" 
+          className="fixed top-[-20000px] left-[-20000px] print:top-0 print:left-0 z-[999999] m-0 p-0 overflow-hidden bg-white print-hidden-outlines" 
           style={{ width: "800px", height: "1131px" }}
         >
             <PrintableView
@@ -249,28 +263,30 @@ const PublicMemory = () => {
             />
         </div>
 
-        <div className="print:hidden min-h-[100dvh] h-screen bg-slate-900 flex flex-col overflow-hidden fixed inset-0 z-[100]">
-            <div className="flex-none flex items-center justify-between bg-slate-950/90 backdrop-blur-md px-4 sm:px-8 py-3.5 border-b border-slate-800 shadow-xl z-50">
+        <div className="print:hidden h-[100dvh] w-screen bg-slate-900 flex flex-col overflow-hidden fixed inset-0 z-[100]">
+            {/* Top Toolbar */}
+            <div className="flex-none flex items-center justify-between bg-slate-950/90 backdrop-blur-md px-4 sm:px-8 py-3 border-b border-slate-800 shadow-xl z-50">
                 <button onClick={exitPreviewMode} className="flex items-center gap-1 sm:gap-2 text-white/80 hover:text-white font-medium cursor-pointer">
                     <X size={20} /> <span className="hidden sm:inline">Back</span>
                 </button>
 
                 <div className="flex items-center justify-center text-center">
-                    <span className="text-white/70 text-[9px] sm:text-xs font-semibold tracking-wider uppercase flex items-center gap-1.5">
+                    <span className="text-white/70 text-[10px] sm:text-xs font-semibold tracking-wider uppercase flex items-center gap-1.5">
                         <MousePointerClick size={14} className="text-[#3559D4] shrink-0"/> 
-                        <span>Drag & Pinch Photo</span>
+                        <span>Tap/Click any photo to change • Use sidebar or touch to frame</span>
                     </span>
                 </div>
 
                 <button
                     onClick={handleNativePrint}
-                    className="flex items-center gap-2 bg-[#3559D4] text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer"
+                    className="flex items-center gap-2 bg-[#3559D4] text-white px-4 py-1.5 sm:px-6 sm:py-2 rounded-full text-xs sm:text-sm font-bold shadow-lg hover:bg-blue-500 transition cursor-pointer"
                 >
                     <Download size={16} /> <span className="hidden sm:inline">Save PDF / Print</span>
                 </button>
             </div>
 
-            <div className="flex-1 w-full flex flex-col md:flex-row overflow-hidden relative pb-16" onClick={() => setActiveSlot(null)}>
+            {/* Strict Single-Window Workspace */}
+            <div className="flex-1 w-full flex flex-col lg:flex-row overflow-hidden relative select-none">
                 <div ref={previewContainerRef} className="flex-1 overflow-hidden flex flex-col justify-center items-center bg-slate-900 relative p-2">
                     <div
                       style={{ 
@@ -280,7 +296,7 @@ const PublicMemory = () => {
                         height: '1131px', 
                         transition: 'transform 0.1s ease-out' 
                       }}
-                      className="shadow-[0_20px_25px_rgba(0,0,0,0.5)] ring-1 ring-white/10 flex-shrink-0 bg-white"
+                      className="shadow-[0_20px_25px_rgba(0,0,0,0.5)] ring-1 ring-white/10 flex-shrink-0 bg-white relative"
                     >
                         <PrintableView
                             memory={memory}
@@ -288,21 +304,184 @@ const PublicMemory = () => {
                             mediaConfig={mediaConfig}
                             isEditing={true}
                             activeSlot={activeSlot}
-                            onSlotClick={(id) => setActiveSlot(id)}
+                            onSlotClick={(id) => {
+                              setActiveSlot(id);
+                              setShowImagePickerModal(true);
+                            }}
                             onUpdateConfig={handleConfigChange}
                         />
+
+                        {/* Universal Image Picker Modal */}
+                        {showImagePickerModal && (
+                          <div 
+                            className="absolute inset-0 bg-slate-950/90 backdrop-blur-md z-[1000] flex flex-col p-6 pointer-events-auto"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                              <h3 className="text-white font-bold text-base flex items-center gap-2">
+                                <ImageIcon size={18} className="text-blue-400" />
+                                Select Photo for {activeSlot === 'cover' ? 'Cover Photo' : `Slot #${typeof activeSlot === 'number' ? activeSlot + 1 : activeSlot}`}
+                              </h3>
+                              <button 
+                                onClick={() => setShowImagePickerModal(false)}
+                                className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition cursor-pointer"
+                              >
+                                <X size={18} />
+                              </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto py-6 grid grid-cols-3 sm:grid-cols-4 gap-4">
+                              {allImages.map((img, idx) => {
+                                const isSelected = currentEditorConfig?.url === img.url;
+                                return (
+                                  <div
+                                    key={idx}
+                                    onClick={() => {
+                                      handleConfigChange(activeSlot, 'url', img.url);
+                                      handleConfigChange(activeSlot, 'zoom', 1);
+                                      handleConfigChange(activeSlot, 'x', 0);
+                                      handleConfigChange(activeSlot, 'y', 0);
+                                      setShowImagePickerModal(false);
+                                    }}
+                                    className={`relative aspect-square rounded-2xl overflow-hidden border-2 cursor-pointer transition group ${
+                                      isSelected ? 'border-blue-500 ring-4 ring-blue-500/20' : 'border-white/10 hover:border-white/40'
+                                    }`}
+                                  >
+                                    <img src={img.url} alt={`Option ${idx}`} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                                    {isSelected && (
+                                      <div className="absolute inset-0 bg-blue-600/30 flex items-center justify-center">
+                                        <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg">
+                                          <Check size={16} />
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            <div className="pt-4 border-t border-white/10 flex justify-end">
+                              <button
+                                onClick={() => setShowImagePickerModal(false)}
+                                className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-xs text-white transition cursor-pointer"
+                              >
+                                Done / Close
+                              </button>
+                            </div>
+                          </div>
+                        )}
                     </div>
                 </div>
 
-                <div className="fixed bottom-3 inset-x-0 flex items-center justify-center gap-3 z-40 pointer-events-auto px-4">
-                    <button onClick={prevLayout} className="p-2.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white shadow-xl border border-slate-700 transition cursor-pointer active:scale-95">
-                        <ChevronLeft size={18} />
+                {/* Always-On Desktop Right-Side Control Panel with Sliders */}
+                {isDesktop && currentEditorConfig && (
+                    <div className="w-80 bg-slate-950 border-l border-slate-800 p-6 flex flex-col gap-5 z-30 shrink-0 shadow-2xl overflow-y-auto">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                            <div className="flex items-center gap-2">
+                                <Sliders size={18} className="text-blue-400" />
+                                <h3 className="text-white font-bold text-sm">
+                                    Photo Framing Control
+                                </h3>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 text-xs text-slate-300">
+                            <p className="text-[11px] text-slate-400 leading-relaxed bg-slate-900 p-3 rounded-xl border border-slate-800">
+                                Click any photo on the preview canvas to target it, or use the sliders below to adjust zoom and X/Y positioning.
+                            </p>
+
+                            {/* Zoom Level Slider */}
+                            <div>
+                                <label className="block font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Zoom Level</label>
+                                <div className="flex items-center gap-3">
+                                    <ZoomOut size={16} className="text-slate-500" />
+                                    <input 
+                                        type="range" 
+                                        min="1" 
+                                        max="5" 
+                                        step="0.05"
+                                        value={currentEditorConfig.zoom}
+                                        onChange={(e) => handleConfigChange(activeSlot, 'zoom', parseFloat(e.target.value))}
+                                        className="flex-1 accent-blue-500 cursor-pointer"
+                                    />
+                                    <ZoomIn size={16} className="text-slate-500" />
+                                    <span className="font-mono w-10 text-right">{Math.round(currentEditorConfig.zoom * 100)}%</span>
+                                </div>
+                            </div>
+
+                            {/* X-Axis Position Slider */}
+                            <div>
+                                <label className="block font-semibold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center justify-between">
+                                    <span>Horizontal Position (X)</span>
+                                    <span className="font-mono text-[10px] text-blue-400">{Math.round(currentEditorConfig.x)}%</span>
+                                </label>
+                                <div className="flex items-center gap-3">
+                                    <MoveHorizontal size={16} className="text-slate-500" />
+                                    <input 
+                                        type="range" 
+                                        min={-getMaxPan(currentEditorConfig.zoom)} 
+                                        max={getMaxPan(currentEditorConfig.zoom)} 
+                                        step="1"
+                                        value={currentEditorConfig.x}
+                                        onChange={(e) => handleConfigChange(activeSlot, 'x', parseFloat(e.target.value))}
+                                        className="flex-1 accent-blue-500 cursor-pointer"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Y-Axis Position Slider */}
+                            <div>
+                                <label className="block font-semibold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center justify-between">
+                                    <span>Vertical Position (Y)</span>
+                                    <span className="font-mono text-[10px] text-blue-400">{Math.round(currentEditorConfig.y)}%</span>
+                                </label>
+                                <div className="flex items-center gap-3">
+                                    <MoveVertical size={16} className="text-slate-500" />
+                                    <input 
+                                        type="range" 
+                                        min={-getMaxPan(currentEditorConfig.zoom)} 
+                                        max={getMaxPan(currentEditorConfig.zoom)} 
+                                        step="1"
+                                        value={currentEditorConfig.y}
+                                        onChange={(e) => handleConfigChange(activeSlot, 'y', parseFloat(e.target.value))}
+                                        className="flex-1 accent-blue-500 cursor-pointer"
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => setShowImagePickerModal(true)}
+                                className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-lg mt-2"
+                            >
+                                <ImageIcon size={16} /> Change Selected Photo
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    handleConfigChange(activeSlot, 'zoom', 1);
+                                    handleConfigChange(activeSlot, 'x', 0);
+                                    handleConfigChange(activeSlot, 'y', 0);
+                                }}
+                                className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold transition flex items-center justify-center gap-2 cursor-pointer"
+                            >
+                                <RefreshCcw size={14} /> Reset Position & Zoom
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Template Navigator Bottom Bar */}
+                <div className="absolute bottom-2 inset-x-0 flex items-center justify-center gap-3 z-40 pointer-events-auto px-4">
+                    <button onClick={prevLayout} className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-white shadow-xl border border-slate-700 transition cursor-pointer active:scale-95">
+                        <ChevronLeft size={16} />
                     </button>
-                    <div className="bg-slate-950/90 backdrop-blur-md border border-slate-800 text-white px-4 py-2 rounded-full text-xs font-bold shadow-2xl tracking-wider uppercase">
+                    <div className="bg-slate-950/90 backdrop-blur-md border border-slate-800 text-white px-3.5 py-1.5 rounded-full text-[11px] font-bold shadow-2xl tracking-wider uppercase">
                         Template {layoutIndex + 1} / 20
                     </div>
-                    <button onClick={nextLayout} className="p-2.5 rounded-full bg-slate-800 hover:bg-slate-700 text-white shadow-xl border border-slate-700 transition cursor-pointer active:scale-95">
-                        <ChevronRight size={18} />
+                    <button onClick={nextLayout} className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-white shadow-xl border border-slate-700 transition cursor-pointer active:scale-95">
+                        <ChevronRight size={16} />
                     </button>
                 </div>
             </div>
@@ -316,7 +495,6 @@ const PublicMemory = () => {
     <main className="print:hidden min-h-screen bg-slate-50 pb-16 relative z-10">
       <PageTitle title={memory.title} />
       
-      {/* Professional Header Management */}
       {isAdminViewer ? (
         <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/90 px-3 sm:px-6 py-2.5 sm:py-3.5 backdrop-blur-md shadow-xs gap-2">
           <button
