@@ -120,7 +120,7 @@ const AdminUsers = () => {
 
     return (
         <div className="space-y-6 pb-16 animate-in fade-in duration-300 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-            <PageTitle title="Avora - User Management" />
+            <PageTitle title="User Management" />
             <div className="space-y-4">
                 <button
                     type="button"

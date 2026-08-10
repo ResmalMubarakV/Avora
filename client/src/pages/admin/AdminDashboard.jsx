@@ -121,7 +121,7 @@ const AdminDashboard = () => {
 
     return (
         <div className="space-y-4 sm:space-y-6 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 overflow-x-hidden">
-            <PageTitle title="Avora - Admin Dashboard" />
+            <PageTitle title="Admin Dashboard" />
             
             {/* Streamlined Mobile-Friendly Hero Header */}
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#3559D4] p-5 sm:p-8 text-white shadow-md">
