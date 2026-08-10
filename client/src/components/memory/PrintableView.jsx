@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { MapPin, CalendarDays, Navigation, Plane, Car, Train, Ship, Move } from "lucide-react";
 
-// SafeImage: Direct Hand-Pan & Zoom Engine for Any Aspect Ratio
+// SafeImage: Full edge-to-edge cover filling with complete freedom to pan original photos
 const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditing, activeSlot, onSlotClick, onUpdateConfig, style = {}, imgStyle = {} }) => {
   if (!config || !config.url) return <div className={className} style={{ width: '100%', height: '100%', backgroundColor: '#e2e8f0', ...style }} />;
   const { url, zoom = 1, x = 0, y = 0 } = config;
@@ -15,7 +15,8 @@ const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditin
   const [initialPinchDist, setInitialPinchDist] = useState(null);
   const [initialZoom, setInitialZoom] = useState(1);
 
-  const getMaxPan = (z) => (z > 1 ? ((z - 1) / z) * 50 : 0);
+  // Wide pan range allowing full reach across the entire original photo at any zoom level
+  const getMaxPan = (z) => 150 * Math.max(1, z);
 
   const handleMouseDown = (e) => {
     if (!isEditing) return;
@@ -29,8 +30,8 @@ const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditin
   };
 
   const handleMouseMove = (e) => {
-    if (!isActive || !isDragging || !onUpdateConfig) return;
-    const speed = 0.15 / zoom;
+    if (!isDragging || !onUpdateConfig) return;
+    const speed = 0.4 / zoom;
     const maxPan = getMaxPan(zoom);
     onUpdateConfig(slotId, 'x', Math.max(-maxPan, Math.min(maxPan, startPan.x + ((e.clientX - startPos.x) * speed))));
     onUpdateConfig(slotId, 'y', Math.max(-maxPan, Math.min(maxPan, startPan.y + ((e.clientY - startPos.y) * speed))));
@@ -39,9 +40,10 @@ const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditin
   const handleMouseUp = () => { setIsDragging(false); };
   
   const handleWheel = (e) => {
-    if (!isActive || !onUpdateConfig) return;
+    if (!onUpdateConfig) return;
+    if (onSlotClick && activeSlot !== slotId) onSlotClick(slotId);
     e.preventDefault();
-    const newZoom = Math.max(1, Math.min(5, zoom + (e.deltaY < 0 ? 0.1 : -0.1)));
+    const newZoom = Math.max(1, Math.min(6, zoom + (e.deltaY < 0 ? 0.15 : -0.15)));
     const maxPan = getMaxPan(newZoom);
     onUpdateConfig(slotId, 'zoom', newZoom);
     onUpdateConfig(slotId, 'x', Math.max(-maxPan, Math.min(maxPan, x)));
@@ -67,17 +69,17 @@ const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditin
   };
 
   const handleTouchMove = (e) => {
-    if (!isActive || !onUpdateConfig) return;
+    if (!onUpdateConfig) return;
     
     if (isDragging && e.touches.length === 1) {
-        const speed = 0.2 / zoom;
+        const speed = 0.5 / zoom;
         const maxPan = getMaxPan(zoom);
         onUpdateConfig(slotId, 'x', Math.max(-maxPan, Math.min(maxPan, startPan.x + ((e.touches[0].clientX - startPos.x) * speed))));
         onUpdateConfig(slotId, 'y', Math.max(-maxPan, Math.min(maxPan, startPan.y + ((e.touches[0].clientY - startPos.y) * speed))));
     } else if (isPinching && e.touches.length === 2 && initialPinchDist) {
         const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
         const scale = dist / initialPinchDist;
-        const newZoom = Math.max(1, Math.min(5, initialZoom * scale));
+        const newZoom = Math.max(1, Math.min(6, initialZoom * scale));
         const maxPan = getMaxPan(newZoom);
         onUpdateConfig(slotId, 'zoom', newZoom);
         onUpdateConfig(slotId, 'x', Math.max(-maxPan, Math.min(maxPan, x)));
@@ -117,7 +119,7 @@ const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditin
           height: '100%', 
           maxWidth: 'none',
           maxHeight: 'none',
-          objectFit: 'cover', 
+          objectFit: 'cover', // Fills the container edge-to-edge completely
           display: 'block', 
           pointerEvents: 'none', 
           transform: `scale(${zoom}) translate(${x}%, ${y}%)`, 
@@ -131,21 +133,10 @@ const SafeImage = ({ config, className = "", imgClassName = "", slotId, isEditin
         draggable={false} 
       />
       
-      {/* Desktop hover badge hint and active edit frame */}
-      {isEditing && (
-        <div className={`absolute inset-0 pointer-events-none transition-all duration-200 ${isActive ? 'border-4 border-[#3559D4] bg-[#3559D4]/10 shadow-inner' : 'border border-transparent group-hover:border-[#3559D4]/60'}`}>
-            {!isActive && (
-              <span className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow-md uppercase tracking-wider flex items-center gap-1">
-                Click to Edit
-              </span>
-            )}
-            {isActive && isDragging && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-slate-950/80 text-white p-3 rounded-full backdrop-blur-md shadow-2xl">
-                  <Move size={20} />
-                </div>
-              </div>
-            )}
+      {/* Active selection border shown ONLY during editing, completely hidden during print/export */}
+      {isEditing && isActive && (
+        <div className="print:hidden absolute inset-0 pointer-events-none border-4 border-[#3559D4] ring-2 ring-white/50 z-40 flex items-center justify-center">
+            <span className="bg-slate-950/80 text-white text-[10px] font-bold px-2 py-1 rounded shadow-md uppercase tracking-wider backdrop-blur-md">Active Slot</span>
         </div>
       )}
     </div>
