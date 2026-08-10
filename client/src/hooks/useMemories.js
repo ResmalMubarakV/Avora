@@ -82,6 +82,7 @@ const useMemories = () => {
     loading,
     error,
     fetchMemories,
+    refetch: fetchMemories, // Exposing refetch alias for clean live-update syncing
   };
 };
 

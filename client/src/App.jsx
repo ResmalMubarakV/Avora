@@ -22,7 +22,7 @@ import Suspended from "./pages/auth/Suspended";
 
 // Dashboard & App Pages
 import Dashboard from "./pages/dashboard/Dashboard";
-import Memories from "./pages/dashboard/Memories";
+import AllMemories from "./pages/dashboard/AllMemories";
 import CreateMemory from "./pages/memory/CreateMemory";
 import EditMemory from "./pages/memory/EditMemory";
 import EditProfile from "./pages/profile/EditProfile";
@@ -86,7 +86,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/memories" element={<Memories />} />
+          <Route path="/dashboard/memories" element={<AllMemories />} />
           <Route path="/dashboard/create-memory" element={<CreateMemory />} />
           <Route path="/dashboard/edit-memory/:id" element={<EditMemory />} />
           <Route path="/dashboard/settings/profile" element={<EditProfile />} />

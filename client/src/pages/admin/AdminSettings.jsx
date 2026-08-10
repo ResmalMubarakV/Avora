@@ -59,7 +59,7 @@ const AdminSettings = () => {
 
     return (
         <div className="space-y-8 pb-16 max-w-3xl mx-auto animate-in fade-in duration-300">
-            <PageTitle title="Admin Security Settings" />
+            <PageTitle title="Avora - Admin Security Settings" />
             <div>
                 <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
                     Admin Security Settings

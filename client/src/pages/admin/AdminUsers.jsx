@@ -4,6 +4,7 @@ import { getUsers, approveUser, suspendUser, deleteUser } from "../../api/adminA
 import { getMyProfile } from "../../api/userApi";
 import { Search, Loader2, UserCheck, ShieldAlert, Trash2, Shield, X, Filter, ExternalLink, ArrowLeft, ArrowUpDown } from "lucide-react";
 import DeleteUserModal from "../../components/admin/DeleteUserModal";
+import PageTitle from "../../components/common/PageTitle";
 
 // ==========================================
 // ADMIN USERS PAGE
@@ -119,6 +120,7 @@ const AdminUsers = () => {
 
     return (
         <div className="space-y-6 pb-16 animate-in fade-in duration-300 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+            <PageTitle title="Avora - User Management" />
             <div className="space-y-4">
                 <button
                     type="button"

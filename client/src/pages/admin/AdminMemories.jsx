@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Search, Eye, Trash2, Globe, Lock, Images, ArrowLeft, ArrowUpDown, X } from "lucide-react";
 import { getMemories, deleteMemory } from "../../api/adminApi";
 import DeleteMemoryModal from "../../components/admin/DeleteMemoryModal";
+import PageTitle from "../../components/common/PageTitle";
 
 // ==========================================
 // ADMIN MEMORIES PAGE
@@ -104,6 +105,7 @@ const AdminMemories = () => {
 
     return (
         <div className="space-y-6 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 animate-in fade-in duration-300">
+            <PageTitle title="Avora - Memories Moderation" />
             <div className="space-y-4">
                 <button
                     type="button"

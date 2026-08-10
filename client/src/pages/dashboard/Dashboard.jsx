@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import DashboardHero from "../../components/dashboard/DashboardHero";
@@ -14,7 +14,8 @@ import PageTitle from "../../components/common/PageTitle";
 const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { memories, loading, error } = useMemories();
+  const { memories, loading, error, refetch } = useMemories();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Automatically scroll to top on initial page load or redirect
   useEffect(() => {
@@ -25,7 +26,24 @@ const Dashboard = () => {
     });
   }, [location.pathname]);
 
-  if (loading) {
+  // Listen for live updates triggered by like actions across the app
+  useEffect(() => {
+    const handleLiveSync = () => {
+      if (typeof refetch === "function") {
+        refetch();
+      } else {
+        setRefreshKey((prev) => prev + 1);
+      }
+    };
+
+    window.addEventListener("storage", handleLiveSync);
+
+    return () => {
+      window.removeEventListener("storage", handleLiveSync);
+    };
+  }, [refetch]);
+
+  if (loading && memories.length === 0) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <PageTitle title="Dashboard" />
@@ -73,7 +91,7 @@ const Dashboard = () => {
   });
 
   return (
-    <div className="space-y-5 sm:space-y-8 pb-16">
+    <div className="space-y-5 sm:space-y-8 pb-16" key={refreshKey}>
       <PageTitle title="Dashboard" />
 
       <DashboardHero />

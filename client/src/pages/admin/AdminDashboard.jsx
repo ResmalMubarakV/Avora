@@ -5,6 +5,7 @@ import DashboardStats from "../../components/admin/DashboardStats";
 import PendingUsers from "../../components/admin/PendingUsers";
 import RecentUsers from "../../components/admin/RecentUsers";
 import RecentMemories from "../../components/admin/RecentMemories";
+import PageTitle from "../../components/common/PageTitle";
 import { ShieldAlert, Loader2, X, Sparkles, Activity, Users, Images, Clock, Eye, EyeOff } from "lucide-react";
 
 // ==========================================
@@ -107,6 +108,7 @@ const AdminDashboard = () => {
     if (loading) {
         return (
             <div className="flex h-[80vh] items-center justify-center bg-slate-50">
+                <PageTitle title="Loading Admin Dashboard" />
                 <Loader2 size={28} className="animate-spin text-[#3559D4]" />
             </div>
         );
@@ -119,6 +121,8 @@ const AdminDashboard = () => {
 
     return (
         <div className="space-y-4 sm:space-y-6 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 overflow-x-hidden">
+            <PageTitle title="Avora - Admin Dashboard" />
+            
             {/* Streamlined Mobile-Friendly Hero Header */}
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#3559D4] p-5 sm:p-8 text-white shadow-md">
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">

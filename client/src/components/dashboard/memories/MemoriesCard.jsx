@@ -15,6 +15,7 @@ import { toast } from "sonner";
 
 import MemoryActions from "../../memory/MemoryActions";
 import api from "../../../api/axios";
+import { notifyOtherTabs } from "../../../hooks/useMemories";
 
 // ==========================================
 // UTILITY: FORMAT DATE
@@ -72,6 +73,10 @@ const MemoriesCard = ({
 
       await api.patch(`/api/memories/${memory._id}/like`);
       memory.isLiked = newStatus; // update local ref
+      
+      // Trigger live sync across dashboard stats and open views/tabs
+      notifyOtherTabs();
+
       if (onLikeToggle) onLikeToggle(memory._id, newStatus);
     } catch (error) {
       setIsLiked(!isLiked); // Revert on failure

@@ -13,7 +13,7 @@ import PageTitle from "../../components/common/PageTitle";
 
 const ITEMS_PER_PAGE = 12;
 
-const Memories = () => {
+const AllMemories = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -239,4 +239,4 @@ const Memories = () => {
   );
 };
 
-export default Memories;
+export default AllMemories;
