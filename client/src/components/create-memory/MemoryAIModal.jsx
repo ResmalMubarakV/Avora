@@ -21,27 +21,23 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
     try {
       setLoading(true);
 
-      // Completely different opening and closing frameworks to ensure 100% variety
-      const narrativeblueprints = [
-        `BLUEPRINT A (Start at the End): Start the story right at the very end—sitting late at night over plates of Mandhi back in Palakkad, looking back at how crazy the last 24 hours were. Then recount the trip as a flashback starting from the December 10 departure.`,
-        
-        `BLUEPRINT B (Start Mid-Journey): Start the story right in the middle of the action—standing by Kodaikanal Lake with a hot cup of tea in the evening. Then weave in how you got there from the December 10 road trip and exploring Suicide Point and Kookal.`,
-        
-        `BLUEPRINT C (Chronological & Casual): Start directly with the midnight car ride on December 10 with Kochu, Ansil, Chachu, and Salman. Keep it moving fast through the morning arrival, the cave visits, and wrap up with the late-night return home.`,
-        
-        `BLUEPRINT D (Focus on the Road & Vibe): Start the story by focusing on the feeling of being cramped in the car on the way up the mountain. Let the narrative flow naturally through the spots visited and end on the quiet drive back under the stars.`
+      const narrativeBlueprints = [
+        `BLUEPRINT A (Start at the End): Begin the story arriving back home safely at night, then recount the entire family road trip from the start.`,
+        `BLUEPRINT B (Start Mid-Journey): Begin the story right in the middle of exploring Ooty or at the wedding venue, then unfold the details chronologically.`,
+        `BLUEPRINT C (Chronological & Detailed): Start directly with the morning departure in the two cars on October 15, moving step-by-step through the wedding, sightseeing, and return.`
       ];
       
-      const randomBlueprint = narrativeblueprints[Math.floor(Math.random() * narrativeblueprints.length)];
+      const randomBlueprint = narrativeBlueprints[Math.floor(Math.random() * narrativeBlueprints.length)];
 
-      const aiPrompt = `Write a clean, natural, and engaging travel journal story based strictly on these details provided by the user: "${prompt}". 
+      const aiPrompt = `Write a detailed travel journey story based strictly on these details provided by the user: "${prompt}". 
       
-      MANDATORY STRUCTURAL FORMAT:
+      MANDATORY FORMAT & LENGTH:
+      - Expand the story into exactly 5 to 6 well-developed paragraphs.
       - ${randomBlueprint}
       
       CORE RULES:
-      1. Stick strictly to the exact facts, places, timeline, and names provided in the user's prompt. Do not invent or add fictional events or people.
-      2. Write in a human, realistic, and conversational tone (all-age friendly). Completely avoid overly flowery, cliché, or overly poetic AI language. 
+      1. Stick strictly to the exact facts, places, timeline, vehicles, and details provided by the user. Do not invent or add fictional events, unmentioned activities, or unmentioned people.
+      2. Write in a human, realistic, and conversational tone (all-age friendly). Avoid overly flowery, cliché, or overly poetic AI language. 
       3. Keep sentence structures varied, natural, and easy to read. Do not use hashtags.`;
 
       const generatedStory = await askAI(aiPrompt);
@@ -51,7 +47,7 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
       }
 
       onApply(generatedStory);
-      toast.success("Unique story generated successfully!");
+      toast.success("Detailed journey story generated successfully!");
       setPrompt("");
       onClose();
     } catch (error) {
@@ -81,8 +77,8 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
               <Sparkles size={20} />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900">Avora AI Storyteller</h3>
-              <p className="text-xs text-slate-500">Dynamic, non-repetitive travel narratives</p>
+              <h3 className="text-base font-bold text-slate-900">Avora AI Travel Journey</h3>
+              <p className="text-xs text-slate-500">Transform your trip notes into a detailed story</p>
             </div>
           </div>
           <button
@@ -97,7 +93,7 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
         <div className="py-5 space-y-4">
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">
-              What happened during your trip?
+              Describe your travel journey
             </label>
             <textarea
               rows={4}
@@ -105,7 +101,7 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={handleKeyDown}
               autoFocus
-              placeholder="e.g., A trip to Kodaikanal from Palakkad with friends, visiting viewpoints, drinking tea by the lake, and eating mandhi..."
+              placeholder="e.g., Family trip to Ooty on Oct 15-16 in two cars for a wedding, staying at Lovedale, visiting Doddabetta, and returning to Palakkad..."
               className="w-full rounded-2xl border border-slate-200 p-4 text-sm text-slate-800 outline-none focus:border-[#3559D4] focus:ring-4 focus:ring-blue-100 transition resize-none placeholder:text-slate-400"
             />
           </div>
@@ -133,12 +129,12 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
               {loading ? (
                 <>
                   <Loader2 size={16} className="animate-spin" />
-                  <span>Drafting Story...</span>
+                  <span>Crafting Journey...</span>
                 </>
               ) : (
                 <>
                   <Wand2 size={16} />
-                  <span>Generate Story</span>
+                  <span>Generate Journey</span>
                 </>
               )}
             </button>
