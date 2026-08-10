@@ -22,9 +22,9 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
       setLoading(true);
 
       const narrativeBlueprints = [
-        `BLUEPRINT A (Start at the End): Begin the story arriving back home safely at night, then recount the entire family road trip from the start.`,
-        `BLUEPRINT B (Start Mid-Journey): Begin the story right in the middle of exploring Ooty or at the wedding venue, then unfold the details chronologically.`,
-        `BLUEPRINT C (Chronological & Detailed): Start directly with the morning departure in the two cars on October 15, moving step-by-step through the wedding, sightseeing, and return.`
+        `BLUEPRINT A (Chronological & Detailed): Start directly with the morning departure, moving step-by-step chronologically through the journey, activities, and final return.`,
+        `BLUEPRINT B (Start Mid-Journey): Begin the story right in the middle of exploring the main destination or landmark, then unfold the details through a natural sequence.`,
+        `BLUEPRINT C (Road & Movement Focus): Start by focusing on the feeling of setting off on the road, following the natural timeline forward from day one to the end.`
       ];
       
       const randomBlueprint = narrativeBlueprints[Math.floor(Math.random() * narrativeBlueprints.length)];
@@ -101,7 +101,7 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={handleKeyDown}
               autoFocus
-              placeholder="e.g., Family trip to Ooty on Oct 15-16 in two cars for a wedding, staying at Lovedale, visiting Doddabetta, and returning to Palakkad..."
+              placeholder="e.g., A weekend road trip with friends to the hills, exploring scenic viewpoints, local food spots, and heading back home..."
               className="w-full rounded-2xl border border-slate-200 p-4 text-sm text-slate-800 outline-none focus:border-[#3559D4] focus:ring-4 focus:ring-blue-100 transition resize-none placeholder:text-slate-400"
             />
           </div>

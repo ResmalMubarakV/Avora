@@ -47,7 +47,6 @@ const MemoriesSection = ({
 
     const filteredMemories = useMemo(() => {
         const keyword = search.toLowerCase();
-        const hasActiveFilterOrSearch = keyword.length > 0 || selectedFilters.length > 0;
 
         const filtered = memories.filter((memory) => {
             const matchesSearch =
@@ -72,24 +71,24 @@ const MemoriesSection = ({
             return matchesAll;
         });
 
-        if (hasActiveFilterOrSearch) {
-            switch (sortBy) {
-                case "oldest":
-                    filtered.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-                    break;
-                case "title":
-                    filtered.sort((a, b) => a.title.localeCompare(b.title));
-                    break;
-                default:
-                    filtered.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
-            }
-        } else {
-            filtered.sort((a, b) => {
-                if (a.isPinned === b.isPinned) {
-                    return new Date(b.startDate) - new Date(a.startDate);
-                }
-                return a.isPinned ? -1 : 1;
-            });
+        // Always sort based on the user's selected sortBy dropdown choice
+        switch (sortBy) {
+            case "oldest":
+                filtered.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+                break;
+            case "title":
+                filtered.sort((a, b) => a.title.localeCompare(b.title));
+                break;
+            case "newest":
+            default:
+                // When sorting by newest (default), keep pinned items at the top
+                filtered.sort((a, b) => {
+                    if (a.isPinned === b.isPinned) {
+                        return new Date(b.startDate) - new Date(a.startDate);
+                    }
+                    return a.isPinned ? -1 : 1;
+                });
+                break;
         }
 
         return filtered;
