@@ -237,7 +237,7 @@ const EditMemory = () => {
         });
       }
 
-      const response = await updateMemory(id, data);
+      await updateMemory(id, data);
       setShowDiscardModal(false);
       setHasChanges(false);
       toast.success("Memory updated successfully!");
@@ -245,11 +245,8 @@ const EditMemory = () => {
       // Trigger global live sync across stats and views
       notifyOtherTabs();
 
-      if (response?.slug && response?.user?.username) {
-        navigate(`/${response.user.username}/${response.slug}`, { replace: true });
-      } else {
-        navigate(returnTo, { replace: true });
-      }
+      // Navigate back directly to the exact origin page (preserving filters/pagination)
+      navigate(returnTo, { replace: true });
     } catch (error) {
       console.error(error);
       toast.error("Unable to update memory.");

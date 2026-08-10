@@ -19,8 +19,10 @@ const MemoryHero = ({
     const navigate = useNavigate();
     const location = useLocation();
 
-    const from = locationState?.from || `/${username}`;
-    const label = locationState?.label || "Profile";
+    // Preserve the incoming origin state (e.g. pagination/filters from profile or memories list)
+    const incomingFrom = locationState?.from || location.state?.from;
+    const from = incomingFrom || `/${username}`;
+    const label = locationState?.label || (incomingFrom?.includes("/dashboard/memories") ? "Memories" : "Profile");
 
     return (
         <div className="flex flex-col gap-6">
@@ -88,7 +90,7 @@ const MemoryHero = ({
                             <span className="sm:hidden">PDF</span>
                         </button>
 
-                        {/* Existing Edit Memory Button */}
+                        {/* Existing Edit Memory Button (Passes along original from state) */}
                         <button
                             type="button"
                             onClick={() =>
@@ -96,7 +98,8 @@ const MemoryHero = ({
                                     `/dashboard/edit-memory/${memory._id}`,
                                     {
                                         state: {
-                                            from: location.pathname,
+                                            from: from, // Pass the original list/profile path forward!
+                                            label: label,
                                         },
                                     }
                                 )
