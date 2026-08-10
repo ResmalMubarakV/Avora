@@ -21,23 +21,16 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
     try {
       setLoading(true);
 
-      const narrativeBlueprints = [
-        `BLUEPRINT A (Chronological & Detailed): Start directly with the morning departure, moving step-by-step chronologically through the journey, activities, and final return.`,
-        `BLUEPRINT B (Start Mid-Journey): Begin the story right in the middle of exploring the main destination or landmark, then unfold the details through a natural sequence.`,
-        `BLUEPRINT C (Road & Movement Focus): Start by focusing on the feeling of setting off on the road, following the natural timeline forward from day one to the end.`
-      ];
-      
-      const randomBlueprint = narrativeBlueprints[Math.floor(Math.random() * narrativeBlueprints.length)];
-
       const aiPrompt = `Write a detailed travel journey story based strictly on these details provided by the user: "${prompt}". 
       
-      MANDATORY FORMAT & LENGTH:
+      MANDATORY FORMAT & TIMELINE STRUCTURE:
+      - The story MUST start strictly at the very beginning of the trip (the initial departure, boarding, or starting point on day one). Do not start in the middle or at the end.
+      - Follow a strict chronological order moving forward day-by-day through the events, activities, and ending with the final return home.
       - Expand the story into exactly 5 to 6 well-developed paragraphs.
-      - ${randomBlueprint}
       
       CORE RULES:
       1. Stick strictly to the exact facts, places, timeline, vehicles, and details provided by the user. Do not invent or add fictional events, unmentioned activities, or unmentioned people.
-      2. Write in a human, realistic, and conversational tone (all-age friendly). Avoid overly flowery, cliché, or overly poetic AI language. 
+      2. Write in a human, realistic, and conversational journal style (all-age friendly). Avoid overly flowery, cliché, or overly poetic AI language. 
       3. Keep sentence structures varied, natural, and easy to read. Do not use hashtags.`;
 
       const generatedStory = await askAI(aiPrompt);
