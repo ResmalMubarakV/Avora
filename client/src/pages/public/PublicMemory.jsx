@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 // ==========================================
-// 1. EXTRACTED WRAPPER
+// 1. EXTRACTED WRAPPER (PREVENTS LAG)
 // ==========================================
 const Wrapper = ({ children, style, className = "" }) => (
   <div className={className} style={{ width: '800px', height: '1131px', minHeight: '1131px', minWidth: '800px', overflow: 'hidden', position: 'relative', boxSizing: 'border-box', backgroundColor: '#ffffff', ...style }}>
@@ -26,7 +26,8 @@ const Wrapper = ({ children, style, className = "" }) => (
 );
 
 // ==========================================
-// 2. AUTOFIT TEXT ENGINE (Dynamically shrinks font size to fit container)
+// 2. AUTOFIT TEXT ENGINE
+// Shrinks text gracefully to prevent overflow in print templates
 // ==========================================
 const AutoFitText = React.memo(({ children, style, className = "" }) => {
   const containerRef = useRef(null);
@@ -35,15 +36,29 @@ const AutoFitText = React.memo(({ children, style, className = "" }) => {
     const el = containerRef.current;
     if (!el) return;
 
-    // Reset to the original target font size first
     const initialSize = parseFloat(style.fontSize) || 14;
+    const minSize = 10.5; // Minimum readable font size for A4 printing
+    
     el.style.fontSize = `${initialSize}px`;
+    el.style.display = 'block';
+    el.style.webkitLineClamp = 'unset';
 
     let currentSize = initialSize;
-    // Shrink the font by 0.5px steps until it fits perfectly inside the box (Minimum 6px)
-    while (el.scrollHeight > el.clientHeight && currentSize > 6) {
+
+    // Shrink font size gradually until it fits
+    while (el.scrollHeight > el.clientHeight && currentSize > minSize) {
       currentSize -= 0.5;
       el.style.fontSize = `${currentSize}px`;
+    }
+
+    // If it still overflows at minimum size, clamp it elegantly
+    if (el.scrollHeight > el.clientHeight) {
+      el.style.display = '-webkit-box';
+      el.style.webkitBoxOrient = 'vertical';
+      const lineHeight = parseFloat(window.getComputedStyle(el).lineHeight) || (currentSize * 1.5);
+      const maxLines = Math.floor(el.clientHeight / lineHeight);
+      el.style.webkitLineClamp = Math.max(1, maxLines).toString();
+      el.style.overflow = 'hidden';
     }
   }, [children, style]);
 
@@ -57,7 +72,7 @@ AutoFitText.displayName = 'AutoFitText';
 
 // ==========================================
 // 3. SAFEIMAGE: TRUE NATIVE CROP & 60FPS PAN ENGINE
-// Ensures natural aspect ratio (NO stretching) and lag-free dragging
+// Uses synchronous rendering to PREVENT 1-frame stretching bugs
 // ==========================================
 const SafeImage = React.memo((props) => {
   const { config, className = "", slotId, isEditing, activeSlot, onSlotClick, onUpdateConfig, onBoundsChange, onOpenPicker, style = {}, imgStyle = {} } = props;
@@ -73,9 +88,15 @@ const SafeImage = React.memo((props) => {
   const x = config?.x || 0; 
   const y = config?.y || 0; 
 
-  useEffect(() => {
+  // 1. Synchronously measure container size before paint to stop stretching
+  useLayoutEffect(() => {
     const el = containerRef.current;
-    if (!el || typeof ResizeObserver === 'undefined') return;
+    if (!el) return;
+    
+    // Immediate read on mount
+    setContainerSize({ w: el.offsetWidth, h: el.offsetHeight });
+    
+    // Observer for subsequent changes
     const ro = new ResizeObserver(([entry]) => {
       if (entry) setContainerSize({ w: entry.contentRect.width, h: entry.contentRect.height });
     });
@@ -83,6 +104,7 @@ const SafeImage = React.memo((props) => {
     return () => ro.disconnect();
   }, []);
 
+  // 2. Clear Natural Size on URL Change
   useEffect(() => {
     setNaturalSize({ w: 0, h: 0 });
   }, [url]);
@@ -93,27 +115,50 @@ const SafeImage = React.memo((props) => {
 
   const ready = !!(url && naturalSize.w > 0 && containerSize.w > 0);
 
-  const metricsRef = useRef({ w: 0, h: 0, maxPxX: 0, maxPxY: 0 });
-  let imgW = 0, imgH = 0, maxPxX = 0, maxPxY = 0;
+  // 3. Mathematical Bounding Box (No Stretching)
+  let maxPxX = 0, maxPxY = 0;
+  let currentW = '100%', currentH = '100%', currentTransform = 'translate(-50%, -50%)';
   
+  const isDraggingRef = useRef(false);
+  const panState = useRef({ x: 0, y: 0 });
+  const [isActivelyDragging, setIsActivelyDragging] = useState(false);
+
   if (ready) {
     const baseScale = Math.max(containerSize.w / naturalSize.w, containerSize.h / naturalSize.h);
-    imgW = naturalSize.w * baseScale * zoom;
-    imgH = naturalSize.h * baseScale * zoom;
-    maxPxX = Math.max(0, (imgW - containerSize.w) / 2);
-    maxPxY = Math.max(0, (imgH - containerSize.h) / 2);
-    metricsRef.current = { w: imgW, h: imgH, maxPxX, maxPxY };
+    const cW = naturalSize.w * baseScale * zoom;
+    const cH = naturalSize.h * baseScale * zoom;
+    maxPxX = Math.max(0, (cW - containerSize.w) / 2);
+    maxPxY = Math.max(0, (cH - containerSize.h) / 2);
+
+    const renderX = isDraggingRef.current ? panState.current.x : x;
+    const renderY = isDraggingRef.current ? panState.current.y : y;
+
+    const cX = Math.max(-100, Math.min(100, renderX));
+    const cY = Math.max(-100, Math.min(100, renderY));
+
+    const px = (cX / 100) * maxPxX;
+    const py = (cY / 100) * maxPxY;
+
+    currentW = `${cW}px`;
+    currentH = `${cH}px`;
+    currentTransform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px))`;
   }
 
+  // 4. Report Limits to Parent Sliders safely
   useEffect(() => {
     if (!ready) return;
     if (typeof onBoundsChange === 'function') {
-      onBoundsChange(slotId, { maxX: maxPxX > 0.5 ? 100 : 0, maxY: maxPxY > 0.5 ? 100 : 0 });
+      onBoundsChange(slotId, { 
+        maxX: maxPxX > 0.5 ? 100 : 0, 
+        maxY: maxPxY > 0.5 ? 100 : 0 
+      });
     }
   }, [maxPxX, maxPxY, ready, slotId, onBoundsChange]);
 
+  // 5. Direct DOM Engine to bypass React Render Lag (60FPS)
   const applyTransform = useCallback((pctX, pctY, z) => {
     if (!imgRef.current || !ready) return;
+    
     const baseScale = Math.max(containerSize.w / naturalSize.w, containerSize.h / naturalSize.h);
     const cW = naturalSize.w * baseScale * z;
     const cH = naturalSize.h * baseScale * z;
@@ -131,17 +176,14 @@ const SafeImage = React.memo((props) => {
     imgRef.current.style.transform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px))`;
   }, [ready, containerSize, naturalSize]);
 
-  const isDraggingRef = useRef(false);
-  const panState = useRef({ x: 0, y: 0 });
-  const [isActivelyDragging, setIsActivelyDragging] = useState(false);
-
+  // Sync incoming React state to local ref
   useEffect(() => {
     if (!isDraggingRef.current) {
       panState.current = { x, y };
-      applyTransform(x, y, zoom);
     }
-  }, [x, y, zoom, applyTransform]);
+  }, [x, y]);
 
+  // 6. Touch/Drag Interaction System
   useEffect(() => {
     const el = containerRef.current;
     if (!el || !isEditing || !ready) return;
@@ -165,8 +207,6 @@ const SafeImage = React.memo((props) => {
       const dx = clientX - startX;
       const dy = clientY - startY;
 
-      const { maxPxX, maxPxY } = metricsRef.current;
-      
       if (maxPxY === 0 && Math.abs(dy) > Math.abs(dx) && maxPxX === 0) {
         isDraggingRef.current = false;
         setIsActivelyDragging(false);
@@ -268,7 +308,7 @@ const SafeImage = React.memo((props) => {
       el.removeEventListener('touchend', handleTouchEnd);
       el.removeEventListener('touchcancel', handleTouchEnd);
     };
-  }, [isEditing, ready, zoom, slotId, onUpdateConfig, onSlotClick, applyTransform, containerSize, naturalSize]);
+  }, [isEditing, ready, zoom, maxPxX, maxPxY, slotId, onUpdateConfig, onSlotClick, applyTransform]);
 
   if (!url) return <div className={className} style={{ width: '100%', height: '100%', backgroundColor: '#e2e8f0', ...style }} />;
 
@@ -294,12 +334,14 @@ const SafeImage = React.memo((props) => {
         style={{
           position: 'absolute',
           top: '50%', left: '50%',
-          width: '100%', height: '100%',
+          width: currentW, height: currentH,
+          objectFit: 'cover', // CRITICAL: Fallback protection against stretching
           maxWidth: 'none', maxHeight: 'none', minWidth: 0, minHeight: 0,
           display: 'block',
           pointerEvents: 'none', 
-          transform: 'translate(-50%, -50%)',
+          transform: currentTransform,
           transformOrigin: 'center center',
+          transition: isActivelyDragging ? 'none' : 'transform 0.1s ease-out, width 0.1s ease-out, height 0.1s ease-out',
           filter: imgStyle.filter,
           WebkitFilter: imgStyle.filter,
           ...imgStyle
@@ -327,6 +369,19 @@ const SafeImage = React.memo((props) => {
       )}
     </div>
   );
+}, (prevProps, nextProps) => {
+  if (prevProps.slotId !== nextProps.slotId) return false;
+  if (prevProps.isEditing !== nextProps.isEditing) return false;
+  
+  const prevActive = prevProps.isEditing && prevProps.activeSlot === prevProps.slotId;
+  const nextActive = nextProps.isEditing && nextProps.activeSlot === nextProps.slotId;
+  if (prevActive !== nextActive) return false;
+
+  const p = prevProps.config || {};
+  const n = nextProps.config || {};
+  if (p.url !== n.url || p.zoom !== n.zoom || p.x !== n.x || p.y !== n.y) return false;
+  
+  return true;
 });
 SafeImage.displayName = 'SafeImage';
 
@@ -402,7 +457,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
       </Wrapper>
     );
   }
-
+  
   if (layoutIndex === 2) {
     return (
       <Wrapper style={{ backgroundColor: '#E8E6E1', color: '#3A3A3A', padding: 0, display: 'flex', flexDirection: 'column' }}>
@@ -878,6 +933,7 @@ export default function PublicMemory() {
   const [activeSlot, setActiveSlot] = useState('cover'); 
   const [showImagePickerModal, setShowImagePickerModal] = useState(false);
 
+  // Default values passed to child safeimages dynamically update this based on natural proportions
   const [slotBounds, setSlotBounds] = useState({});
   const handleBoundsChange = useCallback((slotId, bounds) => {
     setSlotBounds(prev => {
@@ -893,6 +949,7 @@ export default function PublicMemory() {
       ...(memory?.media?.filter(m => m.type === 'image').map(m => m.url) || [])
   ].filter(Boolean))).map(url => ({ url })), [memory]);
 
+  // Handle CSS for High Quality PDF Printing
   useEffect(() => {
     if (!isPreviewMode) return;
     const styleId = "avora-print-styles";
@@ -934,6 +991,7 @@ export default function PublicMemory() {
     }
   }, [memory]);
 
+  // Set initial configs with 50% as the default center point
   useEffect(() => {
     if (memory && !mediaConfig) {
         const baseCover = memory.coverImage || (allImages.length > 0 ? allImages[0].url : "");
@@ -945,6 +1003,7 @@ export default function PublicMemory() {
     }
   }, [memory, mediaConfig, allImages]);
 
+  // Scale the preview wrapper dynamically
   useEffect(() => {
     if (!isPreviewMode) return;
     const container = previewContainerRef.current;
@@ -1031,7 +1090,8 @@ export default function PublicMemory() {
 
     return (
       <>
-        <div className="print-only-container print-hidden-outlines bg-white" style={{ width: "800px", height: "1131px" }}>
+        {/* Hidden Export Wrapper - ONLY FOR PRINTING */}
+        <div className="print-only-container bg-white" style={{ width: "800px", height: "1131px" }}>
             <PrintableView memory={memory} layoutIndex={layoutIndex} mediaConfig={mediaConfig} isEditing={false} />
         </div>
 
@@ -1078,6 +1138,7 @@ export default function PublicMemory() {
                     </div>
                 </div>
 
+                {/* SIDEBAR CONTROLS - Simplified as requested */}
                 {isDesktop && currentEditorConfig && (
                     <div className="w-80 bg-slate-950 border-l border-slate-800 p-6 flex flex-col gap-6 z-30 shrink-0 shadow-2xl overflow-y-auto">
                         <div className="flex items-center justify-between pb-3 border-b border-slate-800">
@@ -1088,6 +1149,7 @@ export default function PublicMemory() {
                                 Click an image on the canvas to select it. Drag directly on the image to pan, or use the sliders below.
                             </p>
 
+                            {/* Target Slot Selector */}
                             <div>
                                 <label className="block font-semibold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5"><Target size={12} /> Target Slot</label>
                                 <select value={String(activeSlot)} onChange={(e) => setActiveSlot(e.target.value === 'cover' ? 'cover' : Number(e.target.value))} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-white text-xs font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -1096,6 +1158,7 @@ export default function PublicMemory() {
                                 </select>
                             </div>
 
+                            {/* Zoom Level Slider */}
                             <div>
                                 <label className="block font-semibold uppercase tracking-wider text-slate-400 mb-2">Zoom Level</label>
                                 <div className="flex items-center gap-3">
@@ -1106,6 +1169,7 @@ export default function PublicMemory() {
                                 </div>
                             </div>
 
+                            {/* X-Axis Position Slider (0 to 100) */}
                             <div>
                                 <label className="block font-semibold uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">
                                     <span>Horizontal (X)</span><span className="font-mono text-[10px] text-blue-400">{Math.round(currentEditorConfig.x)}%</span>
@@ -1116,6 +1180,7 @@ export default function PublicMemory() {
                                 </div>
                             </div>
 
+                            {/* Y-Axis Position Slider (0 to 100) */}
                             <div>
                                 <label className="block font-semibold uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">
                                     <span>Vertical (Y)</span><span className="font-mono text-[10px] text-blue-400">{Math.round(currentEditorConfig.y)}%</span>
@@ -1143,6 +1208,7 @@ export default function PublicMemory() {
     );
   }
 
+  // STANDARD PUBLIC MEMORY VIEW
   return (
     <main className="print:hidden min-h-screen bg-slate-50 pb-16 relative z-10">
       <PageTitle title={memory.title} />
