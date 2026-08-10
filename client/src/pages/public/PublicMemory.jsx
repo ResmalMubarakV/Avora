@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from "react";
 import { useNavigate, useParams, useSearchParams, useLocation } from "react-router-dom";
 import api from "../../api/axios";
 import { getMyProfile } from "../../api/userApi";
@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 // ==========================================
-// 1. EXTRACTED WRAPPER (PREVENTS LAG)
+// 1. EXTRACTED WRAPPER
 // ==========================================
 const Wrapper = ({ children, style, className = "" }) => (
   <div className={className} style={{ width: '800px', height: '1131px', minHeight: '1131px', minWidth: '800px', overflow: 'hidden', position: 'relative', boxSizing: 'border-box', backgroundColor: '#ffffff', ...style }}>
@@ -26,7 +26,37 @@ const Wrapper = ({ children, style, className = "" }) => (
 );
 
 // ==========================================
-// 2. SAFEIMAGE: TRUE NATIVE CROP & 60FPS PAN ENGINE
+// 2. AUTOFIT TEXT ENGINE (Dynamically shrinks font size to fit container)
+// ==========================================
+const AutoFitText = React.memo(({ children, style, className = "" }) => {
+  const containerRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    // Reset to the original target font size first
+    const initialSize = parseFloat(style.fontSize) || 14;
+    el.style.fontSize = `${initialSize}px`;
+
+    let currentSize = initialSize;
+    // Shrink the font by 0.5px steps until it fits perfectly inside the box (Minimum 6px)
+    while (el.scrollHeight > el.clientHeight && currentSize > 6) {
+      currentSize -= 0.5;
+      el.style.fontSize = `${currentSize}px`;
+    }
+  }, [children, style]);
+
+  return (
+    <div ref={containerRef} className={className} style={{ ...style, overflow: 'hidden' }}>
+      {children}
+    </div>
+  );
+});
+AutoFitText.displayName = 'AutoFitText';
+
+// ==========================================
+// 3. SAFEIMAGE: TRUE NATIVE CROP & 60FPS PAN ENGINE
 // Ensures natural aspect ratio (NO stretching) and lag-free dragging
 // ==========================================
 const SafeImage = React.memo((props) => {
@@ -43,7 +73,6 @@ const SafeImage = React.memo((props) => {
   const x = config?.x || 0; 
   const y = config?.y || 0; 
 
-  // 1. Measure Container Size
   useEffect(() => {
     const el = containerRef.current;
     if (!el || typeof ResizeObserver === 'undefined') return;
@@ -54,7 +83,6 @@ const SafeImage = React.memo((props) => {
     return () => ro.disconnect();
   }, []);
 
-  // 2. Clear Natural Size on URL Change
   useEffect(() => {
     setNaturalSize({ w: 0, h: 0 });
   }, [url]);
@@ -65,7 +93,6 @@ const SafeImage = React.memo((props) => {
 
   const ready = !!(url && naturalSize.w > 0 && containerSize.w > 0);
 
-  // 3. Mathematical Bounding Box (No Stretching, Perfect Fit)
   const metricsRef = useRef({ w: 0, h: 0, maxPxX: 0, maxPxY: 0 });
   let imgW = 0, imgH = 0, maxPxX = 0, maxPxY = 0;
   
@@ -78,21 +105,15 @@ const SafeImage = React.memo((props) => {
     metricsRef.current = { w: imgW, h: imgH, maxPxX, maxPxY };
   }
 
-  // 4. Report Limits to Parent Sliders safely
   useEffect(() => {
     if (!ready) return;
     if (typeof onBoundsChange === 'function') {
-      onBoundsChange(slotId, { 
-        maxX: maxPxX > 0.5 ? 100 : 0, 
-        maxY: maxPxY > 0.5 ? 100 : 0 
-      });
+      onBoundsChange(slotId, { maxX: maxPxX > 0.5 ? 100 : 0, maxY: maxPxY > 0.5 ? 100 : 0 });
     }
   }, [maxPxX, maxPxY, ready, slotId, onBoundsChange]);
 
-  // 5. Direct DOM Engine to bypass React Render Lag (60FPS)
   const applyTransform = useCallback((pctX, pctY, z) => {
     if (!imgRef.current || !ready) return;
-    
     const baseScale = Math.max(containerSize.w / naturalSize.w, containerSize.h / naturalSize.h);
     const cW = naturalSize.w * baseScale * z;
     const cH = naturalSize.h * baseScale * z;
@@ -110,7 +131,6 @@ const SafeImage = React.memo((props) => {
     imgRef.current.style.transform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px))`;
   }, [ready, containerSize, naturalSize]);
 
-  // Sync incoming React state (Sliders) to DOM
   const isDraggingRef = useRef(false);
   const panState = useRef({ x: 0, y: 0 });
   const [isActivelyDragging, setIsActivelyDragging] = useState(false);
@@ -122,7 +142,6 @@ const SafeImage = React.memo((props) => {
     }
   }, [x, y, zoom, applyTransform]);
 
-  // 6. Touch/Drag Interaction System
   useEffect(() => {
     const el = containerRef.current;
     if (!el || !isEditing || !ready) return;
@@ -148,7 +167,6 @@ const SafeImage = React.memo((props) => {
 
       const { maxPxX, maxPxY } = metricsRef.current;
       
-      // If panning isn't possible in the direction dragged, allow page to scroll
       if (maxPxY === 0 && Math.abs(dy) > Math.abs(dx) && maxPxX === 0) {
         isDraggingRef.current = false;
         setIsActivelyDragging(false);
@@ -179,7 +197,6 @@ const SafeImage = React.memo((props) => {
       }
     };
 
-    // Desktop Events
     const handleWheel = (e) => {
       if (e.target.closest('button')) return;
       e.preventDefault();
@@ -198,7 +215,6 @@ const SafeImage = React.memo((props) => {
     const handleGlobalMouseMove = (e) => onPointerMove(e.clientX, e.clientY, null);
     const handleGlobalMouseUp = () => onPointerUp();
 
-    // Mobile/Tablet Touch Events
     const handleTouchStart = (e) => {
       if (e.target.closest('button')) return;
       if (e.touches.length === 1) {
@@ -311,24 +327,11 @@ const SafeImage = React.memo((props) => {
       )}
     </div>
   );
-}, (prevProps, nextProps) => {
-  if (prevProps.slotId !== nextProps.slotId) return false;
-  if (prevProps.isEditing !== nextProps.isEditing) return false;
-  
-  const prevActive = prevProps.isEditing && prevProps.activeSlot === prevProps.slotId;
-  const nextActive = nextProps.isEditing && nextProps.activeSlot === nextProps.slotId;
-  if (prevActive !== nextActive) return false;
-
-  const p = prevProps.config || {};
-  const n = nextProps.config || {};
-  if (p.url !== n.url || p.zoom !== n.zoom || p.x !== n.x || p.y !== n.y) return false;
-  
-  return true;
 });
 SafeImage.displayName = 'SafeImage';
 
 // ==========================================
-// 3. PRINTABLE TEMPLATE ENGINE
+// 4. PRINTABLE TEMPLATE ENGINE
 // ==========================================
 const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null, isEditing = false, activeSlot = null, onSlotClick = null, onUpdateConfig = null, onBoundsChange = null, onOpenPicker = null }) => {
   const defaultImages = useMemo(() => memory?.media?.filter(m => m.type === 'image') || [], [memory?.media]);
@@ -362,7 +365,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
       <Wrapper style={{ backgroundColor: '#F4F1EB', padding: '48px', color: '#1e293b', display: 'flex', flexDirection: 'column', boxSizing: 'border-box' }}>
         <h1 style={{ fontSize: '56px', fontFamily: 'serif', fontStyle: 'italic', textAlign: 'center', marginTop: '16px', marginBottom: '8px', lineHeight: '1.2', wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</h1>
         <p style={{ textAlign: 'center', fontSize: '11px', fontWeight: 'bold', letterSpacing: '4px', textTransform: 'uppercase', marginBottom: '28px', color: '#64748b' }}>{location} • {dateStr}</p>
-        <div style={{ maxWidth: '580px', margin: '0 auto', textAlign: 'justify', fontSize: '15px', lineHeight: '1.65', fontWeight: '500', marginBottom: '28px', maxHeight: '210px', overflow: 'hidden' }}>{story}</div>
+        <AutoFitText style={{ maxWidth: '580px', margin: '0 auto', textAlign: 'justify', fontSize: '15px', lineHeight: '1.65', fontWeight: '500', marginBottom: '28px', maxHeight: '210px' }}>{story}</AutoFitText>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', padding: '0 32px', marginTop: 'auto', marginBottom: '24px' }}>
              {slotConfigs.slice(0, 4).map((cfg, i) => (
                  <div key={i} style={{ backgroundColor: '#ffffff', padding: '10px', paddingBottom: '36px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0', position: 'relative', height: '180px', boxSizing: 'border-box' }}>
@@ -389,7 +392,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
              </div>
          </div>
          <div style={{ display: 'flex', gap: '32px', flex: 1, overflow: 'hidden' }}>
-             <div style={{ width: '41.6%', fontSize: '14px', lineHeight: '1.65', fontWeight: '500', textAlign: 'justify', color: '#334155', maxHeight: '720px', overflow: 'hidden' }}>{story}</div>
+             <AutoFitText style={{ width: '41.6%', fontSize: '14px', lineHeight: '1.65', fontWeight: '500', textAlign: 'justify', color: '#334155', maxHeight: '720px' }}>{story}</AutoFitText>
              <div style={{ width: '58.3%', display: 'flex', flexDirection: 'column', gap: '20px', height: '100%' }}>
                  {slotConfigs.slice(0,2).map((cfg, i) => (
                      <div key={i} style={{ flex: 1, width: '100%', backgroundColor: '#f1f5f9', boxShadow: '0 10px 15px rgba(0,0,0,0.1)', overflow: 'hidden', position: 'relative' }}><SafeImage config={cfg} slotId={i} {...sharedImgProps} /></div>
@@ -399,7 +402,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
       </Wrapper>
     );
   }
-  
+
   if (layoutIndex === 2) {
     return (
       <Wrapper style={{ backgroundColor: '#E8E6E1', color: '#3A3A3A', padding: 0, display: 'flex', flexDirection: 'column' }}>
@@ -414,7 +417,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
             </div>
         </div>
         <div style={{ padding: '48px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxSizing: 'border-box', overflow: 'hidden' }}>
-            <div style={{ columnCount: 2, columnGap: '32px', fontSize: '14px', lineHeight: '1.65', fontFamily: 'serif', textAlign: 'justify', color: '#334155', maxHeight: '250px', overflow: 'hidden' }}>{story}</div>
+            <AutoFitText style={{ columnCount: 2, columnGap: '32px', fontSize: '14px', lineHeight: '1.65', fontFamily: 'serif', textAlign: 'justify', color: '#334155', maxHeight: '250px' }}>{story}</AutoFitText>
             <div style={{ display: 'flex', gap: '12px', height: '160px', backgroundColor: '#000000', padding: '12px', boxSizing: 'border-box', flexShrink: 0, overflow: 'hidden' }}>
                  {slotConfigs.slice(0, 4).map((cfg, i) => (
                      <div key={i} style={{ flex: 1, height: '100%', backgroundColor: '#1a1a1a', overflow: 'hidden', position: 'relative' }}><SafeImage config={cfg} slotId={i} imgStyle={{ filter: 'sepia(20%)' }} {...sharedImgProps} /></div>
@@ -434,7 +437,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
              <div style={{ display: 'flex', gap: '36px', flex: 1, overflow: 'hidden' }}>
                   <div style={{ width: '50%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                        <p style={{ marginBottom: '20px', borderBottom: '1px solid #334155', paddingBottom: '16px', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px', color: '#94a3b8', margin: '0 0 20px 0' }}><MapPin size={16} /> {location}</p>
-                       <div style={{ fontSize: '14px', lineHeight: '1.65', color: '#cbd5e1', fontWeight: '300', textAlign: 'justify', maxHeight: '550px', overflow: 'hidden' }}>{story}</div>
+                       <AutoFitText style={{ fontSize: '14px', lineHeight: '1.65', color: '#cbd5e1', fontWeight: '300', textAlign: 'justify', maxHeight: '550px' }}>{story}</AutoFitText>
                   </div>
                   <div style={{ width: '50%', display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'center', overflow: 'hidden' }}>
                        {slotConfigs.slice(0,3).map((cfg, i) => (
@@ -463,7 +466,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
                   <div style={{ width: '66.666%' }}>
                       <div style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.2)', padding: '20px', borderRadius: '12px', color: '#ffffff', maxHeight: '190px', overflow: 'hidden' }}>
                           <h3 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em', borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: '6px', margin: '0 0 8px 0' }}>The Story</h3>
-                          <p style={{ fontSize: '13px', fontWeight: '500', lineHeight: '1.6', color: 'rgba(255,255,255,0.9)', margin: 0, overflow: 'hidden', maxHeight: '115px' }}>{story}</p>
+                          <AutoFitText style={{ fontSize: '13px', fontWeight: '500', lineHeight: '1.6', color: 'rgba(255,255,255,0.9)', margin: 0, maxHeight: '115px' }}>{story}</AutoFitText>
                       </div>
                   </div>
                   <div style={{ width: '33.333%', display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -495,7 +498,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
               <div style={{ flex: 1, display: 'flex', gap: '36px', overflow: 'hidden' }}>
                   <div style={{ width: '50%', display: 'flex', flexDirection: 'column', gap: '24px', height: '100%', overflow: 'hidden' }}>
                       <div style={{ width: '100%', height: '220px', flexShrink: 0, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', overflow: 'hidden', position: 'relative' }}><SafeImage config={coverConfig} slotId="cover" imgStyle={{ filter: 'grayscale(100%)' }} {...sharedImgProps} /></div>
-                      <div style={{ fontSize: '13px', lineHeight: '1.65', fontFamily: 'serif', color: '#1f2937', textAlign: 'justify', maxHeight: '350px', overflow: 'hidden' }}>{story}</div>
+                      <AutoFitText style={{ fontSize: '13px', lineHeight: '1.65', fontFamily: 'serif', color: '#1f2937', textAlign: 'justify', maxHeight: '350px' }}>{story}</AutoFitText>
                   </div>
                   <div style={{ width: '50%', display: 'flex', flexDirection: 'column', gap: '24px', height: '100%', overflow: 'hidden' }}>
                       {slotConfigs.slice(0, 2).map((cfg, i) => (
@@ -524,7 +527,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
                   ))}
               </div>
               <div style={{ backgroundColor: '#e9c496', padding: '24px', borderRadius: '20px', border: '3px solid #d87c4a', maxHeight: '240px', overflow: 'hidden' }}>
-                  <p style={{ fontSize: '14px', fontWeight: 'bold', lineHeight: '1.6', color: '#5c3a21', overflow: 'hidden', maxHeight: '190px', margin: 0 }}>{story}</p>
+                  <AutoFitText style={{ fontSize: '14px', fontWeight: 'bold', lineHeight: '1.6', color: '#5c3a21', maxHeight: '190px', margin: 0 }}>{story}</AutoFitText>
               </div>
           </div>
       </Wrapper>
@@ -547,7 +550,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
               <div style={{ display: 'flex', gap: '28px', flex: 1, overflow: 'hidden' }}>
                   <div style={{ width: '41.6%', borderRight: '2px solid #1e3a8a', paddingRight: '24px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                       <h3 style={{ fontSize: '16px', fontWeight: '900', borderBottom: '2px solid #1e3a8a', display: 'inline-block', marginBottom: '12px', margin: '0 0 12px 0', paddingBottom: '4px' }}>OBSERVATIONS</h3>
-                      <div style={{ fontSize: '14px', lineHeight: '1.65', color: '#334155', textAlign: 'justify', maxHeight: '600px', overflow: 'hidden' }}>{story}</div>
+                      <AutoFitText style={{ fontSize: '14px', lineHeight: '1.65', color: '#334155', textAlign: 'justify', maxHeight: '600px' }}>{story}</AutoFitText>
                   </div>
                   <div style={{ width: '58.3%', display: 'flex', flexDirection: 'column', gap: '16px', height: '100%', overflow: 'hidden' }}>
                       {slotConfigs.slice(0, 3).map((cfg, i) => (
@@ -573,7 +576,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
                   <div style={{ width: '100%', height: '320px', padding: '12px', backgroundColor: '#ffffff', boxShadow: '0 15px 30px rgba(0,0,0,0.1)', borderRadius: '4px', marginBottom: '32px', transform: 'rotate(1deg)', flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
                       <SafeImage config={coverConfig} slotId="cover" {...sharedImgProps} />
                   </div>
-                  <div style={{ fontSize: '15px', lineHeight: '1.65', fontFamily: 'serif', color: '#475569', textAlign: 'center', padding: '0 24px', maxHeight: '180px', overflow: 'hidden' }}>{story}</div>
+                  <AutoFitText style={{ fontSize: '15px', lineHeight: '1.65', fontFamily: 'serif', color: '#475569', textAlign: 'center', padding: '0 24px', maxHeight: '180px' }}>{story}</AutoFitText>
               </div>
           </div>
       </Wrapper>
@@ -595,7 +598,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
               </div>
           </header>
           <div style={{ position: 'absolute', top: '156px', left: '40px', width: '720px', height: '80px', backgroundColor: '#ffffff', padding: '12px 16px', borderRadius: '16px', boxSizing: 'border-box', border: '1px solid #f1f5f9', overflow: 'hidden' }}>
-              <p style={{ fontSize: '13px', lineHeight: '1.5', color: '#475569', fontWeight: '500', margin: 0, maxHeight: '56px', overflow: 'hidden' }}>{story}</p>
+              <AutoFitText style={{ fontSize: '13px', lineHeight: '1.5', color: '#475569', fontWeight: '500', margin: 0, maxHeight: '56px' }}>{story}</AutoFitText>
           </div>
           {slotConfigs.slice(0, 9).map((cfg, i) => {
               const cols = 3, cellWidth = 224, cellHeight = 224, gap = 24, startX = 40, startY = 260;
@@ -615,7 +618,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
                   <span>Vol. 1</span><span>{location}</span><span>{dateStr}</span><span>{mode}</span>
               </div>
           </div>
-          <div style={{ columnCount: 3, columnGap: '24px', fontSize: '13px', lineHeight: '1.6', fontFamily: 'serif', textAlign: 'justify', color: '#333333', marginBottom: '24px', maxHeight: '420px', overflow: 'hidden' }}>{story}</div>
+          <AutoFitText style={{ columnCount: 3, columnGap: '24px', fontSize: '13px', lineHeight: '1.6', fontFamily: 'serif', textAlign: 'justify', color: '#333333', marginBottom: '24px', maxHeight: '420px' }}>{story}</AutoFitText>
           <div style={{ display: 'flex', gap: '16px', height: '220px', flexShrink: 0, marginTop: 'auto' }}>
              {slotConfigs.slice(0,2).map((cfg, i) => (
                  <div key={i} style={{ flex: 1, height: '100%', border: '2px solid #111111', padding: '6px', backgroundColor: '#ffffff', overflow: 'hidden', position: 'relative' }}><SafeImage config={cfg} slotId={i} imgStyle={{ filter: 'grayscale(100%)' }} {...sharedImgProps} /></div>
@@ -638,7 +641,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
               </div>
           </header>
           <div style={{ display: 'flex', gap: '36px', flex: 1, overflow: 'hidden' }}>
-              <div style={{ width: '50%', fontSize: '13px', lineHeight: '1.65', color: '#b3b3b3', textAlign: 'justify', maxHeight: '650px', overflow: 'hidden' }}><span style={{ color: '#00ff9d' }}>&gt;_ </span>{story}</div>
+              <AutoFitText style={{ width: '50%', fontSize: '13px', lineHeight: '1.65', color: '#b3b3b3', textAlign: 'justify', maxHeight: '650px' }}><span style={{ color: '#00ff9d' }}>&gt;_ </span>{story}</AutoFitText>
               <div style={{ width: '50%', display: 'flex', flexDirection: 'column', gap: '20px', height: '100%', overflow: 'hidden' }}>
                  {slotConfigs.slice(0, 2).map((cfg, i) => (
                      <div key={i} style={{ flex: 1, minHeight: 0, position: 'relative', width: '100%', border: '1px solid #00e5ff', backgroundColor: '#0a0a0a', boxShadow: '0 0 15px rgba(0,229,255,0.2)', padding: '6px', overflow: 'hidden' }}><SafeImage config={cfg} slotId={i} imgStyle={{ opacity: 0.8, mixBlendMode: 'screen' }} {...sharedImgProps} /></div>
@@ -656,7 +659,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
               <p style={{ fontSize: '11px', letterSpacing: '0.4em', textTransform: 'uppercase', color: '#c19a6b', marginBottom: '20px', marginTop: '12px', margin: '12px 0 20px 0', flexShrink: 0 }}>{dateStr}</p>
               <h1 style={{ fontSize: '38px', fontFamily: 'serif', fontWeight: '300', letterSpacing: '0.05em', marginBottom: '24px', lineHeight: '1.2', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', margin: '0 0 24px 0', flexShrink: 0 }}>{title}</h1>
               <div style={{ width: '100%', height: '220px', marginBottom: '24px', backgroundColor: '#fdfbf7', padding: '6px', border: '1px solid #eaeaea', boxShadow: '0 10px 20px rgba(0,0,0,0.05)', flexShrink: 0, overflow: 'hidden', position: 'relative' }}><SafeImage config={coverConfig} slotId="cover" {...sharedImgProps} /></div>
-              <div style={{ fontSize: '14px', lineHeight: '1.65', fontFamily: 'serif', color: '#555555', maxWidth: '450px', maxHeight: '180px', overflow: 'hidden', margin: '0 auto' }}>{story}</div>
+              <AutoFitText style={{ fontSize: '14px', lineHeight: '1.65', fontFamily: 'serif', color: '#555555', maxWidth: '450px', maxHeight: '180px', margin: '0 auto' }}>{story}</AutoFitText>
               <p style={{ marginTop: 'auto', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#c19a6b', borderTop: '1px solid #c19a6b', paddingTop: '16px', width: '100%', margin: 'auto 0 0 0', flexShrink: 0 }}>Recorded in {location}</p>
           </div>
       </Wrapper>
@@ -678,7 +681,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
           <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
               <div style={{ width: '50%', padding: '36px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                   <div style={{ backgroundColor: '#1d3557', color: '#ffffff', display: 'inline-block', padding: '6px 12px', fontSize: '11px', fontWeight: 'bold', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '20px', alignSelf: 'flex-start', flexShrink: 0 }}>{dateStr}</div>
-                  <div style={{ fontSize: '14px', lineHeight: '1.65', fontWeight: '500', textAlign: 'justify', maxHeight: '550px', overflow: 'hidden' }}>{story}</div>
+                  <AutoFitText style={{ fontSize: '14px', lineHeight: '1.65', fontWeight: '500', textAlign: 'justify', maxHeight: '550px' }}>{story}</AutoFitText>
               </div>
               <div style={{ width: '50%', backgroundColor: '#8ecae6', padding: '24px', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
                   <SafeImage config={coverConfig} slotId="cover" imgStyle={{ mixBlendMode: 'multiply' }} {...sharedImgProps} />
@@ -699,7 +702,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
               <div style={{ display: 'flex', gap: '24px', fontSize: '10px', fontWeight: 'bold', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#5a7d6a', marginBottom: '24px', borderTop: '1px solid #5a7d6a', borderBottom: '1px solid #5a7d6a', padding: '12px 0', justifyContent: 'center', width: '100%', flexShrink: 0 }}>
                   <span>{location}</span><span>{dateStr}</span>
               </div>
-              <div style={{ textAlign: 'center', fontSize: '14px', lineHeight: '1.65', fontFamily: 'serif', color: '#3e5f4d', padding: '0 32px', maxHeight: '280px', overflow: 'hidden' }}>{story}</div>
+              <AutoFitText style={{ textAlign: 'center', fontSize: '14px', lineHeight: '1.65', fontFamily: 'serif', color: '#3e5f4d', padding: '0 32px', maxHeight: '280px' }}>{story}</AutoFitText>
           </div>
       </Wrapper>
     );
@@ -720,7 +723,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
               </div>
               <div style={{ backgroundColor: '#fce4ec', borderRadius: '20px', padding: '24px', flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                   <p style={{ fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px', margin: '0 0 12px 0', flexShrink: 0 }}><MapPin size={14}/> {location}</p>
-                  <div style={{ fontSize: '14px', lineHeight: '1.65', color: '#880e4f', overflow: 'hidden', flex: 1 }}>{story}</div>
+                  <AutoFitText style={{ fontSize: '14px', lineHeight: '1.65', color: '#880e4f', flex: 1 }}>{story}</AutoFitText>
               </div>
           </div>
       </Wrapper>
@@ -748,7 +751,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
                       <div style={{ borderBottom: '2px dashed #0a2342', paddingBottom: '6px', marginBottom: '16px', flexShrink: 0 }}>
                           <p style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666666', margin: 0 }}>Official Entry: <span style={{ color: '#0a2342' }}>{location}</span></p>
                       </div>
-                      <div style={{ fontSize: '14px', lineHeight: '1.65', fontFamily: 'monospace', color: '#333333', textAlign: 'justify', maxHeight: '600px', overflow: 'hidden' }}>{story}</div>
+                      <AutoFitText style={{ fontSize: '14px', lineHeight: '1.65', fontFamily: 'monospace', color: '#333333', textAlign: 'justify', maxHeight: '600px' }}>{story}</AutoFitText>
                   </div>
               </div>
           </div>
@@ -766,7 +769,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
                           <h1 style={{ fontSize: '36px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '-0.05em', lineHeight: '1.2', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', maxWidth: '80%', margin: 0 }}>{title}</h1>
                           {renderIcon(36)}
                       </div>
-                      <div style={{ fontSize: '14px', lineHeight: '1.65', fontWeight: '500', textAlign: 'justify', maxHeight: '420px', overflow: 'hidden' }}>{story}</div>
+                      <AutoFitText style={{ fontSize: '14px', lineHeight: '1.65', fontWeight: '500', textAlign: 'justify', maxHeight: '420px' }}>{story}</AutoFitText>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid #2b2b2b', paddingTop: '16px', flexShrink: 0, marginTop: '20px' }}>
                       <div><p style={{ fontSize: '9px', textTransform: 'uppercase', fontWeight: 'bold', color: '#888888', margin: 0 }}>DESTINATION</p><p style={{ fontSize: '12px', fontWeight: '900', textTransform: 'uppercase', margin: 0 }}>{location}</p></div>
@@ -798,7 +801,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
               <div style={{ overflow: 'hidden' }}>
                   <p style={{ fontSize: '12px', marginBottom: '20px', color: '#999999', margin: '0 0 20px 0' }}>~/travels/{location.toLowerCase().replace(/\s+/g, '-')}.txt</p>
                   <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '24px', paddingBottom: '6px', textDecoration: 'underline', textDecorationThickness: '3px', textUnderlineOffset: '6px', lineHeight: '1.2', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', margin: '0 0 24px 0' }}>{title}</h1>
-                  <div style={{ fontSize: '14px', lineHeight: '1.65', color: '#333333', maxHeight: '300px', overflow: 'hidden', textAlign: 'justify' }}>{story}</div>
+                  <AutoFitText style={{ fontSize: '14px', lineHeight: '1.65', color: '#333333', maxHeight: '300px', textAlign: 'justify' }}>{story}</AutoFitText>
               </div>
               <div style={{ overflow: 'hidden' }}>
                   <div style={{ display: 'flex', gap: '20px', marginBottom: '24px', height: '180px', width: '100%', flexShrink: 0 }}>
@@ -825,9 +828,9 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
               <h1 style={{ fontSize: '56px', fontFamily: 'serif', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '20px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', lineHeight: '1.2', textShadow: '0 10px 20px rgba(0,0,0,0.8)', margin: '0 0 20px 0' }}>{title}</h1>
               <p style={{ fontSize: '13px', fontWeight: '300', letterSpacing: '0.4em', color: '#cccccc', marginBottom: '20px', textTransform: 'uppercase', margin: '0 0 20px 0' }}>A Journey to {location}</p>
               
-              <div style={{ fontSize: '13px', fontFamily: 'monospace', lineHeight: '1.6', margin: '0 auto 24px auto', maxWidth: '600px', maxHeight: '90px', overflow: 'hidden', color: 'rgba(255,255,255,0.8)' }}>
+              <AutoFitText style={{ fontSize: '13px', fontFamily: 'monospace', lineHeight: '1.6', margin: '0 auto 24px auto', maxWidth: '600px', maxHeight: '90px', color: 'rgba(255,255,255,0.8)' }}>
                   {story}
-              </div>
+              </AutoFitText>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', letterSpacing: '0.1em', color: '#aaaaaa', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '16px', textTransform: 'uppercase' }}>
                   <span style={{ width: '40%', textAlign: 'right', paddingRight: '12px' }}>Date: {dateStr}</span>
@@ -841,6 +844,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
 
   return null;
 });
+
 PrintableView.displayName = 'PrintableView';
 
 // ==========================================
@@ -874,7 +878,6 @@ export default function PublicMemory() {
   const [activeSlot, setActiveSlot] = useState('cover'); 
   const [showImagePickerModal, setShowImagePickerModal] = useState(false);
 
-  // Default values passed to child safeimages dynamically update this based on natural proportions
   const [slotBounds, setSlotBounds] = useState({});
   const handleBoundsChange = useCallback((slotId, bounds) => {
     setSlotBounds(prev => {
@@ -890,7 +893,6 @@ export default function PublicMemory() {
       ...(memory?.media?.filter(m => m.type === 'image').map(m => m.url) || [])
   ].filter(Boolean))).map(url => ({ url })), [memory]);
 
-  // Handle CSS for printing
   useEffect(() => {
     if (!isPreviewMode) return;
     const styleId = "avora-print-styles";
@@ -902,6 +904,7 @@ export default function PublicMemory() {
             @page { size: 800px 1131px !important; margin: 0 !important; }
             html, body { margin: 0 !important; padding: 0 !important; width: 800px !important; height: 1131px !important; background-color: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .print-hidden-outlines * { outline: none !important; border: none !important; }
             .print-only-container { position: absolute !important; top: 0 !important; left: 0 !important; display: block !important; visibility: visible !important; }
           }
           @media screen {
@@ -931,7 +934,6 @@ export default function PublicMemory() {
     }
   }, [memory]);
 
-  // Set initial configs with 50% as the default center point
   useEffect(() => {
     if (memory && !mediaConfig) {
         const baseCover = memory.coverImage || (allImages.length > 0 ? allImages[0].url : "");
@@ -943,7 +945,6 @@ export default function PublicMemory() {
     }
   }, [memory, mediaConfig, allImages]);
 
-  // Scale the preview wrapper dynamically
   useEffect(() => {
     if (!isPreviewMode) return;
     const container = previewContainerRef.current;
@@ -1030,8 +1031,7 @@ export default function PublicMemory() {
 
     return (
       <>
-        {/* Hidden Export Wrapper - ONLY FOR PRINTING */}
-        <div className="print-only-container bg-white" style={{ width: "800px", height: "1131px" }}>
+        <div className="print-only-container print-hidden-outlines bg-white" style={{ width: "800px", height: "1131px" }}>
             <PrintableView memory={memory} layoutIndex={layoutIndex} mediaConfig={mediaConfig} isEditing={false} />
         </div>
 
@@ -1078,7 +1078,6 @@ export default function PublicMemory() {
                     </div>
                 </div>
 
-                {/* SIDEBAR CONTROLS - Simplified as requested */}
                 {isDesktop && currentEditorConfig && (
                     <div className="w-80 bg-slate-950 border-l border-slate-800 p-6 flex flex-col gap-6 z-30 shrink-0 shadow-2xl overflow-y-auto">
                         <div className="flex items-center justify-between pb-3 border-b border-slate-800">
@@ -1089,7 +1088,6 @@ export default function PublicMemory() {
                                 Click an image on the canvas to select it. Drag directly on the image to pan, or use the sliders below.
                             </p>
 
-                            {/* Target Slot Selector */}
                             <div>
                                 <label className="block font-semibold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5"><Target size={12} /> Target Slot</label>
                                 <select value={String(activeSlot)} onChange={(e) => setActiveSlot(e.target.value === 'cover' ? 'cover' : Number(e.target.value))} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-white text-xs font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -1098,7 +1096,6 @@ export default function PublicMemory() {
                                 </select>
                             </div>
 
-                            {/* Zoom Level Slider */}
                             <div>
                                 <label className="block font-semibold uppercase tracking-wider text-slate-400 mb-2">Zoom Level</label>
                                 <div className="flex items-center gap-3">
@@ -1109,7 +1106,6 @@ export default function PublicMemory() {
                                 </div>
                             </div>
 
-                            {/* X-Axis Position Slider (0 to 100) */}
                             <div>
                                 <label className="block font-semibold uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">
                                     <span>Horizontal (X)</span><span className="font-mono text-[10px] text-blue-400">{Math.round(currentEditorConfig.x)}%</span>
@@ -1120,7 +1116,6 @@ export default function PublicMemory() {
                                 </div>
                             </div>
 
-                            {/* Y-Axis Position Slider (0 to 100) */}
                             <div>
                                 <label className="block font-semibold uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">
                                     <span>Vertical (Y)</span><span className="font-mono text-[10px] text-blue-400">{Math.round(currentEditorConfig.y)}%</span>
@@ -1131,7 +1126,7 @@ export default function PublicMemory() {
                                 </div>
                             </div>
 
-                            {/* Reset Button */}
+                            <button type="button" onClick={() => setShowImagePickerModal(true)} className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-lg mt-2"><ImageIcon size={16} /> Change Selected Photo</button>
                             <button type="button" onClick={() => { handleConfigChange(activeSlot, 'zoom', 1); handleConfigChange(activeSlot, 'x', 50); handleConfigChange(activeSlot, 'y', 50); }} className="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold transition flex items-center justify-center gap-2 cursor-pointer mt-4"><RefreshCcw size={14} /> Reset Image</button>
                         </div>
                     </div>
@@ -1148,7 +1143,6 @@ export default function PublicMemory() {
     );
   }
 
-  // STANDARD PUBLIC MEMORY VIEW
   return (
     <main className="print:hidden min-h-screen bg-slate-50 pb-16 relative z-10">
       <PageTitle title={memory.title} />
