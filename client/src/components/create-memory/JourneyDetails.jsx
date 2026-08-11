@@ -1,16 +1,62 @@
-import { useState } from "react";
-import { Sparkles, X } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Sparkles, X, ChevronDown, Check } from "lucide-react";
 import MemoryAIModal from "./MemoryAIModal";
 import LocationAutocomplete from "../common/LocationAutocomplete";
 
 const JourneyDetails = ({ formData, setFormData, handleChange }) => {
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [isTravelModeOpen, setIsTravelModeOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const travelModes = [
+    "Car",
+    "Bike",
+    "Bus",
+    "Train",
+    "Flight",
+    "Walk",
+    "Cycle",
+    "Boat",
+    "Other",
+  ];
+
+  // Ensure selected modes are handled as an array
+  const selectedModes = Array.isArray(formData.modeOfTravel)
+    ? formData.modeOfTravel
+    : formData.modeOfTravel
+    ? [formData.modeOfTravel]
+    : [];
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsTravelModeOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleClear = (fieldName) => {
     setFormData((prev) => ({
       ...prev,
-      [fieldName]: "",
+      [fieldName]: fieldName === "modeOfTravel" ? [] : "",
     }));
+  };
+
+  const handleModeToggle = (mode) => {
+    const updatedModes = selectedModes.includes(mode)
+      ? selectedModes.filter((m) => m !== mode)
+      : [...selectedModes, mode];
+
+    // Propagate change matching standard event structure
+    handleChange({
+      target: {
+        name: "modeOfTravel",
+        value: updatedModes,
+      },
+    });
   };
 
   return (
@@ -124,39 +170,79 @@ const JourneyDetails = ({ formData, setFormData, handleChange }) => {
         </div>
       </div>
 
-      {/* Mode of Travel */}
-      <div>
+      {/* Mode of Travel (Multi-select) */}
+      <div className="relative" ref={dropdownRef}>
         <label className="block text-xs font-semibold text-slate-700 mb-1">
           Mode of Travel <span className="text-red-500">*</span>
         </label>
-        <div className="relative">
-          <select
-            name="modeOfTravel"
-            value={formData.modeOfTravel}
-            onChange={handleChange}
-            className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 px-3 py-2 pr-8 text-xs sm:text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-2 focus:ring-blue-100 appearance-none"
-          >
-            <option value="" disabled>Select Travel Mode</option>
-            <option value="Car">Car</option>
-            <option value="Bike">Bike</option>
-            <option value="Bus">Bus</option>
-            <option value="Train">Train</option>
-            <option value="Flight">Flight</option>
-            <option value="Walk">Walk</option>
-            <option value="Cycle">Cycle</option>
-            <option value="Boat">Boat</option>
-            <option value="Other">Other</option>
-          </select>
-          {formData.modeOfTravel && (
+        
+        <div
+          onClick={() => setIsTravelModeOpen(!isTravelModeOpen)}
+          className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 px-3 py-2 pr-14 text-xs sm:text-sm text-slate-800 outline-none transition focus-within:border-[#3559D4] focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-100 cursor-pointer min-h-[38px] flex items-center flex-wrap gap-1.5"
+        >
+          {selectedModes.length === 0 ? (
+            <span className="text-slate-400">Select Travel Mode(s)</span>
+          ) : (
+            selectedModes.map((mode) => (
+              <span
+                key={mode}
+                className="inline-flex items-center gap-1 bg-blue-50 text-[#3559D4] border border-blue-200/60 px-2 py-0.5 rounded-md text-[11px] font-medium"
+              >
+                {mode}
+                <X
+                  size={12}
+                  className="hover:text-blue-900 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleModeToggle(mode);
+                  }}
+                />
+              </span>
+            ))
+          )}
+        </div>
+
+        {/* Clear & Toggle Icons */}
+        <div className="absolute right-2.5 top-[30px] flex items-center gap-1 text-slate-400">
+          {selectedModes.length > 0 && (
             <button
               type="button"
               onClick={() => handleClear("modeOfTravel")}
-              className="absolute right-7 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-lg transition cursor-pointer"
+              className="hover:text-slate-600 p-0.5 rounded-lg transition cursor-pointer"
             >
               <X size={14} />
             </button>
           )}
+          <ChevronDown
+            size={16}
+            className={`transition-transform duration-200 ${
+              isTravelModeOpen ? "rotate-180" : ""
+            }`}
+          />
         </div>
+
+        {/* Dropdown Options */}
+        {isTravelModeOpen && (
+          <div className="absolute z-25 mt-1.5 w-full rounded-xl border border-slate-200 bg-white shadow-lg py-1.5 max-h-56 overflow-y-auto">
+            {travelModes.map((mode) => {
+              const isSelected = selectedModes.includes(mode);
+              return (
+                <div
+                  key={mode}
+                  onClick={() => handleModeToggle(mode)}
+                  className={`flex items-center justify-between px-3 py-2 text-xs sm:text-sm cursor-pointer transition ${
+                    isSelected
+                      ? "bg-blue-50/80 text-[#3559D4] font-medium"
+                      : "text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  <span>{mode}</span>
+                  {isSelected && <Check size={14} className="text-[#3559D4]" />}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Story / Description */}
