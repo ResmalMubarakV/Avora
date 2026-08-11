@@ -6,7 +6,7 @@ const Memory = require("../models/Memory");
 // ==========================================
 /**
  * Performs a global search across users, accessible memories (public + own private), 
- * and distinct locations.
+ * restricted strictly to title and location.
  */
 const search = async (req, res) => {
   try {
@@ -42,7 +42,7 @@ const search = async (req, res) => {
       memoryVisibility.push({ user: req.user._id });
     }
 
-    // 3. Search memories matching title, location, or description
+    // 3. Search memories matching title or location ONLY (Description excluded)
     const memories = await Memory.find({
       $and: [
         { $or: memoryVisibility }, // Enforce visibility rules
@@ -50,7 +50,6 @@ const search = async (req, res) => {
           $or: [
             { title: regex },
             { location: regex },
-            { description: regex },
           ],
         }
       ]

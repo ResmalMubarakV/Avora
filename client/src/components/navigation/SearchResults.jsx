@@ -84,10 +84,16 @@ const SearchResults = ({ open, query, results, loading }) => {
                     <p className="mb-3 text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">Places</p>
                     <div className="space-y-1">
                         {places.map((place) => (
-                            <button key={place} type="button" className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-slate-50 cursor-pointer">
+                            <a
+                                key={place}
+                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-slate-50 cursor-pointer"
+                            >
                                 <span className="text-sm">📍</span>
                                 <p className="text-sm font-medium text-slate-800">{place}</p>
-                            </button>
+                            </a>
                         ))}
                     </div>
                 </div>
