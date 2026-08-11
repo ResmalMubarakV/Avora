@@ -20,13 +20,13 @@ const MemoryHero = ({
 
     const incomingFrom = locationState?.from || location.state?.from || sessionStorage.getItem(RETURN_KEY);
     const from = incomingFrom || `/${username}`;
-    const label = locationState?.label || (incomingFrom?.includes("/dashboard/memories") ? "Memories" : "Profile");
 
     const currentMemoryPath = location.pathname + location.search;
 
     return (
         <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
+                {/* Icon-Only Back Button */}
                 <button
                     type="button"
                     onClick={() => navigate(from)}
@@ -34,16 +34,12 @@ const MemoryHero = ({
                         group
                         inline-flex
                         items-center
-                        gap-2
+                        justify-center
                         rounded-2xl
                         border
                         border-slate-200/80
                         bg-white
-                        px-4
-                        py-2.5
-                        text-xs
-                        sm:text-sm
-                        font-bold
+                        p-2.5
                         text-slate-700
                         shadow-sm
                         transition-all
@@ -53,9 +49,9 @@ const MemoryHero = ({
                         hover:border-slate-300
                         active:scale-95
                     "
+                    title="Go back"
                 >
-                    <ArrowLeft size={16} className="transition-transform duration-300 group-hover:-translate-x-1" />
-                    <span>Back to {label}</span>
+                    <ArrowLeft size={18} className="transition-transform duration-300 group-hover:-translate-x-1" />
                 </button>
 
                 {isOwner && (
