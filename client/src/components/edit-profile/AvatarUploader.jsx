@@ -3,11 +3,10 @@ import { useRef, useMemo, useState, useEffect } from "react";
 import AvatarCropModal from "./AvatarCropModal";
 
 // ==========================================
-// AVATAR UPLOADER COMPONENT
+// AVATAR UPLOADER COMPONENT (COMPACT)
 // ==========================================
 /**
- * Renders a profile photo uploader with preview support, object URL memory cleanup, 
- * cropping modal integration via AvatarCropModal, and photo removal actions.
+ * Renders a compact profile photo uploader with responsive single-row buttons.
  */
 const AvatarUploader = ({
   formData,
@@ -27,7 +26,7 @@ const AvatarUploader = ({
     formData.existingProfileImage,
   ]);
 
-  // --- Cleanup Object URL on unmount or preview change to prevent memory leaks ---
+  // --- Cleanup Object URL on unmount or preview change ---
   useEffect(() => {
     const currentPreview = preview;
     return () => {
@@ -42,7 +41,6 @@ const AvatarUploader = ({
     const file = e.target.files[0];
     if (!file) return;
 
-    // Open the cropper instead of using the raw file directly
     setCropFile(file);
     e.target.value = "";
   };
@@ -58,13 +56,11 @@ const AvatarUploader = ({
 
   // --- Re-crop Existing or Newly Selected Photo ---
   const handleRecrop = async () => {
-    // Re-cropping a photo already selected this session
     if (formData.profileImage) {
       setCropFile(formData.profileImage);
       return;
     }
 
-    // Re-cropping a previously uploaded avatar — fetch it back into a File
     if (formData.existingProfileImage) {
       try {
         const response = await fetch(formData.existingProfileImage);
@@ -89,18 +85,18 @@ const AvatarUploader = ({
   };
 
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+    <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 sm:p-5 shadow-xs">
       {/* Header */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold text-slate-900">Profile Photo</h2>
-        <p className="mt-1 text-sm text-slate-500">
+      <div className="mb-3">
+        <h2 className="text-sm sm:text-base font-bold text-slate-900">Profile Photo</h2>
+        <p className="text-[11px] text-slate-500">
           Upload a clear profile photo for your public profile.
         </p>
       </div>
 
       {/* Avatar Container & Controls */}
-      <div className="flex flex-col items-center gap-6">
-        <div className="h-40 w-40 overflow-hidden rounded-full border-4 border-slate-200 bg-slate-100 shadow-inner">
+      <div className="flex flex-col items-center gap-4">
+        <div className="h-28 w-28 sm:h-32 sm:w-32 overflow-hidden rounded-full border-4 border-slate-200/80 bg-slate-100 shadow-inner">
           {preview ? (
             <img
               src={preview}
@@ -109,7 +105,7 @@ const AvatarUploader = ({
             />
           ) : (
             <div className="flex h-full items-center justify-center text-slate-400">
-              <Camera size={42} />
+              <Camera size={32} />
             </div>
           )}
         </div>
@@ -123,12 +119,12 @@ const AvatarUploader = ({
           className="hidden"
         />
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap justify-center gap-3">
+        {/* Action Buttons in a Single Row */}
+        <div className="flex flex-row flex-wrap items-center justify-center gap-2 w-full">
           <button
             type="button"
             onClick={() => inputRef.current.click()}
-            className="rounded-xl bg-[#3559D4] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#1E3A8A]"
+            className="rounded-xl bg-[#3559D4] px-3.5 py-2 text-xs sm:text-sm font-semibold text-white transition hover:bg-[#1E3A8A] cursor-pointer"
           >
             {preview ? "Change Photo" : "Upload Photo"}
           </button>
@@ -137,9 +133,9 @@ const AvatarUploader = ({
             <button
               type="button"
               onClick={handleRecrop}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 transition hover:bg-slate-50 cursor-pointer"
             >
-              <Crop size={16} />
+              <Crop size={14} />
               Crop
             </button>
           )}
@@ -148,9 +144,9 @@ const AvatarUploader = ({
             <button
               type="button"
               onClick={removeImage}
-              className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-5 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-red-200/80 bg-red-50/50 px-3.5 py-2 text-xs sm:text-sm font-semibold text-red-600 transition hover:bg-red-100/60 cursor-pointer"
             >
-              <Trash2 size={16} />
+              <Trash2 size={14} />
               Remove
             </button>
           )}
@@ -169,4 +165,5 @@ const AvatarUploader = ({
   );
 };
 
+AvatarUploader.displayName = "AvatarUploader";
 export default AvatarUploader;
