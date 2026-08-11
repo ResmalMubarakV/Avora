@@ -1,42 +1,80 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
+import api from "../../../api/axios";
 
 import MemoriesCard from "../../../components/dashboard/memories/MemoriesCard";
 import ProfileSearch from "./ProfileSearch";
 import ProfileFilters from "./ProfileFilters";
 import ProfilePagination from "./ProfilePagination";
 
-const ITEMS_PER_PAGE_GRID = 12;
-const ITEMS_PER_PAGE_INLINE = 6;
-
 // ==========================================
-// MEMORIES SECTION COMPONENT
+// MEMORIES SECTION COMPONENT (Self-fetching & Isolated)
 // ==========================================
-const MemoriesSection = ({
-    memories: initialMemories,
-    username,
-    isOwner,
-}) => {
+const MemoriesSection = ({ username, isOwner }) => {
     const location = useLocation();
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const pageParam = Number(searchParams.get("page")) || 1;
+    const currentPage = parseInt(searchParams.get("page")) || 1;
+    const sortBy = searchParams.get("sort") || "newest";
+    const filterParam = searchParams.get("filter") || "";
+    const search = searchParams.get("search") || "";
 
-    const [memories, setMemories] = useState(initialMemories);
-    const [search, setSearch] = useState("");
-    const [selectedFilters, setSelectedFilters] = useState([]);
-    const [sortBy, setSortBy] = useState("newest");
-    const [currentPage, setCurrentPage] = useState(pageParam);
+    const currentFilters = filterParam ? filterParam.split(",") : [];
+
+    const [memories, setMemories] = useState([]);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+    const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState("grid");
 
-    const itemsPerPage = viewMode === "inline" ? ITEMS_PER_PAGE_INLINE : ITEMS_PER_PAGE_GRID;
+    // പ്രൊഫൈൽ ഫുൾ റീഫ്രഷ് ആവാതെ മെമ്മറീസ് മാത്രം ഫെച്ച് ചെയ്യുന്നു
+    useEffect(() => {
+        if (!username) return;
+
+        let isMounted = true;
+        const fetchMemories = async () => {
+            try {
+                setLoading(true);
+                const { data } = await api.get(`/api/public/${username}`, {
+                    params: {
+                        page: currentPage,
+                        sort: sortBy,
+                        filter: filterParam,
+                        search: search,
+                    }
+                });
+
+                if (isMounted) {
+                    setMemories(data.memories || []);
+                    setTotalPages(data.totalPages || 1);
+                    setTotalCount(data.totalMemories || (data.memories ? data.memories.length : 0));
+                }
+            } catch (error) {
+                console.error("Failed to load profile memories:", error);
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+
+        fetchMemories();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [username, currentPage, sortBy, filterParam, search]);
 
     const toggleFilter = (filterValue) => {
-        setSelectedFilters((prev) =>
-            prev.includes(filterValue)
-                ? prev.filter((f) => f !== filterValue)
-                : [...prev, filterValue]
-        );
+        const updatedFilters = currentFilters.includes(filterValue)
+            ? currentFilters.filter((f) => f !== filterValue)
+            : [...currentFilters, filterValue];
+
+        if (updatedFilters.length > 0) {
+            searchParams.set("filter", updatedFilters.join(","));
+        } else {
+            searchParams.delete("filter");
+        }
+        searchParams.delete("page");
+        setSearchParams(searchParams, { replace: true });
     };
 
     const handlePinUpdated = (id, newPinnedState) => {
@@ -45,86 +83,40 @@ const MemoriesSection = ({
         );
     };
 
-    const filteredMemories = useMemo(() => {
-        const keyword = search.toLowerCase();
-
-        const filtered = memories.filter((memory) => {
-            const matchesSearch =
-                memory.title.toLowerCase().includes(keyword) ||
-                memory.location.toLowerCase().includes(keyword);
-
-            if (!matchesSearch) return false;
-
-            if (!isOwner && !memory.isPublic) {
-                return false;
-            }
-
-            if (selectedFilters.length === 0) return true;
-
-            const matchesAll = selectedFilters.every((f) => {
-                if (f === "public") return memory.isPublic;
-                if (f === "private") return !memory.isPublic;
-                if (f === "liked") return memory.isLiked;
-                return true;
-            });
-
-            return matchesAll;
-        });
-
-        // Always sort based on the user's selected sortBy dropdown choice
-        switch (sortBy) {
-            case "oldest":
-                filtered.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-                break;
-            case "title":
-                filtered.sort((a, b) => a.title.localeCompare(b.title));
-                break;
-            case "newest":
-            default:
-                // When sorting by newest (default), keep pinned items at the top
-                filtered.sort((a, b) => {
-                    if (a.isPinned === b.isPinned) {
-                        return new Date(b.startDate) - new Date(a.startDate);
-                    }
-                    return a.isPinned ? -1 : 1;
-                });
-                break;
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        if (value) {
+            searchParams.set("search", value);
+        } else {
+            searchParams.delete("search");
         }
-
-        return filtered;
-    }, [memories, search, selectedFilters, sortBy, isOwner]);
-
-    useEffect(() => {
-        setCurrentPage(1);
         searchParams.delete("page");
         setSearchParams(searchParams, { replace: true });
-    }, [search, selectedFilters, sortBy, viewMode]);
-
-    const totalPages = Math.max(
-        1,
-        Math.ceil(filteredMemories.length / itemsPerPage)
-    );
-
-    const handlePageChange = (newPage) => {
-        setCurrentPage(newPage);
-        if (newPage > 1) {
-            setSearchParams({ page: newPage.toString() }, { replace: true });
-        } else {
-            searchParams.delete("page");
-            setSearchParams(searchParams, { replace: true });
-        }
     };
 
-    const paginatedMemories = filteredMemories.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
+    const handleSortChange = (e) => {
+        const newSort = e.target.value;
+        searchParams.set("sort", newSort);
+        searchParams.delete("page");
+        setSearchParams(searchParams, { replace: true });
+    };
 
-    useEffect(() => {
-        if (currentPage > totalPages) {
-            handlePageChange(totalPages);
+    const handlePageChange = (newPage) => {
+        if (newPage > 1) {
+            searchParams.set("page", newPage.toString());
+        } else {
+            searchParams.delete("page");
         }
-    }, [currentPage, totalPages]);
+        setSearchParams(searchParams, { replace: true });
+
+        // പേജ് മാറുമ്പോൾ മാത്രം ചെറിയ സ്ക്രോൾ
+        setTimeout(() => {
+            window.scrollTo({
+                top: window.innerHeight * 0.4,
+                behavior: "smooth",
+            });
+        }, 50);
+    };
 
     return (
         <section
@@ -175,8 +167,8 @@ const MemoriesSection = ({
                                 [word-spacing:0.25rem]
                             "
                         >
-                            {filteredMemories.length}{" "}
-                            {filteredMemories.length === 1 ? "journey" : "journeys"} documented
+                            {totalCount}{" "}
+                            {totalCount === 1 ? "journey" : "journeys"} documented
                         </p>
                     )}
                 </div>
@@ -185,14 +177,14 @@ const MemoriesSection = ({
                     <div className="flex-1 sm:flex-initial">
                         <ProfileSearch
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            onChange={handleSearchChange}
                         />
                     </div>
 
                     <div className="shrink-0">
                         <select
                             value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
+                            onChange={handleSortChange}
                             title="Sort memories dropdown"
                             aria-label="Sort memories dropdown"
                             className="
@@ -222,13 +214,17 @@ const MemoriesSection = ({
 
             <ProfileFilters
                 isOwner={isOwner}
-                selectedFilters={selectedFilters}
+                selectedFilters={currentFilters}
                 toggleFilter={toggleFilter}
                 viewMode={viewMode}
                 setViewMode={setViewMode}
             />
 
-            {paginatedMemories.length === 0 ? (
+            {loading ? (
+                <div className="rounded-3xl border border-slate-200 bg-white py-24 text-center text-slate-400">
+                    Loading memories...
+                </div>
+            ) : memories.length === 0 ? (
                 <div
                     className="
                         rounded-2xl
@@ -280,7 +276,7 @@ const MemoriesSection = ({
                                 : "grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-2 xl:grid-cols-4"
                         }
                     >
-                        {paginatedMemories.map((memory) => (
+                        {memories.map((memory) => (
                             <div
                                 key={memory._id}
                                 className="w-full"

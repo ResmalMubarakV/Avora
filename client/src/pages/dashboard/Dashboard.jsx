@@ -17,10 +17,13 @@ const Dashboard = () => {
   const { memories: initialMemories, loading, error } = useMemories();
   const [memories, setMemories] = useState([]);
 
-  // Sync initial hook data to local state safely
+  // Sync initial hook data to local state safely (handles both array or object payloads)
   useEffect(() => {
     if (initialMemories) {
-      setMemories(initialMemories);
+      const memoriesArray = Array.isArray(initialMemories)
+        ? initialMemories
+        : (initialMemories.memories || []);
+      setMemories(memoriesArray);
     }
   }, [initialMemories]);
 

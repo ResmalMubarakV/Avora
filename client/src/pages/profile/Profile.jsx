@@ -19,7 +19,6 @@ const Profile = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // GUARD: If username matches reserved auth keywords, immediately redirect out to prevent route collisions
   const reservedWords = ["login", "register", "forgot-password", "reset-password", "dashboard", "admin", "pending-approval", "suspended"];
   if (username && reservedWords.includes(username.toLowerCase())) {
     return <Navigate to={`/${username.toLowerCase()}`} replace />;
@@ -27,21 +26,11 @@ const Profile = () => {
 
   const [user, setUser] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  const [memories, setMemories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const profileUsername = username || currentUser?.username;
   const isOwner = currentUser?.username === profileUsername;
   const isAdminViewer = currentUser?.role === "admin";
-
-  // Automatically scroll to top on initial page load or redirect
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "instant",
-    });
-  }, [location.pathname]);
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -59,13 +48,13 @@ const Profile = () => {
     if (!profileUsername) return;
 
     let isMounted = true;
-    const fetchProfile = async () => {
+    const fetchProfileUser = async () => {
       try {
         setLoading(true);
+        // പ്രൊഫൈൽ യൂസർ ഡിറ്റെയ്ൽസ് മാത്രം ഫെച്ച് ചെയ്യുന്നു
         const { data } = await api.get(`/api/public/${profileUsername}`);
         if (isMounted) {
-          setUser(data.user);
-          setMemories(data.memories);
+          setUser(data.user || data);
         }
       } catch (error) {
         if (!isMounted) return;
@@ -84,18 +73,16 @@ const Profile = () => {
       }
     };
 
-    fetchProfile();
+    fetchProfileUser();
 
     return () => {
       isMounted = false;
     };
-  }, [profileUsername, navigate]); // Removed location.key to prevent infinite refetching loops!
+  }, [profileUsername, navigate]);
 
   const handleBack = () => {
     if (isAdminViewer) {
       navigate("/admin", { replace: true });
-    } else if (window.history.length > 1) {
-      navigate(-1);
     } else {
       navigate("/dashboard", { replace: true });
     }
@@ -116,9 +103,7 @@ const Profile = () => {
     <main className="min-h-screen bg-slate-50 pb-16">
       <PageTitle title={user ? `${user.name} (@${user.username})` : "Travel Profile"} />
 
-      {/* Navigation Header Management */}
       {isAdminViewer ? (
-        // Responsive, compact Admin Inspection Header Bar
         <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/90 px-3 sm:px-6 py-2.5 sm:py-3.5 backdrop-blur-md shadow-xs gap-2">
           <button
             type="button"
@@ -126,8 +111,7 @@ const Profile = () => {
             className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-slate-700 shadow-xs transition hover:bg-slate-50 cursor-pointer active:scale-95 shrink-0"
           >
             <ArrowLeft size={14} className="sm:w-[15px] sm:h-[15px]" />
-            <span className="hidden xs:inline sm:inline">Back to Admin Panel</span>
-            <span className="inline xs:hidden sm:hidden">Back</span>
+            <span>Back</span>
           </button>
 
           <div className="inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-2.5 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold text-purple-700 shadow-xs truncate">
@@ -142,35 +126,24 @@ const Profile = () => {
       )}
 
       <div className="relative">
-        {/* Render floating back button only if the user is not an admin viewer */}
-        {!isAdminViewer && (
-          isOwner ? (
-            <button
-              onClick={() => navigate("/dashboard")}
-              className="absolute top-3 left-3 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-1 sm:gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur-xl px-2.5 py-1 text-[11px] sm:px-4 sm:py-2.5 sm:text-sm font-medium text-white shadow-lg shadow-black/25 transition-all duration-300 hover:scale-105 hover:bg-white/20 hover:border-white/40 cursor-pointer"
-            >
-              <ArrowLeft size={14} className="sm:w-[18px] sm:h-[18px]" />
-              <span>Back to Dashboard</span>
-            </button>
-          ) : (
-            <button
-              onClick={handleBack}
-              className="absolute top-3 left-3 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-1 sm:gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur-xl px-2.5 py-1 text-[11px] sm:px-4 sm:py-2.5 sm:text-sm font-medium text-white shadow-lg shadow-black/25 transition-all duration-300 hover:scale-105 hover:bg-white/20 hover:border-white/40 cursor-pointer"
-            >
-              <ArrowLeft size={14} className="sm:w-[18px] sm:h-[18px]" />
-              <span>Back</span>
-            </button>
-          )
+        {!isAdminViewer && isOwner && (
+          <button
+            onClick={handleBack}
+            className="absolute top-3 left-3 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-1 sm:gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur-xl px-2.5 py-1 text-[11px] sm:px-4 sm:py-2.5 sm:text-sm font-medium text-white shadow-lg shadow-black/25 transition-all duration-300 hover:scale-105 hover:bg-white/20 hover:border-white/40 cursor-pointer"
+          >
+            <ArrowLeft size={14} className="sm:w-[18px] sm:h-[18px]" />
+            <span className="hidden sm:inline">Back to Dashboard</span>
+            <span className="inline sm:hidden">Back</span>
+          </button>
         )}
 
         <ProfileHero
           user={user}
           isOwner={isOwner}
-          memories={memories}
+          memories={[]}
         />
       </div>
 
-      {/* If profile is locked for viewer, show ONLY the locked alert card and hide all memories sections completely */}
       {isLockedForViewer ? (
         <div className="mx-auto max-w-[1500px] px-5 sm:px-8 lg:px-10 xl:px-14 pt-10 pb-24">
           <div className="mx-auto max-w-xl text-center rounded-3xl border border-slate-200 bg-white p-10 shadow-sm space-y-4">
@@ -185,7 +158,6 @@ const Profile = () => {
         </div>
       ) : (
         <MemoriesSection
-          memories={memories}
           username={profileUsername}
           isOwner={isOwner}
         />

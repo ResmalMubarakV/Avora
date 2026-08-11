@@ -5,14 +5,12 @@ import api from "./axios";
 // ==========================================
 
 /**
- * Fetches all user memories, optionally filtered by a search term.
- * @param {string} [search=""] - Search query string.
- * @returns {Promise<Array>} Array of memory objects.
+ * Fetches user memories with support for pagination, sorting, filtering, and searching.
+ * @param {Object} [params={}] - Query parameters object (page, sort, filter, search).
+ * @returns {Promise<Object|Array>} Paginated response object or array of memories.
  */
-export const getMemories = async (search = "") => {
-  const response = await api.get("/api/memories", {
-    params: { search },
-  });
+export const getMemories = async (params = {}) => {
+  const response = await api.get("/api/memories", { params });
   return response.data;
 };
 

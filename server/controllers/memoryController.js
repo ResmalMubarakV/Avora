@@ -130,17 +130,20 @@ const createMemory = async (req, res) => {
 };
 
 // ==========================================
-// GET MEMORIES
+// GET MEMORIES (All Memories Space - NO PIN PRIORITY)
 // ==========================================
-/**
- * Retrieves user memories with optional search filtering and pin prioritization.
- */
 const getMemories = async (req, res) => {
   try {
-    const { search } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const sortBy = req.query.sort || "newest";
+    const filterQuery = req.query.filter || "";
+    const search = req.query.search || "";
+    const skip = (page - 1) * limit;
+
     const query = { user: req.user._id };
 
-    // Apply search filter across multiple fields
+    // Apply search filter across fields
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
@@ -149,14 +152,49 @@ const getMemories = async (req, res) => {
       ];
     }
 
-    // Sort by pinned status first (only if no search query is active), then newest first
-    const sortOption = search ? { createdAt: -1 } : { isPinned: -1, createdAt: -1 };
+    // Apply multi-select filters dynamically
+    if (filterQuery) {
+      const filters = filterQuery.split(",");
+      const conditions = [];
+      filters.forEach((f) => {
+        if (f === "public") conditions.push({ isPublic: true });
+        if (f === "private") conditions.push({ isPublic: false });
+        if (f === "liked") conditions.push({ isLiked: true });
+      });
+
+      if (conditions.length === 1) {
+        Object.assign(query, conditions[0]);
+      } else if (conditions.length > 1) {
+        query.$and = conditions;
+      }
+    }
+
+    // Count total matching documents globally
+    const totalMemories = await Memory.countDocuments(query);
+    const totalPages = Math.ceil(totalMemories / limit) || 1;
+
+    // SORTING: Completely bypass pin priority here. Purely sort based on user options.
+    let sortOption = {};
+    if (sortBy === "oldest") {
+      sortOption = { startDate: 1 };
+    } else if (sortBy === "title") {
+      sortOption = { title: 1 };
+    } else {
+      sortOption = { startDate: -1 }; // Newest first default without pin interference
+    }
 
     const memories = await Memory.find(query)
       .populate("user", "username")
-      .sort(sortOption);
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit);
 
-    return res.status(200).json(memories);
+    return res.status(200).json({
+      memories,
+      currentPage: page,
+      totalPages,
+      totalMemories,
+    });
   } catch (error) {
     console.error("Get Memories Error", error.message);
     return res.status(500).json({ message: "Server Error" });

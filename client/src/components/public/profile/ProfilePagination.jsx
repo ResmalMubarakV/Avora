@@ -1,16 +1,22 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 
 // ==========================================
 // PROFILE PAGINATION COMPONENT
 // ==========================================
 /**
- * Renders a compact, e-commerce style centered pagination bar for profile views.
+ * Renders a compact, e-commerce style centered pagination bar synced with URL search params.
  */
 const ProfilePagination = ({
-    currentPage,
     totalPages,
-    setCurrentPage,
+    currentPage: propCurrentPage,
+    setCurrentPage: propSetCurrentPage,
 }) => {
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // Fallback gracefully if props are passed directly or via URL
+    const currentPage = propCurrentPage || parseInt(searchParams.get("page")) || 1;
+
     if (totalPages <= 1) return null;
 
     const pages = [];
@@ -21,7 +27,14 @@ const ProfilePagination = ({
     const handlePageChange = (newPage) => {
         if (newPage < 1 || newPage > totalPages) return;
 
-        setCurrentPage(newPage);
+        // Update URL query parameters (e.g., ?page=2)
+        setSearchParams({ page: newPage });
+
+        // Update parent state if provided
+        if (propSetCurrentPage) {
+            propSetCurrentPage(newPage);
+        }
+
         setTimeout(() => {
             window.scrollTo({
                 top: 0,

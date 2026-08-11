@@ -4,9 +4,6 @@ const Memory = require("../models/Memory");
 // ==========================================
 // GET FEATURED TRAVELERS
 // ==========================================
-/**
- * Returns approved users who have at least one public memory and whose profiles are not locked.
- */
 const getFeaturedTravelers = async (req, res) => {
   try {
     const users = await User.find({ role: "user", status: "approved", isLocked: false })
@@ -43,13 +40,15 @@ const getFeaturedTravelers = async (req, res) => {
 // ==========================================
 // GET PUBLIC PROFILE
 // ==========================================
-/**
- * Retrieves a user's public profile and their associated memories.
- * Hides memories completely if the profile is locked and the requester is not the owner.
- */
 const getPublicProfile = async (req, res) => {
   try {
     const { username } = req.params;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const sortBy = req.query.sort || "newest";
+    const filterQuery = req.query.filter || "";
+    const skip = (page - 1) * limit;
 
     const user = await User.findOne({
       username,
@@ -63,18 +62,65 @@ const getPublicProfile = async (req, res) => {
 
     const isOwner = req.user && req.user._id.toString() === user._id.toString();
 
-    // STRICT CHECK: If profile is locked and viewer is not owner, return empty memories array
     let memories = [];
+    let totalPages = 1;
+
     if (!user.isLocked || isOwner) {
-      memories = await Memory.find({
+      const query = {
         user: user._id,
         ...(isOwner ? {} : { isPublic: true }),
-      })
+      };
+
+      if (filterQuery) {
+        const filters = filterQuery.split(",");
+        const validFilters = isOwner ? filters : filters.filter(f => f !== "private");
+
+        if (validFilters.length > 0) {
+          const conditions = [];
+          validFilters.forEach((f) => {
+            if (f === "public") conditions.push({ isPublic: true });
+            if (f === "private") conditions.push({ isPublic: false });
+            if (f === "liked") conditions.push({ isLiked: true });
+          });
+
+          if (conditions.length === 1) {
+            Object.assign(query, conditions[0]);
+          } else if (conditions.length > 1) {
+            query.$and = conditions;
+          }
+        }
+      }
+
+      const totalMemories = await Memory.countDocuments(query);
+      totalPages = Math.ceil(totalMemories / limit) || 1;
+
+      // STRICT RULE: Pinning ONLY applies if sorting is 'newest' AND NO filters are applied.
+      let dbSort = {};
+      const hasFilters = Boolean(filterQuery);
+
+      if (sortBy === "oldest") {
+        dbSort = { startDate: 1 };
+      } else if (sortBy === "title") {
+        dbSort = { title: 1 };
+      } else if (sortBy === "newest" && !hasFilters) {
+        dbSort = { isPinned: -1, startDate: -1 }; // Pin priority active ONLY on default view without filters
+      } else {
+        dbSort = { startDate: -1 }; // Continuous sorting without pin interference when filters/sorts are used
+      }
+
+      memories = await Memory.find(query)
         .populate("user", "username")
-        .sort({ createdAt: -1 });
+        .sort(dbSort)
+        .skip(skip)
+        .limit(limit);
     }
 
-    return res.status(200).json({ user, memories });
+    return res.status(200).json({ 
+      user, 
+      memories,
+      currentPage: page,
+      totalPages,
+    });
   } catch (error) {
     console.error("Public Profile Error:", error.message);
     return res.status(500).json({ message: "Server Error" });
@@ -84,10 +130,6 @@ const getPublicProfile = async (req, res) => {
 // ==========================================
 // GET PUBLIC MEMORY
 // ==========================================
-/**
- * Retrieves a specific memory by username and slug.
- * Throws a 403 error if the profile is locked, prompting the frontend to redirect.
- */
 const getPublicMemory = async (req, res) => {
   try {
     const { username, slug } = req.params;
@@ -104,7 +146,6 @@ const getPublicMemory = async (req, res) => {
 
     const isOwner = req.user && req.user._id.toString() === user._id.toString();
 
-    // STRICT CHECK: Block access to individual memories if profile is locked and requester is not owner
     if (user.isLocked && !isOwner) {
       return res.status(403).json({ message: "This profile is locked." });
     }

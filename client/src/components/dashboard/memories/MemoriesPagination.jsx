@@ -3,10 +3,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 // ==========================================
 // MEMORIES PAGINATION COMPONENT
 // ==========================================
-/**
- * Renders a compact, e-commerce style (Amazon/Flipkart) centered pagination bar.
- * Automatically scrolls to the top smoothly when clicked.
- */
 const MemoriesPagination = ({
   currentPage,
   totalPages,

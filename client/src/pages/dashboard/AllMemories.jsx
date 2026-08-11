@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
-import { toast } from "sonner";
 import { ArrowLeft, Plus } from "lucide-react";
 
-import { getMemories } from "../../api/memoryApi";
+import useMemories from "../../hooks/useMemories";
 import MemoriesHeader from "../../components/dashboard/memories/MemoriesHeader";
 import MemoriesSearch from "../../components/dashboard/memories/MemoriesSearch";
 import MemoriesFilters from "../../components/dashboard/memories/MemoriesFilters";
@@ -11,138 +10,82 @@ import MemoriesPagination from "../../components/dashboard/memories/MemoriesPagi
 import MemoriesCard from "../../components/dashboard/memories/MemoriesCard";
 import PageTitle from "../../components/common/PageTitle";
 
-const ITEMS_PER_PAGE = 12;
-
 const AllMemories = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams] = useSearchParams();
-  const initialFilter = searchParams.get("filter");
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [loading, setLoading] = useState(true);
-  const [memories, setMemories] = useState([]);
-  const [search, setSearch] = useState("");
-  
-  // Multi-select filters state (supports combining e.g. ["public", "liked"])
-  const [selectedFilters, setSelectedFilters] = useState(
-    initialFilter && initialFilter !== "all" ? [initialFilter] : []
-  );
-  
-  const [sortBy, setSortBy] = useState("newest");
-  const [currentPage, setCurrentPage] = useState(1);
+  const { memories: apiResponse, loading, error } = useMemories();
+  const [search, setSearch] = useState(searchParams.get("search") || "");
 
-  // Automatically scroll to top on initial page load or redirect
+  const currentPage = parseInt(searchParams.get("page")) || 1;
+  const sortBy = searchParams.get("sort") || "newest";
+  const filterParam = searchParams.get("filter") || "";
+  const selectedFilters = filterParam ? filterParam.split(",") : [];
+
+  const memories = Array.isArray(apiResponse) ? apiResponse : (apiResponse?.memories || []);
+  const totalPages = apiResponse?.totalPages || 1;
+  const totalCount = apiResponse?.totalMemories || memories.length;
+
+  // Scroll to top on page/filter change
   useEffect(() => {
     window.scrollTo({
       top: 0,
       left: 0,
       behavior: "instant",
     });
-  }, [location.pathname]);
+  }, [location.pathname, currentPage, sortBy, filterParam]);
 
-  // Sync filter if URL parameter changes dynamically
-  useEffect(() => {
-    const urlFilter = searchParams.get("filter");
-    if (urlFilter && urlFilter !== "all") {
-      setSelectedFilters([urlFilter]);
-    }
-  }, [searchParams]);
-
-  // Toggle filter helper for multi-selection
+  // Handle multi-select filter toggle
   const toggleFilter = (filterValue) => {
-    setSelectedFilters((prev) =>
-      prev.includes(filterValue)
-        ? prev.filter((f) => f !== filterValue)
-        : [...prev, filterValue]
-    );
+    const updatedFilters = selectedFilters.includes(filterValue)
+      ? selectedFilters.filter((f) => f !== filterValue)
+      : [...selectedFilters, filterValue];
+
+    if (updatedFilters.length > 0) {
+      searchParams.set("filter", updatedFilters.join(","));
+    } else {
+      searchParams.delete("filter");
+    }
+    searchParams.delete("page");
+    setSearchParams(searchParams, { replace: true });
   };
 
-  // --- Fetch All Memories on Mount ---
-  useEffect(() => {
-    const fetchMemories = async () => {
-      try {
-        setLoading(true);
-        const data = await getMemories();
-        setMemories(data);
-      } catch (error) {
-        console.error(error);
-        toast.error("Unable to load memories.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMemories();
-  }, []);
-
-  // --- Multi-Condition Filter and Sort Memo (Standard sorting, ignores pinning here) ---
-  const filteredMemories = useMemo(() => {
-    const filtered = memories.filter((memory) => {
-      const keyword = search.toLowerCase();
-      const matchesSearch =
-        memory.title.toLowerCase().includes(keyword) ||
-        memory.location.toLowerCase().includes(keyword);
-
-      if (!matchesSearch) return false;
-
-      // If no filters selected, match everything
-      if (selectedFilters.length === 0) return true;
-
-      // Intersection logic: Memory must satisfy ALL selected filters (e.g. Public AND Liked)
-      const matchesAll = selectedFilters.every((f) => {
-        if (f === "public") return memory.isPublic;
-        if (f === "private") return !memory.isPublic;
-        if (f === "liked") return memory.isLiked;
-        return true;
-      });
-
-      return matchesAll;
-    });
-
-    // Apply standard sorting criteria only
-    switch (sortBy) {
-      case "oldest":
-        filtered.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-        break;
-      case "title":
-        filtered.sort((a, b) => a.title.localeCompare(b.title));
-        break;
-      case "newest":
-      default:
-        filtered.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
-        break;
+  // Handle Search change
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearch(value);
+    if (value) {
+      searchParams.set("search", value);
+    } else {
+      searchParams.delete("search");
     }
+    searchParams.delete("page");
+    setSearchParams(searchParams, { replace: true });
+  };
 
-    return filtered;
-  }, [memories, search, selectedFilters, sortBy]);
+  // Handle Sort change
+  const handleSortChange = (newSort) => {
+    searchParams.set("sort", newSort);
+    searchParams.delete("page");
+    setSearchParams(searchParams, { replace: true });
+  };
 
-  // Reset to page 1 whenever filters, search, or sorting change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, selectedFilters, sortBy]);
-
-  // --- Pagination Calculations ---
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredMemories.length / ITEMS_PER_PAGE)
-  );
-
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
+  // Handle Page change
+  const handlePageChange = (newPage) => {
+    if (newPage > 1) {
+      searchParams.set("page", newPage.toString());
+    } else {
+      searchParams.delete("page");
     }
-  }, [currentPage, totalPages]);
-
-  const paginatedMemories = filteredMemories.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+    setSearchParams(searchParams, { replace: true });
+  };
 
   return (
     <div className="space-y-6 sm:space-y-8 pb-16">
       <PageTitle title="My Memories" />
 
-      {/* Top Bar: Back Button & New Memory Action aligned in one line */}
+      {/* Top Bar */}
       <div className="flex items-center justify-between gap-4">
         <button
           type="button"
@@ -167,44 +110,42 @@ const AllMemories = () => {
         </button>
       </div>
 
-      {/* Header and Total Count */}
-      <MemoriesHeader total={filteredMemories.length} />
+      <MemoriesHeader total={totalCount} />
 
-      {/* Search and Multi-Select Filter Controls */}
+      {/* Search and Filters */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <MemoriesSearch
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={handleSearchChange}
         />
         <MemoriesFilters
           selectedFilters={selectedFilters}
           toggleFilter={toggleFilter}
           sortBy={sortBy}
-          setSortBy={setSortBy}
+          setSortBy={handleSortChange}
         />
       </div>
 
       {/* Results Count Bar */}
       <div className="flex items-center justify-between text-xs sm:text-sm text-slate-500">
         <span>
-          Showing
+          Showing items
           <span className="mx-1 font-semibold text-slate-900">
-            {filteredMemories.length}
+            ({totalCount} total found)
           </span>
-          of
-          <span className="mx-1 font-semibold text-slate-900">
-            {memories.length}
-          </span>
-          memories
         </span>
       </div>
 
-      {/* Content States: Loading | Empty | Grid */}
+      {/* Content States */}
       {loading ? (
         <div className="flex items-center justify-center rounded-3xl border border-slate-200 bg-white py-24 text-slate-500">
           Loading your memories...
         </div>
-      ) : filteredMemories.length === 0 ? (
+      ) : error ? (
+        <div className="rounded-3xl border border-red-200 bg-red-50 py-16 text-center text-red-500">
+          {error}
+        </div>
+      ) : memories.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-slate-300 bg-white py-24 text-center">
           <h2 className="text-2xl font-bold text-slate-900">No memories found</h2>
           <p className="mt-3 text-slate-500">
@@ -213,9 +154,8 @@ const AllMemories = () => {
         </div>
       ) : (
         <>
-          {/* Responsive Grid: 1 per line on mobile, 2 per line on tablet, 4 per line on desktop */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4">
-            {paginatedMemories.map((memory) => (
+            {memories.map((memory) => (
               <MemoriesCard
                 key={memory._id}
                 memory={memory}
@@ -231,7 +171,7 @@ const AllMemories = () => {
           <MemoriesPagination
             currentPage={currentPage}
             totalPages={totalPages}
-            setCurrentPage={setCurrentPage}
+            setCurrentPage={handlePageChange}
           />
         </>
       )}

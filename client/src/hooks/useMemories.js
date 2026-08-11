@@ -1,33 +1,42 @@
-import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { getMemories } from "../api/memoryApi";
+import { toast } from "sonner";
 
 // ==========================================
 // USE MEMORIES CUSTOM HOOK
 // ==========================================
 const useMemories = () => {
+  const [searchParams] = useSearchParams();
   const [memories, setMemories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const location = useLocation();
 
-  const fetchMemories = async (search = "") => {
+  const page = searchParams.get("page") || 1;
+  const sort = searchParams.get("sort") || "newest";
+  const filter = searchParams.get("filter") || "";
+  const search = searchParams.get("search") || "";
+
+  const fetchMemories = async () => {
     try {
-      const data = await getMemories(search);
+      setLoading(true);
+      const data = await getMemories({ page, sort, filter, search });
       setMemories(data);
       setError("");
     } catch (err) {
       console.error("Error fetching memories:", err);
-      setError(err.response?.data?.message || "Failed to load memories.");
+      const errorMsg = err.response?.data?.message || "Failed to load memories.";
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
-  // Initial fetch on route change
+  // Re-fetch automatically whenever search parameters or filters change
   useEffect(() => {
     fetchMemories();
-  }, [location.key]);
+  }, [page, sort, filter, search]);
 
   return {
     memories,

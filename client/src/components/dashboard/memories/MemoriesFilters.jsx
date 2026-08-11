@@ -3,10 +3,6 @@ import { ArrowDownWideNarrow, Check } from "lucide-react";
 // ==========================================
 // MEMORIES FILTERS COMPONENT
 // ==========================================
-/**
- * Multi-select filter and sorting toolbar allowing users to combine 
- * criteria like Public + Liked just like an e-commerce catalog.
- */
 const MemoriesFilters = ({
   selectedFilters,
   toggleFilter,
