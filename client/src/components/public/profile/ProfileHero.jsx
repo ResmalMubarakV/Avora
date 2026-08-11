@@ -122,14 +122,14 @@ const ProfileHero = ({
                         className="h-full w-full object-cover"
                     />
                 ) : (
-                    <div className="h-full w-full bg-gradient-to-br from-slate-950 via-slate-800 to-slate-700" />
+                    <div className="h-full w-full bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950" />
                 )}
 
                 <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/60" />
             </div>
 
             <div className="mx-auto max-w-7xl px-4 sm:px-6">
-                <div className="relative -mt-16 sm:-mt-24 rounded-3xl bg-white p-5 sm:p-8 lg:p-10 shadow-xl border border-slate-100">
+                <div className="relative -mt-16 sm:-mt-24 rounded-[32px] bg-gradient-to-br from-white via-slate-50/90 to-indigo-50/25 p-5 sm:p-8 lg:p-10 shadow-2xl shadow-indigo-950/[0.04] border border-slate-200/70 backdrop-blur-xl">
                     
                     {/* Top-Right Mobile & Tablet Dropdown Menu (3 Dots) */}
                     <div className="absolute right-4 top-4 sm:right-6 sm:top-6 z-25 flex items-center gap-2 xl:hidden">
@@ -138,7 +138,7 @@ const ProfileHero = ({
                                 <button
                                     type="button"
                                     onClick={handleShareClick}
-                                    className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100 shadow-sm cursor-pointer"
+                                    className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-700 transition hover:bg-slate-50 shadow-xs cursor-pointer"
                                     title="Share Profile"
                                 >
                                     {copied ? <Check size={16} className="text-emerald-600" /> : <Share2 size={16} />}
@@ -152,7 +152,7 @@ const ProfileHero = ({
                                     type="button"
                                     onClick={() => setMenuOpen((prev) => !prev)}
                                     aria-label="Options"
-                                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100 shadow-sm cursor-pointer"
+                                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-700 transition hover:bg-slate-50 shadow-xs cursor-pointer"
                                 >
                                     <MoreVertical size={18} />
                                 </button>
@@ -198,7 +198,7 @@ const ProfileHero = ({
                                 type="button"
                                 onClick={handleShareClick}
                                 title="Share Profile"
-                                className="h-9 w-9 inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:border-slate-300 cursor-pointer"
+                                className="h-9 w-9 inline-flex items-center justify-center rounded-xl border border-slate-200/80 bg-white/90 backdrop-blur-sm text-slate-700 shadow-2xs transition hover:bg-white hover:border-slate-300 cursor-pointer"
                             >
                                 <Share2 size={15} className="text-slate-600" />
                             </button>
@@ -206,7 +206,7 @@ const ProfileHero = ({
                             <Link
                                 to="/dashboard/settings/profile"
                                 title="Edit Profile"
-                                className="h-9 w-9 inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:border-slate-300 cursor-pointer"
+                                className="h-9 w-9 inline-flex items-center justify-center rounded-xl border border-slate-200/80 bg-white/90 backdrop-blur-sm text-slate-700 shadow-2xs transition hover:bg-white hover:border-slate-300 cursor-pointer"
                             >
                                 <Pencil size={15} className="text-slate-600" />
                             </Link>
@@ -214,7 +214,7 @@ const ProfileHero = ({
                             <Link
                                 to="/dashboard/create-memory"
                                 title="New Memory"
-                                className="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-[#1E3A8A] text-white shadow-md shadow-blue-900/10 transition hover:bg-[#3559D4] cursor-pointer"
+                                className="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-gradient-to-tr from-[#1E3A8A] to-[#3559D4] text-white shadow-md shadow-blue-900/15 transition hover:opacity-95 cursor-pointer"
                             >
                                 <Plus size={16} />
                             </Link>
@@ -287,19 +287,22 @@ const ProfileHero = ({
 
                     <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start text-center sm:text-left w-full">
                         
-                        {/* Avatar */}
-                        <div className="-mt-20 sm:-mt-28 h-32 w-32 sm:h-44 sm:w-44 shrink-0 overflow-hidden rounded-full border-4 sm:border-[6px] border-white bg-slate-200 shadow-xl">
-                            {user?.profileImage ? (
-                                <img
-                                    src={user.profileImage}
-                                    alt={user.name}
-                                    className="h-full w-full object-cover"
-                                />
-                            ) : (
-                                <div className="flex h-full w-full items-center justify-center bg-slate-300 text-4xl sm:text-6xl font-bold text-slate-700">
-                                    {initials}
-                                </div>
-                            )}
+                        {/* Avatar with Subtle Gradient Glow Ring */}
+                        <div className="relative -mt-20 sm:-mt-28 shrink-0">
+                            <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-400 opacity-30 blur-sm"></div>
+                            <div className="relative h-32 w-32 sm:h-44 sm:w-44 overflow-hidden rounded-full border-4 sm:border-[6px] border-white bg-slate-200 shadow-xl">
+                                {user?.profileImage ? (
+                                    <img
+                                        src={user.profileImage}
+                                        alt={user.name}
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex h-full w-full items-center justify-center bg-slate-300 text-4xl sm:text-6xl font-bold text-slate-700">
+                                        {initials}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Info Section */}
@@ -358,7 +361,7 @@ const ProfileHero = ({
                                             target="_blank"
                                             rel="noreferrer"
                                             aria-label="Website"
-                                            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition hover:bg-[#3559D4] hover:text-white shadow-2xs"
+                                            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-white/80 border border-slate-200/80 text-slate-700 transition hover:bg-[#3559D4] hover:text-white hover:border-transparent shadow-2xs"
                                         >
                                             <Globe size={15} />
                                         </a>
@@ -370,7 +373,7 @@ const ProfileHero = ({
                                             target="_blank"
                                             rel="noreferrer"
                                             aria-label="Instagram"
-                                            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition hover:bg-pink-500 hover:text-white shadow-2xs"
+                                            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-white/80 border border-slate-200/80 text-slate-700 transition hover:bg-pink-500 hover:text-white hover:border-transparent shadow-2xs"
                                         >
                                             <FaInstagram size={15} />
                                         </a>
@@ -382,7 +385,7 @@ const ProfileHero = ({
                                             target="_blank"
                                             rel="noreferrer"
                                             aria-label="YouTube"
-                                            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition hover:bg-red-500 hover:text-white shadow-2xs"
+                                            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-white/80 border border-slate-200/80 text-slate-700 transition hover:bg-red-500 hover:text-white hover:border-transparent shadow-2xs"
                                         >
                                             <FaYoutube size={15} />
                                         </a>
@@ -394,7 +397,7 @@ const ProfileHero = ({
                                             target="_blank"
                                             rel="noreferrer"
                                             aria-label="LinkedIn"
-                                            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition hover:bg-blue-600 hover:text-white shadow-2xs"
+                                            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-white/80 border border-slate-200/80 text-slate-700 transition hover:bg-blue-600 hover:text-white hover:border-transparent shadow-2xs"
                                         >
                                             <FaLinkedin size={15} />
                                         </a>
