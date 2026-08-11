@@ -1040,10 +1040,10 @@ export default function PublicMemory() {
   const currentEditorConfig = activeSlot === 'cover' ? mediaConfig?.cover : (activeSlot !== null && activeSlot !== undefined ? mediaConfig?.slots[activeSlot] : null);
   const currentBounds = slotBounds[String(activeSlot)] || { maxX: 0, maxY: 0 };
 
-  const enterPreviewMode = () => setSearchParams({ preview: "true", layout: Math.floor(Math.random() * 20).toString() }, { replace: true });
-  const exitPreviewMode = () => setSearchParams({}, { replace: true });
-  const nextLayout = () => { setShowImagePickerModal(false); setSearchParams({ preview: "true", layout: ((layoutIndex + 1) % 20).toString() }, { replace: true }); };
-  const prevLayout = () => { setShowImagePickerModal(false); setSearchParams({ preview: "true", layout: ((layoutIndex - 1 + 20) % 20).toString() }, { replace: true }); };
+  const enterPreviewMode = () => setSearchParams({ preview: "true", layout: Math.floor(Math.random() * 20).toString() }, { replace: true, state: location.state });
+  const exitPreviewMode = () => setSearchParams({}, { replace: true, state: location.state });
+  const nextLayout = () => { setShowImagePickerModal(false); setSearchParams({ preview: "true", layout: ((layoutIndex + 1) % 20).toString() }, { replace: true, state: location.state }); };
+  const prevLayout = () => { setShowImagePickerModal(false); setSearchParams({ preview: "true", layout: ((layoutIndex - 1 + 20) % 20).toString() }, { replace: true, state: location.state }); };
 
   useEffect(() => {
     if (!isPreviewMode) return;
@@ -1056,10 +1056,10 @@ export default function PublicMemory() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isPreviewMode, layoutIndex, showImagePickerModal]);
 
-  const openGallery = (index) => { setSelectedIndex(index); setIsOpen(true); setSearchParams({ image: index.toString() }, { replace: false }); };
-  const goToImage = (index) => { setSelectedIndex(index); setSearchParams({ image: index.toString() }, { replace: false }); };
-  const nextImage = () => { setSelectedIndex((prev) => { const next = prev + 1; setSearchParams({ image: next.toString() }, { replace: false }); return next; }); };
-  const previousImage = () => { setSelectedIndex((prev) => { const previous = prev - 1; setSearchParams({ image: previous.toString() }, { replace: false }); return previous; }); };
+  const openGallery = (index) => { setSelectedIndex(index); setIsOpen(true); setSearchParams({ image: index.toString() }, { replace: false, state: location.state }); };
+  const goToImage = (index) => { setSelectedIndex(index); setSearchParams({ image: index.toString() }, { replace: false, state: location.state }); };
+  const nextImage = () => { setSelectedIndex((prev) => { const next = prev + 1; setSearchParams({ image: next.toString() }, { replace: false, state: location.state }); return next; }); };
+  const previousImage = () => { setSelectedIndex((prev) => { const previous = prev - 1; setSearchParams({ image: previous.toString() }, { replace: false, state: location.state }); return previous; }); };
 
   useEffect(() => {
     const fetchCurrentUser = async () => { try { const user = await getMyProfile(); setCurrentUser(user); } catch { setCurrentUser(null); } };
@@ -1249,7 +1249,19 @@ export default function PublicMemory() {
         </div>
       </section>
 
-      {isOpen && <Lightbox media={memory.media} selectedIndex={selectedIndex} nextImage={nextImage} previousImage={previousImage} goToImage={goToImage} canDownload={isOwner} memoryTitle={memory.title} onClose={() => { setIsOpen(false); setSearchParams({}, { replace: false }); }} />}
+            {isOpen && <Lightbox 
+            media={memory.media} 
+            selectedIndex={selectedIndex} 
+            nextImage={nextImage} 
+            previousImage={previousImage} 
+            goToImage={goToImage} 
+            canDownload={isOwner} 
+            memoryTitle={memory.title} 
+            onClose={() => { 
+                setIsOpen(false); 
+                setSearchParams({}, { replace: false, state: location.state }); 
+            }} 
+        />}
     </main>
   );
 }

@@ -87,9 +87,10 @@ const AllMemories = () => {
 
       {/* Top Bar */}
       <div className="flex items-center justify-between gap-4">
+        {/* Updated Back Button */}
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/dashboard")}
           className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 cursor-pointer"
         >
           <ArrowLeft size={16} />
