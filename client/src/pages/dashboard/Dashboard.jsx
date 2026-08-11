@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "sonner";
 
+import { getDashboardMemories } from "../../api/memoryApi";
 import DashboardHero from "../../components/dashboard/DashboardHero";
 import StatsCards from "../../components/dashboard/StatsCards";
 import RecentMemories from "../../components/dashboard/RecentMemories";
 import EmptyDashboard from "../../components/dashboard/EmptyDashboard";
-import useMemories from "../../hooks/useMemories";
 import PageTitle from "../../components/common/PageTitle";
 
 // ==========================================
@@ -14,18 +15,28 @@ import PageTitle from "../../components/common/PageTitle";
 const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { memories: initialMemories, loading, error } = useMemories();
   const [memories, setMemories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Sync initial hook data to local state safely (handles both array or object payloads)
   useEffect(() => {
-    if (initialMemories) {
-      const memoriesArray = Array.isArray(initialMemories)
-        ? initialMemories
-        : (initialMemories.memories || []);
-      setMemories(memoriesArray);
-    }
-  }, [initialMemories]);
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const data = await getDashboardMemories();
+        const memoriesArray = Array.isArray(data) ? data : (data?.memories || []);
+        setMemories(memoriesArray);
+      } catch (err) {
+        console.error(err);
+        setError("Unable to load dashboard data.");
+        toast.error("Unable to load dashboard data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [location.pathname]);
 
   // Automatically scroll to top on initial page load or redirect
   useEffect(() => {

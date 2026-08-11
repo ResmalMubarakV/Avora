@@ -18,16 +18,12 @@ const generateSlug = (title) => {
 // ==========================================
 // CREATE MEMORY
 // ==========================================
-/**
- * Creates a new memory, handles media uploads, and provides Cloudinary rollback on failure.
- */
 const createMemory = async (req, res) => {
   const uploadedPublicIds = [];
 
   try {
     const { title, description, location, startDate, endDate, modeOfTravel, isPublic } = req.body;
 
-    // Validate required fields
     if (!title || !description || !location || !startDate || !endDate || !modeOfTravel) {
       return res.status(400).json({ message: "Please fill all the required fields" });
     }
@@ -45,7 +41,6 @@ const createMemory = async (req, res) => {
     const uploadedMedia = [];
     let coverUpload;
 
-    // Upload cover image
     try {
       coverUpload = await cloudinary.uploader.upload(coverImageFile.path, {
         folder: "avora/covers",
@@ -57,7 +52,6 @@ const createMemory = async (req, res) => {
 
     uploadedPublicIds.push({ publicId: coverUpload.public_id, type: "image" });
 
-    // Upload gallery media items sequentially
     for (const file of mediaFiles) {
       let upload;
       try {
@@ -71,7 +65,6 @@ const createMemory = async (req, res) => {
 
       const type = file.mimetype.startsWith("image/") ? "image" : "video";
       
-      // Automatically generate a Cloudinary JPEG poster snapshot for videos
       let posterUrl = "";
       if (type === "video" && upload.secure_url) {
         posterUrl = upload.secure_url
@@ -88,7 +81,6 @@ const createMemory = async (req, res) => {
       });
     }
 
-    // Generate unique slug
     const slug = generateSlug(title);
     let finalSlug = slug;
     let counter = 2;
@@ -98,7 +90,6 @@ const createMemory = async (req, res) => {
       counter++;
     }
 
-    // Save memory to database
     const memory = await Memory.create({
       title,
       description,
@@ -116,7 +107,6 @@ const createMemory = async (req, res) => {
 
     return res.status(201).json(memory);
   } catch (error) {
-    // Rollback Cloudinary uploads if DB creation fails
     for (const file of uploadedPublicIds) {
       try {
         await cloudinary.uploader.destroy(file.publicId, { resource_type: file.type });
@@ -143,7 +133,6 @@ const getMemories = async (req, res) => {
 
     const query = { user: req.user._id };
 
-    // Apply search filter across fields
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
@@ -152,7 +141,6 @@ const getMemories = async (req, res) => {
       ];
     }
 
-    // Apply multi-select filters dynamically
     if (filterQuery) {
       const filters = filterQuery.split(",");
       const conditions = [];
@@ -169,18 +157,16 @@ const getMemories = async (req, res) => {
       }
     }
 
-    // Count total matching documents globally
     const totalMemories = await Memory.countDocuments(query);
     const totalPages = Math.ceil(totalMemories / limit) || 1;
 
-    // SORTING: Completely bypass pin priority here. Purely sort based on user options.
     let sortOption = {};
     if (sortBy === "oldest") {
       sortOption = { startDate: 1 };
     } else if (sortBy === "title") {
       sortOption = { title: 1 };
     } else {
-      sortOption = { startDate: -1 }; // Newest first default without pin interference
+      sortOption = { startDate: -1 };
     }
 
     const memories = await Memory.find(query)
@@ -202,11 +188,24 @@ const getMemories = async (req, res) => {
 };
 
 // ==========================================
+// GET DASHBOARD MEMORIES (For Stats & Recent / With Pin Priority)
+// ==========================================
+const getDashboardMemories = async (req, res) => {
+  try {
+    const memories = await Memory.find({ user: req.user._id })
+      .populate("user", "username")
+      .sort({ isPinned: -1, createdAt: -1 });
+
+    return res.status(200).json(memories);
+  } catch (error) {
+    console.error("Get Dashboard Memories Error", error.message);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
+
+// ==========================================
 // GET MEMORY BY ID
 // ==========================================
-/**
- * Retrieves a specific memory by its ID.
- */
 const getMemoryById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -230,9 +229,6 @@ const getMemoryById = async (req, res) => {
 // ==========================================
 // TOGGLE LIKE MEMORY
 // ==========================================
-/**
- * Toggles the like/favorite status of a memory.
- */
 const toggleLikeMemory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -259,9 +255,6 @@ const toggleLikeMemory = async (req, res) => {
 // ==========================================
 // TOGGLE PIN MEMORY
 // ==========================================
-/**
- * Toggles the pin status of a memory, enforcing a maximum limit of 4 pinned memories.
- */
 const togglePinMemory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -295,9 +288,6 @@ const togglePinMemory = async (req, res) => {
 // ==========================================
 // UPDATE MEMORY
 // ==========================================
-/**
- * Updates memory details, handles new media uploads, and cleans up removed media.
- */
 const updateMemory = async (req, res) => {
   const uploadedPublicIds = [];
 
@@ -323,7 +313,6 @@ const updateMemory = async (req, res) => {
 
     let oldCoverPublicId = null;
 
-    // Update Cover Image if provided
     if (req.files?.coverImage?.length > 0) {
       const coverImageFile = req.files.coverImage[0];
       let coverUpload;
@@ -343,7 +332,6 @@ const updateMemory = async (req, res) => {
       memory.coverImagePublicId = coverUpload.public_id;
     }
 
-    // Append new gallery media
     const uploadedMedia = [];
     if (req.files?.media?.length > 0) {
       for (const file of req.files.media) {
@@ -376,7 +364,6 @@ const updateMemory = async (req, res) => {
       }
     }
 
-    // Keep only gallery items selected by frontend
     if (req.body.existingGallery) {
       let keepMedia = [];
       try {
@@ -389,7 +376,6 @@ const updateMemory = async (req, res) => {
 
       const removedMedia = memory.media.filter((item) => !keepMedia.includes(item.publicId));
 
-      // Destroy removed media from Cloudinary
       for (const media of removedMedia) {
         try {
           await cloudinary.uploader.destroy(media.publicId, {
@@ -405,7 +391,6 @@ const updateMemory = async (req, res) => {
 
     memory.media.push(...uploadedMedia);
 
-    // Update Slug if Title Changes
     if (req.body.title && req.body.title !== memory.title) {
       const baseSlug = generateSlug(req.body.title);
       let finalSlug = baseSlug;
@@ -418,7 +403,6 @@ const updateMemory = async (req, res) => {
       memory.slug = finalSlug;
     }
 
-    // Handle cover removal request
     if (req.body.removeCover === "true" && !req.files?.coverImage?.length) {
       if (memory.coverImagePublicId) {
         try {
@@ -431,7 +415,6 @@ const updateMemory = async (req, res) => {
       memory.coverImagePublicId = "";
     }
 
-    // Update standard fields
     memory.title = req.body.title || memory.title;
     memory.description = req.body.description || memory.description;
     memory.location = req.body.location || memory.location;
@@ -445,7 +428,6 @@ const updateMemory = async (req, res) => {
 
     await memory.save();
 
-    // Clean up old cover image after successful save
     if (oldCoverPublicId) {
       try {
         await cloudinary.uploader.destroy(oldCoverPublicId);
@@ -454,12 +436,10 @@ const updateMemory = async (req, res) => {
       }
     }
 
-    // Populate user username to ensure frontend routing/slug handles correctly
     const updatedMemory = await Memory.findById(memory._id).populate("user", "username");
 
     return res.status(200).json(updatedMemory);
   } catch (error) {
-    // Rollback new uploads if update fails
     for (const file of uploadedPublicIds) {
       try {
         await cloudinary.uploader.destroy(file.publicId, { resource_type: file.type });
@@ -475,9 +455,6 @@ const updateMemory = async (req, res) => {
 // ==========================================
 // DELETE MEMORY
 // ==========================================
-/**
- * Deletes a memory and removes all associated assets from Cloudinary.
- */
 const deleteMemory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -491,7 +468,6 @@ const deleteMemory = async (req, res) => {
       return res.status(404).json({ message: "Memory not found" });
     }
 
-    // Cleanup Cloudinary assets
     try {
       await cloudinary.uploader.destroy(memory.coverImagePublicId);
     } catch (err) {
@@ -519,9 +495,6 @@ const deleteMemory = async (req, res) => {
 // ==========================================
 // DELETE MEDIA
 // ==========================================
-/**
- * Removes a specific media item from a memory and deletes it from Cloudinary.
- */
 const deleteMedia = async (req, res) => {
   try {
     const { id } = req.params;
@@ -545,7 +518,6 @@ const deleteMedia = async (req, res) => {
       return res.status(404).json({ message: "Media Not Found" });
     }
 
-    // Delete from Cloudinary
     try {
       await cloudinary.uploader.destroy(mediaPublicId, {
         resource_type: media.type === "video" ? "video" : "image",
@@ -555,7 +527,6 @@ const deleteMedia = async (req, res) => {
       return res.status(500).json({ message: "Failed to delete media from Cloudinary" });
     }
 
-    // Update DB
     memory.media = memory.media.filter((item) => item.publicId !== mediaPublicId);
     await memory.save();
 
@@ -569,9 +540,6 @@ const deleteMedia = async (req, res) => {
 // ==========================================
 // DOWNLOAD MEDIA
 // ==========================================
-/**
- * Handles validation for media download requests.
- */
 const downloadMedia = async (req, res) => {
   try {
     const { memoryId, mediaId } = req.params;
@@ -598,6 +566,7 @@ const downloadMedia = async (req, res) => {
 module.exports = {
   createMemory,
   getMemories,
+  getDashboardMemories, // പുതിയ കൺട്രോളർ എക്സ്പോർട്ട് ചെയ്തു
   getMemoryById,
   toggleLikeMemory,
   togglePinMemory,
