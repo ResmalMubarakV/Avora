@@ -1,3 +1,5 @@
+import React from "react";
+
 // ==========================================
 // SUGGESTION CHIPS COMPONENT
 // ==========================================
@@ -9,6 +11,7 @@ const SuggestionChips = ({
   loading,
 }) => {
   const suggestions = [
+    "Detailed Itinerary",
     "Continue Planning",
     "Estimated Budget",
     "Packing Checklist",
