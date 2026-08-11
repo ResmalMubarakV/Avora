@@ -48,6 +48,7 @@ const getPublicProfile = async (req, res) => {
     const limit = parseInt(req.query.limit) || 12;
     const sortBy = req.query.sort || "newest";
     const filterQuery = req.query.filter || "";
+    const search = req.query.search || "";
     const skip = (page - 1) * limit;
 
     const user = await User.findOne({
@@ -64,12 +65,28 @@ const getPublicProfile = async (req, res) => {
 
     let memories = [];
     let totalPages = 1;
+    let totalMemoriesCount = 0;
+    let publicCount = 0;
+    let privateCount = 0;
 
     if (!user.isLocked || isOwner) {
+      // പ്രൊഫൈൽ ഹീറോ കാർഡുകൾക്കായി ഓവറോൾ കൗണ്ടുകൾ എടുത്തുവെക്കുന്നു
+      totalMemoriesCount = await Memory.countDocuments({ user: user._id });
+      publicCount = await Memory.countDocuments({ user: user._id, isPublic: true });
+      privateCount = await Memory.countDocuments({ user: user._id, isPublic: false });
+
       const query = {
         user: user._id,
         ...(isOwner ? {} : { isPublic: true }),
       };
+
+      if (search) {
+        query.$or = [
+          { title: { $regex: search, $options: "i" } },
+          { description: { $regex: search, $options: "i" } },
+          { location: { $regex: search, $options: "i" } },
+        ];
+      }
 
       if (filterQuery) {
         const filters = filterQuery.split(",");
@@ -91,21 +108,20 @@ const getPublicProfile = async (req, res) => {
         }
       }
 
-      const totalMemories = await Memory.countDocuments(query);
-      totalPages = Math.ceil(totalMemories / limit) || 1;
+      const filteredTotal = await Memory.countDocuments(query);
+      totalPages = Math.ceil(filteredTotal / limit) || 1;
 
-      // STRICT RULE: Pinning ONLY applies if sorting is 'newest' AND NO filters are applied.
       let dbSort = {};
-      const hasFilters = Boolean(filterQuery);
+      const hasFilters = Boolean(filterQuery || search);
 
       if (sortBy === "oldest") {
         dbSort = { startDate: 1 };
       } else if (sortBy === "title") {
         dbSort = { title: 1 };
       } else if (sortBy === "newest" && !hasFilters) {
-        dbSort = { isPinned: -1, startDate: -1 }; // Pin priority active ONLY on default view without filters
+        dbSort = { isPinned: -1, startDate: -1 };
       } else {
-        dbSort = { startDate: -1 }; // Continuous sorting without pin interference when filters/sorts are used
+        dbSort = { startDate: -1 };
       }
 
       memories = await Memory.find(query)
@@ -120,6 +136,9 @@ const getPublicProfile = async (req, res) => {
       memories,
       currentPage: page,
       totalPages,
+      totalMemories: totalMemoriesCount,
+      publicCount,
+      privateCount,
     });
   } catch (error) {
     console.error("Public Profile Error:", error.message);

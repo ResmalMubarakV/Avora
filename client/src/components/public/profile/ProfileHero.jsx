@@ -26,14 +26,10 @@ import { toast } from "sonner";
 // ==========================================
 // PROFILE HERO COMPONENT
 // ==========================================
-/**
- * Renders an executive traveler profile header featuring a professional layout,
- * icon-only vertical action buttons on large desktop screens (xl:), and a 3-dot menu for mobile and tablets.
- */
 const ProfileHero = ({
     user,
     isOwner,
-    memories,
+    stats,
 }) => {
     const [copied, setCopied] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -45,7 +41,6 @@ const ProfileHero = ({
     const profileUrl = window.location.href;
     const shareTitle = `Check out ${user?.name || "this traveler"}'s profile on Avora`;
 
-    // --- Generate Initials Fallback for Avatar ---
     const initials = user?.name
         ?.split(" ")
         .map((word) => word[0])
@@ -53,7 +48,6 @@ const ProfileHero = ({
         .slice(0, 2)
         .toUpperCase();
 
-    // --- Advanced Share Handler (Native Web Share API + Custom Modal/Sheet) ---
     const handleShareClick = async () => {
         setMenuOpen(false);
         
@@ -117,12 +111,12 @@ const ProfileHero = ({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const publicCount = memories?.filter((m) => m.isPublic).length || 0;
-    const privateCount = memories?.filter((m) => !m.isPublic).length || 0;
+    const totalMemoriesCount = stats?.total || 0;
+    const publicCount = stats?.public || 0;
+    const privateCount = stats?.private || 0;
 
     return (
         <section className="bg-white">
-            {/* Cover Image Banner */}
             <div className="relative h-48 sm:h-72 lg:h-[360px] overflow-hidden bg-slate-900">
                 {user?.coverImage ? (
                     <img
@@ -137,14 +131,10 @@ const ProfileHero = ({
                 <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/60" />
             </div>
 
-            {/* Profile Content Container */}
             <div className="mx-auto max-w-7xl px-4 sm:px-6">
                 <div className="relative -mt-16 sm:-mt-24 rounded-3xl bg-white p-5 sm:p-8 lg:p-10 shadow-xl border border-slate-100">
                     
-                    {/* --- ABSOLUTE TOP-RIGHT ACTION TRIGGERS --- */}
                     <div className="absolute right-4 top-4 sm:right-6 sm:top-6 z-20 flex items-center gap-2">
-                        
-                        {/* FOR GUESTS OR OTHER PROFILES: Share button always visible */}
                         {!isOwner && (
                             <div className="relative" ref={shareRef}>
                                 <button
@@ -156,7 +146,6 @@ const ProfileHero = ({
                                     {copied ? <Check size={16} className="text-emerald-600" /> : <Share2 size={16} />}
                                 </button>
 
-                                {/* Share Modal/Dropdown */}
                                 {shareOpen && (
                                     <div className="absolute right-0 top-12 z-40 w-64 rounded-2xl border border-slate-100 bg-white p-3 shadow-2xl animate-in fade-in zoom-in-95 duration-150 space-y-1">
                                         <div className="px-3 py-2 border-b border-slate-100 mb-1">
@@ -223,7 +212,6 @@ const ProfileHero = ({
                             </div>
                         )}
 
-                        {/* FOR PROFILE OWNER: Tablet & Mobile 3-Dot Menu (visible on screens < 1280px) */}
                         {isOwner && (
                             <div className="relative xl:hidden" ref={menuRef}>
                                 <button
@@ -271,10 +259,8 @@ const ProfileHero = ({
 
                     <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
                         
-                        {/* LEFT SIDE: Avatar & Details */}
                         <div className="flex flex-col items-center gap-4 sm:gap-6 sm:flex-row sm:items-start text-center sm:text-left w-full">
                             
-                            {/* Profile Avatar */}
                             <div className="-mt-20 sm:-mt-28 h-32 w-32 sm:h-44 sm:w-44 shrink-0 overflow-hidden rounded-full border-4 sm:border-[6px] border-white bg-slate-200 shadow-xl">
                                 {user?.profileImage ? (
                                     <img
@@ -289,11 +275,9 @@ const ProfileHero = ({
                                 )}
                             </div>
 
-                            {/* Profile Details */}
                             <div className="flex-1 pt-1 sm:pt-2 w-full">
                                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                     
-                                    {/* Name & Handle & Owner Locked Icon Indicator */}
                                     <div className="space-y-1">
                                         <div className="flex items-center justify-center sm:justify-start gap-2.5 w-full">
                                             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 text-center sm:text-left">
@@ -313,12 +297,12 @@ const ProfileHero = ({
                                         </p>
                                     </div>
 
-                                    {/* --- DESKTOP/IPAD PRO STATS BAR --- */}
-                                    {isOwner && memories && (
+                                    {/* Desktop Stats Bar */}
+                                    {isOwner && (
                                         <div className="hidden xl:flex items-center gap-3 shrink-0 mr-12">
                                             <div className="inline-flex items-center gap-5 rounded-2xl border border-slate-200 bg-slate-50/80 px-6 py-3.5 text-xs font-semibold text-slate-700 shadow-sm">
                                                 <div className="text-center px-2">
-                                                    <span className="block text-lg font-extrabold text-slate-900">{memories.length}</span>
+                                                    <span className="block text-lg font-extrabold text-slate-900">{totalMemoriesCount}</span>
                                                     <span className="text-[11px] text-slate-400 uppercase tracking-wider font-bold">Memories</span>
                                                 </div>
                                                 <div className="h-8 w-px bg-slate-200" />
@@ -337,7 +321,6 @@ const ProfileHero = ({
 
                                 </div>
 
-                                {/* Location & Joined Date */}
                                 <div className="mt-4 flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs sm:text-sm font-medium text-slate-500 tracking-wider [word-spacing:0.25rem]">
                                     {user.location && (
                                         <div className="flex items-center gap-1.5">
@@ -358,14 +341,12 @@ const ProfileHero = ({
                                     </div>
                                 </div>
 
-                                {/* Bio */}
                                 {user.bio && (
                                     <p className="mt-3 max-w-2xl text-xs sm:text-sm lg:text-[15px] leading-relaxed text-slate-600 tracking-wide [word-spacing:0.15rem] text-center sm:text-left mx-auto sm:mx-0">
                                         {user.bio}
                                     </p>
                                 )}
 
-                                {/* Social Links Footer Row */}
                                 {(user.website || user.instagram || user.youtube || user.linkedin) && (
                                     <div className="mt-5 pt-4 border-t border-slate-100 flex flex-wrap justify-center sm:justify-start gap-2">
                                         {user.website && (
@@ -418,11 +399,11 @@ const ProfileHero = ({
                                     </div>
                                 )}
 
-                                {/* Mobile/Tablet Stats Bar (< 1280px) */}
-                                {isOwner && memories && (
+                                {/* Mobile/Tablet Stats Bar */}
+                                {isOwner && (
                                     <div className="mt-6 grid grid-cols-3 gap-2 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3.5 xl:hidden text-center shadow-sm">
                                         <div>
-                                            <span className="block text-base font-extrabold text-slate-900">{memories.length}</span>
+                                            <span className="block text-base font-extrabold text-slate-900">{totalMemoriesCount}</span>
                                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Memories</span>
                                         </div>
                                         <div className="border-x border-slate-200">
@@ -438,10 +419,8 @@ const ProfileHero = ({
                             </div>
                         </div>
 
-                        {/* --- LARGE DESKTOP ICON-ONLY VERTICAL ACTION BUTTONS COLUMN (>= 1280px) --- */}
                         {isOwner && (
                             <div className="hidden xl:flex flex-col gap-2.5 shrink-0 relative mt-0" ref={shareRef}>
-                                {/* Share Profile Icon Button */}
                                 <button
                                     type="button"
                                     onClick={handleShareClick}
@@ -451,7 +430,6 @@ const ProfileHero = ({
                                     <Share2 size={18} className="text-slate-600" />
                                 </button>
 
-                                {/* Edit Profile Icon Button */}
                                 <Link
                                     to="/dashboard/settings/profile"
                                     title="Edit Profile"
@@ -460,7 +438,6 @@ const ProfileHero = ({
                                     <Pencil size={18} className="text-slate-600" />
                                 </Link>
 
-                                {/* New Memory Icon Button */}
                                 <Link
                                     to="/dashboard/create-memory"
                                     title="New Memory"
@@ -469,7 +446,6 @@ const ProfileHero = ({
                                     <Plus size={18} />
                                 </Link>
 
-                                {/* Share Dropdown Sheet for Desktop */}
                                 {shareOpen && (
                                     <div className="absolute right-0 top-36 z-40 w-64 rounded-2xl border border-slate-100 bg-white p-3 shadow-2xl animate-in fade-in zoom-in-95 duration-150 space-y-1">
                                         <div className="px-3 py-2 border-b border-slate-100 mb-1">

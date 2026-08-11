@@ -26,6 +26,7 @@ const Profile = () => {
 
   const [user, setUser] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [stats, setStats] = useState({ total: 0, public: 0, private: 0 });
   const [loading, setLoading] = useState(true);
 
   const profileUsername = username || currentUser?.username;
@@ -51,10 +52,14 @@ const Profile = () => {
     const fetchProfileUser = async () => {
       try {
         setLoading(true);
-        // പ്രൊഫൈൽ യൂസർ ഡിറ്റെയ്ൽസ് മാത്രം ഫെച്ച് ചെയ്യുന്നു
         const { data } = await api.get(`/api/public/${profileUsername}`);
         if (isMounted) {
           setUser(data.user || data);
+          setStats({
+            total: data.totalMemories || 0,
+            public: data.publicCount || 0,
+            private: data.privateCount || 0,
+          });
         }
       } catch (error) {
         if (!isMounted) return;
@@ -140,7 +145,7 @@ const Profile = () => {
         <ProfileHero
           user={user}
           isOwner={isOwner}
-          memories={[]}
+          stats={stats}
         />
       </div>
 
