@@ -280,22 +280,22 @@ const EditProfile = () => {
   };
 
   return (
-    <div className="space-y-3 xl:h-[calc(100vh-3.5rem)] xl:flex xl:flex-col xl:overflow-hidden pb-2">
+    <div className="space-y-4 pb-24">
       <PageTitle title="Edit Profile" />
       <div>
         <button
           type="button"
           onClick={handleCancel}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 cursor-pointer"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 cursor-pointer"
         >
-          <ArrowLeft size={15} />
+          <ArrowLeft size={16} />
           <span>Back</span>
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3 items-start xl:h-[calc(100vh-6.5rem)] xl:overflow-hidden">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3 items-start">
         {/* Left Column (Scrollable Form Fields) */}
-        <div className="xl:col-span-2 xl:h-full xl:overflow-y-auto xl:pr-3 space-y-3 pb-16 scrollbar-hide">
+        <div className="xl:col-span-2 space-y-4">
           <BasicInformation
             formData={formData}
             handleChange={handleChange}
@@ -343,13 +343,11 @@ const EditProfile = () => {
         </div>
 
         {/* Right Column (Fixed Preview & Action Buttons) */}
-        <div className="hidden xl:block xl:col-span-1 xl:h-full">
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5 flex flex-col xl:h-full">
-            <div className="overflow-y-auto scrollbar-hide flex-1 pr-1 pb-2">
-              <ProfilePreview formData={formData} />
-            </div>
+        <div className="hidden xl:block xl:col-span-1 sticky top-6 space-y-4">
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 space-y-4">
+            <ProfilePreview formData={formData} />
 
-            <div className="pt-2 border-t border-slate-100 bg-white shrink-0">
+            <div className="pt-2 border-t border-slate-100">
               <ActionButtons
                 loading={loading}
                 onSubmit={handleSubmit}

@@ -244,7 +244,7 @@ const EditMemory = () => {
   };
 
   return (
-    <div className="space-y-3 xl:h-[calc(100vh-5rem)] xl:flex xl:flex-col xl:overflow-hidden pb-4">
+    <div className="space-y-4 pb-24">
       <PageTitle title="Edit Memory" />
       <div>
         <button
@@ -262,8 +262,9 @@ const EditMemory = () => {
         subtitle="Update your journey and keep your memories fresh."
       />
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3 items-start xl:h-[calc(100vh-7.5rem)] xl:overflow-hidden">
-        <div className="xl:col-span-2 xl:h-full xl:overflow-y-auto xl:pr-3 space-y-3.5 scrollbar-hide">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3 items-start">
+        {/* Left Form Section */}
+        <div className="xl:col-span-2 space-y-4">
           <JourneyDetails
             formData={formData}
             setFormData={(updater) => {
@@ -312,14 +313,12 @@ const EditMemory = () => {
           </div>
         </div>
 
-        {/* Desktop Sidebar Action Buttons */}
-        <div className="hidden xl:block xl:col-span-1 xl:h-full">
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 flex flex-col xl:h-full">
-            <div className="overflow-y-auto scrollbar-hide flex-1 pr-1 pb-2">
-              <LivePreview formData={formData} />
-            </div>
+        {/* Right Desktop Sidebar (Live Preview & Sticky Save Button) */}
+        <div className="hidden xl:block xl:col-span-1 sticky top-6 space-y-4">
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 space-y-4">
+            <LivePreview formData={formData} />
 
-            <div className="pt-2 bg-white shrink-0">
+            <div className="pt-2 border-t border-slate-100">
               <ActionButtons
                 loading={loading || saving}
                 onSubmit={handleSubmit}

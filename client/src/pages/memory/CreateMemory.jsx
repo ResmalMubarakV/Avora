@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
@@ -176,7 +176,7 @@ const CreateMemory = () => {
   };
 
   return (
-    <div className="space-y-3 xl:h-[calc(100vh-5rem)] xl:flex xl:flex-col xl:overflow-hidden pb-4">
+    <div className="space-y-4 pb-24">
       <PageTitle title="Create New Memory" />
       <div>
         <button
@@ -191,9 +191,9 @@ const CreateMemory = () => {
 
       <PageHeader />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 items-start xl:h-[calc(100vh-7.5rem)] xl:overflow-hidden">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
         {/* Form Inputs Container */}
-        <div className="xl:col-span-2 xl:h-full xl:overflow-y-auto xl:pr-3 space-y-3.5 scrollbar-hide">
+        <div className="xl:col-span-2 space-y-4">
           <JourneyDetails
             formData={formData}
             setFormData={(updater) => {
@@ -235,14 +235,12 @@ const CreateMemory = () => {
           </div>
         </div>
 
-        {/* Desktop Sidebar Preview & Buttons */}
-        <div className="hidden xl:block xl:col-span-1 xl:h-full">
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 flex flex-col xl:h-full">
-            <div className="overflow-y-auto scrollbar-hide flex-1 pr-1 pb-2">
-              <LivePreview formData={formData} />
-            </div>
+        {/* Right Desktop Sidebar (Live Preview & Sticky Publish Button) */}
+        <div className="hidden xl:block xl:col-span-1 sticky top-6 space-y-4">
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 space-y-4">
+            <LivePreview formData={formData} />
 
-            <div className="pt-2 bg-white shrink-0">
+            <div className="pt-2 border-t border-slate-100">
               <ActionButtons
                 loading={loading}
                 onSubmit={handleSubmit}
