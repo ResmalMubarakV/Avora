@@ -5,7 +5,7 @@ const upload = require("../middleware/uploadMiddleware");
 const { protect } = require("../middleware/authMiddleware");
 const {
   getMemories,
-  getDashboardMemories, // ഇമ്പോർട്ട് ചെയ്യുക
+  getDashboardMemories, // Import
   createMemory,
   getMemoryById,
   toggleLikeMemory,
@@ -30,7 +30,7 @@ router.post(
 );
 
 router.get("/", protect, getMemories);
-router.get("/dashboard-overview", protect, getDashboardMemories); // പുതിയ റൂട്ട്
+router.get("/dashboard-overview", protect, getDashboardMemories); // New route
 router.get("/:id", protect, getMemoryById);
 
 router.patch("/:id/like", protect, toggleLikeMemory);

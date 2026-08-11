@@ -23,11 +23,11 @@ const MemoriesSection = ({ username, isOwner }) => {
 
     const [memories, setMemories] = useState([]);
     const [totalPages, setTotalPages] = useState(1);
-    const [totalCount, setTotalCount] = useState(0);
+    const [filteredCount, setFilteredCount] = useState(0); // Tracks count based on active filters/search
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState("grid");
 
-    // പ്രൊഫൈൽ ഫുൾ റീഫ്രഷ് ആവാതെ മെമ്മറീസ് മാത്രം ഫെച്ച് ചെയ്യുന്നു
+    // Refreshes the memories section without refreshing the whole browser window
     useEffect(() => {
         if (!username) return;
 
@@ -47,7 +47,8 @@ const MemoriesSection = ({ username, isOwner }) => {
                 if (isMounted) {
                     setMemories(data.memories || []);
                     setTotalPages(data.totalPages || 1);
-                    setTotalCount(data.totalMemories || (data.memories ? data.memories.length : 0));
+                    // Use backend's filtered total count if available, falling back to array length
+                    setFilteredCount(data.totalMemories ?? data.count ?? (data.memories ? data.memories.length : 0));
                 }
             } catch (error) {
                 console.error("Failed to load profile memories:", error);
@@ -109,7 +110,7 @@ const MemoriesSection = ({ username, isOwner }) => {
         }
         setSearchParams(searchParams, { replace: true });
 
-        // പേജ് മാറുമ്പോൾ മാത്രം ചെറിയ സ്ക്രോൾ
+        // Smooth scroll only when changing pages
         setTimeout(() => {
             window.scrollTo({
                 top: window.innerHeight * 0.4,
@@ -167,8 +168,8 @@ const MemoriesSection = ({ username, isOwner }) => {
                                 [word-spacing:0.25rem]
                             "
                         >
-                            {totalCount}{" "}
-                            {totalCount === 1 ? "journey" : "journeys"} documented
+                            {filteredCount}{" "}
+                            {filteredCount === 1 ? "journey" : "journeys"} found
                         </p>
                     )}
                 </div>

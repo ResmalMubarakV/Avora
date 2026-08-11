@@ -566,7 +566,7 @@ const downloadMedia = async (req, res) => {
 module.exports = {
   createMemory,
   getMemories,
-  getDashboardMemories, // പുതിയ കൺട്രോളർ എക്സ്പോർട്ട് ചെയ്തു
+  getDashboardMemories, 
   getMemoryById,
   toggleLikeMemory,
   togglePinMemory,

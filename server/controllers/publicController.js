@@ -68,9 +68,10 @@ const getPublicProfile = async (req, res) => {
     let totalMemoriesCount = 0;
     let publicCount = 0;
     let privateCount = 0;
+    let filteredTotal = 0;
 
     if (!user.isLocked || isOwner) {
-      // പ്രൊഫൈൽ ഹീറോ കാർഡുകൾക്കായി ഓവറോൾ കൗണ്ടുകൾ എടുത്തുവെക്കുന്നു
+      // Overall profile counters for stats / badges
       totalMemoriesCount = await Memory.countDocuments({ user: user._id });
       publicCount = await Memory.countDocuments({ user: user._id, isPublic: true });
       privateCount = await Memory.countDocuments({ user: user._id, isPublic: false });
@@ -108,7 +109,7 @@ const getPublicProfile = async (req, res) => {
         }
       }
 
-      const filteredTotal = await Memory.countDocuments(query);
+      filteredTotal = await Memory.countDocuments(query);
       totalPages = Math.ceil(filteredTotal / limit) || 1;
 
       let dbSort = {};
@@ -136,7 +137,7 @@ const getPublicProfile = async (req, res) => {
       memories,
       currentPage: page,
       totalPages,
-      totalMemories: totalMemoriesCount,
+      totalMemories: filteredTotal, // Updated to return the active filtered total count
       publicCount,
       privateCount,
     });

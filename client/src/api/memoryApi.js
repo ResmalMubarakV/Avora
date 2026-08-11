@@ -9,7 +9,7 @@ export const getMemories = async (params = {}) => {
   return response.data;
 };
 
-// ഡാഷ്‌ബോർഡിനായി മാത്രം (പിൻ പ്രയോറിറ്റിയോടുകൂടിയ മൊത്തം ഡാറ്റ)
+// For dashboard only (all data with pin priority)
 export const getDashboardMemories = async () => {
   const response = await api.get("/api/memories/dashboard-overview");
   return response.data;
