@@ -79,10 +79,10 @@ const MemoryInfo = ({ memory, isOwner = false, isLoggedIn = false }) => {
     });
 
     return (
-        <div className="flex flex-col h-full justify-between">
+        <div className="flex flex-col h-full justify-between lg:py-2">
           <div>
             <div className="flex items-start justify-between gap-4">
-                <h1 className="text-xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight text-slate-900">
+                <h1 className="text-xl sm:text-3xl lg:text-2xl xl:text-3xl font-extrabold tracking-tight leading-tight text-slate-900">
                     {memory.title}
                 </h1>
 

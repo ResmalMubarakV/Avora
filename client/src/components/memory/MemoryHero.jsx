@@ -22,10 +22,6 @@ const MemoryHero = ({
     const from = incomingFrom || `/${username}`;
     const label = locationState?.label || (incomingFrom?.includes("/dashboard/memories") ? "Memories" : "Profile");
 
-    // The Edit button should return here — to this exact memory page —
-    // not to wherever the user originally came from (that's only for
-    // the "Back to ..." button above). Keep the current URL, including
-    // any query string (e.g. ?image=2), so we land back exactly here.
     const currentMemoryPath = location.pathname + location.search;
 
     return (
@@ -95,9 +91,6 @@ const MemoryHero = ({
                         <button
                             type="button"
                             onClick={() => {
-                                // Capture THIS memory page as the return target, immediately,
-                                // before navigating — so after saving, EditMemory sends the
-                                // user back here rather than to the list they came from.
                                 sessionStorage.setItem(RETURN_KEY, currentMemoryPath);
                                 navigate(
                                     `/dashboard/edit-memory/${memory._id}`,
@@ -149,18 +142,18 @@ const MemoryHero = ({
                     xl:grid-cols-12
                     gap-8
                     xl:gap-14
-                    items-start
+                    items-stretch
                 "
             >
-                <div className="xl:col-span-5">
-                    <div className="rounded-[32px] border border-slate-200/80 bg-white shadow-xl shadow-sky-950/[0.03] overflow-hidden">
-                        <div className="p-6 sm:p-8 lg:p-10">
+                <div className="xl:col-span-5 flex flex-col">
+                    <div className="rounded-[32px] border border-slate-200/80 bg-gradient-to-br from-sky-50/60 via-blue-50/20 to-white shadow-xl shadow-sky-950/[0.03] overflow-hidden flex-1 flex flex-col">
+                        <div className="p-6 sm:p-8 lg:p-10 flex-1 flex flex-col justify-between">
                             <MemoryInfo memory={memory} isOwner={isOwner} isLoggedIn={isLoggedIn} />
                         </div>
                     </div>
                 </div>
 
-                <div className="xl:col-span-7">
+                <div className="xl:col-span-7 flex flex-col">
                     <CoverImage image={memory.coverImage} onClick={() => openGallery(0)} />
                     {memory.media && memory.media.length > 0 && (
                         <div className="mt-4 sm:mt-6">
