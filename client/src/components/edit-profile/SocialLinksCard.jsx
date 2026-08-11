@@ -1,5 +1,4 @@
 import { Globe } from "lucide-react";
-
 import {
     FaInstagram,
     FaYoutube,
@@ -7,11 +6,10 @@ import {
 } from "react-icons/fa";
 
 // ==========================================
-// SOCIAL LINKS CARD COMPONENT
+// SOCIAL LINKS CARD COMPONENT (COMPACT)
 // ==========================================
 /**
- * Renders social media profile link inputs (Website, Instagram, YouTube, LinkedIn)
- * with associated brand/icon symbols, placeholders, and form update handlers.
+ * Renders compact social media link inputs with integrated branding icons.
  */
 const SocialLinksCard = ({
     formData,
@@ -45,45 +43,19 @@ const SocialLinksCard = ({
     ];
 
     return (
-        <div
-            className="
-                rounded-3xl
-                border
-                border-slate-200
-
-                bg-white
-
-                p-8
-
-                shadow-sm
-            "
-        >
+        <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-5 shadow-xs">
             {/* Header */}
-            <div className="mb-8">
-                <h2
-                    className="
-                        text-xl
-                        font-semibold
-                        text-slate-900
-                    "
-                >
+            <div className="mb-3">
+                <h2 className="text-sm sm:text-base font-bold text-slate-900">
                     Social Links
                 </h2>
-
-                <p
-                    className="
-                        mt-1
-
-                        text-sm
-                        text-slate-500
-                    "
-                >
-                    Share your online presence with fellow travelers.
+                <p className="text-[11px] text-slate-500">
+                    Share your online presence.
                 </p>
             </div>
 
             {/* Social Input Fields List */}
-            <div className="space-y-6">
+            <div className="space-y-3">
                 {fields.map((field) => {
                     const Icon = field.icon;
 
@@ -91,29 +63,15 @@ const SocialLinksCard = ({
                         <div key={field.name}>
                             <label
                                 htmlFor={field.name}
-                                className="
-                                    mb-2
-                                    block
-
-                                    text-sm
-                                    font-medium
-                                    text-slate-700
-                                "
+                                className="mb-1 block text-[11px] font-semibold text-slate-700"
                             >
                                 {field.label}
                             </label>
 
                             <div className="relative">
                                 <Icon
-                                    size={18}
-                                    className="
-                                        absolute
-                                        left-4
-                                        top-1/2
-                                        -translate-y-1/2
-
-                                        text-slate-400
-                                    "
+                                    size={14}
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                                 />
 
                                 <input
@@ -123,25 +81,7 @@ const SocialLinksCard = ({
                                     value={formData[field.name]}
                                     onChange={handleChange}
                                     placeholder={field.placeholder}
-                                    className="
-                                        w-full
-
-                                        rounded-xl
-                                        border
-                                        border-slate-200
-
-                                        py-3
-                                        pl-12
-                                        pr-4
-
-                                        outline-none
-
-                                        transition
-
-                                        focus:border-[#3559D4]
-                                        focus:ring-4
-                                        focus:ring-blue-100
-                                    "
+                                    className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-xs sm:text-sm outline-none transition focus:border-[#3559D4] focus:ring-2 focus:ring-blue-100"
                                 />
                             </div>
                         </div>
@@ -152,4 +92,5 @@ const SocialLinksCard = ({
     );
 };
 
+SocialLinksCard.displayName = "SocialLinksCard";
 export default SocialLinksCard;

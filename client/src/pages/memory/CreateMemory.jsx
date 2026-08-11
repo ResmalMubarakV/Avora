@@ -150,7 +150,6 @@ const CreateMemory = () => {
       setHasChanges(false);
       toast.success("Memory created successfully!");
 
-      // Go back to exact previous page upon successful publish
       navigate(-1);
     } catch (error) {
       console.error(error);
@@ -177,7 +176,7 @@ const CreateMemory = () => {
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-3 xl:h-[calc(100vh-5rem)] xl:flex xl:flex-col xl:overflow-hidden pb-4">
       <PageTitle title="Create New Memory" />
       <div>
         <button
@@ -192,9 +191,9 @@ const CreateMemory = () => {
 
       <PageHeader />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 items-start xl:h-[calc(100vh-7.5rem)] xl:overflow-hidden">
         {/* Form Inputs Container */}
-        <div className="xl:col-span-2 xl:h-[calc(100vh-10rem)] xl:overflow-y-auto xl:pr-4 space-y-6 scrollbar-hide">
+        <div className="xl:col-span-2 xl:h-full xl:overflow-y-auto xl:pr-3 space-y-3.5 scrollbar-hide">
           <JourneyDetails
             formData={formData}
             setFormData={(updater) => {
@@ -226,7 +225,7 @@ const CreateMemory = () => {
           />
 
           {/* Mobile & Tablet Action Buttons */}
-          <div className="xl:hidden bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 mt-6">
+          <div className="xl:hidden bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 mt-4">
             <ActionButtons
               loading={loading}
               onSubmit={handleSubmit}
@@ -237,8 +236,8 @@ const CreateMemory = () => {
         </div>
 
         {/* Desktop Sidebar Preview & Buttons */}
-        <div className="hidden xl:block xl:col-span-1">
-          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 flex flex-col h-[calc(100vh-10rem)]">
+        <div className="hidden xl:block xl:col-span-1 xl:h-full">
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 flex flex-col xl:h-full">
             <div className="overflow-y-auto scrollbar-hide flex-1 pr-1 pb-2">
               <LivePreview formData={formData} />
             </div>

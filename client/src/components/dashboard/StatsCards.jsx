@@ -1,13 +1,15 @@
+import React from "react";
 import { Globe2, Images, Lock, Heart, ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 // ==========================================
-// STATS CARDS COMPONENT (ELITE LIGHT NAVY)
+// STATS CARDS COMPONENT (RESPONSIVE REDESIGN)
 // ==========================================
 /**
  * Renders summary statistic cards on the dashboard.
- * Features fully responsive text scaling across mobile, tablet, and desktop 
- * without altering the container layout or structure.
+ * - Mobile: Ultra-compact single-line stats pill bar.
+ * - Tablet & iPad Pro (sm up to lg): Compact, neatly sized 2x2 grid.
+ * - Desktop (lg+): Original elite 4-column micro-grid layout.
  */
 const StatsCards = ({
   totalMemories = 0,
@@ -70,7 +72,69 @@ const StatsCards = ({
 
   return (
     <section className="mb-6 lg:mb-8">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+      {/* 1. MOBILE VIEW: Compact Single-Line Stats Pill Bar */}
+      <div className="block sm:hidden bg-white border border-slate-200/80 px-3 py-2.5 rounded-2xl flex items-center justify-between text-[11px] font-medium text-slate-600 shadow-[0_2px_10px_rgb(0,0,0,0.02)] mb-2">
+        <button 
+          type="button" 
+          onClick={() => navigate(stats[0].path)} 
+          className="flex items-center gap-1 active:opacity-70 transition-opacity"
+        >
+          <span>📊</span> <b>{totalMemories}</b> <span className="text-[9px] uppercase tracking-wider text-slate-400">Archives</span>
+        </button>
+        <span className="text-slate-200 font-light">|</span>
+        <button 
+          type="button" 
+          onClick={() => navigate(stats[1].path)} 
+          className="flex items-center gap-1 active:opacity-70 transition-opacity"
+        >
+          <span>🌍</span> <b>{publicMemories}</b> <span className="text-[9px] uppercase tracking-wider text-slate-400">Public</span>
+        </button>
+        <span className="text-slate-200 font-light">|</span>
+        <button 
+          type="button" 
+          onClick={() => navigate(stats[2].path)} 
+          className="flex items-center gap-1 active:opacity-70 transition-opacity"
+        >
+          <span>🔒</span> <b>{privateMemories}</b> <span className="text-[9px] uppercase tracking-wider text-slate-400">Private</span>
+        </button>
+        <span className="text-slate-200 font-light">|</span>
+        <button 
+          type="button" 
+          onClick={() => navigate(stats[3].path)} 
+          className="flex items-center gap-1 active:opacity-70 transition-opacity"
+        >
+          <span>❤️</span> <b>{likedMemories}</b> <span className="text-[9px] uppercase tracking-wider text-slate-400">Likes</span>
+        </button>
+      </div>
+
+      {/* 2. TABLET & IPAD PRO VIEW: Compact and neat 2x2 grid (hidden on mobile and desktop) */}
+      <div className="hidden sm:grid lg:hidden grid-cols-2 gap-3.5">
+        {stats.map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <button
+              key={stat.title}
+              type="button"
+              onClick={() => navigate(stat.path)}
+              className="group relative flex items-center justify-between overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 text-left shadow-xs transition-all hover:border-blue-200 hover:shadow-sm cursor-pointer"
+            >
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">{stat.title}</p>
+                <h3 className="text-3xl font-extrabold text-slate-900 mt-0.5 transition-colors group-hover:text-[#1E3A8A]">
+                  {stat.value}
+                </h3>
+                <p className="text-[11px] text-slate-500 mt-0.5 font-medium line-clamp-1">{stat.description}</p>
+              </div>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-lg border ${stat.iconBorder} ${stat.iconBg} shadow-xs transition-transform group-hover:scale-105 shrink-0`}>
+                <Icon className={`h-5 w-5 ${stat.iconColor}`} />
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 3. DESKTOP VIEW: Original Elite 4-Column Micro-Grid Layout */}
+      <div className="hidden lg:grid lg:grid-cols-4 gap-5">
         {stats.map((stat) => {
           const Icon = stat.icon;
 
@@ -79,7 +143,7 @@ const StatsCards = ({
               key={stat.title}
               type="button"
               onClick={() => navigate(stat.path)}
-              className="group relative flex flex-col justify-between overflow-hidden rounded-[1.25rem] xl:rounded-2xl border border-slate-200/70 bg-white p-4 sm:p-5 xl:p-4 text-left shadow-[0_4px_20px_rgb(0,0,0,0.03)] backdrop-blur-2xl transition-all duration-500 hover:-translate-y-1 hover:border-blue-200/80 hover:shadow-[0_20px_40px_-15px_rgba(30,58,138,0.12)] cursor-pointer"
+              className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/70 bg-white p-4 xl:p-4 text-left shadow-[0_4px_20px_rgb(0,0,0,0.03)] backdrop-blur-2xl transition-all duration-500 hover:-translate-y-1 hover:border-blue-200/80 hover:shadow-[0_20px_40px_-15px_rgba(30,58,138,0.12)] cursor-pointer"
             >
               {/* Premium Micro-Grid Pattern (Reveals on Hover) */}
               <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e3a8a06_1px,transparent_1px),linear-gradient(to_bottom,#1e3a8a06_1px,transparent_1px)] bg-[size:1rem_1rem] opacity-0 transition-opacity duration-700 group-hover:opacity-100 pointer-events-none" />
@@ -88,17 +152,17 @@ const StatsCards = ({
               <div className={`absolute -right-8 -top-8 h-32 w-32 rounded-full blur-3xl transition-all duration-700 group-hover:scale-150 ${stat.glowColor} pointer-events-none`} />
 
               {/* Top Row: Icon & Status Indicator */}
-              <div className="relative z-10 flex items-start justify-between w-full mb-3 sm:mb-4 xl:mb-3">
+              <div className="relative z-10 flex items-start justify-between w-full mb-3 xl:mb-3">
                 <div
-                  className={`flex h-9 w-9 sm:h-12 sm:w-12 xl:h-10 xl:w-10 items-center justify-center rounded-[0.85rem] border ${stat.iconBorder} ${stat.iconBg} shadow-sm transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}
+                  className={`flex h-10 w-10 xl:h-10 xl:w-10 items-center justify-center rounded-[0.85rem] border ${stat.iconBorder} ${stat.iconBg} shadow-sm transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}
                 >
-                  <Icon className={`h-4 w-4 sm:h-6 sm:w-6 xl:h-5 xl:w-5 ${stat.iconColor}`} />
+                  <Icon className={`h-5 w-5 xl:h-5 xl:w-5 ${stat.iconColor}`} />
                 </div>
                 
                 {/* Tech Status Node */}
-                <div className="flex items-center gap-1.5 rounded-full border border-slate-100 bg-slate-50/80 px-2 py-0.5 sm:py-1 shadow-sm backdrop-blur-md">
+                <div className="flex items-center gap-1.5 rounded-full border border-slate-100 bg-slate-50/80 px-2 py-1 shadow-sm backdrop-blur-md">
                   <span className={`h-1.5 w-1.5 rounded-full ${stat.dotColor} animate-pulse`} />
-                  <span className="text-[9px] sm:text-[10px] xl:text-[9px] font-bold uppercase tracking-widest text-slate-500">Live</span>
+                  <span className="text-[9px] xl:text-[9px] font-bold uppercase tracking-widest text-slate-500">Live</span>
                 </div>
               </div>
 
@@ -106,18 +170,18 @@ const StatsCards = ({
               <div className="relative z-10 w-full">
                 <div className="flex items-end justify-between">
                   <div>
-                    {/* Scaled Text: Larger and optimized for Mobile, Tablet, and Desktop */}
-                    <h2 className="text-3xl sm:text-5xl md:text-6xl xl:text-4xl font-extrabold tracking-tight text-slate-900 transition-colors duration-300 group-hover:text-[#1E3A8A]">
+                    {/* Scaled Text: Optimized for Desktop */}
+                    <h2 className="text-4xl xl:text-4xl font-extrabold tracking-tight text-slate-900 transition-colors duration-300 group-hover:text-[#1E3A8A]">
                       {stat.value}
                     </h2>
-                    <p className="mt-1 text-[10px] sm:text-xs md:text-sm xl:text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400 transition-colors duration-300 group-hover:text-[#3559D4]">
+                    <p className="mt-1 text-sm xl:text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400 transition-colors duration-300 group-hover:text-[#3559D4]">
                       {stat.title}
                     </p>
                   </div>
 
                   {/* Hover Action Arrow */}
-                  <div className="mb-0.5 flex h-6 w-6 sm:h-8 sm:w-8 xl:h-6 xl:w-6 items-center justify-center rounded-full bg-slate-50 border border-slate-100 text-slate-400 transition-all duration-300 group-hover:bg-blue-50 group-hover:border-blue-200 group-hover:text-[#1E3A8A]">
-                    <ArrowUpRight size={14} className="sm:size-5 xl:size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  <div className="mb-0.5 flex h-6 w-6 xl:h-6 xl:w-6 items-center justify-center rounded-full bg-slate-50 border border-slate-100 text-slate-400 transition-all duration-300 group-hover:bg-blue-50 group-hover:border-blue-200 group-hover:text-[#1E3A8A]">
+                    <ArrowUpRight size={14} className="xl:size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                   </div>
                 </div>
 

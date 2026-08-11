@@ -29,15 +29,15 @@ const ProfileLockToggle = ({ formData, setFormData }) => {
   const isLocked = formData.isLocked ?? false;
 
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-5 shadow-xs">
       <div className="flex items-start justify-between gap-6">
-        <div className="flex gap-4">
-          <div className={`flex h-12 w-12 items-center justify-center rounded-2xl transition ${isLocked ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-500"}`}>
-            {isLocked ? <Lock size={22} /> : <Unlock size={22} />}
+        <div className="flex gap-3">
+          <div className={`flex h-10 w-10 sm:h-10 sm:w-10 items-center justify-center rounded-xl transition ${isLocked ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-500"}`}>
+            {isLocked ? <Lock size={18} /> : <Unlock size={18} />}
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">Lock Profile</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <h2 className="text-sm sm:text-base font-bold text-slate-900">Lock Profile</h2>
+            <p className="text-[11px] text-slate-500">
               {isLocked 
                 ? "Your profile is locked. Only your bio is visible to public visitors." 
                 : "Your profile is public. Everyone can view your profile and travel memories."}
@@ -49,13 +49,13 @@ const ProfileLockToggle = ({ formData, setFormData }) => {
         <button
           type="button"
           onClick={() => setFormData((prev) => ({ ...prev, isLocked: !prev.isLocked }))}
-          className={`relative h-8 w-14 rounded-full transition-all duration-300 cursor-pointer shrink-0 ${
+          className={`relative h-7 w-12 rounded-full transition-all duration-300 cursor-pointer shrink-0 ${
             isLocked ? "bg-[#3559D4]" : "bg-slate-300"
           }`}
         >
           <span
-            className={`absolute top-1 h-6 w-6 rounded-full bg-white shadow-md transition-all duration-300 ${
-              isLocked ? "left-7" : "left-1"
+            className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-md transition-all duration-300 ${
+              isLocked ? "left-6" : "left-1"
             }`}
           />
         </button>
@@ -67,8 +67,6 @@ const ProfileLockToggle = ({ formData, setFormData }) => {
 const EditProfile = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const returnTo = location.state?.from || "/dashboard";
 
   const [loading, setLoading] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState("idle");
@@ -112,7 +110,8 @@ const EditProfile = () => {
         window.history.pushState(null, "", window.location.href);
         setShowDiscardModal(true);
       } else {
-        navigate(-1);
+        const targetUser = formData.username || originalUsername;
+        navigate(targetUser ? `/${targetUser}` : "/dashboard", { replace: true });
       }
     };
 
@@ -130,7 +129,7 @@ const EditProfile = () => {
       window.removeEventListener("popstate", handlePopState);
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [hasChanges, navigate]);
+  }, [hasChanges, navigate, formData.username, originalUsername]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -218,17 +217,21 @@ const EditProfile = () => {
   };
 
   const handleCancel = () => {
+    const targetUser = formData.username || originalUsername;
+    const profileRoute = targetUser ? `/${targetUser}` : "/dashboard";
     if (hasChanges) {
       setShowDiscardModal(true);
     } else {
-      navigate(returnTo);
+      navigate(profileRoute);
     }
   };
 
   const discardProfileChanges = () => {
     setShowDiscardModal(false);
     setHasChanges(false);
-    navigate(returnTo);
+    const targetUser = formData.username || originalUsername;
+    const profileRoute = targetUser ? `/${targetUser}` : "/dashboard";
+    navigate(profileRoute);
   };
 
   const handleSubmit = async () => {
@@ -277,23 +280,22 @@ const EditProfile = () => {
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-3 xl:h-[calc(100vh-3.5rem)] xl:flex xl:flex-col xl:overflow-hidden pb-2">
       <PageTitle title="Edit Profile" />
       <div>
         <button
           type="button"
           onClick={handleCancel}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 cursor-pointer"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 cursor-pointer"
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft size={15} />
           <span>Back</span>
         </button>
       </div>
 
-      <ProfileHeader />
-
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3 items-start">
-        <div className="xl:col-span-2 xl:h-[calc(100vh-12rem)] xl:overflow-y-auto xl:pr-4 space-y-6 scrollbar-hide">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3 items-start xl:h-[calc(100vh-6.5rem)] xl:overflow-hidden">
+        {/* Left Column (Scrollable Form Fields) */}
+        <div className="xl:col-span-2 xl:h-full xl:overflow-y-auto xl:pr-3 space-y-3 pb-16 scrollbar-hide">
           <BasicInformation
             formData={formData}
             handleChange={handleChange}
@@ -330,7 +332,7 @@ const EditProfile = () => {
           />
 
           {/* Mobile & Tablet Action Buttons */}
-          <div className="xl:hidden bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 mt-6">
+          <div className="xl:hidden bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 mt-4">
             <ActionButtons
               loading={loading}
               onSubmit={handleSubmit}
@@ -340,13 +342,14 @@ const EditProfile = () => {
           </div>
         </div>
 
-        <div className="hidden xl:block xl:col-span-1">
-          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 flex flex-col xl:h-[calc(100vh-12rem)]">
-            <div className="overflow-y-auto scrollbar-hide flex-1 pr-1 pb-4">
+        {/* Right Column (Fixed Preview & Action Buttons) */}
+        <div className="hidden xl:block xl:col-span-1 xl:h-full">
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5 flex flex-col xl:h-full">
+            <div className="overflow-y-auto scrollbar-hide flex-1 pr-1 pb-2">
               <ProfilePreview formData={formData} />
             </div>
 
-            <div className="pt-4 border-t border-slate-100 bg-white shrink-0">
+            <div className="pt-2 border-t border-slate-100 bg-white shrink-0">
               <ActionButtons
                 loading={loading}
                 onSubmit={handleSubmit}

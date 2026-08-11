@@ -5,11 +5,10 @@ import {
 } from "lucide-react";
 
 // ==========================================
-// BASIC INFORMATION COMPONENT
+// BASIC INFORMATION COMPONENT (COMPACT)
 // ==========================================
 /**
- * Renders basic user profile input fields (Full Name, Username with availability indicator, and Location)
- * with interactive validation status icons and helper feedback messages.
+ * Renders compact basic user profile input fields with validation status indicators.
  */
 const BasicInformation = ({
   formData,
@@ -17,23 +16,23 @@ const BasicInformation = ({
   usernameStatus,
 }) => {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-5 shadow-xs">
       {/* Section Header */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold text-slate-900">
+      <div className="mb-3">
+        <h2 className="text-sm sm:text-base font-bold text-slate-900">
           Basic Information
         </h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Update your personal details displayed on your public profile.
+        <p className="text-[11px] text-slate-500">
+          Update your personal details.
         </p>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-3">
         {/* Full Name Input */}
         <div>
           <label
             htmlFor="name"
-            className="mb-2 block text-sm font-medium text-slate-700"
+            className="mb-1 block text-[11px] font-semibold text-slate-700"
           >
             Full Name
           </label>
@@ -45,7 +44,7 @@ const BasicInformation = ({
             value={formData.name}
             onChange={handleChange}
             placeholder="Enter your full name"
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-[#3559D4] focus:ring-4 focus:ring-blue-100"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs sm:text-sm outline-none transition focus:border-[#3559D4] focus:ring-2 focus:ring-blue-100"
           />
         </div>
 
@@ -53,7 +52,7 @@ const BasicInformation = ({
         <div>
           <label
             htmlFor="username"
-            className="mb-2 block text-sm font-medium text-slate-700"
+            className="mb-1 block text-[11px] font-semibold text-slate-700"
           >
             Username
           </label>
@@ -67,40 +66,40 @@ const BasicInformation = ({
               onChange={handleChange}
               autoComplete="off"
               placeholder="Choose a unique username"
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 lowercase outline-none transition focus:border-[#3559D4] focus:ring-4 focus:ring-blue-100"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 pr-9 text-xs sm:text-sm lowercase outline-none transition focus:border-[#3559D4] focus:ring-2 focus:ring-blue-100"
             />
 
             {/* Status Indicator Icon */}
-            <div className="absolute right-4 top-1/2 -translate-y-1/2">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
               {usernameStatus === "checking" && (
-                <Loader2 size={18} className="animate-spin text-slate-400" />
+                <Loader2 size={14} className="animate-spin text-slate-400" />
               )}
 
               {usernameStatus === "available" && (
-                <CheckCircle2 size={18} className="text-emerald-500" />
+                <CheckCircle2 size={14} className="text-emerald-500" />
               )}
 
               {usernameStatus === "taken" && (
-                <XCircle size={18} className="text-red-500" />
+                <XCircle size={14} className="text-red-500" />
               )}
             </div>
           </div>
 
           {/* Status Message Feedback */}
           {usernameStatus === "checking" && (
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-1 text-[10px] text-slate-500">
               Checking username...
             </p>
           )}
 
           {usernameStatus === "available" && (
-            <p className="mt-2 text-sm text-emerald-600">
+            <p className="mt-1 text-[10px] text-emerald-600">
               Username is available.
             </p>
           )}
 
           {usernameStatus === "taken" && (
-            <p className="mt-2 text-sm text-red-600">
+            <p className="mt-1 text-[10px] text-red-600">
               Username is already taken.
             </p>
           )}
@@ -110,7 +109,7 @@ const BasicInformation = ({
         <div>
           <label
             htmlFor="location"
-            className="mb-2 block text-sm font-medium text-slate-700"
+            className="mb-1 block text-[11px] font-semibold text-slate-700"
           >
             Location
           </label>
@@ -122,7 +121,7 @@ const BasicInformation = ({
             value={formData.location}
             onChange={handleChange}
             placeholder="City, State or Country"
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none transition focus:border-[#3559D4] focus:ring-4 focus:ring-blue-100"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs sm:text-sm outline-none transition focus:border-[#3559D4] focus:ring-2 focus:ring-blue-100"
           />
         </div>
       </div>
@@ -130,4 +129,5 @@ const BasicInformation = ({
   );
 };
 
+BasicInformation.displayName = "BasicInformation";
 export default BasicInformation;

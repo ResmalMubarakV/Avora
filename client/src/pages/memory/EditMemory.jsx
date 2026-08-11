@@ -22,17 +22,11 @@ import PageTitle from "../../components/common/PageTitle";
 
 const RETURN_KEY = "avora_edit_return_to";
 
-// ==========================================
-// EDIT MEMORY PAGE COMPONENT
-// ==========================================
 const EditMemory = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
 
-  // Freeze the return path (including exact ?page=X etc.) once, on first
-  // render only. sessionStorage is written by the card/hero the instant the
-  // user clicks "Edit Memory", so it's already correct by the time we mount.
   const returnToRef = useRef();
   if (returnToRef.current === undefined) {
     returnToRef.current =
@@ -189,12 +183,8 @@ const EditMemory = () => {
     }
   };
 
-  // --- Handle Save: single clean handler, no duplicate global listeners.
-  // Awaits the actual network call before navigating away, so the save is
-  // guaranteed to have gone out (and either lands or reports an error)
-  // before we redirect on the very first click.
   const handleSubmit = async () => {
-    if (saving) return; // guard against accidental double-invocation
+    if (saving) return; 
     if (!validateForm()) return;
 
     setSaving(true);
@@ -235,15 +225,12 @@ const EditMemory = () => {
         });
       }
 
-      // Wait for the update to actually complete before doing anything else.
       await updateMemory(id, data);
 
       toast.success("Memory updated successfully!");
       setHasChanges(false);
       sessionStorage.removeItem(RETURN_KEY);
 
-      // Instant SPA navigation back to the exact origin path + pagination —
-      // no full page reload, so no freeze and no race with the request above.
       navigate(returnTo, { replace: true });
     } catch (error) {
       console.error("Update memory error:", error);
@@ -257,7 +244,7 @@ const EditMemory = () => {
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-3 xl:h-[calc(100vh-5rem)] xl:flex xl:flex-col xl:overflow-hidden pb-4">
       <PageTitle title="Edit Memory" />
       <div>
         <button
@@ -275,8 +262,8 @@ const EditMemory = () => {
         subtitle="Update your journey and keep your memories fresh."
       />
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3 items-start">
-        <div className="xl:col-span-2 xl:h-[calc(100vh-10rem)] xl:overflow-y-auto xl:pr-4 space-y-6 scrollbar-hide">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3 items-start xl:h-[calc(100vh-7.5rem)] xl:overflow-hidden">
+        <div className="xl:col-span-2 xl:h-full xl:overflow-y-auto xl:pr-3 space-y-3.5 scrollbar-hide">
           <JourneyDetails
             formData={formData}
             setFormData={(updater) => {
@@ -315,7 +302,7 @@ const EditMemory = () => {
           />
 
           {/* Mobile & Tablet Action Buttons */}
-          <div className="xl:hidden bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 mt-6">
+          <div className="xl:hidden bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 mt-4">
             <ActionButtons
               loading={loading || saving}
               onSubmit={handleSubmit}
@@ -326,8 +313,8 @@ const EditMemory = () => {
         </div>
 
         {/* Desktop Sidebar Action Buttons */}
-        <div className="hidden xl:block xl:col-span-1">
-          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 flex flex-col h-[calc(100vh-10rem)]">
+        <div className="hidden xl:block xl:col-span-1 xl:h-full">
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 flex flex-col xl:h-full">
             <div className="overflow-y-auto scrollbar-hide flex-1 pr-1 pb-2">
               <LivePreview formData={formData} />
             </div>
