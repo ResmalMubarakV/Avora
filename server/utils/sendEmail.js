@@ -1,19 +1,22 @@
 const nodemailer = require("nodemailer");
 
 // ==========================================
-// EMAIL SENDER UTILITY
+// EMAIL SENDER UTILITY (Port 587 STARTTLS)
 // ==========================================
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true, // true for port 465, false for port 587
+  port: 587,
+  secure: false, // false for port 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  connectionTimeout: 10000, // Fail fast (10s) instead of hanging indefinitely
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
+  tls: {
+    rejectUnauthorized: false,
+  },
+  connectionTimeout: 15000,
+  greetingTimeout: 15000,
+  socketTimeout: 15000,
 });
 
 /**
