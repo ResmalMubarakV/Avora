@@ -1,3 +1,6 @@
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first"); // Forces Node.js to prefer IPv4, fixing ENETUNREACH errors on Render cloud servers
+
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
