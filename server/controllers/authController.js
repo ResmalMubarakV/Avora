@@ -139,7 +139,7 @@ const loginUser = async (req, res) => {
 };
 
 // ==========================================
-// FORGOT PASSWORD (Rate Limiting Bypassed)
+// FORGOT PASSWORD
 // ==========================================
 const forgotPassword = async (req, res) => {
   try {
@@ -221,6 +221,9 @@ const resetPassword = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
+
+    // Invalidate all existing tokens/sessions across all devices
+    user.passwordChangedAt = Date.now() - 1000;
 
     // Clear reset fields after successful change
     user.passwordResetToken = "";

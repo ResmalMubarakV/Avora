@@ -12,7 +12,20 @@ const protect = async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       
-      req.user = await User.findById(decoded.id).select("-password");
+      const currentUser = await User.findById(decoded.id).select("-password");
+      if (!currentUser) {
+        return res.status(401).json({ message: "User no longer exists." });
+      }
+
+      // Check if user changed password after the token was issued
+      if (currentUser.passwordChangedAt) {
+        const changedTimestamp = parseInt(currentUser.passwordChangedAt.getTime() / 1000, 10);
+        if (decoded.iat < changedTimestamp) {
+          return res.status(401).json({ message: "Password recently changed! Please log in again." });
+        }
+      }
+
+      req.user = currentUser;
       return next();
     } catch (error) {
       console.error("Protect Error", error);
@@ -56,7 +69,17 @@ const protectOptional = async (req, res, next) => {
       const token = authHeader.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       
-      req.user = await User.findById(decoded.id).select("-password");
+      const currentUser = await User.findById(decoded.id).select("-password");
+      
+      if (currentUser && currentUser.passwordChangedAt) {
+        const changedTimestamp = parseInt(currentUser.passwordChangedAt.getTime() / 1000, 10);
+        if (decoded.iat < changedTimestamp) {
+          req.user = null;
+          return next();
+        }
+      }
+
+      req.user = currentUser || null;
     } catch {
       req.user = null;
     }

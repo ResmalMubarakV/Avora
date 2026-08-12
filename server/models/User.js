@@ -123,6 +123,11 @@ const userSchema = new mongoose.Schema(
     passwordResetWindowStart: {
       type: Date,
     },
+
+    // --- Security / Session Invalidation ---
+    passwordChangedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
