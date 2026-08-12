@@ -98,7 +98,7 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Invalid Credentials" });
     }
 
-    // Handle account access based on admin approval status (Admins bypass approval checks if needed, or follow standard rules)
+    // Handle account access based on admin approval status
     if (user.role !== "admin") {
       if (user.status === "pending") {
         return res.status(403).json({
@@ -139,14 +139,8 @@ const loginUser = async (req, res) => {
 };
 
 // ==========================================
-// FORGOT PASSWORD
+// FORGOT PASSWORD (Rate Limiting Bypassed)
 // ==========================================
-/**
- * @desc Generate password reset token and send email only if username and email match.
- * Enforces a rate limit of maximum 3 password reset requests per 24 hours.
- * @route POST /api/auth/forgot-password
- * @access Public
- */
 const forgotPassword = async (req, res) => {
   try {
     const { email, username } = req.body;
@@ -167,31 +161,12 @@ const forgotPassword = async (req, res) => {
       });
     }
 
-    const now = Date.now();
-    const twentyFourHours = 24 * 60 * 60 * 1000;
-
-    // Reset rate window if 24 hours have passed or if it hasn't been set yet
-    if (!user.passwordResetWindowStart || now - user.passwordResetWindowStart.getTime() > twentyFourHours) {
-      user.passwordResetWindowStart = new Date(now);
-      user.passwordResetAttempts = 0;
-    }
-
-    // Check if user has exceeded 3 attempts in the last 24 hours
-    if (user.passwordResetAttempts >= 3) {
-      return res.status(429).json({
-        message: "Too many password reset requests. You can only request a reset 3 times every 24 hours.",
-      });
-    }
-
-    // Increment attempt count
-    user.passwordResetAttempts += 1;
-
     // Generate and hash secure token
     const resetToken = crypto.randomBytes(32).toString("hex");
     const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
 
     user.passwordResetToken = hashedToken;
-    user.passwordResetExpires = new Date(now + 15 * 60 * 1000); // 15 mins expiry
+    user.passwordResetExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins expiry
 
     await user.save();
 
@@ -207,7 +182,7 @@ const forgotPassword = async (req, res) => {
       message: "A password reset link has been sent to your email.",
     });
   } catch (error) {
-    console.error("Forgot Password:", error);
+    console.error("Forgot Password Error:", error.message);
     return res.status(500).json({ message: "Server Error" });
   }
 };
@@ -215,11 +190,6 @@ const forgotPassword = async (req, res) => {
 // ==========================================
 // RESET PASSWORD
 // ==========================================
-/**
- * @desc Reset password using valid token
- * @route POST /api/auth/reset-password/:token
- * @access Public
- */
 const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;

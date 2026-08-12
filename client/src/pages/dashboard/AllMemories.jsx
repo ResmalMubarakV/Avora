@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, Loader2 } from "lucide-react";
 
 import useMemories from "../../hooks/useMemories";
 import MemoriesHeader from "../../components/dashboard/memories/MemoriesHeader";
@@ -139,8 +139,9 @@ const AllMemories = () => {
 
       {/* Content States */}
       {loading ? (
-        <div className="flex items-center justify-center rounded-3xl border border-slate-200 bg-white py-24 text-slate-500">
-          Loading your memories...
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white py-24 gap-3">
+          <Loader2 className="h-9 w-9 animate-spin text-[#3559D4]" />
+          <p className="text-sm font-medium text-slate-500">Loading your memories...</p>
         </div>
       ) : error ? (
         <div className="rounded-3xl border border-red-200 bg-red-50 py-16 text-center text-red-500">

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation, Navigate } from "react-router-dom";
-import { ArrowLeft, Lock, Shield } from "lucide-react";
+import { ArrowLeft, Lock, Shield, Loader2 } from "lucide-react";
 
 import api from "../../api/axios";
 import { getMyProfile } from "../../api/userApi";
@@ -95,9 +95,10 @@ const Profile = () => {
 
   if (loading && !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 gap-3">
         <PageTitle title="Loading Profile" />
-        <p className="text-lg font-medium text-slate-500">Loading profile...</p>
+        <Loader2 className="h-9 w-9 animate-spin text-[#3559D4]" />
+        <p className="text-sm font-medium text-slate-500">Loading profile...</p>
       </div>
     );
   }

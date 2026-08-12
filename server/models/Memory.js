@@ -95,4 +95,9 @@ const memorySchema = new mongoose.Schema(
   }
 );
 
+// Performance Indexes for Faster Profile and Memory Queries
+memorySchema.index({ user: 1, isPublic: 1 });
+memorySchema.index({ user: 1, slug: 1 });
+memorySchema.index({ user: 1, startDate: -1 });
+
 module.exports = mongoose.model("Memory", memorySchema);

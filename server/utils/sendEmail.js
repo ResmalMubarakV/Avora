@@ -4,11 +4,16 @@ const nodemailer = require("nodemailer");
 // EMAIL SENDER UTILITY
 // ==========================================
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true, // true for port 465, false for port 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  connectionTimeout: 10000, // Fail fast (10s) instead of hanging indefinitely
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
 });
 
 /**
@@ -19,12 +24,18 @@ const transporter = nodemailer.createTransport({
  * @param {string} options.html - HTML body content of the email.
  */
 const sendEmail = async ({ to, subject, html }) => {
-  await transporter.sendMail({
-    from: `"Avora" <${process.env.EMAIL_USER}>`,
-    to,
-    subject,
-    html,
-  });
+  try {
+    const info = await transporter.sendMail({
+      from: `"Avora" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      html,
+    });
+    return info;
+  } catch (error) {
+    console.error("Nodemailer Send Error:", error.message);
+    throw error;
+  }
 };
 
 module.exports = sendEmail;

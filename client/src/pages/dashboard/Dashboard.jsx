@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 import { getDashboardMemories } from "../../api/memoryApi";
 import DashboardHero from "../../components/dashboard/DashboardHero";
@@ -58,9 +59,10 @@ const Dashboard = () => {
 
   if (loading && memories.length === 0) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
         <PageTitle title="Dashboard" />
-        <p className="text-xs sm:text-sm font-medium text-slate-400 animate-pulse">Loading dashboard...</p>
+        <Loader2 className="h-9 w-9 animate-spin text-[#3559D4]" />
+        <p className="text-sm font-medium text-slate-500">Loading dashboard...</p>
       </div>
     );
   }

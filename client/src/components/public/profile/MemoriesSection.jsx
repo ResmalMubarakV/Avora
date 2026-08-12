@@ -222,8 +222,25 @@ const MemoriesSection = ({ username, isOwner }) => {
             />
 
             {loading ? (
-                <div className="rounded-3xl border border-slate-200 bg-white py-24 text-center text-slate-400">
-                    Loading memories...
+                <div
+                    className={
+                        viewMode === "inline"
+                            ? "flex flex-col max-w-3xl mx-auto gap-6"
+                            : "grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-2 xl:grid-cols-4"
+                    }
+                >
+                    {[...Array(8)].map((_, index) => (
+                        <div
+                            key={index}
+                            className="w-full rounded-2xl sm:rounded-3xl border border-slate-200/60 bg-white p-3 space-y-3 animate-pulse shadow-xs"
+                        >
+                            <div className="h-40 sm:h-52 w-full bg-slate-200/80 rounded-xl sm:rounded-2xl" />
+                            <div className="space-y-2 py-1">
+                                <div className="h-4 bg-slate-200/80 rounded-md w-3/4" />
+                                <div className="h-3 bg-slate-200/80 rounded-md w-1/2" />
+                            </div>
+                        </div>
+                    ))}
                 </div>
             ) : memories.length === 0 ? (
                 <div

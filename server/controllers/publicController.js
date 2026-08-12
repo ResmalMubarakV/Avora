@@ -38,7 +38,7 @@ const getFeaturedTravelers = async (req, res) => {
 };
 
 // ==========================================
-// GET PUBLIC PROFILE
+// GET PUBLIC PROFILE (Optimized with Promise.all)
 // ==========================================
 const getPublicProfile = async (req, res) => {
   try {
@@ -71,11 +71,6 @@ const getPublicProfile = async (req, res) => {
     let filteredTotal = 0;
 
     if (!user.isLocked || isOwner) {
-      // Overall profile counters for stats / badges
-      totalMemoriesCount = await Memory.countDocuments({ user: user._id });
-      publicCount = await Memory.countDocuments({ user: user._id, isPublic: true });
-      privateCount = await Memory.countDocuments({ user: user._id, isPublic: false });
-
       const query = {
         user: user._id,
         ...(isOwner ? {} : { isPublic: true }),
@@ -109,9 +104,6 @@ const getPublicProfile = async (req, res) => {
         }
       }
 
-      filteredTotal = await Memory.countDocuments(query);
-      totalPages = Math.ceil(filteredTotal / limit) || 1;
-
       let dbSort = {};
       const hasFilters = Boolean(filterQuery || search);
 
@@ -125,11 +117,26 @@ const getPublicProfile = async (req, res) => {
         dbSort = { startDate: -1 };
       }
 
-      memories = await Memory.find(query)
-        .populate("user", "username")
-        .sort(dbSort)
-        .skip(skip)
-        .limit(limit);
+      // Execute all database queries concurrently in parallel for lightning-fast loading
+      [
+        totalMemoriesCount,
+        publicCount,
+        privateCount,
+        filteredTotal,
+        memories,
+      ] = await Promise.all([
+        Memory.countDocuments({ user: user._id }),
+        Memory.countDocuments({ user: user._id, isPublic: true }),
+        Memory.countDocuments({ user: user._id, isPublic: false }),
+        Memory.countDocuments(query),
+        Memory.find(query)
+          .populate("user", "username")
+          .sort(dbSort)
+          .skip(skip)
+          .limit(limit),
+      ]);
+
+      totalPages = Math.ceil(filteredTotal / limit) || 1;
     }
 
     return res.status(200).json({ 
@@ -137,7 +144,7 @@ const getPublicProfile = async (req, res) => {
       memories,
       currentPage: page,
       totalPages,
-      totalMemories: filteredTotal, // Updated to return the active filtered total count
+      totalMemories: filteredTotal,
       publicCount,
       privateCount,
     });
