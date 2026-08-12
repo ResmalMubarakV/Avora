@@ -1,42 +1,27 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
 // ==========================================
-// EMAIL SENDER UTILITY (Port 587 STARTTLS)
+// RESEND HTTP EMAIL UTILITY (Bypasses Render SMTP Blocks)
 // ==========================================
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // false for port 587
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-  connectionTimeout: 15000,
-  greetingTimeout: 15000,
-  socketTimeout: 15000,
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-/**
- * Sends an email using the configured Gmail transporter.
- * @param {Object} options - Email configuration options.
- * @param {string} options.to - Recipient email address.
- * @param {string} options.subject - Subject line of the email.
- * @param {string} options.html - HTML body content of the email.
- */
 const sendEmail = async ({ to, subject, html }) => {
   try {
-    const info = await transporter.sendMail({
-      from: `"Avora" <${process.env.EMAIL_USER}>`,
-      to,
-      subject,
-      html,
+    const { data, error } = await resend.emails.send({
+      from: "Avora <onboarding@resend.dev>", // Free testing domain provided by Resend
+      to: [to],
+      subject: subject,
+      html: html,
     });
-    return info;
+
+    if (error) {
+      console.error("Resend SDK Error:", error);
+      throw new Error(error.message);
+    }
+
+    return data;
   } catch (error) {
-    console.error("Nodemailer Send Error:", error.message);
+    console.error("Send Email Error:", error.message);
     throw error;
   }
 };

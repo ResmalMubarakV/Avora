@@ -29,7 +29,8 @@
     "multer": "^2.2.0",
     "nodemailer": "^9.0.4",
     "openai": "^6.46.0",
-    "puppeteer-core": "^25.5.0"
+    "puppeteer-core": "^25.5.0",
+    "resend": "^6.19.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14",
