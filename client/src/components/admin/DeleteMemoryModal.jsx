@@ -24,25 +24,27 @@ const DeleteMemoryModal = ({ selectedMemory, onClose, onConfirm, deleteLoading, 
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
-            <div className="w-full max-w-md rounded-3xl border border-red-200 bg-white shadow-[0_20px_50px_rgba(239,68,68,0.15)] overflow-hidden">
+            {/* max-h-[90vh] and overflow-y-auto prevent vertical overflow on small or ultra-wide viewports */}
+            <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl border border-red-200 bg-white shadow-[0_20px_50px_rgba(239,68,68,0.15)]">
                 
                 {/* Thin Red Accent Top Border */}
-                <div className="h-1.5 w-full bg-gradient-to-r from-red-500 via-rose-500 to-red-600" />
+                <div className="h-1.5 w-full bg-gradient-to-r from-red-500 via-rose-500 to-red-600 shrink-0" />
 
-                <div className="p-7">
+                <div className="p-5 sm:p-7">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-3 text-red-600">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 border border-red-100 shadow-inner">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 border border-red-100 shadow-inner shrink-0">
                                 <ShieldAlert size={22} />
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900">Confirm Deletion</h3>
+                            <h3 className="text-lg font-bold text-slate-900 truncate">Confirm Deletion</h3>
                         </div>
                         <button
                             type="button"
                             onClick={onClose}
                             disabled={deleteLoading}
-                            className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer transition disabled:opacity-50"
+                            aria-label="Close Modal"
+                            className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer transition disabled:opacity-50 shrink-0"
                         >
                             <X size={20} />
                         </button>
@@ -73,7 +75,7 @@ const DeleteMemoryModal = ({ selectedMemory, onClose, onConfirm, deleteLoading, 
 
                     {/* Error Banner */}
                     {deleteError && (
-                        <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-3.5 text-xs font-semibold text-red-700 animate-shake">
+                        <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-3.5 text-xs font-semibold text-red-700">
                             {deleteError}
                         </div>
                     )}
@@ -99,6 +101,7 @@ const DeleteMemoryModal = ({ selectedMemory, onClose, onConfirm, deleteLoading, 
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
                                     className="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-600 cursor-pointer"
                                     tabIndex={-1}
                                 >

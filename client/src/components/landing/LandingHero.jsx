@@ -6,7 +6,7 @@ import { Sparkles, MapPin, Image as ImageIcon, ShieldCheck, Calendar, PenTool } 
 
 const LandingHero = () => {
     return (
-        <section className="relative overflow-hidden mx-auto flex max-w-7xl flex-col-reverse items-center gap-12 px-5 py-12 md:flex-row md:items-center md:justify-between md:gap-10 md:px-8 md:py-16 lg:min-h-[calc(100vh-96px)] lg:py-0">
+        <section className="relative overflow-hidden mx-auto flex max-w-7xl flex-col-reverse items-center gap-12 px-5 py-12 md:flex-row md:items-center md:justify-between md:gap-10 md:px-8 md:py-16 lg:min-h-[calc(100vh-96px)] lg:py-0 w-full">
             
             {/* Background Ambient Glows (Strictly Blue/Slate/Indigo) */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
@@ -45,7 +45,7 @@ const LandingHero = () => {
                 </div>
 
                 {/* Heading with Elite Navy Blue Gradient */}
-                <h1 className="mt-6 text-4xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:mt-8 lg:text-6xl lg:leading-[1.08]">
+                <h1 className="mt-6 text-4xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:mt-8 lg:text-6xl 2xl:text-7xl lg:leading-[1.08]">
                     Every Journey
                     <br />
                     Deserves To Be
@@ -65,14 +65,14 @@ const LandingHero = () => {
                 <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center md:justify-start lg:mt-10">
                     <Link
                         to="/register"
-                        className="rounded-full bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#2541b2] px-7 py-3.5 text-center font-semibold text-white shadow-[0_15px_30px_-5px_rgba(30,58,138,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_40px_-5px_rgba(30,58,138,0.4)]"
+                        className="rounded-full bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#2541b2] px-7 py-3.5 text-center font-semibold text-white shadow-[0_15px_30px_-5px_rgba(30,58,138,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_40px_-5px_rgba(30,58,138,0.4)] cursor-pointer"
                     >
                         Start Your Journey
                     </Link>
 
                     <Link
                         to="/login"
-                        className="rounded-full border border-slate-200 bg-white/80 backdrop-blur-md px-7 py-3.5 text-center font-semibold text-slate-900 shadow-[0_5px_15px_rgba(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-50 hover:border-slate-300 hover:shadow-[0_10px_25px_rgba(0,0,0,0.05)]"
+                        className="rounded-full border border-slate-200 bg-white/80 backdrop-blur-md px-7 py-3.5 text-center font-semibold text-slate-900 shadow-[0_5px_15px_rgba(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-50 hover:border-slate-300 hover:shadow-[0_10px_25px_rgba(0,0,0,0.05)] cursor-pointer"
                     >
                         Login
                     </Link>

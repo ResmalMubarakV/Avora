@@ -52,7 +52,7 @@ const AdminSidebar = ({ sidebarOpen, setSidebarOpen, isMobile }) => {
     return (
         <>
             {/* Mobile / Drawer Backdrop */}
-            {sidebarOpen && (
+            {sidebarOpen && isMobile && (
                 <div
                     onClick={() => setSidebarOpen(false)}
                     className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm transition-opacity"

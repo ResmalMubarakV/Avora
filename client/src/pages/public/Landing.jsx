@@ -44,26 +44,30 @@ const Landing = () => {
   }, [navigate]);
 
   return (
-    <>
+    <div className="min-h-screen bg-white flex flex-col w-full overflow-x-hidden">
       <PageTitle title="Travel Diary Platform" />
+      
       {/* Top Navigation Bar */}
       <LandingNavbar />
 
-      {/* Main Hero Section */}
-      <LandingHero />
+      {/* Main Content Sections Wrapper */}
+      <main className="flex-1 w-full flex flex-col">
+        {/* Main Hero Section */}
+        <LandingHero />
 
-      {/* Highlights & Features Section */}
-      <LandingHighlights />
+        {/* Highlights & Features Section */}
+        <LandingHighlights />
 
-      {/* Why Choose Avora Value Proposition Section */}
-      <WhyChooseAvora />
+        {/* Why Choose Avora Value Proposition Section */}
+        <WhyChooseAvora />
 
-      {/* Call to Action Banner */}
-      <LandingCTA />
+        {/* Call to Action Banner */}
+        <LandingCTA />
+      </main>
 
       {/* Page Footer */}
       <LandingFooter />
-    </>
+    </div>
   );
 };
 

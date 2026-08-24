@@ -1,12 +1,12 @@
-import { ShieldCheck, Sparkles } from "lucide-react";
-import avoraLogo from "../../assets/images/avoraLogo.png";
-
 // ==========================================
 // LANDING FOOTER COMPONENT (MINIMAL ELITE)
 // ==========================================
+import { ShieldCheck, Sparkles } from "lucide-react";
+import avoraLogo from "../../assets/images/avoraLogo.png";
+
 const LandingFooter = () => {
     return (
-        <footer className="relative overflow-hidden border-t border-slate-200/60 bg-gradient-to-b from-white to-slate-50/50 pt-12 pb-8">
+        <footer className="relative overflow-hidden border-t border-slate-200/60 bg-gradient-to-b from-white to-slate-50/50 pt-12 pb-8 w-full">
             
             {/* Extremely Subtle Ambient Glow */}
             <div className="absolute inset-0 pointer-events-none z-0">
@@ -15,10 +15,10 @@ const LandingFooter = () => {
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e3a8a03_1px,transparent_1px),linear-gradient(to_bottom,#1e3a8a03_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_60%_100%_at_50%_100%,#000_50%,transparent_100%)]" />
             </div>
 
-            <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
+            <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8 w-full">
                 
                 {/* Top Section: Grid Layout for Left, Middle, Right alignment */}
-                <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-3">
+                <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-3 w-full">
                     
                     {/* Left: Brand Logo (Increased Size) */}
                     <div className="flex justify-center md:justify-start">
@@ -55,7 +55,7 @@ const LandingFooter = () => {
                 <div className="my-8 h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
 
                 {/* Bottom Section: Copyright & Links */}
-                <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+                <div className="flex flex-col items-center justify-between gap-4 md:flex-row w-full">
                     
                     <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
                         © {new Date().getFullYear()} Avora Platforms Inc.

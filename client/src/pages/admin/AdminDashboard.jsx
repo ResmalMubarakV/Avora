@@ -107,9 +107,9 @@ const AdminDashboard = () => {
 
     if (loading) {
         return (
-            <div className="flex h-[80vh] items-center justify-center bg-slate-50">
+            <div className="flex h-[70vh] items-center justify-center w-full">
                 <PageTitle title="Loading Admin Dashboard" />
-                <Loader2 size={28} className="animate-spin text-[#3559D4]" />
+                <Loader2 size={32} className="animate-spin text-[#3559D4]" />
             </div>
         );
     }
@@ -120,41 +120,42 @@ const AdminDashboard = () => {
     const pendingReviews = dashboard?.stats?.pendingUsers || 0;
 
     return (
-        <div className="space-y-4 sm:space-y-6 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 overflow-x-hidden">
+        /* w-full and space-y ensure clean structural flow across all viewports */
+        <div className="space-y-4 sm:space-y-6 pb-16 w-full overflow-x-hidden">
             <PageTitle title="Admin Dashboard" />
             
             {/* Streamlined Mobile-Friendly Hero Header */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#3559D4] p-5 sm:p-8 text-white shadow-md">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#3559D4] p-5 sm:p-8 2xl:p-10 text-white shadow-md w-full">
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div className="min-w-0">
                         <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-semibold backdrop-blur-md mb-2 border border-white/10">
                             <Sparkles size={11} className="text-blue-200 shrink-0" />
                             <span>Enterprise Control Center</span>
                         </div>
-                        <h1 className="text-xl sm:text-3xl font-black tracking-tight truncate">
+                        <h1 className="text-xl sm:text-3xl 2xl:text-4xl font-black tracking-tight truncate">
                             {greeting}, Administrator
                         </h1>
                         
-                        <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-blue-100/90 font-medium">
+                        <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-blue-100/90 font-medium">
                             <span className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-md border border-white/10">
-                                <Users size={12} className="text-blue-200" />
+                                <Users size={12} className="text-blue-200 shrink-0" />
                                 <strong>{totalUsers}</strong> Users
                             </span>
                             <span className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-md border border-white/10">
-                                <Images size={12} className="text-blue-200" />
+                                <Images size={12} className="text-blue-200 shrink-0" />
                                 <strong>{totalMemories}</strong> Memories
                             </span>
                             <span className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-md border border-white/10">
-                                <Clock size={12} className="text-amber-300" />
+                                <Clock size={12} className="text-amber-300 shrink-0" />
                                 <strong>{pendingReviews}</strong> Pending
                             </span>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2.5 bg-white/10 border border-white/15 rounded-xl px-3 py-2 backdrop-blur-md self-start md:self-auto shrink-0">
+                    <div className="flex items-center gap-2.5 bg-white/10 border border-white/15 rounded-xl px-3.5 py-2 backdrop-blur-md self-start md:self-auto shrink-0">
                         <Activity size={16} className="animate-pulse text-blue-200 shrink-0" />
                         <div className="min-w-0">
-                            <p className={`text-[11px] font-bold ${currentCore.color} flex items-center gap-1.5 truncate`}>
+                            <p className={`text-[11px] sm:text-xs font-bold ${currentCore.color} flex items-center gap-1.5 truncate`}>
                                 <span className={`h-1.5 w-1.5 rounded-full ${currentCore.dot} animate-ping shrink-0`} />
                                 <span className="truncate">{currentCore.label}</span>
                             </p>
@@ -173,7 +174,7 @@ const AdminDashboard = () => {
             />
 
             {/* Pending Approvals Queue */}
-            <div className="w-full overflow-x-hidden">
+            <div className="w-full">
                 <PendingUsers
                     users={dashboard?.pendingUsers || []}
                     onApprove={handleApprove}
@@ -182,14 +183,14 @@ const AdminDashboard = () => {
             </div>
 
             {/* Recent Activity Grid */}
-            <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-2">
-                <div className="min-w-0 overflow-x-hidden">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-2 w-full">
+                <div className="w-full min-w-0">
                     <RecentUsers
                         users={dashboard?.recentUsers || []}
                         onView={(user) => window.open(`/${user.username}`, "_blank")}
                     />
                 </div>
-                <div className="min-w-0 overflow-x-hidden">
+                <div className="w-full min-w-0">
                     <RecentMemories
                         memories={dashboard?.recentMemories || []}
                         onView={handleViewMemory}
@@ -204,24 +205,25 @@ const AdminDashboard = () => {
             {/* Secure Password Confirmation Modal */}
             {selectedMemory && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
-                    <div className="w-full max-w-md rounded-2xl border border-red-200 bg-white shadow-xl overflow-hidden">
-                        <div className="h-1 w-full bg-red-600" />
-                        <div className="p-5 sm:p-6">
+                    <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl border border-red-200 bg-white shadow-xl">
+                        <div className="h-1.5 w-full bg-red-600 shrink-0" />
+                        <div className="p-5 sm:p-7">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-2.5 text-red-600 min-w-0">
-                                    <ShieldAlert size={20} />
+                                    <ShieldAlert size={20} className="shrink-0" />
                                     <h3 className="text-base font-bold text-slate-900 truncate">Confirm Deletion</h3>
                                 </div>
                                 <button
                                     type="button"
                                     onClick={() => { setSelectedMemory(null); setPassword(""); setShowPassword(false); setDeleteError(""); }}
-                                    className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
+                                    aria-label="Close modal"
+                                    className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer shrink-0"
                                 >
                                     <X size={18} />
                                 </button>
                             </div>
 
-                            <p className="text-xs text-slate-600 mb-4 font-medium">
+                            <p className="text-xs sm:text-sm text-slate-600 mb-4 font-medium leading-relaxed">
                                 Permanently delete <span className="font-bold text-slate-900">"{selectedMemory.title}"</span>?
                             </p>
 
@@ -241,12 +243,13 @@ const AdminDashboard = () => {
                                         required
                                         autoFocus
                                         disabled={deleteLoading}
-                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-3 pr-10 text-xs text-slate-800 outline-none focus:border-red-500 focus:bg-white"
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3.5 pl-3.5 pr-12 text-xs sm:text-sm text-slate-800 outline-none focus:border-red-500 focus:bg-white"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400"
+                                        aria-label={showPassword ? "Hide password" : "Show password"}
+                                        className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 cursor-pointer"
                                     >
                                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                     </button>
@@ -257,14 +260,14 @@ const AdminDashboard = () => {
                                         type="button"
                                         onClick={() => { setSelectedMemory(null); setPassword(""); setShowPassword(false); setDeleteError(""); }}
                                         disabled={deleteLoading}
-                                        className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 cursor-pointer"
+                                        className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 cursor-pointer hover:bg-slate-50"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={deleteLoading || !password}
-                                        className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white shadow-sm cursor-pointer disabled:opacity-50"
+                                        className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm cursor-pointer disabled:opacity-50 hover:bg-red-700"
                                     >
                                         {deleteLoading ? <Loader2 size={14} className="animate-spin" /> : <span>Delete</span>}
                                     </button>

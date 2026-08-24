@@ -5,14 +5,15 @@ import { Check, ShieldAlert, UserCheck, ExternalLink } from "lucide-react";
 // ==========================================
 const PendingUsers = ({ users = [], onApprove, onSuspend }) => {
     return (
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 shadow-sm overflow-hidden">
+        /* w-full ensures it fits container bounds cleanly across all screen sizes */
+        <div className="w-full rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 2xl:p-8 shadow-sm overflow-hidden">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <div>
-                    <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
+                    <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
                         Pending Approvals Queue
                     </h3>
-                    <p className="text-xs font-medium text-slate-500">
+                    <p className="text-xs sm:text-sm font-medium text-slate-500">
                         Review and verify new user accounts requesting platform access
                     </p>
                 </div>

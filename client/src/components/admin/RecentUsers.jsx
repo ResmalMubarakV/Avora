@@ -10,7 +10,8 @@ const RecentUsers = ({
     const navigate = useNavigate();
 
     return (
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-sm flex flex-col h-full">
+        /* w-full ensures it fits container bounds cleanly across all screen sizes */
+        <div className="w-full rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 2xl:p-8 shadow-sm flex flex-col h-full">
             {/* Header */}
             <div className="mb-6 flex items-center justify-between">
                 <div>
@@ -21,7 +22,7 @@ const RecentUsers = ({
                         Newly registered users across the platform.
                     </p>
                 </div>
-                <div className="hidden sm:flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 border border-blue-100">
+                <div className="hidden sm:flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 shrink-0">
                     <Sparkles size={16} />
                 </div>
             </div>
@@ -73,7 +74,7 @@ const RecentUsers = ({
                                                 {user.name}
                                             </h3>
                                             <span
-                                                className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold capitalize ${badgeStyles}`}
+                                                className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold capitalize shrink-0 ${badgeStyles}`}
                                             >
                                                 <span className="h-1.5 w-1.5 rounded-full bg-current" />
                                                 {user.status || "Unknown"}
@@ -111,7 +112,7 @@ const RecentUsers = ({
                                             navigate(`/admin/users?search=${encodeURIComponent(user.username)}`);
                                         }}
                                         title="Manage User in Admin Panel"
-                                        className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300 cursor-pointer active:scale-95"
+                                        className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:border-slate-300 cursor-pointer active:scale-95 shrink-0"
                                     >
                                         <span className="hidden sm:inline">Manage</span>
                                         <ChevronRight size={14} className="text-slate-400" />

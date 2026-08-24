@@ -17,6 +17,7 @@ const Navbar = () => {
                     mx-auto
                     flex
                     max-w-7xl
+                    w-full
                     items-center
                     justify-between
 
@@ -60,6 +61,7 @@ const Navbar = () => {
                             hover:text-slate-900
 
                             md:text-base
+                            cursor-pointer
                         "
                     >
                         Login
@@ -83,6 +85,7 @@ const Navbar = () => {
                             hover:bg-slate-800
                             hover:shadow-md
                             sm:hidden
+                            cursor-pointer
                         "
                     >
                         Get Started
@@ -110,6 +113,7 @@ const Navbar = () => {
                             md:py-3
                             md:text-base
                             sm:inline-block
+                            cursor-pointer
                         "
                     >
                         Get Started

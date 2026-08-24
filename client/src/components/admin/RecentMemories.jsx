@@ -9,14 +9,15 @@ import { Eye, Trash2, ArrowUpRight, Globe, Lock } from "lucide-react";
  */
 const RecentMemories = ({ memories = [], onView, onDelete }) => {
     return (
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm">
+        /* w-full ensures it fits container bounds cleanly across all screen sizes */
+        <div className="w-full rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-7 2xl:p-8 shadow-sm">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h3 className="text-base font-extrabold text-slate-900 tracking-tight">
+                    <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
                         Recent Memories
                     </h3>
-                    <p className="text-xs font-medium text-slate-500">
+                    <p className="text-xs sm:text-sm font-medium text-slate-500">
                         Latest travel stories published across the platform
                     </p>
                 </div>
@@ -36,7 +37,7 @@ const RecentMemories = ({ memories = [], onView, onDelete }) => {
                         return (
                             <div
                                 key={memory._id}
-                                className="group flex items-center justify-between p-3 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-200 transition-all duration-200"
+                                className="group flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-200 transition-all duration-200"
                             >
                                 <div className="flex items-center gap-3.5 min-w-0">
                                     <img

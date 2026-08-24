@@ -48,11 +48,14 @@ const AdminLogin = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4">
+        /* w-full and flex layout ensure perfect vertical/horizontal centering on any screen */
+        <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4 py-8">
             <PageTitle title="Admin Login" />
-            <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
+            
+            {/* max-h-[95vh] and overflow-y-auto protect against vertical clipping on small or ultra-wide screens */}
+            <div className="w-full max-w-md max-h-[95vh] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xl">
                 <div className="text-center mb-8">
-                    <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-[#1E3A8A] to-[#3559D4] text-white shadow-lg shadow-blue-500/20 mb-4">
+                    <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r from-[#1E3A8A] to-[#3559D4] text-white shadow-lg shadow-blue-500/20 mb-4 shrink-0">
                         <Lock size={28} />
                     </div>
                     <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
@@ -76,14 +79,14 @@ const AdminLogin = () => {
                             Admin Email
                         </label>
                         <div className="relative">
-                            <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                             <input
                                 type="email"
                                 placeholder="name@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3 pl-11 pr-4 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-2 focus:ring-blue-100"
+                                className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-2 focus:ring-blue-100"
                             />
                         </div>
                     </div>
@@ -93,18 +96,19 @@ const AdminLogin = () => {
                             Password
                         </label>
                         <div className="relative">
-                            <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                             <input
                                 type={showPassword ? "text" : "password"}
                                 placeholder="••••••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3 pl-11 pr-12 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-2 focus:ring-blue-100"
+                                className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3.5 pl-11 pr-12 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-2 focus:ring-blue-100"
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
+                                aria-label={showPassword ? "Hide password" : "Show password"}
                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                                 tabIndex={-1}
                             >

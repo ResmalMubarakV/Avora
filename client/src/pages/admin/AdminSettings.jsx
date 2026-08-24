@@ -58,25 +58,26 @@ const AdminSettings = () => {
     };
 
     return (
-        <div className="space-y-8 pb-16 max-w-3xl mx-auto animate-in fade-in duration-300">
+        /* w-full and space-y ensure full fluid layout alignment across all display resolutions */
+        <div className="space-y-6 sm:space-y-8 pb-16 w-full pt-4 animate-in fade-in duration-300 max-w-4xl mx-auto">
             <PageTitle title="Admin Security Settings" />
             <div>
-                <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+                <h1 className="text-2xl sm:text-3xl 2xl:text-4xl font-extrabold tracking-tight text-slate-900">
                     Admin Security Settings
                 </h1>
-                <p className="mt-1 text-sm sm:text-base text-slate-500">
+                <p className="mt-1 text-xs sm:text-sm text-slate-500">
                     Manage your administrator credentials and account security.
                 </p>
             </div>
 
-            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 shadow-sm">
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-8 2xl:p-10 shadow-sm w-full">
                 <div className="flex items-center gap-3.5 pb-6 mb-6 border-b border-slate-100">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 border border-blue-100 text-[#3559D4]">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 border border-blue-100 text-[#3559D4] shrink-0">
                         <KeyRound size={24} />
                     </div>
-                    <div>
-                        <h2 className="text-lg font-bold text-slate-900">Change Password</h2>
-                        <p className="text-xs sm:text-sm text-slate-500">
+                    <div className="min-w-0">
+                        <h2 className="text-base sm:text-lg font-bold text-slate-900 truncate">Change Password</h2>
+                        <p className="text-xs sm:text-sm text-slate-500 truncate">
                             Ensure your account uses an enterprise-grade secure password.
                         </p>
                     </div>
@@ -113,6 +114,7 @@ const AdminSettings = () => {
                             <button
                                 type="button"
                                 onClick={() => setShowCurrent(!showCurrent)}
+                                aria-label={showCurrent ? "Hide current password" : "Show current password"}
                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
                             >
                                 {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -136,6 +138,7 @@ const AdminSettings = () => {
                             <button
                                 type="button"
                                 onClick={() => setShowNew(!showNew)}
+                                aria-label={showNew ? "Hide new password" : "Show new password"}
                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
                             >
                                 {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -159,6 +162,7 @@ const AdminSettings = () => {
                             <button
                                 type="button"
                                 onClick={() => setShowConfirm(!showConfirm)}
+                                aria-label={showConfirm ? "Hide confirmation password" : "Show confirmation password"}
                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer"
                             >
                                 {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}

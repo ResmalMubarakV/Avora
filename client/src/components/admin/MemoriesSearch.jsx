@@ -9,7 +9,8 @@ import { Search, Loader2, X } from "lucide-react";
  */
 const MemoriesSearch = ({ searchTerm, setSearchTerm, isSearching = false }) => {
     return (
-        <div className="relative w-full max-w-md">
+        /* w-full with max-w-md and 2xl:max-w-lg prevents infinite stretching on ultra-wide screens */
+        <div className="relative w-full max-w-md 2xl:max-w-lg">
             <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
                 <Search size={18} />
             </div>

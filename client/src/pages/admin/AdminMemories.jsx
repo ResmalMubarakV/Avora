@@ -104,7 +104,8 @@ const AdminMemories = () => {
     });
 
     return (
-        <div className="space-y-6 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 animate-in fade-in duration-300">
+        /* w-full and space-y ensure full fluid layout alignment across all display resolutions */
+        <div className="space-y-6 pb-16 w-full pt-4 animate-in fade-in duration-300 overflow-x-hidden">
             <PageTitle title="Memories Moderation" />
             <div className="space-y-4">
                 <button
@@ -118,12 +119,12 @@ const AdminMemories = () => {
 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/60 pb-5">
                     <div>
-                        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">Memories Moderation</h1>
+                        <h1 className="text-2xl sm:text-3xl 2xl:text-4xl font-black tracking-tight text-slate-900">Memories Moderation</h1>
                         <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Oversee and moderate published platform travel stories.</p>
                     </div>
 
                     <div className="flex items-center justify-between md:justify-end gap-2.5 w-full md:w-auto">
-                        <div className="flex items-center gap-1 overflow-x-auto bg-slate-100/80 p-1 rounded-xl">
+                        <div className="flex items-center gap-1 overflow-x-auto bg-slate-100/80 p-1 rounded-xl shrink-0">
                             {[
                                 { label: "All", value: "all" },
                                 { label: "Public", value: "public" },
@@ -144,7 +145,7 @@ const AdminMemories = () => {
                         </div>
 
                         <div className="relative flex items-center bg-slate-100/80 p-2.5 sm:px-3.5 sm:py-2 rounded-xl group cursor-pointer shrink-0" title="Sort Order">
-                            <ArrowUpDown size={16} className="text-slate-500 group-hover:text-slate-900 transition sm:mr-1.5" />
+                            <ArrowUpDown size={16} className="text-slate-500 group-hover:text-slate-900 transition sm:mr-1.5 shrink-0" />
                             <span className="hidden sm:inline text-xs sm:text-sm font-bold text-slate-700 capitalize">
                                 {currentSort === "newest" ? "Newest" : currentSort === "oldest" ? "Oldest" : "Title A-Z"}
                             </span>
@@ -163,8 +164,8 @@ const AdminMemories = () => {
                 </div>
             </div>
 
-            <div className="relative max-w-md">
-                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <div className="relative w-full max-w-md 2xl:max-w-lg">
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 <input
                     type="text"
                     placeholder="Search by title, location, or author..."
@@ -175,29 +176,30 @@ const AdminMemories = () => {
                 {search && (
                     <button
                         onClick={() => setSearch("")}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        aria-label="Clear search"
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                     >
                         <X size={16} />
                     </button>
                 )}
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden w-full">
                 {loading ? (
                     <div className="flex h-48 items-center justify-center">
                         <p className="text-xs sm:text-sm font-bold text-slate-400 animate-pulse">Loading memories...</p>
                     </div>
                 ) : filteredMemories.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center">
-                        <Images size={24} className="text-slate-300 mb-2" />
+                        <Images size={28} className="text-slate-300 mb-2" />
                         <h3 className="text-sm font-bold text-slate-800">No memories found</h3>
                     </div>
                 ) : (
-                    <div className="divide-y divide-slate-100">
+                    <div className="divide-y divide-slate-100 w-full">
                         {filteredMemories.map((memory) => {
                             const isPublic = memory.isPublic || memory.visibility === "public";
                             return (
-                                <div key={memory._id} className="relative flex flex-col md:grid md:grid-cols-[auto_1fr_160px_140px_100px] items-center p-3.5 sm:p-4 lg:p-5 gap-3.5 md:gap-6 hover:bg-slate-50/60 transition">
+                                <div key={memory._id} className="relative flex flex-col md:grid md:grid-cols-[auto_1fr_160px_140px_100px] items-center p-3.5 sm:p-4 lg:p-5 gap-3.5 md:gap-6 hover:bg-slate-50/60 transition w-full">
                                     {/* Absolute Delete Button for Mobile on Top Right */}
                                     <div className="absolute top-3.5 right-3.5 md:hidden">
                                         <button
