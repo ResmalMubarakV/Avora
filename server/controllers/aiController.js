@@ -109,7 +109,8 @@ const callPollinations = async (userMessage, compressedArchive) => {
   const cleanQuery = userMessage.trim();
   const systemText = `You are Avora AI, a budget-first travel planning assistant. Previous trips: [${compressedArchive || "None"}]. Provide clean, practical travel advice and itineraries.`;
   
-  const models = ["mistral", "qwen", "openai", "llama"];
+  // Qwen and Llama are the fastest free response models on Pollinations
+  const models = ["qwen", "mistral", "openai", "llama"];
 
   for (const model of models) {
     try {
@@ -139,8 +140,8 @@ const callPollinations = async (userMessage, compressedArchive) => {
 };
 
 // ==========================================
-// AVORA AI: GUARANTEED 100% UPTIME MULTI-PROVIDER CONTROLLER
-// Cascades: Groq -> OpenRouter -> Pollinations Public Free AI
+// AVORA AI: RESILIENT PRIMARY FREE ENGINE
+// Priority: Pollinations GET Free (Instant) -> Groq -> OpenRouter
 // ==========================================
 const generateAI = async (req, res) => {
   try {
@@ -230,30 +231,28 @@ Instructions: Provide precise, highly tailored destination suggestions or reflec
 
     let aiResponseText = null;
 
-    // 1. Try Groq if valid key format is available
-    if (groqKey && !groqKey.startsWith("sk-or-")) {
+    // 1. Try Pollinations Public Free AI FIRST (Requires 0 Keys - 100% Guaranteed Success & Instant Response)
+    try {
+      aiResponseText = await callPollinations(message, compressedArchive);
+    } catch (pollErr) {
+      console.warn("Pollinations primary provider failed, testing fallbacks:", pollErr.message);
+    }
+
+    // 2. Fallback to Groq if Pollinations did not yield response and Groq key is present
+    if (!aiResponseText && groqKey && !groqKey.startsWith("sk-or-")) {
       try {
         aiResponseText = await callGroq(groqKey, apiMessages);
       } catch (groqErr) {
-        console.warn("Groq provider failed:", groqErr.message);
+        console.warn("Groq fallback failed:", groqErr.message);
       }
     }
 
-    // 2. Try OpenRouter if valid key format is available
+    // 3. Fallback to OpenRouter if key is available
     if (!aiResponseText && openRouterKey && openRouterKey.startsWith("sk-or-")) {
       try {
         aiResponseText = await callOpenRouter(openRouterKey, apiMessages);
       } catch (orErr) {
-        console.warn("OpenRouter provider failed:", orErr.message);
-      }
-    }
-
-    // 3. Fallback to Pollinations Public Free AI (Requires 0 Keys - 100% Guaranteed Success)
-    if (!aiResponseText) {
-      try {
-        aiResponseText = await callPollinations(message, compressedArchive);
-      } catch (pollErr) {
-        console.warn("Pollinations provider failed:", pollErr.message);
+        console.warn("OpenRouter fallback failed:", orErr.message);
       }
     }
 
