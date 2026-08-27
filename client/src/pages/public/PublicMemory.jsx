@@ -966,10 +966,10 @@ export default function PublicMemory() {
           @media print {
             @page { size: portrait !important; margin: 0mm !important; }
             html, body { margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; background-color: white !important; overflow: hidden !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box !important; }
             .print-hidden-outlines * { outline: none !important; border: none !important; }
-            .print-only-container { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; max-width: 100% !important; max-height: 100% !important; margin: 0 !important; padding: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; visibility: visible !important; background-color: white !important; z-index: 99999 !important; }
-            .print-only-container > div { width: 100% !important; height: 100% !important; max-width: 100% !important; max-height: 100% !important; margin: 0 !important; padding: 0 !important; box-shadow: none !important; }
+            .print-only-container { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; max-width: 100vw !important; max-height: 100vh !important; margin: 0 !important; padding: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; visibility: visible !important; background-color: white !important; z-index: 99999 !important; overflow: hidden !important; }
+            .print-only-container > div { width: 100% !important; height: 100% !important; max-width: 100% !important; max-height: 100% !important; margin: 0 !important; padding: 0 !important; box-shadow: none !important; transform: scale(0.98) !important; transform-origin: center center !important; }
           }
           @media screen {
             .print-only-container { position: absolute; left: -9999px; top: -9999px; visibility: hidden; }
