@@ -27,14 +27,14 @@ const LandingFooter = () => {
                         <img
                             src={avoraLogo}
                             alt="Avora Logo"
-                            className="h-16 sm:h-20 md:h-24 w-auto object-contain drop-shadow-sm transition-transform duration-500 hover:scale-105 dark:hidden"
+                            className="h-20 sm:h-24 md:h-28 w-auto object-contain drop-shadow-sm transition-transform duration-500 hover:scale-105 dark:hidden"
                             draggable={false}
                         />
                         {/* Dark Mode Logo */}
                         <img
                             src={avoraLogoDark}
                             alt="Avora Logo Dark"
-                            className="h-16 sm:h-20 md:h-24 w-auto object-contain drop-shadow-sm dark:drop-shadow-[0_0_20px_rgba(99,102,241,0.25)] transition-transform duration-500 hover:scale-105 hidden dark:block"
+                            className="h-20 sm:h-24 md:h-28 w-auto object-contain drop-shadow-sm dark:drop-shadow-[0_0_20px_rgba(99,102,241,0.25)] transition-transform duration-500 hover:scale-105 hidden dark:block"
                             draggable={false}
                         />
                     </div>

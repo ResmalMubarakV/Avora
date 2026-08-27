@@ -3,12 +3,12 @@ import avoraLogo from "../../assets/images/avoraLogo.png";
 import avoraLogoDark from "../../assets/images/avoraLogoDark.png";
 
 // ==========================================
-// UNIFORM LOGO COMPONENT
+// UNIFORM LOGO COMPONENT (PROPORTIONAL SCALE)
 // ==========================================
 /**
  * Renders the Avora brand logo with configurable size variants (sm, md, lg) 
  * and optional navigation link destination. Guarantees 100% identical size matching
- * between Light and Dark mode logo variants.
+ * between Light and Dark mode logo variants with enhanced visual presence.
  */
 const Logo = ({ to = "/", size = "md", className = "" }) => {
   // Size configuration map
@@ -24,8 +24,8 @@ const Logo = ({ to = "/", size = "md", className = "" }) => {
       gap: "gap-2.5",
     },
     lg: {
-      box: "h-11 w-11 sm:h-13 sm:w-13",
-      text: "text-2xl sm:text-3xl lg:text-4xl tracking-[0.16em]",
+      box: "h-12 w-12 sm:h-15 sm:w-15",
+      text: "text-2xl sm:text-3xl lg:text-[40px] tracking-[0.16em]",
       gap: "gap-3",
     },
   };

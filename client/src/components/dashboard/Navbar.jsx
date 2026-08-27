@@ -9,7 +9,7 @@ import UserMenu from "../navigation/UserMenu";
 import ThemeToggle from "../common/ThemeToggle";
 
 // ==========================================
-// NAVBAR COMPONENT
+// NAVBAR COMPONENT (ULTRA-ELITE RESPONSIVE DESIGN)
 // ==========================================
 const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
   const navigate = useNavigate();
@@ -34,13 +34,12 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
   };
 
   return (
-    /* Changed overflow-x-hidden to relative overflow-visible z-40 so search results can overlap page content freely */
-    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shrink-0 overflow-visible transition-colors duration-300">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-2.5 sm:px-6 gap-1 relative overflow-visible">
+    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 dark:border-slate-800/80 dark:bg-slate-900/95 backdrop-blur-md shrink-0 overflow-visible transition-colors duration-300">
+      <div className="mx-auto flex h-16 sm:h-20 max-w-7xl items-center justify-between px-3 sm:px-6 gap-2 relative overflow-visible">
         
-        {/* Expanded Mobile Search Overlay */}
-        {mobileSearchOpen ? (
-          <div className="absolute inset-0 bg-white dark:bg-slate-900 px-3 flex items-center justify-between z-50 md:hidden w-full">
+        {/* Expanded Mobile Search Overlay Drawer */}
+        {mobileSearchOpen && (
+          <div className="absolute inset-0 bg-white/95 dark:bg-slate-900/95 px-3.5 flex items-center justify-between z-50 md:hidden w-full backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="flex-1 pr-2">
               <SearchBar />
             </div>
@@ -48,73 +47,88 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
               type="button"
               onClick={() => setMobileSearchOpen(false)}
               aria-label="Close search"
-              className="h-10 w-10 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 flex items-center justify-center shrink-0 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700"
+              className="h-9 w-9 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 flex items-center justify-center shrink-0 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 transition"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
-        ) : null}
+        )}
 
         {/* Left Section: Mobile Hamburger Menu & Brand Logo */}
-        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
           {!hideHamburger && (
             <button
               type="button"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               aria-label="Toggle Sidebar"
-              className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 transition hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer shadow-sm md:hidden shrink-0"
+              className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-slate-50/80 text-slate-700 dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-200 transition hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer shadow-2xs active:scale-95 md:hidden shrink-0"
             >
               <Menu size={18} />
             </button>
           )}
 
-          <div className="shrink-0 scale-95 sm:scale-100 origin-left">
+          <div className="shrink-0">
             <Logo to="/dashboard" size="sm" />
           </div>
         </div>
 
-        {/* Center Section: Search Bar Container (Relative with no clipping) */}
+        {/* Center Section: Search Bar Container (Desktop & Tablet) */}
         <div className="hidden md:flex flex-1 max-w-md lg:max-xl:max-w-xs justify-center px-2 relative overflow-visible">
           <SearchBar />
         </div>
 
-        {/* Right Section: Mobile Search Toggle, Theme Toggle, User Menu & Logout Button */}
-        <div className="flex items-center justify-end gap-1.5 shrink-0">
-          {/* Mobile Search Icon Button */}
-          <button
-            type="button"
-            onClick={() => setMobileSearchOpen(true)}
-            aria-label="Open search"
-            className="flex md:hidden h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer shadow-sm shrink-0"
-          >
-            <Search size={16} />
-          </button>
+        {/* Right Section: Mobile Glassmorphic Action Bar & Desktop Action Group */}
+        <div className="flex items-center justify-end gap-1.5 sm:gap-2.5 shrink-0">
+          
+          {/* Mobile Action Pill Group (Uncluttered Glassmorphic Capsule) */}
+          <div className="flex sm:hidden items-center gap-1 border border-slate-200/60 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-800/40 p-1 rounded-2xl backdrop-blur-md">
+            {/* Mobile Search Toggle */}
+            <button
+              type="button"
+              onClick={() => setMobileSearchOpen(true)}
+              aria-label="Open search"
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700/80 cursor-pointer transition active:scale-95"
+            >
+              <Search size={15} />
+            </button>
 
-          {/* Theme Toggle Button */}
-          <ThemeToggle />
+            {/* Theme Toggle */}
+            <ThemeToggle />
 
-          <UserMenu />
+            {/* User Menu */}
+            <UserMenu />
 
-          {/* Icon-only Logout for mobile screens right next to user menu */}
-          <button
-            type="button"
-            onClick={() => setShowLogoutModal(true)}
-            aria-label="Logout"
-            className="flex sm:hidden h-9 w-9 items-center justify-center rounded-xl border border-red-200/80 bg-gradient-to-r from-red-50/60 to-rose-50/40 dark:border-red-900/60 dark:bg-gradient-to-r dark:from-red-950/40 dark:to-rose-950/30 p-2 text-xs font-bold text-red-600 dark:text-red-400 shadow-2xs transition-all duration-300 hover:border-red-300 dark:hover:border-red-700/80 hover:bg-red-100/80 dark:hover:bg-red-900/50 hover:text-red-700 dark:hover:text-red-300 dark:shadow-[0_0_12px_rgba(239,68,68,0.15)] hover:scale-105 active:scale-95 cursor-pointer shrink-0"
-          >
-            <LogOut size={15} />
-          </button>
+            {/* Icon-only Logout */}
+            <button
+              type="button"
+              onClick={() => setShowLogoutModal(true)}
+              aria-label="Logout"
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 cursor-pointer transition active:scale-95"
+            >
+              <LogOut size={15} />
+            </button>
+          </div>
 
-          {/* Logout button for tablets and desktops */}
-          <button
-            type="button"
-            onClick={() => setShowLogoutModal(true)}
-            aria-label="Logout"
-            className="hidden sm:flex h-10 items-center justify-center gap-2 rounded-xl border border-red-200/80 bg-gradient-to-r from-red-50/60 to-rose-50/40 dark:border-red-900/60 dark:bg-gradient-to-r dark:from-red-950/40 dark:to-rose-950/30 px-3.5 py-2 text-xs sm:text-sm font-bold text-red-600 dark:text-red-400 shadow-2xs transition-all duration-300 hover:border-red-300 dark:hover:border-red-700/80 hover:bg-gradient-to-r hover:from-red-100/90 hover:to-rose-100/80 dark:hover:from-red-900/60 dark:hover:to-rose-900/50 hover:text-red-700 dark:hover:text-red-300 dark:shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:shadow-md hover:scale-[1.02] active:scale-95 cursor-pointer shrink-0"
-          >
-            <LogOut size={16} className="transition-transform duration-300 group-hover:-translate-x-0.5" />
-            <span className="hidden md:inline font-bold">Logout</span>
-          </button>
+          {/* Desktop & Tablet Action Group */}
+          <div className="hidden sm:flex items-center gap-2">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
+            {/* User Menu */}
+            <UserMenu />
+
+            {/* Desktop Logout button */}
+            <button
+              type="button"
+              onClick={() => setShowLogoutModal(true)}
+              aria-label="Logout"
+              className="flex h-10 items-center justify-center gap-2 rounded-xl border border-red-200/80 bg-gradient-to-r from-red-50/60 to-rose-50/40 dark:border-red-900/60 dark:bg-gradient-to-r dark:from-red-950/40 dark:to-rose-950/30 px-3.5 py-2 text-xs sm:text-sm font-bold text-red-600 dark:text-red-400 shadow-2xs transition-all duration-300 hover:border-red-300 dark:hover:border-red-700/80 hover:bg-gradient-to-r hover:from-red-100/90 hover:to-rose-100/80 dark:hover:from-red-900/60 dark:hover:to-rose-900/50 hover:text-red-700 dark:hover:text-red-300 dark:shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:shadow-md hover:scale-[1.02] active:scale-95 cursor-pointer shrink-0"
+            >
+              <LogOut size={16} className="transition-transform duration-300 group-hover:-translate-x-0.5" />
+              <span className="hidden md:inline font-bold">Logout</span>
+            </button>
+          </div>
+
         </div>
       </div>
 
