@@ -140,7 +140,7 @@ const MemoriesCard = ({
     <div
       onClick={handleOpenMemory}
       onTouchEnd={handleTouchEnd}
-      className="group relative cursor-pointer overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col justify-between select-none"
+      className="group relative cursor-pointer overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/95 shadow-[0_4px_20px_rgba(30,58,138,0.05)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#3559D4] dark:hover:border-indigo-500 hover:shadow-[0_12px_32px_rgba(53,89,212,0.16)] dark:hover:shadow-[0_0_28px_rgba(99,102,241,0.3)] flex flex-col justify-between select-none"
     >
       <div>
         <div className="relative h-36 sm:h-60 overflow-hidden">

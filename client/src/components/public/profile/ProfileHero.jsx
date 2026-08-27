@@ -289,8 +289,8 @@ const ProfileHero = ({
                         
                         {/* Avatar with Subtle Gradient Glow Ring */}
                         <div className="relative -mt-20 sm:-mt-28 shrink-0">
-                            <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-400 opacity-30 blur-sm"></div>
-                            <div className="relative h-32 w-32 sm:h-44 sm:w-44 overflow-hidden rounded-full border-4 sm:border-[6px] border-white dark:border-slate-800 bg-slate-200 dark:bg-slate-800 shadow-xl">
+                            <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-500 to-sky-400 opacity-30 dark:opacity-75 blur-md dark:animate-pulse"></div>
+                            <div className="relative h-32 w-32 sm:h-44 sm:w-44 overflow-hidden rounded-full border-4 sm:border-[6px] border-white dark:border-indigo-500 dark:ring-4 dark:ring-indigo-500/40 bg-slate-200 dark:bg-slate-800 shadow-xl dark:shadow-[0_0_40px_rgba(99,102,241,0.5)] transition-all duration-300">
                                 {user?.profileImage ? (
                                     <img
                                         src={user.profileImage}

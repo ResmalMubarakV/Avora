@@ -22,22 +22,22 @@ const AuthLayout = ({ children, type = 'login' }) => {
   }, []);
 
   return (
-    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-slate-50 text-slate-900 selection:bg-blue-600 selection:text-white">
+    <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white selection:bg-blue-600 selection:text-white transition-colors duration-300">
       
-      {/* ================= SEAMLESS BACKGROUND (Unified Light Theme) ================= */}
+      {/* ================= SEAMLESS BACKGROUND ================= */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         {/* Soft Base Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-blue-50/80" />
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-blue-50/80 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950" />
 
         {/* Ambient Radial Glows (Navy & Sky) */}
-        <div className="absolute -top-40 -left-40 h-[50rem] w-[50rem] rounded-full bg-[#1E3A8A]/10 blur-[150px] animate-pulse [animation-duration:8s]" />
-        <div className="absolute bottom-0 right-0 h-[45rem] w-[45rem] rounded-full bg-[#60A5FA]/15 blur-[120px] animate-pulse [animation-duration:12s]" />
+        <div className="absolute -top-40 -left-40 h-[50rem] w-[50rem] rounded-full bg-[#1E3A8A]/10 dark:bg-indigo-600/15 blur-[150px] animate-pulse [animation-duration:8s]" />
+        <div className="absolute bottom-0 right-0 h-[45rem] w-[45rem] rounded-full bg-[#60A5FA]/15 dark:bg-blue-500/15 blur-[120px] animate-pulse [animation-duration:12s]" />
         
         {/* Architectural Blueprint Grid Overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e3a8a08_1px,transparent_1px),linear-gradient(to_bottom,#1e3a8a08_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_100%_100%_at_50%_50%,#000_60%,transparent_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e3a8a08_1px,transparent_1px),linear-gradient(to_bottom,#1e3a8a08_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#6366f10a_1px,transparent_1px),linear-gradient(to_bottom,#6366f10a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_100%_100%_at_50%_50%,#000_60%,transparent_100%)]" />
 
         {/* Animated Flight Path Ray crossing the entire screen */}
-        <svg className="absolute inset-0 w-full h-full opacity-40" xmlns="http://www.w3.org/2000/svg">
+        <svg className="absolute inset-0 w-full h-full opacity-40 dark:opacity-60" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M-100,600 Q400,-100 1200,400 T2400,200"
             fill="none"
@@ -56,7 +56,7 @@ const AuthLayout = ({ children, type = 'login' }) => {
         </svg>
       </div>
 
-      {/* ================= CONTENT GRID (No strict split-screen) ================= */}
+      {/* ================= CONTENT GRID ================= */}
       <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 py-12 lg:px-12 flex flex-col lg:flex-row items-center justify-between gap-16 xl:gap-24">
         
         {/* LEFT COLUMN: Narrative & Animated Floating UI */}
@@ -68,75 +68,75 @@ const AuthLayout = ({ children, type = 'login' }) => {
 
           <div className="relative w-full max-w-xl">
             {/* Premium Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/80 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#1E3A8A] backdrop-blur-md shadow-[0_10px_30px_rgba(30,58,138,0.08)] mb-8">
-              <Sparkles className="h-4 w-4 text-[#3559D4]" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 dark:border-indigo-800 bg-white/80 dark:bg-slate-900/80 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#1E3A8A] dark:text-indigo-300 backdrop-blur-md shadow-[0_10px_30px_rgba(30,58,138,0.08)] dark:shadow-none mb-8">
+              <Sparkles className="h-4 w-4 text-[#3559D4] dark:text-indigo-400" />
               Your Digital Travel Vault
             </div>
 
-            <h1 className="text-5xl font-extrabold leading-[1.1] tracking-tight text-slate-900 xl:text-6xl mb-6">
+            <h1 className="text-5xl font-extrabold leading-[1.1] tracking-tight text-slate-900 dark:text-white xl:text-6xl mb-6">
               Every Journey Starts <br />
-              With A <span className="bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#3559D4] bg-clip-text text-transparent">Memory.</span>
+              With A <span className="bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#3559D4] dark:from-white dark:via-indigo-200 dark:to-blue-400 bg-clip-text text-transparent">Memory.</span>
             </h1>
 
-            <p className="mb-16 text-lg leading-relaxed text-slate-600 font-medium">
+            <p className="mb-16 text-lg leading-relaxed text-slate-600 dark:text-slate-300 font-medium">
               Preserve your adventures with beautiful timelines. Relive your favorite moments. Share your timeless stories seamlessly.
             </p>
 
-            {/* Light-Themed Interactive Cinematic Composition (The "Anime UI") */}
+            {/* Interactive Cinematic Composition */}
             <div className="relative h-64 w-full">
               
               {/* Central Glowing Orb */}
               <div className="absolute top-1/2 left-[40%] h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-[#3559D4]/20 to-[#60A5FA]/20 blur-2xl animate-pulse" />
               
               {/* Orbital Rings */}
-              <div className="absolute top-1/2 left-[40%] h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-blue-900/10 animate-[spin_30s_linear_infinite]" />
-              <div className="absolute top-1/2 left-[40%] h-48 w-48 -translate-x-1/2 -translate-y-1/2 rounded-full border border-blue-900/5 animate-[spin_20s_linear_infinite_reverse]" />
+              <div className="absolute top-1/2 left-[40%] h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-blue-900/10 dark:border-slate-800 animate-[spin_30s_linear_infinite]" />
+              <div className="absolute top-1/2 left-[40%] h-48 w-48 -translate-x-1/2 -translate-y-1/2 rounded-full border border-blue-900/5 dark:border-slate-800/80 animate-[spin_20s_linear_infinite_reverse]" />
 
-              {/* Orbiting Glassmorphic Icons (Light Theme) */}
+              {/* Orbiting Glassmorphic Icons */}
               <div className="absolute inset-0">
                 
                 {/* Floating Jet */}
-                <div className="absolute top-8 left-[60%] flex h-14 w-14 animate-[bounce_6s_ease-in-out_infinite] items-center justify-center rounded-2xl border border-white bg-white/90 text-[#3559D4] backdrop-blur-xl shadow-[0_20px_40px_-10px_rgba(30,58,138,0.15)]">
+                <div className="absolute top-8 left-[60%] flex h-14 w-14 animate-[bounce_6s_ease-in-out_infinite] items-center justify-center rounded-2xl border border-white dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 text-[#3559D4] dark:text-indigo-400 backdrop-blur-xl shadow-xl">
                   <Plane className="h-6 w-6 rotate-45 transform drop-shadow-md" />
                 </div>
                 
                 {/* Floating Map Pin */}
-                <div className="absolute bottom-10 left-[15%] flex h-12 w-12 animate-[bounce_8s_ease-in-out_infinite_1s] items-center justify-center rounded-[1rem] border border-white bg-white/90 text-[#1E3A8A] backdrop-blur-xl shadow-[0_20px_40px_-10px_rgba(30,58,138,0.15)]">
+                <div className="absolute bottom-10 left-[15%] flex h-12 w-12 animate-[bounce_8s_ease-in-out_infinite_1s] items-center justify-center rounded-[1rem] border border-white dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 text-[#1E3A8A] dark:text-sky-400 backdrop-blur-xl shadow-xl">
                   <MapPin className="h-5 w-5 drop-shadow-sm" />
                 </div>
 
                 {/* Secure Vault Badge */}
-                <div className="absolute top-1/2 -left-4 flex animate-[pulse_4s_ease-in-out_infinite] items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/90 p-3.5 backdrop-blur-xl shadow-xl">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-500 shadow-sm">
+                <div className="absolute top-1/2 -left-4 flex animate-[pulse_4s_ease-in-out_infinite] items-center gap-3 rounded-2xl border border-blue-100 dark:border-slate-800 bg-blue-50/90 dark:bg-slate-900/90 p-3.5 backdrop-blur-xl shadow-xl">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white dark:bg-slate-800 text-emerald-500 shadow-sm">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div className="pr-2">
-                    <p className="text-xs font-bold text-slate-900">Encrypted Vault</p>
-                    <p className="text-[10px] font-medium text-slate-500">100% Private</p>
+                    <p className="text-xs font-bold text-slate-900 dark:text-white">Encrypted Vault</p>
+                    <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">100% Private</p>
                   </div>
                 </div>
 
                 {/* AI Timeline Badge */}
-                <div className="absolute bottom-4 right-[10%] flex animate-[bounce_7s_ease-in-out_infinite_0.5s] items-center gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/90 p-3.5 backdrop-blur-xl shadow-xl">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1E3A8A] text-white shadow-md">
+                <div className="absolute bottom-4 right-[10%] flex animate-[bounce_7s_ease-in-out_infinite_0.5s] items-center gap-3 rounded-2xl border border-indigo-100 dark:border-slate-800 bg-indigo-50/90 dark:bg-slate-900/90 p-3.5 backdrop-blur-xl shadow-xl">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1E3A8A] dark:bg-indigo-600 text-white shadow-md">
                     <Camera className="h-5 w-5" />
                   </div>
                   <div className="pr-2">
-                    <p className="text-xs font-bold text-[#1E3A8A]">Smart Timeline</p>
-                    <p className="text-[10px] font-medium text-slate-500">Auto-Organized</p>
+                    <p className="text-xs font-bold text-[#1E3A8A] dark:text-indigo-300">Smart Timeline</p>
+                    <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">Auto-Organized</p>
                   </div>
                 </div>
               </div>
             </div>
             
             {/* Elegant Rotating Quotes */}
-            <div className="mt-12 border-t border-slate-200/60 pt-8 flex items-start gap-4">
-              <Quote className="h-8 w-8 text-[#3559D4]/20 rotate-180 shrink-0" />
+            <div className="mt-12 border-t border-slate-200/60 dark:border-slate-800 pt-8 flex items-start gap-4">
+              <Quote className="h-8 w-8 text-[#3559D4]/20 dark:text-indigo-400/20 rotate-180 shrink-0" />
               <div className="transition-opacity duration-700 ease-in-out">
-                <p className="text-lg font-medium italic text-slate-700 leading-relaxed">
+                <p className="text-lg font-medium italic text-slate-700 dark:text-slate-300 leading-relaxed">
                   "{quotes[currentQuote].quote}"
                 </p>
-                <p className="mt-2 text-xs font-bold tracking-wider text-[#3559D4] uppercase">
+                <p className="mt-2 text-xs font-bold tracking-wider text-[#3559D4] dark:text-indigo-400 uppercase">
                   — {quotes[currentQuote].author}
                 </p>
               </div>
@@ -154,16 +154,16 @@ const AuthLayout = ({ children, type = 'login' }) => {
 
           <div className="relative group">
             {/* Cinematic Outer Glow for the Card */}
-            <div className="absolute -inset-1.5 rounded-[2.5rem] bg-gradient-to-r from-blue-200 via-indigo-200 to-sky-200 opacity-60 blur-xl transition duration-500 group-hover:opacity-100" />
+            <div className="absolute -inset-1.5 rounded-[2.5rem] bg-gradient-to-r from-blue-200 via-indigo-200 to-sky-200 dark:from-indigo-600/30 dark:via-blue-600/30 dark:to-sky-600/30 opacity-60 dark:opacity-80 blur-xl transition duration-500 group-hover:opacity-100" />
             
             {/* Glassmorphic Form Container */}
-            <div className="relative rounded-[2rem] border border-white bg-white/95 p-8 sm:p-10 shadow-[0_30px_70px_-15px_rgba(30,58,138,0.15)] backdrop-blur-2xl">
+            <div className="relative rounded-[2rem] border border-white dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 p-8 sm:p-10 shadow-[0_30px_70px_-15px_rgba(30,58,138,0.15)] dark:shadow-[0_0_50px_rgba(0,0,0,0.6)] backdrop-blur-2xl transition-colors duration-300">
               {children}
             </div>
           </div>
 
           <footer className="mt-10 text-center lg:hidden">
-            <p className="text-xs font-medium text-slate-400">
+            <p className="text-xs font-medium text-slate-400 dark:text-slate-500">
               Avora Global Travel Platform &copy; {new Date().getFullYear()}
             </p>
           </footer>

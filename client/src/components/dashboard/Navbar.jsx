@@ -100,7 +100,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
             type="button"
             onClick={() => setShowLogoutModal(true)}
             aria-label="Logout"
-            className="flex sm:hidden h-9 w-9 items-center justify-center rounded-xl border border-red-200 bg-white dark:border-red-900/50 dark:bg-slate-900 p-2 text-sm font-medium text-red-600 dark:text-red-400 transition-all duration-300 hover:border-red-300 dark:hover:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-700 dark:hover:text-red-300 cursor-pointer shadow-sm shrink-0"
+            className="flex sm:hidden h-9 w-9 items-center justify-center rounded-xl border border-red-200/80 bg-gradient-to-r from-red-50/60 to-rose-50/40 dark:border-red-900/60 dark:bg-gradient-to-r dark:from-red-950/40 dark:to-rose-950/30 p-2 text-xs font-bold text-red-600 dark:text-red-400 shadow-2xs transition-all duration-300 hover:border-red-300 dark:hover:border-red-700/80 hover:bg-red-100/80 dark:hover:bg-red-900/50 hover:text-red-700 dark:hover:text-red-300 dark:shadow-[0_0_12px_rgba(239,68,68,0.15)] hover:scale-105 active:scale-95 cursor-pointer shrink-0"
           >
             <LogOut size={15} />
           </button>
@@ -110,10 +110,10 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
             type="button"
             onClick={() => setShowLogoutModal(true)}
             aria-label="Logout"
-            className="hidden sm:flex h-10 items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-white dark:border-red-900/50 dark:bg-slate-900 px-3 py-2 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 transition-all duration-300 hover:border-red-300 dark:hover:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-700 dark:hover:text-red-300 cursor-pointer shadow-sm shrink-0"
+            className="hidden sm:flex h-10 items-center justify-center gap-2 rounded-xl border border-red-200/80 bg-gradient-to-r from-red-50/60 to-rose-50/40 dark:border-red-900/60 dark:bg-gradient-to-r dark:from-red-950/40 dark:to-rose-950/30 px-3.5 py-2 text-xs sm:text-sm font-bold text-red-600 dark:text-red-400 shadow-2xs transition-all duration-300 hover:border-red-300 dark:hover:border-red-700/80 hover:bg-gradient-to-r hover:from-red-100/90 hover:to-rose-100/80 dark:hover:from-red-900/60 dark:hover:to-rose-900/50 hover:text-red-700 dark:hover:text-red-300 dark:shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:shadow-md hover:scale-[1.02] active:scale-95 cursor-pointer shrink-0"
           >
-            <LogOut size={16} />
-            <span className="hidden md:inline">Logout</span>
+            <LogOut size={16} className="transition-transform duration-300 group-hover:-translate-x-0.5" />
+            <span className="hidden md:inline font-bold">Logout</span>
           </button>
         </div>
       </div>

@@ -37,7 +37,7 @@ const PasswordField = ({
         <div className="space-y-1.5">
             {/* Field Label */}
             {label && (
-                <label className="block text-sm font-semibold text-slate-700">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
                     {label}
                 </label>
             )}
@@ -50,21 +50,22 @@ const PasswordField = ({
                     rounded-2xl
                     border
                     bg-white
+                    dark:bg-slate-800/50
                     px-4
                     py-2.5
                     transition-all
                     duration-300
                     ${
                         error
-                            ? "border-red-400 focus-within:border-red-500 focus-within:ring-4 focus-within:ring-red-100"
-                            : "border-slate-300 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100"
+                            ? "border-red-400 focus-within:border-red-500 focus-within:ring-4 focus-within:ring-red-100 dark:focus-within:ring-red-950/50"
+                            : "border-slate-300 dark:border-slate-700 focus-within:border-blue-500 dark:focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-blue-100 dark:focus-within:ring-indigo-950/50"
                     }
-                    ${disabled ? "bg-slate-50 opacity-60 cursor-not-allowed" : ""}
+                    ${disabled ? "bg-slate-50 dark:bg-slate-800 opacity-60 cursor-not-allowed" : ""}
                 `}
             >
                 {/* Leading Lock Icon */}
                 <FiLock
-                    className="mr-3 shrink-0 text-slate-400"
+                    className="mr-3 shrink-0 text-slate-400 dark:text-slate-400"
                     size={20}
                 />
 
@@ -83,7 +84,9 @@ const PasswordField = ({
                         text-[15px]
                         leading-6
                         text-slate-700
+                        dark:text-slate-100
                         placeholder:text-slate-400
+                        dark:placeholder:text-slate-500
                         outline-none
                         disabled:cursor-not-allowed
                     "
@@ -105,10 +108,13 @@ const PasswordField = ({
                             justify-center
                             rounded-full
                             text-slate-400
+                            dark:text-slate-400
                             transition
                             cursor-pointer
                             hover:bg-slate-100
+                            dark:hover:bg-slate-700
                             hover:text-slate-700
+                            dark:hover:text-slate-200
                         "
                     >
                         <X size={14} />
@@ -124,10 +130,12 @@ const PasswordField = ({
                     className="
                         ml-1
                         text-slate-400
+                        dark:text-slate-400
                         transition-colors
                         duration-200
                         cursor-pointer
                         hover:text-blue-600
+                        dark:hover:text-indigo-400
                         disabled:cursor-not-allowed
                         disabled:opacity-60
                     "

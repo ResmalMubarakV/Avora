@@ -98,14 +98,19 @@ const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false,
                 overflow-visible
                 rounded-[28px]
                 border
-                border-slate-200/80
+                border-slate-200/90
+                dark:border-slate-800
                 bg-white
-                shadow-sm
+                dark:bg-slate-900/95
+                shadow-[0_4px_20px_rgba(30,58,138,0.05)]
+                dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)]
                 transition-all
                 duration-300
                 hover:-translate-y-1.5
-                hover:shadow-xl
-                hover:border-slate-300
+                hover:border-[#3559D4]
+                dark:hover:border-indigo-500
+                hover:shadow-[0_12px_32px_rgba(53,89,212,0.16)]
+                dark:hover:shadow-[0_0_28px_rgba(99,102,241,0.3)]
             "
         >
             {/* Cover Image & Badges Container */}
@@ -146,7 +151,7 @@ const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false,
                                 ${
                                     liked
                                         ? "bg-rose-500 text-white shadow-rose-500/30"
-                                        : "bg-white/90 text-slate-600 hover:bg-white hover:text-rose-500"
+                                        : "bg-white/90 dark:bg-slate-900/90 text-slate-600 dark:text-slate-300 hover:bg-white hover:text-rose-500"
                                 }
                             `}
                         >
@@ -215,19 +220,19 @@ const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false,
 
             {/* Card Body Content */}
             <div className="relative p-5 sm:p-6">
-                <h3 className="pr-12 text-lg sm:text-xl font-black text-slate-900 line-clamp-1 tracking-tight">
+                <h3 className="pr-12 text-lg sm:text-xl font-black text-slate-900 dark:text-white line-clamp-1 tracking-tight">
                     {memory.title}
                 </h3>
 
-                <div className="mt-3.5 flex items-center gap-2 text-slate-500 text-xs sm:text-sm font-medium">
-                    <MapPin size={16} className="shrink-0 text-[#3559D4]" />
+                <div className="mt-3.5 flex items-center gap-2 text-slate-500 dark:text-slate-300 text-xs sm:text-sm font-medium">
+                    <MapPin size={16} className="shrink-0 text-[#3559D4] dark:text-indigo-400" />
                     <span className="truncate">
                         {memory.location}
                     </span>
                 </div>
 
-                <div className="mt-2 flex items-center gap-2 text-slate-500 text-xs sm:text-sm font-medium">
-                    <CalendarDays size={16} className="shrink-0 text-slate-400" />
+                <div className="mt-2 flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-medium">
+                    <CalendarDays size={16} className="shrink-0 text-slate-400 dark:text-slate-500" />
                     <span>
                         {formatDate(memory.startDate)}
                     </span>

@@ -148,10 +148,13 @@ const AllMemories = () => {
           {error}
         </div>
       ) : memories.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-slate-300 bg-white py-24 text-center">
-          <h2 className="text-2xl font-bold text-slate-900">No memories found</h2>
-          <p className="mt-3 text-slate-500">
-            Try adjusting your multi-select filters or search criteria.
+        <div className="rounded-3xl border border-dashed border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900/90 py-20 px-6 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 dark:bg-slate-800 border border-blue-100 dark:border-slate-700 text-[#3559D4] dark:text-indigo-400">
+            <Sparkles size={24} />
+          </div>
+          <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">No memories found</h2>
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+            Try adjusting your search criteria or multi-select filters.
           </p>
         </div>
       ) : (

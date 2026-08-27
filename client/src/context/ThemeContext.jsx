@@ -27,12 +27,12 @@ export const ThemeProvider = ({ children }) => {
     if (theme === "dark") {
       root.classList.add("dark");
       if (favicon) {
-        favicon.setAttribute("href", "/avoraLogoDark.png");
+        favicon.setAttribute("href", "/avoraLogoLight.png");
       }
     } else {
       root.classList.remove("dark");
       if (favicon) {
-        favicon.setAttribute("href", "/avoraLogoLight.png");
+        favicon.setAttribute("href", "/avoraLogoDark.png");
       }
     }
     localStorage.setItem("avora_theme", theme);
