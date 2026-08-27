@@ -27,7 +27,7 @@ const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50 relative">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 dark:text-slate-100 relative transition-colors duration-300">
       {/* Sidebar Navigation */}
       {!hideSidebarAndNav && (
         <Sidebar

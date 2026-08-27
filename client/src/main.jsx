@@ -17,13 +17,16 @@ import "@fontsource/outfit/700.css";
 // Global Styles & Root Component
 import "./index.css";
 import App from "./App.jsx";
+import { ThemeProvider } from "./context/ThemeContext.jsx";
 
 // Initialize and render the React application
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <BrowserRouter>
-        <App />
+      <ThemeProvider>
+        <BrowserRouter>
+          <App />
+
         
         {/* Global Universal Below-Navbar, Larger High-End Toast Provider */}
         <Toaster 
@@ -49,6 +52,7 @@ createRoot(document.getElementById("root")).render(
           }}
         />
       </BrowserRouter>
-    </GoogleOAuthProvider>
-  </StrictMode>
+    </ThemeProvider>
+  </GoogleOAuthProvider>
+</StrictMode>
 );

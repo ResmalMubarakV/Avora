@@ -1,9 +1,18 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 body {
   font-family: "Outfit", sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+html.dark body {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
 
 .no-scrollbar::-webkit-scrollbar,
 .scrollbar-hide::-webkit-scrollbar {

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Logo from "../common/Logo";
 import SearchBar from "./SearchBar";
 import UserMenu from "./UserMenu";
+import ThemeToggle from "../common/ThemeToggle";
 
 // ==========================================
 // APP HEADER COMPONENT
@@ -17,7 +18,7 @@ const AppHeader = ({
     isLoggedIn = false,
 }) => {
     return (
-        <header className="sticky top-0 z-50 w-full border-b border-slate-100 bg-white/80 backdrop-blur-md">
+        <header className="sticky top-0 z-50 w-full border-b border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md transition-colors duration-300">
             <div
                 className="
                     mx-auto
@@ -54,18 +55,20 @@ const AppHeader = ({
                 </div>
 
                 {isOwner ? (
-                    <>
+                    <div className="flex items-center gap-3 md:gap-5 flex-1 justify-end">
                         {/* Navigation Links */}
-                        <nav className="ml-10 hidden items-center gap-8 md:flex">
+                        <nav className="ml-6 hidden items-center gap-8 md:flex">
                             <Link
                                 to="/dashboard"
                                 className="
                                     text-sm
                                     font-semibold
                                     text-slate-700
+                                    dark:text-slate-300
                                     transition-colors
                                     duration-300
                                     hover:text-slate-900
+                                    dark:hover:text-white
                                 "
                             >
                                 Home
@@ -73,16 +76,22 @@ const AppHeader = ({
                         </nav>
 
                         {/* Search Bar Bar */}
-                        <div className="mx-auto w-full max-w-xl px-6">
+                        <div className="mx-auto w-full max-w-xl px-4 hidden md:block">
                             <SearchBar />
                         </div>
 
+                        {/* Theme Toggle */}
+                        <ThemeToggle />
+
                         {/* User Menu Dropdown */}
                         <UserMenu />
-                    </>
+                    </div>
                 ) : (
                     /* Public Visitor Action Links */
-                    <div className="flex items-center gap-2 sm:gap-3 md:gap-5">
+                    <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+                        {/* Theme Toggle */}
+                        <ThemeToggle />
+
                         {/* Login Link */}
                         <Link
                             to="/login"
@@ -93,11 +102,13 @@ const AppHeader = ({
                                 text-sm
                                 font-semibold
                                 text-slate-700
+                                dark:text-slate-300
 
                                 transition-colors
                                 duration-300
 
                                 hover:text-slate-900
+                                dark:hover:text-white
 
                                 md:text-base
                             "
@@ -112,6 +123,7 @@ const AppHeader = ({
                                 rounded-full
 
                                 bg-slate-900
+                                dark:bg-slate-100
 
                                 px-4
                                 py-2.5
@@ -119,6 +131,7 @@ const AppHeader = ({
                                 text-sm
                                 font-semibold
                                 text-white
+                                dark:text-slate-900
 
                                 shadow-sm
 
@@ -127,6 +140,7 @@ const AppHeader = ({
 
                                 hover:-translate-y-0.5
                                 hover:bg-slate-800
+                                dark:hover:bg-white
                                 hover:shadow-md
 
                                 sm:px-5

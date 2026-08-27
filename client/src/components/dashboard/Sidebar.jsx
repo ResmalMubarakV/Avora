@@ -93,13 +93,13 @@ const Sidebar = ({
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-40 bg-slate-950/20 backdrop-blur-md transition-opacity duration-300"
+          className="fixed inset-0 z-40 bg-slate-950/20 dark:bg-slate-950/60 backdrop-blur-md transition-opacity duration-300"
         />
       )}
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed left-0 top-0 z-50 h-[100dvh] bg-white/90 backdrop-blur-xl border-r border-slate-200/80 shadow-[0_10px_35px_rgba(30,58,138,0.08)] transition-all duration-300 ease-in-out flex flex-col overflow-hidden ${
+        className={`fixed left-0 top-0 z-50 h-[100dvh] bg-white/90 dark:bg-slate-900/95 backdrop-blur-xl border-r border-slate-200/80 dark:border-slate-800 shadow-[0_10px_35px_rgba(30,58,138,0.08)] transition-all duration-300 ease-in-out flex flex-col overflow-hidden ${
           sidebarOpen
             ? "translate-x-0 w-72 shadow-2xl"
             : "-translate-x-full md:translate-x-0 w-20"
@@ -107,8 +107,8 @@ const Sidebar = ({
       >
         {/* Background Glass Gradient Effects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-[#FAFBFD]/80 to-[#1E3A8A]/10" />
-          <div className="absolute -right-24 top-20 h-72 w-72 rounded-full bg-[#1E3A8A]/10 blur-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-[#FAFBFD]/80 to-[#1E3A8A]/10 dark:from-slate-900/90 dark:via-slate-900/80 dark:to-indigo-950/20" />
+          <div className="absolute -right-24 top-20 h-72 w-72 rounded-full bg-[#1E3A8A]/10 dark:bg-indigo-500/10 blur-3xl" />
         </div>
 
         {/* Sidebar Inner Content */}
@@ -168,7 +168,7 @@ const Sidebar = ({
                       } ${
                         isActive && menu.title !== "Profile"
                           ? "bg-gradient-to-r from-[#1E3A8A] to-[#3559D4] text-white shadow-md shadow-[#1E3A8A]/20"
-                          : "text-slate-600 hover:bg-[#1E3A8A]/5 hover:text-[#1E3A8A]"
+                          : "text-slate-600 dark:text-slate-300 hover:bg-[#1E3A8A]/5 dark:hover:bg-slate-800 hover:text-[#1E3A8A] dark:hover:text-indigo-400"
                       }
                     `}
                   >
@@ -201,8 +201,8 @@ const Sidebar = ({
                     sidebarOpen ? "justify-between px-3.5" : "justify-center"
                   } ${
                     isSettingsActive
-                      ? "bg-slate-100 text-[#1E3A8A] font-bold"
-                      : "text-slate-600 hover:bg-[#1E3A8A]/5 hover:text-[#1E3A8A]"
+                      ? "bg-slate-100 dark:bg-slate-800 text-[#1E3A8A] dark:text-indigo-400 font-bold"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-[#1E3A8A]/5 dark:hover:bg-slate-800 hover:text-[#1E3A8A] dark:hover:text-indigo-400"
                   }`}
                 >
                   <div className={`flex items-center ${sidebarOpen ? "gap-3.5" : "justify-center w-full"}`}>
@@ -224,14 +224,14 @@ const Sidebar = ({
                 </button>
 
                 {sidebarOpen && settingsOpen && (
-                  <div className="pl-5 pt-1 space-y-1 border-l-2 border-slate-200 ml-5 my-1">
+                  <div className="pl-5 pt-1 space-y-1 border-l-2 border-slate-200 dark:border-slate-800 ml-5 my-1">
                     <button
                       type="button"
                       onClick={() => handleNavigation("/dashboard/settings/profile")}
                       className={`w-full flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-xs transition-all text-left cursor-pointer ${
                         location.pathname === "/dashboard/settings/profile" 
                           ? "bg-[#1E3A8A] text-white font-semibold" 
-                          : "text-slate-600 hover:bg-slate-100"
+                          : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                       }`}
                     >
                       <User size={15} /> Edit Profile
@@ -242,7 +242,7 @@ const Sidebar = ({
                       className={`w-full flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-xs transition-all text-left cursor-pointer ${
                         location.pathname === "/dashboard/settings/security" 
                           ? "bg-[#1E3A8A] text-white font-semibold" 
-                          : "text-slate-600 hover:bg-slate-100"
+                          : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                       }`}
                     >
                       <Lock size={15} /> Security & Password
@@ -254,14 +254,14 @@ const Sidebar = ({
           </div>
 
           {/* Logout Action Footer */}
-          <div className="px-3 pt-2 border-t border-slate-200/70 shrink-0">
+          <div className="px-3 pt-2 border-t border-slate-200/70 dark:border-slate-800 shrink-0">
             <button
               type="button"
               onClick={() => setShowLogoutModal(true)}
               title={!sidebarOpen ? "Logout" : ""}
               className={`w-full h-12 rounded-xl cursor-pointer transition-all duration-300 flex items-center ${
                 sidebarOpen ? "justify-start gap-3.5 px-3.5" : "justify-center"
-              } text-red-600 hover:bg-red-50 hover:text-red-700`}
+              } text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-700 dark:hover:text-red-300`}
             >
               <LogOut size={sidebarOpen ? 20 : 24} className="shrink-0 transition-all duration-300" />
               <span

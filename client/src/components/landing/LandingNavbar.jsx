@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Logo from "../common/Logo";
+import ThemeToggle from "../common/ThemeToggle";
 
 // ==========================================
 // LANDING NAVBAR COMPONENT
@@ -11,7 +12,7 @@ import Logo from "../common/Logo";
  */
 const Navbar = () => {
     return (
-        <nav className="sticky top-0 z-50 w-full border-b border-slate-100 bg-white/80 backdrop-blur-md">
+        <nav className="sticky top-0 z-50 w-full border-b border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md transition-colors duration-300">
             <div
                 className="
                     mx-auto
@@ -43,7 +44,10 @@ const Navbar = () => {
                 </div>
 
                 {/* Right Action Buttons Section */}
-                <div className="flex items-center gap-2 sm:gap-3 md:gap-5">
+                <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+                    {/* Theme Toggle Button */}
+                    <ThemeToggle />
+
                     {/* Login Link (Hidden on small mobile screens) */}
                     <Link
                         to="/login"
@@ -54,11 +58,13 @@ const Navbar = () => {
                             text-sm
                             font-semibold
                             text-slate-700
+                            dark:text-slate-300
 
                             transition-colors
                             duration-300
 
                             hover:text-slate-900
+                            dark:hover:text-white
 
                             md:text-base
                             cursor-pointer

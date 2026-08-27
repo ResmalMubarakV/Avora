@@ -6,6 +6,7 @@ import LogoutModal from "../navigation/LogoutModal";
 import Logo from "../common/Logo";
 import SearchBar from "../navigation/SearchBar";
 import UserMenu from "../navigation/UserMenu";
+import ThemeToggle from "../common/ThemeToggle";
 
 // ==========================================
 // NAVBAR COMPONENT
@@ -34,12 +35,12 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
 
   return (
     /* Changed overflow-x-hidden to relative overflow-visible z-40 so search results can overlap page content freely */
-    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white shrink-0 overflow-visible">
+    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shrink-0 overflow-visible transition-colors duration-300">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-2.5 sm:px-6 gap-1 relative overflow-visible">
         
         {/* Expanded Mobile Search Overlay */}
         {mobileSearchOpen ? (
-          <div className="absolute inset-0 bg-white px-3 flex items-center justify-between z-50 md:hidden w-full">
+          <div className="absolute inset-0 bg-white dark:bg-slate-900 px-3 flex items-center justify-between z-50 md:hidden w-full">
             <div className="flex-1 pr-2">
               <SearchBar />
             </div>
@@ -47,7 +48,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
               type="button"
               onClick={() => setMobileSearchOpen(false)}
               aria-label="Close search"
-              className="h-10 w-10 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 flex items-center justify-center shrink-0 cursor-pointer hover:bg-slate-100"
+              className="h-10 w-10 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 flex items-center justify-center shrink-0 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700"
             >
               <X size={20} />
             </button>
@@ -61,7 +62,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
               type="button"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               aria-label="Toggle Sidebar"
-              className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100 cursor-pointer shadow-sm md:hidden shrink-0"
+              className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 transition hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer shadow-sm md:hidden shrink-0"
             >
               <Menu size={18} />
             </button>
@@ -77,17 +78,20 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
           <SearchBar />
         </div>
 
-        {/* Right Section: Mobile Search Toggle, User Menu & Logout Button */}
+        {/* Right Section: Mobile Search Toggle, Theme Toggle, User Menu & Logout Button */}
         <div className="flex items-center justify-end gap-1.5 shrink-0">
           {/* Mobile Search Icon Button */}
           <button
             type="button"
             onClick={() => setMobileSearchOpen(true)}
             aria-label="Open search"
-            className="flex md:hidden h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 cursor-pointer shadow-sm shrink-0"
+            className="flex md:hidden h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer shadow-sm shrink-0"
           >
             <Search size={16} />
           </button>
+
+          {/* Theme Toggle Button */}
+          <ThemeToggle />
 
           <UserMenu />
 
@@ -96,7 +100,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
             type="button"
             onClick={() => setShowLogoutModal(true)}
             aria-label="Logout"
-            className="flex sm:hidden h-9 w-9 items-center justify-center rounded-xl border border-red-200 bg-white p-2 text-sm font-medium text-red-600 transition-all duration-300 hover:border-red-300 hover:bg-red-50 hover:text-red-700 cursor-pointer shadow-sm shrink-0"
+            className="flex sm:hidden h-9 w-9 items-center justify-center rounded-xl border border-red-200 bg-white dark:border-red-900/50 dark:bg-slate-900 p-2 text-sm font-medium text-red-600 dark:text-red-400 transition-all duration-300 hover:border-red-300 dark:hover:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-700 dark:hover:text-red-300 cursor-pointer shadow-sm shrink-0"
           >
             <LogOut size={15} />
           </button>
@@ -106,7 +110,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
             type="button"
             onClick={() => setShowLogoutModal(true)}
             aria-label="Logout"
-            className="hidden sm:flex h-10 items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-xs sm:text-sm font-medium text-red-600 transition-all duration-300 hover:border-red-300 hover:bg-red-50 hover:text-red-700 cursor-pointer shadow-sm shrink-0"
+            className="hidden sm:flex h-10 items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-white dark:border-red-900/50 dark:bg-slate-900 px-3 py-2 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 transition-all duration-300 hover:border-red-300 dark:hover:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-700 dark:hover:text-red-300 cursor-pointer shadow-sm shrink-0"
           >
             <LogOut size={16} />
             <span className="hidden md:inline">Logout</span>
