@@ -935,6 +935,12 @@ export default function PublicMemory() {
 
   // Default values passed to child safeimages dynamically update this based on natural proportions
   const [slotBounds, setSlotBounds] = useState({});
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
+
+  const mapEmbedUrl = useMemo(() => {
+    if (!memory?.location) return "";
+    return `https://maps.google.com/maps?q=${encodeURIComponent(memory.location)}&t=m&z=13&ie=UTF8&iwloc=&output=embed`;
+  }, [memory?.location]);
   const handleBoundsChange = useCallback((slotId, bounds) => {
     setSlotBounds(prev => {
       const key = String(slotId);
@@ -1207,13 +1213,6 @@ export default function PublicMemory() {
       </>
     );
   }
-
-  const [isMapLoaded, setIsMapLoaded] = useState(false);
-
-  const mapEmbedUrl = useMemo(() => {
-    if (!memory?.location) return "";
-    return `https://maps.google.com/maps?q=${encodeURIComponent(memory.location)}&t=m&z=13&ie=UTF8&iwloc=&output=embed`;
-  }, [memory?.location]);
 
   // STANDARD PUBLIC MEMORY VIEW
   return (
