@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Plus, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Loader2, Sparkles } from "lucide-react";
 
 import useMemories from "../../hooks/useMemories";
 import MemoriesHeader from "../../components/dashboard/memories/MemoriesHeader";
