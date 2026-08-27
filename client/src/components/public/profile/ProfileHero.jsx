@@ -113,7 +113,7 @@ const ProfileHero = ({
     const hasSocials = user?.website || user?.instagram || user?.youtube || user?.linkedin;
 
     return (
-        <section className="bg-white">
+        <section className="bg-white dark:bg-slate-950 transition-colors duration-300">
             <div className="relative h-48 sm:h-72 lg:h-[360px] overflow-hidden bg-slate-900">
                 {user?.coverImage ? (
                     <img
@@ -129,7 +129,7 @@ const ProfileHero = ({
             </div>
 
             <div className="mx-auto max-w-7xl px-4 sm:px-6">
-                <div className="relative -mt-16 sm:-mt-24 rounded-[32px] bg-gradient-to-br from-white via-slate-50/90 to-indigo-50/25 p-5 sm:p-8 lg:p-10 shadow-2xl shadow-indigo-950/[0.04] border border-slate-200/70 backdrop-blur-xl">
+                <div className="relative -mt-16 sm:-mt-24 rounded-[32px] bg-gradient-to-br from-white via-slate-50/90 to-indigo-50/25 p-5 sm:p-8 lg:p-10 shadow-2xl shadow-indigo-950/[0.04] border border-slate-200/70 backdrop-blur-xl keep-light keep-white">
                     
                     {/* Top-Right Mobile & Tablet Dropdown Menu (3 Dots) */}
                     <div className="absolute right-4 top-4 sm:right-6 sm:top-6 z-25 flex items-center gap-2 xl:hidden">

@@ -20,7 +20,7 @@ const ProfileHeader = ({ user, memoryCount }) => {
             </div>
 
             {/* Profile Details Section */}
-            <div className="max-w-5xl mx-auto px-6">
+            <div className="max-w-5xl mx-auto px-6 keep-light keep-white">
                 <div className="-mt-16 flex flex-col sm:flex-row items-start sm:items-end gap-5">
                     {/* Overlapping Profile Avatar */}
                     <div className="w-32 h-32 rounded-full border-4 border-white bg-slate-200 overflow-hidden shrink-0 shadow-md">
