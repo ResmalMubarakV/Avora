@@ -24,8 +24,8 @@ const Navbar = () => {
                     px-4
                     sm:px-6
                     lg:px-8
-                    py-4
-                    md:py-5
+                    py-5
+                    md:py-6
                 "
             >
                 {/* Brand Logo Section */}

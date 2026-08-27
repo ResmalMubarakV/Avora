@@ -9,7 +9,7 @@ import UserMenu from "../navigation/UserMenu";
 import ThemeToggle from "../common/ThemeToggle";
 
 // ==========================================
-// NAVBAR COMPONENT (PERFECTLY CENTERED SEARCHBAR DESIGN)
+// NAVBAR COMPONENT (MINIMAL MOBILE & UNTOUCHED DESKTOP)
 // ==========================================
 const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
   const navigate = useNavigate();
@@ -35,7 +35,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 dark:border-slate-800/80 dark:bg-slate-900/95 backdrop-blur-md shrink-0 overflow-visible transition-colors duration-300">
-      <div className="mx-auto flex h-16 sm:h-20 max-w-[1600px] items-center justify-between px-4 sm:px-6 lg:px-8 gap-2 relative overflow-visible">
+      <div className="mx-auto flex h-20 sm:h-24 max-w-[1600px] items-center justify-between py-3 sm:py-4 px-4 sm:px-6 lg:px-8 gap-2 relative overflow-visible">
         
         {/* Expanded Mobile Search Overlay Drawer */}
         {mobileSearchOpen && (
@@ -67,23 +67,27 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
             </button>
           )}
 
-          <div className="shrink-0">
+          {/* Mobile uses size="sm" for spacious fit; Tablet & Desktop use size="md" untouched */}
+          <div className="shrink-0 block sm:hidden">
+            <Logo to="/dashboard" size="sm" />
+          </div>
+          <div className="shrink-0 hidden sm:block">
             <Logo to="/dashboard" size="md" />
           </div>
         </div>
 
-        {/* Center Section: Dead-Centered Search Bar (Tablet & Desktop) */}
+        {/* Center Section: Dead-Centered Search Bar (Tablet & Desktop - Untouched) */}
         <div className="hidden sm:flex absolute left-1/2 -translate-x-1/2 w-full max-w-[240px] sm:max-w-xs md:max-w-md lg:max-w-lg justify-center px-2 pointer-events-none z-20 overflow-visible">
           <div className="w-full pointer-events-auto">
             <SearchBar />
           </div>
         </div>
 
-        {/* Right Section: Mobile Glassmorphic Action Bar & Desktop Action Group */}
+        {/* Right Section: Minimal Mobile Action Group & Untouched Desktop Action Group */}
         <div className="flex items-center justify-end gap-1.5 sm:gap-2.5 shrink-0 z-10">
           
-          {/* Mobile Action Pill Group (Uncluttered Glassmorphic Capsule) */}
-          <div className="flex sm:hidden items-center gap-1 border border-slate-200/60 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-800/40 p-1 rounded-2xl backdrop-blur-md">
+          {/* Minimal Mobile Action Bar (< 640px): 3 Essential Items (Search, Theme, Profile Avatar) */}
+          <div className="flex sm:hidden items-center gap-1.5 border border-slate-200/60 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-800/40 p-1 rounded-2xl backdrop-blur-md">
             {/* Mobile Search Toggle */}
             <button
               type="button"
@@ -97,21 +101,11 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
             {/* Theme Toggle */}
             <ThemeToggle />
 
-            {/* User Menu */}
+            {/* User Profile Avatar */}
             <UserMenu />
-
-            {/* Icon-only Logout */}
-            <button
-              type="button"
-              onClick={() => setShowLogoutModal(true)}
-              aria-label="Logout"
-              className="flex h-8 w-8 items-center justify-center rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 cursor-pointer transition active:scale-95"
-            >
-              <LogOut size={15} />
-            </button>
           </div>
 
-          {/* Desktop & Tablet Action Group */}
+          {/* Desktop & Tablet Action Group (Untouched) */}
           <div className="hidden sm:flex items-center gap-2">
             {/* Theme Toggle */}
             <ThemeToggle />
