@@ -1,8 +1,12 @@
 import { ArrowDownWideNarrow, Check, Calendar } from "lucide-react";
 
 // ==========================================
-// MEMORIES FILTERS COMPONENT
+// MEMORIES FILTERS COMPONENT (Single Line Horizontal Layout)
 // ==========================================
+/**
+ * Renders filter chips, year selector dropdown, and sorting dropdown
+ * guaranteed to stay strictly in a single horizontal line across all viewports.
+ */
 const MemoriesFilters = ({
   selectedFilters,
   toggleFilter,
@@ -29,11 +33,11 @@ const MemoriesFilters = ({
   ];
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white dark:bg-slate-900/90 p-3 sm:p-4 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm transition-colors">
+    <div className="flex flex-row items-center justify-between gap-2 sm:gap-3 bg-white dark:bg-slate-900/90 p-2 sm:p-3 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs overflow-x-auto whitespace-nowrap scrollbar-none transition-colors">
       
       {/* Multi-Select Filter Chips */}
-      <div className="flex items-center gap-1.5 flex-wrap">
-        <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-1">Filter:</span>
+      <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+        <span className="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-0.5 shrink-0">Filter:</span>
         {filterOptions.map((item) => {
           const isActive = selectedFilters.includes(item.value);
           return (
@@ -41,32 +45,32 @@ const MemoriesFilters = ({
               key={item.value}
               type="button"
               onClick={() => toggleFilter(item.value)}
-              className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
+              className={`inline-flex items-center gap-1 rounded-lg sm:rounded-xl px-2.5 sm:px-3.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold transition-all duration-200 cursor-pointer shrink-0 ${
                 isActive
                   ? "bg-slate-900 dark:bg-gradient-to-r dark:from-indigo-600 dark:to-blue-600 text-white shadow-sm dark:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
                   : "bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
-              {isActive && <Check size={13} className="text-blue-400 dark:text-sky-300" />}
+              {isActive && <Check size={12} className="text-blue-400 dark:text-sky-300" />}
               <span>{item.label}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Select Controls: Year & Sorting */}
-      <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full sm:w-auto">
+      {/* Select Controls: Year & Sorting (Single Horizontal Line) */}
+      <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
         {/* Year Filter Dropdown */}
         {setYear && (
-          <div className="relative w-full sm:w-auto">
+          <div className="relative inline-block shrink-0">
             <Calendar
-              size={16}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none sm:w-[17px] sm:h-[17px]"
+              size={14}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none"
             />
             <select
               value={selectedYear}
               onChange={(e) => setYear(e.target.value)}
-              className="w-full sm:min-w-[140px] appearance-none rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60 py-2 sm:py-2.5 pl-10 pr-8 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 outline-none transition-all hover:bg-slate-100 dark:hover:bg-slate-800 focus:border-slate-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-slate-100 dark:focus:ring-indigo-950/50 cursor-pointer"
+              className="appearance-none rounded-lg sm:rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60 py-1 sm:py-1.5 pl-7 pr-6 text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-200 outline-none transition-all hover:bg-slate-100 dark:hover:bg-slate-800 focus:border-slate-400 dark:focus:border-indigo-500 cursor-pointer"
             >
               {yearOptions.map((opt) => (
                 <option key={opt.value} value={opt.value} className="dark:bg-slate-900 dark:text-white">
@@ -78,16 +82,16 @@ const MemoriesFilters = ({
         )}
 
         {/* Sorting Dropdown */}
-        <div className="relative w-full sm:w-auto">
+        <div className="relative inline-block shrink-0">
           <ArrowDownWideNarrow
-            size={16}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none sm:w-[18px] sm:h-[18px]"
+            size={14}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none"
           />
 
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="w-full sm:min-w-[180px] appearance-none rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60 py-2 sm:py-2.5 pl-10 pr-8 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 outline-none transition-all hover:bg-slate-100 dark:hover:bg-slate-800 focus:border-slate-400 dark:focus:border-indigo-500 focus:ring-2 focus:ring-slate-100 dark:focus:ring-indigo-950/50 cursor-pointer"
+            className="appearance-none rounded-lg sm:rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60 py-1 sm:py-1.5 pl-7 pr-6 text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-200 outline-none transition-all hover:bg-slate-100 dark:hover:bg-slate-800 focus:border-slate-400 dark:focus:border-indigo-500 cursor-pointer"
           >
             <option value="newest" className="dark:bg-slate-900 dark:text-white">Newest First</option>
             <option value="oldest" className="dark:bg-slate-900 dark:text-white">Oldest First</option>

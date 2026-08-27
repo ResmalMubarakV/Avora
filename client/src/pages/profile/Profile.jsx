@@ -106,7 +106,7 @@ const Profile = () => {
   const isLockedForViewer = user?.isLocked && !isOwner;
 
   return (
-    <main className="min-h-screen bg-slate-50 pb-16">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-16 text-slate-900 dark:text-white transition-colors duration-300">
       <PageTitle title={user ? `${user.name} (@${user.username})` : "Travel Profile"} />
 
       {isAdminViewer ? (

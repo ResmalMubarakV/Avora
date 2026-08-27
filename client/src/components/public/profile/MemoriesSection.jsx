@@ -18,6 +18,7 @@ const MemoriesSection = ({ username, isOwner }) => {
     const sortBy = searchParams.get("sort") || "newest";
     const filterParam = searchParams.get("filter") || "";
     const search = searchParams.get("search") || "";
+    const selectedYear = searchParams.get("year") || "all";
 
     const currentFilters = filterParam ? filterParam.split(",") : [];
 
@@ -41,6 +42,7 @@ const MemoriesSection = ({ username, isOwner }) => {
                         sort: sortBy,
                         filter: filterParam,
                         search: search,
+                        year: selectedYear,
                     }
                 });
 
@@ -62,7 +64,7 @@ const MemoriesSection = ({ username, isOwner }) => {
         return () => {
             isMounted = false;
         };
-    }, [username, currentPage, sortBy, filterParam, search]);
+    }, [username, currentPage, sortBy, filterParam, search, selectedYear]);
 
     const toggleFilter = (filterValue) => {
         const updatedFilters = currentFilters.includes(filterValue)
@@ -73,6 +75,16 @@ const MemoriesSection = ({ username, isOwner }) => {
             searchParams.set("filter", updatedFilters.join(","));
         } else {
             searchParams.delete("filter");
+        }
+        searchParams.delete("page");
+        setSearchParams(searchParams, { replace: true });
+    };
+
+    const handleYearChange = (newYear) => {
+        if (newYear && newYear !== "all") {
+            searchParams.set("year", newYear);
+        } else {
+            searchParams.delete("year");
         }
         searchParams.delete("page");
         setSearchParams(searchParams, { replace: true });
@@ -223,6 +235,8 @@ const MemoriesSection = ({ username, isOwner }) => {
                 isOwner={isOwner}
                 selectedFilters={currentFilters}
                 toggleFilter={toggleFilter}
+                selectedYear={selectedYear}
+                setYear={handleYearChange}
                 viewMode={viewMode}
                 setViewMode={setViewMode}
             />

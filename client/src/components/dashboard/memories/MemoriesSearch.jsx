@@ -25,7 +25,7 @@ const MemoriesSearch = ({
       {/* Search Icon */}
       <Search
         size={20}
-        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
       />
 
       {/* Search Input Field */}
@@ -34,7 +34,7 @@ const MemoriesSearch = ({
         value={value}
         onChange={onChange}
         placeholder="Search by title or destination..."
-        className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-12 pr-12 text-base text-slate-800 placeholder:text-slate-400 shadow-sm outline-none transition-all duration-300 focus:border-[#3559D4] focus:ring-4 focus:ring-blue-100"
+        className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 py-3.5 pl-12 pr-12 text-base text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-sm outline-none transition-all duration-300 focus:border-[#3559D4] dark:focus:border-indigo-500 focus:ring-4 focus:ring-blue-100 dark:focus:ring-indigo-950/50"
       />
 
       {/* Clear (X) Button */}
@@ -42,7 +42,7 @@ const MemoriesSearch = ({
         <button
           type="button"
           onClick={handleClear}
-          className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+          className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 dark:text-slate-500 transition hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300"
         >
           <X size={18} />
         </button>

@@ -49,6 +49,7 @@ const getPublicProfile = async (req, res) => {
     const sortBy = req.query.sort || "newest";
     const filterQuery = req.query.filter || "";
     const search = req.query.search || "";
+    const yearParam = req.query.year || "";
     const skip = (page - 1) * limit;
 
     const user = await User.findOne({
@@ -100,6 +101,20 @@ const getPublicProfile = async (req, res) => {
             Object.assign(query, conditions[0]);
           } else if (conditions.length > 1) {
             query.$and = conditions;
+          }
+        }
+      }
+
+      // Year-based filtering for public profiles
+      if (yearParam && yearParam !== "all") {
+        if (yearParam === "older") {
+          query.startDate = { $lt: new Date("2020-01-01T00:00:00.000Z") };
+        } else {
+          const numericYear = parseInt(yearParam);
+          if (!isNaN(numericYear)) {
+            const startOfYear = new Date(`${numericYear}-01-01T00:00:00.000Z`);
+            const endOfYear = new Date(`${numericYear}-12-31T23:59:59.999Z`);
+            query.startDate = { $gte: startOfYear, $lte: endOfYear };
           }
         }
       }

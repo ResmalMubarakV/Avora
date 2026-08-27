@@ -113,8 +113,8 @@ const ProfileHero = ({
     const hasSocials = user?.website || user?.instagram || user?.youtube || user?.linkedin;
 
     return (
-        <section className="bg-white dark:bg-slate-950 transition-colors duration-300">
-            <div className="relative h-48 sm:h-72 lg:h-[360px] overflow-hidden bg-slate-900">
+        <section className="w-full bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+            <div className="relative h-48 sm:h-72 lg:h-[360px] overflow-hidden bg-slate-900 dark:bg-slate-950">
                 {user?.coverImage ? (
                     <img
                         src={user.coverImage}
@@ -129,7 +129,7 @@ const ProfileHero = ({
             </div>
 
             <div className="mx-auto max-w-7xl px-4 sm:px-6">
-                <div className="relative -mt-16 sm:-mt-24 rounded-[32px] bg-gradient-to-br from-white via-slate-50/90 to-indigo-50/25 dark:from-slate-900 dark:via-slate-900/95 dark:to-indigo-950/40 p-5 sm:p-8 lg:p-10 shadow-2xl shadow-indigo-950/[0.04] dark:shadow-[0_15px_40px_rgba(0,0,0,0.5)] border border-slate-200/70 dark:border-slate-800 backdrop-blur-xl transition-colors duration-300">
+                <div className="relative -mt-16 sm:-mt-24 rounded-[32px] bg-white/95 dark:bg-slate-900/95 p-5 sm:p-8 lg:p-10 shadow-xl shadow-slate-900/5 dark:shadow-[0_15px_45px_rgba(0,0,0,0.6)] border border-slate-200/90 dark:border-slate-800 ring-1 ring-slate-900/5 dark:ring-white/10 backdrop-blur-xl transition-colors duration-300">
                     
                     {/* Top-Right Mobile & Tablet Dropdown Menu (3 Dots) */}
                     <div className="absolute right-4 top-4 sm:right-6 sm:top-6 z-25 flex items-center gap-2 xl:hidden">
@@ -287,10 +287,10 @@ const ProfileHero = ({
 
                     <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start text-center sm:text-left w-full">
                         
-                        {/* Avatar with Subtle Gradient Glow Ring */}
+                        {/* Avatar with Mild Blue/Indigo Glow Highlight */}
                         <div className="relative -mt-20 sm:-mt-28 shrink-0">
-                            <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-blue-600/30 via-indigo-500/30 to-sky-400/30 opacity-30 dark:opacity-40 blur-sm pointer-events-none"></div>
-                            <div className="relative h-32 w-32 sm:h-44 sm:w-44 overflow-hidden rounded-full border-4 sm:border-[6px] border-white dark:border-indigo-500/60 dark:ring-2 dark:ring-indigo-500/20 bg-slate-200 dark:bg-slate-800 shadow-xl dark:shadow-[0_0_18px_rgba(99,102,241,0.2)] transition-all duration-300">
+                            <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-blue-500/30 via-sky-400/20 to-indigo-500/30 opacity-40 dark:opacity-50 blur-md pointer-events-none"></div>
+                            <div className="relative h-32 w-32 sm:h-44 sm:w-44 overflow-hidden rounded-full border-4 sm:border-[6px] border-white dark:border-slate-800 dark:ring-2 dark:ring-blue-500/30 bg-slate-200 dark:bg-slate-800 shadow-xl dark:shadow-[0_0_22px_rgba(53,89,212,0.25)] transition-all duration-300">
                                 {user?.profileImage ? (
                                     <img
                                         src={user.profileImage}

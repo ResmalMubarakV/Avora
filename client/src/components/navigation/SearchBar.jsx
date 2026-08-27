@@ -99,7 +99,9 @@ const SearchBar = () => {
                         rounded-full
                         border
                         border-slate-200
+                        dark:border-slate-800
                         bg-slate-50
+                        dark:bg-slate-900/90
                         pl-12
                         pr-10
                         sm:pl-14
@@ -107,14 +109,19 @@ const SearchBar = () => {
                         text-xs
                         sm:text-sm
                         text-slate-700
+                        dark:text-slate-100
                         outline-none
                         transition-all
                         duration-200
                         placeholder:text-slate-400
+                        dark:placeholder:text-slate-500
                         focus:border-slate-400
+                        dark:focus:border-indigo-500
                         focus:bg-white
+                        dark:focus:bg-slate-900
                         focus:ring-4
                         focus:ring-slate-100
+                        dark:focus:ring-indigo-950/50
                     "
                 />
 
@@ -134,9 +141,12 @@ const SearchBar = () => {
                             cursor-pointer
                             p-1
                             text-slate-400
+                            dark:text-slate-500
                             transition
                             hover:bg-slate-200
+                            dark:hover:bg-slate-800
                             hover:text-slate-700
+                            dark:hover:text-slate-200
                         "
                     >
                         ✕

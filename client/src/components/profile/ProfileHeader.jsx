@@ -23,7 +23,7 @@ const ProfileHeader = ({ user, memoryCount }) => {
             <div className="max-w-5xl mx-auto px-6">
                 <div className="-mt-16 flex flex-col sm:flex-row items-start sm:items-end gap-5">
                     {/* Overlapping Profile Avatar */}
-                    <div className="w-32 h-32 rounded-full border-4 border-white dark:border-indigo-500/60 dark:ring-2 dark:ring-indigo-500/20 bg-slate-200 dark:bg-slate-800 overflow-hidden shrink-0 shadow-md dark:shadow-[0_0_18px_rgba(99,102,241,0.2)] transition-all duration-300">
+                    <div className="w-32 h-32 rounded-full border-4 border-white dark:border-slate-800 dark:ring-2 dark:ring-blue-500/30 bg-slate-200 dark:bg-slate-800 overflow-hidden shrink-0 shadow-md dark:shadow-[0_0_22px_rgba(53,89,212,0.25)] transition-all duration-300">
                         {user.profileImage ? (
                             <img
                                 src={user.profileImage}
