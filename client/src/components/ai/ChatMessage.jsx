@@ -12,7 +12,7 @@ import MarkdownRenderer from "./MarkdownRenderer";
 import SuggestionChips from "./SuggestionChips";
 
 // ==========================================
-// CHAT MESSAGE COMPONENT
+// CHAT MESSAGE COMPONENT (RESPONSIVE OPTIMIZED)
 // ==========================================
 /**
  * Renders individual chat message bubble with distinct user vs assistant styling,
@@ -50,9 +50,9 @@ const ChatMessage = ({
   if (isUser) {
     return (
       <div className="flex justify-end">
-        <div className="max-w-xl sm:max-w-2xl rounded-3xl rounded-br-sm bg-gradient-to-r from-[#3559D4] to-[#1E3A8A] px-5 py-4 sm:px-6 sm:py-4 text-white shadow-lg shadow-blue-500/10">
-          <p className="whitespace-pre-wrap text-[15px] leading-relaxed">{content}</p>
-          <p className="mt-2 text-[11px] text-blue-100/80 text-right">
+        <div className="max-w-[85%] sm:max-w-2xl rounded-2xl sm:rounded-3xl rounded-br-xs sm:rounded-br-sm bg-gradient-to-r from-[#3559D4] to-[#1E3A8A] px-3.5 py-2.5 sm:px-6 sm:py-4 text-white shadow-md shadow-blue-500/10">
+          <p className="whitespace-pre-wrap text-xs sm:text-[15px] leading-relaxed font-medium">{content}</p>
+          <p className="mt-1 sm:mt-2 text-[9px] sm:text-[11px] text-blue-100/80 text-right">
             {formattedTime}
           </p>
         </div>
@@ -64,43 +64,45 @@ const ChatMessage = ({
   // ASSISTANT MESSAGE BUBBLE
   // ==========================================
   return (
-    <div className="flex items-start gap-3.5 sm:gap-4">
+    <div className="flex items-start gap-2.5 sm:gap-4">
       {/* AI Bot Avatar */}
-      <div className="relative flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#3559D4] to-[#1E3A8A] text-white shadow-md shadow-blue-500/20">
-        <Bot size={20} className="sm:w-[22px] sm:h-[22px]" />
-        <span className="absolute -right-1 -top-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-white text-[#3559D4] shadow-sm">
-          <Sparkles size={10} />
+      <div className="relative flex h-8 w-8 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#3559D4] to-[#1E3A8A] text-white shadow-md shadow-blue-500/20 mt-1">
+        <Bot size={16} className="sm:w-[22px] sm:h-[22px]" />
+        <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-white dark:bg-slate-900 text-[#3559D4] dark:text-indigo-400 shadow-2xs">
+          <Sparkles size={8} className="sm:w-[10px] sm:h-[10px]" />
         </span>
       </div>
 
       {/* Message Content & Actions */}
-      <div className="flex-1 overflow-hidden">
-        <div className="mb-1.5 text-xs sm:text-sm font-bold text-slate-900">Avora AI</div>
+      <div className="flex-1 overflow-hidden min-w-0">
+        <div className="mb-1 text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Avora AI</div>
 
-        <div className="rounded-3xl rounded-tl-sm border border-slate-200/80 bg-white p-5 sm:p-6 shadow-sm">
+        <div className="rounded-2xl sm:rounded-3xl rounded-tl-xs sm:rounded-tl-sm border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-3.5 sm:p-6 shadow-2xs transition-colors">
           <MarkdownRenderer content={content} />
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 px-1">
-          <p className="text-[11px] text-slate-400">{formattedTime}</p>
+        <div className="mt-1.5 flex flex-wrap items-center justify-between gap-1.5 px-0.5">
+          <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 font-medium">{formattedTime}</p>
 
           {/* Action Buttons Toolbar */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
+              type="button"
               onClick={copyMessage}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 cursor-pointer shadow-sm"
+              className="inline-flex items-center gap-1 rounded-lg sm:rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/80 dark:bg-slate-800/80 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-slate-600 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white cursor-pointer shadow-2xs active:scale-95"
             >
-              {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
-              {copied ? "Copied" : "Copy"}
+              {copied ? <Check size={12} className="text-emerald-600 dark:text-emerald-400" /> : <Copy size={12} />}
+              <span>{copied ? "Copied" : "Copy"}</span>
             </button>
 
             {isLastAssistantMessage && (
               <button
+                type="button"
                 onClick={onRegenerate}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 cursor-pointer shadow-sm"
+                className="inline-flex items-center gap-1 rounded-lg sm:rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/80 dark:bg-slate-800/80 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-slate-600 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white cursor-pointer shadow-2xs active:scale-95"
               >
-                <RotateCcw size={14} />
-                Regenerate
+                <RotateCcw size={12} />
+                <span>Retry</span>
               </button>
             )}
           </div>
