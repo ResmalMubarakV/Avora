@@ -9,7 +9,7 @@ import UserMenu from "../navigation/UserMenu";
 import ThemeToggle from "../common/ThemeToggle";
 
 // ==========================================
-// NAVBAR COMPONENT (ULTRA-ELITE RESPONSIVE DESIGN)
+// NAVBAR COMPONENT (PERFECTLY CENTERED SEARCHBAR DESIGN)
 // ==========================================
 const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
   const navigate = useNavigate();
@@ -39,7 +39,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
         
         {/* Expanded Mobile Search Overlay Drawer */}
         {mobileSearchOpen && (
-          <div className="absolute inset-0 bg-white/95 dark:bg-slate-900/95 px-3.5 flex items-center justify-between z-50 md:hidden w-full backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="absolute inset-0 bg-white/95 dark:bg-slate-900/95 px-3.5 flex items-center justify-between z-50 sm:hidden w-full backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="flex-1 pr-2">
               <SearchBar />
             </div>
@@ -55,7 +55,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
         )}
 
         {/* Left Section: Mobile Hamburger Menu & Brand Logo */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0 z-10">
           {!hideHamburger && (
             <button
               type="button"
@@ -68,17 +68,19 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
           )}
 
           <div className="shrink-0">
-            <Logo to="/dashboard" size="sm" />
+            <Logo to="/dashboard" size="md" />
           </div>
         </div>
 
-        {/* Center Section: Search Bar Container (Desktop & Tablet) */}
-        <div className="hidden md:flex flex-1 max-w-md lg:max-xl:max-w-xs justify-center px-2 relative overflow-visible">
-          <SearchBar />
+        {/* Center Section: Dead-Centered Search Bar (Tablet & Desktop) */}
+        <div className="hidden sm:flex absolute left-1/2 -translate-x-1/2 w-full max-w-[240px] sm:max-w-xs md:max-w-md lg:max-w-lg justify-center px-2 pointer-events-none z-20 overflow-visible">
+          <div className="w-full pointer-events-auto">
+            <SearchBar />
+          </div>
         </div>
 
         {/* Right Section: Mobile Glassmorphic Action Bar & Desktop Action Group */}
-        <div className="flex items-center justify-end gap-1.5 sm:gap-2.5 shrink-0">
+        <div className="flex items-center justify-end gap-1.5 sm:gap-2.5 shrink-0 z-10">
           
           {/* Mobile Action Pill Group (Uncluttered Glassmorphic Capsule) */}
           <div className="flex sm:hidden items-center gap-1 border border-slate-200/60 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-800/40 p-1 rounded-2xl backdrop-blur-md">

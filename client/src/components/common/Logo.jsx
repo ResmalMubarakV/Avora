@@ -3,30 +3,30 @@ import avoraLogo from "../../assets/images/avoraLogo.png";
 import avoraLogoDark from "../../assets/images/avoraLogoDark.png";
 
 // ==========================================
-// UNIFORM LOGO COMPONENT (PROPORTIONAL SCALE)
+// UNIFORM LOGO COMPONENT (PROPORTIONAL NAVBAR HEIGHT SCALE)
 // ==========================================
 /**
  * Renders the Avora brand logo with configurable size variants (sm, md, lg) 
  * and optional navigation link destination. Guarantees 100% identical size matching
- * between Light and Dark mode logo variants with enhanced visual presence.
+ * between Light and Dark mode logo variants, scaled to match navbar height.
  */
 const Logo = ({ to = "/", size = "md", className = "" }) => {
   // Size configuration map
   const sizes = {
     sm: {
-      box: "h-8 w-8 sm:h-9 sm:w-9",
-      text: "text-lg sm:text-xl tracking-[0.14em]",
-      gap: "gap-2",
-    },
-    md: {
-      box: "h-10 w-10 sm:h-12 sm:w-12",
-      text: "text-xl sm:text-2xl lg:text-3xl tracking-[0.15em]",
+      box: "h-9 w-9 sm:h-11 sm:w-11",
+      text: "text-xl sm:text-2xl lg:text-[26px] tracking-[0.14em]",
       gap: "gap-2.5",
     },
-    lg: {
-      box: "h-12 w-12 sm:h-15 sm:w-15",
-      text: "text-2xl sm:text-3xl lg:text-[40px] tracking-[0.16em]",
+    md: {
+      box: "h-11 w-11 sm:h-14 sm:w-14",
+      text: "text-2xl sm:text-3xl lg:text-[34px] tracking-[0.15em]",
       gap: "gap-3",
+    },
+    lg: {
+      box: "h-13 w-13 sm:h-16 sm:w-16",
+      text: "text-3xl sm:text-4xl lg:text-[42px] tracking-[0.16em]",
+      gap: "gap-3.5",
     },
   };
 
