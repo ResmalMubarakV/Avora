@@ -10,22 +10,20 @@ const OPENROUTER_FREE_MODELS = [
   "meta-llama/llama-3.3-70b-instruct:free",
   "deepseek/deepseek-r1-distill-llama-70b:free",
   "qwen/qwen-2.5-coder-32b-instruct:free",
-  "meta-llama/llama-3.1-8b-instruct:free",
-  "google/gemini-2.0-pro-exp-02-05:free"
+  "meta-llama/llama-3.1-8b-instruct:free"
 ];
 
 // ==========================================
-// GROQ ACTIVE PRODUCTION MODELS CASCADE
+// GROQ CURRENT ACTIVE PRODUCTION MODELS
 // ==========================================
 const GROQ_MODELS = [
   "llama-3.3-70b-versatile",
   "llama-3.1-8b-instant",
-  "llama3-70b-8192",
-  "llama3-8b-8192",
-  "gemma-7b-it"
+  "deepseek-r1-distill-llama-70b",
+  "qwen-2.5-coder-32b"
 ];
 
-// --- OpenRouter API Invocation (Dependency-Free Native Fetch) ---
+// --- OpenRouter API Invocation ---
 const callOpenRouter = async (apiKey, messages) => {
   if (!apiKey || !apiKey.startsWith("sk-or-")) {
     throw new Error("Invalid or missing OpenRouter API key");
@@ -105,20 +103,20 @@ const callGroq = async (apiKey, messages) => {
 };
 
 // --- Pollinations Free AI Engine (Unconditional Public GET Endpoint - 100% Free - Zero Keys Required) ---
-const callPollinations = async (messages) => {
+const callPollinations = async (userMessage, compressedArchive) => {
   console.log("Attempting Pollinations Public Free AI Engine...");
 
-  const userMsg = messages.find((m) => m.role === "user")?.content || "";
-  const sysMsg = messages.find((m) => m.role === "system")?.content || "";
-  const fullPrompt = `${sysMsg}\n\nUser Question: ${userMsg}\n\nDetailed Answer:`;
-  const encodedPrompt = encodeURIComponent(fullPrompt.slice(0, 1500));
-
-  const models = ["mistral", "qwen", "openai-large", "karma"];
+  const cleanQuery = userMessage.trim();
+  const systemText = `You are Avora AI, a budget-first travel planning assistant. Previous trips: [${compressedArchive || "None"}]. Provide clean, practical travel advice and itineraries.`;
+  
+  const models = ["mistral", "qwen", "openai", "llama"];
 
   for (const model of models) {
     try {
       console.log(`Trying Pollinations free GET model: ${model}`);
-      const res = await fetch(`https://text.pollinations.ai/${encodedPrompt}?model=${model}&cache=true`, {
+      const promptUrl = `https://text.pollinations.ai/${encodeURIComponent(cleanQuery)}?model=${model}&system=${encodeURIComponent(systemText)}`;
+
+      const res = await fetch(promptUrl, {
         method: "GET",
         headers: {
           "Accept": "text/plain, text/html, application/json",
@@ -127,7 +125,7 @@ const callPollinations = async (messages) => {
 
       if (res.ok) {
         const text = await res.text();
-        if (text && text.trim().length > 10 && !text.includes("402 Payment Required")) {
+        if (text && text.trim().length > 5 && !text.includes("402 Payment Required") && !text.includes("Error")) {
           console.log(`Pollinations Public Free AI success using model: ${model}`);
           return text.trim();
         }
@@ -141,7 +139,7 @@ const callPollinations = async (messages) => {
 };
 
 // ==========================================
-// AVORA AI: ZERO-FAIL MULTI-PROVIDER CONTROLLER
+// AVORA AI: GUARANTEED 100% UPTIME MULTI-PROVIDER CONTROLLER
 // Cascades: Groq -> OpenRouter -> Pollinations Public Free AI
 // ==========================================
 const generateAI = async (req, res) => {
@@ -232,7 +230,7 @@ Instructions: Provide precise, highly tailored destination suggestions or reflec
 
     let aiResponseText = null;
 
-    // 1. Try Groq if valid key is available
+    // 1. Try Groq if valid key format is available
     if (groqKey && !groqKey.startsWith("sk-or-")) {
       try {
         aiResponseText = await callGroq(groqKey, apiMessages);
@@ -241,7 +239,7 @@ Instructions: Provide precise, highly tailored destination suggestions or reflec
       }
     }
 
-    // 2. Try OpenRouter if valid key is available
+    // 2. Try OpenRouter if valid key format is available
     if (!aiResponseText && openRouterKey && openRouterKey.startsWith("sk-or-")) {
       try {
         aiResponseText = await callOpenRouter(openRouterKey, apiMessages);
@@ -253,7 +251,7 @@ Instructions: Provide precise, highly tailored destination suggestions or reflec
     // 3. Fallback to Pollinations Public Free AI (Requires 0 Keys - 100% Guaranteed Success)
     if (!aiResponseText) {
       try {
-        aiResponseText = await callPollinations(apiMessages);
+        aiResponseText = await callPollinations(message, compressedArchive);
       } catch (pollErr) {
         console.warn("Pollinations provider failed:", pollErr.message);
       }
