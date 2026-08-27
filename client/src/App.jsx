@@ -40,6 +40,8 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import Forbidden from "./pages/errors/Forbidden";
 import NotFound from "./pages/errors/NotFound";
 
+import OfflineBanner from "./components/common/OfflineBanner";
+
 // ==========================================
 // APP ROUTING CONFIGURATION
 // ==========================================
@@ -67,57 +69,60 @@ function App() {
   }, []);
 
   return (
-    <Routes>
-      {/* ========================================== */}
-      {/* 1. STATIC PUBLIC & AUTH ROUTES (Must be first) */}
-      {/* ========================================== */}
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password/:token" element={<ResetPassword />} />
-      <Route path="/pending-approval" element={<PendingApproval />} />
-      <Route path="/suspended" element={<Suspended />} />
-      <Route path="/admin/login" element={<AdminLogin />} />
+    <>
+      <OfflineBanner />
+      <Routes>
+        {/* ========================================== */}
+        {/* 1. STATIC PUBLIC & AUTH ROUTES (Must be first) */}
+        {/* ========================================== */}
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/pending-approval" element={<PendingApproval />} />
+        <Route path="/suspended" element={<Suspended />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
 
-      {/* ========================================== */}
-      {/* 2. PROTECTED DASHBOARD ROUTES */}
-      {/* ========================================== */}
-      <Route element={<ProtectedRoute />}>
-        <Route element={<DashboardLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/memories" element={<AllMemories />} />
-          <Route path="/dashboard/create-memory" element={<CreateMemory />} />
-          <Route path="/dashboard/edit-memory/:id" element={<EditMemory />} />
-          <Route path="/dashboard/settings/profile" element={<EditProfile />} />
-          <Route path="/dashboard/settings/security" element={<SecuritySettings />} />
-          <Route path="/dashboard/ai" element={<AI />} />
+        {/* ========================================== */}
+        {/* 2. PROTECTED DASHBOARD ROUTES */}
+        {/* ========================================== */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<DashboardLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard/memories" element={<AllMemories />} />
+            <Route path="/dashboard/create-memory" element={<CreateMemory />} />
+            <Route path="/dashboard/edit-memory/:id" element={<EditMemory />} />
+            <Route path="/dashboard/settings/profile" element={<EditProfile />} />
+            <Route path="/dashboard/settings/security" element={<SecuritySettings />} />
+            <Route path="/dashboard/ai" element={<AI />} />
+          </Route>
         </Route>
-      </Route>
 
-      {/* ========================================== */}
-      {/* 3. PROTECTED ADMIN ROUTES */}
-      {/* ========================================== */}
-      <Route element={<AdminRoute />}>
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="memories" element={<AdminMemories />} />
-          <Route path="settings" element={<AdminSettings />} />
+        {/* ========================================== */}
+        {/* 3. PROTECTED ADMIN ROUTES */}
+        {/* ========================================== */}
+        <Route element={<AdminRoute />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="memories" element={<AdminMemories />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
         </Route>
-      </Route>
 
-      {/* ========================================== */}
-      {/* 4. DYNAMIC PROFILE & PUBLIC MEMORY ROUTES (Reverted to root /) */}
-      {/* ========================================== */}
-      <Route path="/:username" element={<Profile />} />
-      <Route path="/:username/:slug" element={<PublicMemory />} />
+        {/* ========================================== */}
+        {/* 4. DYNAMIC PROFILE & PUBLIC MEMORY ROUTES (Reverted to root /) */}
+        {/* ========================================== */}
+        <Route path="/:username" element={<Profile />} />
+        <Route path="/:username/:slug" element={<PublicMemory />} />
 
-      {/* Error Routes */}
-      <Route path="/403" element={<Forbidden />} />
-      <Route path="/404" element={<NotFound />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        {/* Error Routes */}
+        <Route path="/403" element={<Forbidden />} />
+        <Route path="/404" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
   );
 }
 

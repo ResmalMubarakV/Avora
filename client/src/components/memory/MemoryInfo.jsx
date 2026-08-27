@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import api from "../../api/axios";
+import DestinationGuideCard from "../common/DestinationGuideCard";
+import WeatherComparisonCard from "./WeatherComparisonCard";
 
 // ==========================================
 // MEMORY INFO COMPONENT
@@ -113,7 +115,7 @@ const MemoryInfo = ({ memory, isOwner = false, isLoggedIn = false }) => {
             <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-5">
                 {/* Destination Location */}
                 <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-sky-100 dark:bg-sky-950/80 text-sky-600 dark:text-sky-400 border border-transparent dark:border-sky-800/50 shadow-2xs">
+                    <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-slate-800/90 text-[#1E3A8A] dark:text-indigo-400 border border-blue-100/60 dark:border-slate-700/80 shadow-2xs">
                         <MapPin size={16} className="sm:w-[18px] sm:h-[18px]" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -124,7 +126,7 @@ const MemoryInfo = ({ memory, isOwner = false, isLoggedIn = false }) => {
 
                 {/* Travel Dates */}
                 <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-sky-100 dark:bg-sky-950/80 text-sky-600 dark:text-sky-400 border border-transparent dark:border-sky-800/50 shadow-2xs">
+                    <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-slate-800/90 text-[#1E3A8A] dark:text-indigo-400 border border-blue-100/60 dark:border-slate-700/80 shadow-2xs">
                         <CalendarDays size={16} className="sm:w-[18px] sm:h-[18px]" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -135,7 +137,7 @@ const MemoryInfo = ({ memory, isOwner = false, isLoggedIn = false }) => {
 
                 {/* Mode of Travel */}
                 <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-sky-100 dark:bg-sky-950/80 text-sky-600 dark:text-sky-400 border border-transparent dark:border-sky-800/50 shadow-2xs">
+                    <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-slate-800/90 text-[#1E3A8A] dark:text-indigo-400 border border-blue-100/60 dark:border-slate-700/80 shadow-2xs">
                         <TravelIcon size={16} className="sm:w-[18px] sm:h-[18px]" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -143,6 +145,16 @@ const MemoryInfo = ({ memory, isOwner = false, isLoggedIn = false }) => {
                         <p className="mt-0.5 text-xs sm:text-base font-semibold capitalize text-slate-900 dark:text-slate-100 truncate">{memory.modeOfTravel}</p>
                     </div>
                 </div>
+
+                {/* Destination Etiquette & Emergency Guide */}
+                {memory.location && (
+                  <DestinationGuideCard location={memory.location} className="mt-4" />
+                )}
+
+                {/* Destination Weather Comparison (Historical Travel Date vs Live Today) */}
+                {memory.location && (
+                  <WeatherComparisonCard location={memory.location} startDate={memory.startDate} className="mt-3" />
+                )}
             </div>
           </div>
 

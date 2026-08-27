@@ -79,17 +79,20 @@ const Navbar = () => {
                         className="
                             rounded-full
                             bg-slate-900
+                            dark:bg-gradient-to-r
+                            dark:from-indigo-600
+                            dark:to-blue-600
                             px-4
                             py-2.5
                             text-sm
                             font-semibold
                             text-white
                             shadow-sm
+                            dark:shadow-[0_0_15px_rgba(99,102,241,0.3)]
                             transition-all
                             duration-300
                             hover:-translate-y-0.5
                             hover:bg-slate-800
-                            hover:shadow-md
                             sm:hidden
                             cursor-pointer
                         "
@@ -104,17 +107,20 @@ const Navbar = () => {
                             hidden
                             sm:rounded-full
                             sm:bg-slate-900
+                            dark:sm:bg-gradient-to-r
+                            dark:sm:from-indigo-600
+                            dark:sm:to-blue-600
                             sm:px-5
                             sm:py-2.5
                             sm:text-sm
                             sm:font-semibold
                             sm:text-white
                             sm:shadow-sm
+                            dark:sm:shadow-[0_0_20px_rgba(99,102,241,0.35)]
                             sm:transition-all
                             sm:duration-300
                             sm:hover:-translate-y-0.5
                             sm:hover:bg-slate-800
-                            sm:hover:shadow-md
                             md:px-6
                             md:py-3
                             md:text-base

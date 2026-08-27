@@ -98,19 +98,19 @@ const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false,
                 overflow-visible
                 rounded-[28px]
                 border
-                border-slate-200/90
+                border-slate-200/80
                 dark:border-slate-800
                 bg-white
                 dark:bg-slate-900/95
-                shadow-[0_4px_20px_rgba(30,58,138,0.05)]
+                shadow-[0_2px_12px_rgba(30,58,138,0.04)]
                 dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)]
                 transition-all
                 duration-300
-                hover:-translate-y-1.5
-                hover:border-[#3559D4]
-                dark:hover:border-indigo-500
-                hover:shadow-[0_12px_32px_rgba(53,89,212,0.16)]
-                dark:hover:shadow-[0_0_28px_rgba(99,102,241,0.3)]
+                hover:-translate-y-1
+                hover:border-slate-300
+                dark:hover:border-indigo-500/80
+                hover:shadow-[0_8px_25px_rgba(30,58,138,0.08)]
+                dark:hover:shadow-[0_0_25px_rgba(99,102,241,0.25)]
             "
         >
             {/* Cover Image & Badges Container */}

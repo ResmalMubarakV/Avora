@@ -1208,41 +1208,68 @@ export default function PublicMemory() {
     );
   }
 
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
+
+  const mapEmbedUrl = useMemo(() => {
+    if (!memory?.location) return "";
+    return `https://maps.google.com/maps?q=${encodeURIComponent(memory.location)}&t=m&z=13&ie=UTF8&iwloc=&output=embed`;
+  }, [memory?.location]);
+
   // STANDARD PUBLIC MEMORY VIEW
   return (
-    <main className="print:hidden min-h-screen bg-slate-50 pb-16 relative z-10">
+    <main className="print:hidden min-h-screen bg-slate-50 dark:bg-slate-950 pb-16 relative z-10 transition-colors duration-300">
       <PageTitle title={memory.title} />
       {isAdminViewer ? (
-        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/90 px-3 sm:px-6 py-2.5 sm:py-3.5 backdrop-blur-md shadow-xs gap-2">
-          <button type="button" onClick={() => navigate("/admin", { replace: true })} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-slate-700 shadow-xs transition hover:bg-slate-50 cursor-pointer active:scale-95 shrink-0"><ArrowLeft size={14} className="sm:w-[15px] sm:h-[15px]" /><span className="hidden xs:inline sm:inline">Back to Admin Panel</span><span className="inline xs:hidden sm:hidden">Back</span></button>
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-2.5 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold text-purple-700 shadow-xs truncate"><Shield size={12} className="sm:w-[13px] sm:h-[13px] shrink-0" /><span className="truncate">Admin Inspection Mode</span></div>
+        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 px-3 sm:px-6 py-2.5 sm:py-3.5 backdrop-blur-md shadow-xs gap-2">
+          <button type="button" onClick={() => navigate("/admin", { replace: true })} className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-200 shadow-xs transition hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer active:scale-95 shrink-0"><ArrowLeft size={14} className="sm:w-[15px] sm:h-[15px]" /><span className="hidden xs:inline sm:inline">Back to Admin Panel</span><span className="inline xs:hidden sm:hidden">Back</span></button>
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/60 px-2.5 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold text-purple-700 dark:text-purple-300 shadow-xs truncate"><Shield size={12} className="sm:w-[13px] sm:h-[13px] shrink-0" /><span className="truncate">Admin Inspection Mode</span></div>
         </header>
       ) : isOwner ? ( <Navbar /> ) : ( <AppHeader isOwner={false} isLoggedIn={!!currentUser} /> )}
 
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none z-0"><div className="absolute inset-x-0 top-0 h-[380px] bg-gradient-to-b from-sky-100/60 via-blue-50/30 to-transparent" /></div>
+        <div className="absolute inset-0 pointer-events-none z-0"><div className="absolute inset-x-0 top-0 h-[380px] bg-gradient-to-b from-sky-100/60 via-blue-50/30 to-transparent dark:from-indigo-950/40 dark:via-blue-950/20 dark:to-transparent" /></div>
         <div className="relative z-10 mx-auto max-w-[1500px] px-5 sm:px-8 lg:px-10 xl:px-14 pt-8 lg:pt-12 pb-12">
           <MemoryHero memory={memory} username={username} openGallery={openGallery} isOwner={isOwner} locationState={location.state} onDownloadClick={enterPreviewMode} />
         </div>
       </section>
 
       <section className="relative z-10 mx-auto max-w-[1500px] px-5 sm:px-8 lg:px-10 xl:px-14 pb-24">
-        <div className="relative overflow-hidden rounded-[36px] border border-slate-200/80 bg-white shadow-xl shadow-sky-950/[0.03] p-6 sm:p-14">
+        <div className="relative overflow-hidden rounded-[36px] border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xl shadow-sky-950/[0.03] dark:shadow-black/50 p-6 sm:p-14 transition-colors">
             <div className="flex items-center gap-4">
-              <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-[#1E3A8A] text-white shadow-lg shadow-blue-500/20 overflow-hidden group"><Compass size={24} className="transition-transform duration-700 animate-[spin_12s_linear_infinite]" /></div>
-              <div><p className="text-xs font-bold uppercase tracking-[0.25em] text-[#3559D4]">Travel Journal</p><h2 className="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-slate-900">Journey Story</h2></div>
+              <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-[#1E3A8A] dark:from-indigo-600 dark:to-blue-700 text-white shadow-lg shadow-blue-500/20 dark:shadow-indigo-900/40 overflow-hidden group"><Compass size={24} className="transition-transform duration-700 animate-[spin_12s_linear_infinite]" /></div>
+              <div><p className="text-xs font-bold uppercase tracking-[0.25em] text-[#3559D4] dark:text-indigo-400">Travel Journal</p><h2 className="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">Journey Story</h2></div>
             </div>
-            <div className="my-8 h-px bg-slate-100" />
-            <div className="w-full text-base sm:text-[17px] leading-8 sm:leading-9 text-slate-600 whitespace-pre-line font-medium">{memory.description}</div>
+            <div className="my-8 h-px bg-slate-100 dark:bg-slate-800" />
+            <div className="w-full text-base sm:text-[17px] leading-8 sm:leading-9 text-slate-600 dark:text-slate-300 whitespace-pre-line font-medium">{memory.description}</div>
             <div className="mt-14">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-black text-slate-900">Location Map</h3>
-                <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`)}`} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-[#3559D4] hover:underline flex items-center gap-1">Open in Google Maps ↗</a>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white">Location Map</h3>
+                <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(memory.location || "")}`} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-[#3559D4] dark:text-indigo-400 hover:underline flex items-center gap-1">Open in Google Maps ↗</a>
               </div>
               <div className="flex items-center justify-center w-full">
-                <div className="w-full max-w-4xl aspect-[16/9] sm:h-[400px] rounded-3xl overflow-hidden shadow-md border border-slate-200 z-0 relative group bg-slate-100 mx-auto">
-                  <iframe title="Google Map Location" width="100%" height="100%" style={{ border: 0 }} loading="lazy" allowFullScreen src={`https://maps.google.com/maps?q=${encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`)}&t=&z=13&ie=UTF8&iwloc=&output=embed`} />
-                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(memory.location || `${mapCoords[0]},${mapCoords[1]}`)}`} target="_blank" rel="noopener noreferrer" className="absolute inset-0 bg-transparent cursor-pointer" title="Click to open full Google Maps" />
+                <div className="w-full max-w-4xl aspect-[16/9] sm:h-[400px] rounded-3xl overflow-hidden shadow-md border border-slate-200 dark:border-slate-800 z-0 relative group bg-slate-100 dark:bg-slate-800/80 mx-auto">
+                  
+                  {/* Smooth Map Skeleton Loading State */}
+                  {!isMapLoaded && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-800/90 text-slate-400 dark:text-slate-500 z-10 animate-pulse">
+                      <MapPin size={32} className="text-[#3559D4] dark:text-indigo-400 animate-bounce mb-2" />
+                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Loading Google Map...</p>
+                    </div>
+                  )}
+
+                  {mapEmbedUrl && (
+                    <iframe
+                      title="Google Map Location"
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      loading="lazy"
+                      allowFullScreen
+                      onLoad={() => setIsMapLoaded(true)}
+                      src={mapEmbedUrl}
+                      className="w-full h-full rounded-3xl"
+                    />
+                  )}
                 </div>
               </div>
             </div>

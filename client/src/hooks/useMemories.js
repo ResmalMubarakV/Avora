@@ -16,11 +16,12 @@ const useMemories = () => {
   const sort = searchParams.get("sort") || "newest";
   const filter = searchParams.get("filter") || "";
   const search = searchParams.get("search") || "";
+  const year = searchParams.get("year") || "all";
 
   const fetchMemories = async () => {
     try {
       setLoading(true);
-      const data = await getMemories({ page, sort, filter, search });
+      const data = await getMemories({ page, sort, filter, search, year });
       setMemories(data);
       setError("");
     } catch (err) {
@@ -36,7 +37,7 @@ const useMemories = () => {
   // Re-fetch automatically whenever search parameters or filters change
   useEffect(() => {
     fetchMemories();
-  }, [page, sort, filter, search]);
+  }, [page, sort, filter, search, year]);
 
   return {
     memories,

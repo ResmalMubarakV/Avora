@@ -19,6 +19,16 @@ import "./index.css";
 import App from "./App.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 
+// Register PWA Service Worker for Offline Mode Caching
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((reg) => console.log("Avora PWA Service Worker registered:", reg.scope))
+      .catch((err) => console.error("Avora PWA SW registration failed:", err));
+  });
+}
+
 // Initialize and render the React application
 createRoot(document.getElementById("root")).render(
   <StrictMode>

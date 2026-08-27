@@ -39,20 +39,20 @@ const WhyChooseAvora = () => {
 
             {/* Section Header */}
             <div className="relative z-10 mx-auto max-w-3xl text-center w-full">
-                <div className="inline-flex items-center gap-2 rounded-full border border-blue-200/60 bg-white px-4 py-2 text-xs font-bold text-[#1E3A8A] shadow-sm">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#3559D4]" />
+                <div className="inline-flex items-center gap-2 rounded-full border border-blue-200/60 dark:border-indigo-800 bg-white dark:bg-slate-900 px-4 py-2 text-xs font-bold text-[#1E3A8A] dark:text-indigo-300 shadow-sm">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#3559D4] dark:bg-indigo-400" />
                     Why Choose Avora
                 </div>
 
-                <h2 className="mt-8 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-5xl 2xl:text-6xl">
+                <h2 className="mt-8 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white sm:text-4xl lg:text-5xl 2xl:text-6xl">
                     More Than A Gallery.
                     <br />
-                    <span className="bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#3559D4] bg-clip-text text-transparent">
+                    <span className="bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#3559D4] dark:from-white dark:via-indigo-200 dark:to-blue-400 bg-clip-text text-transparent">
                         It's Your Travel Legacy.
                     </span>
                 </h2>
 
-                <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-500 sm:text-lg">
+                <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-slate-500 dark:text-slate-300 sm:text-lg">
                     Avora helps you preserve every adventure with photos,
                     videos, and AI-powered storytelling—
                     beautifully orchestrated into a private, premium journal.
@@ -66,22 +66,22 @@ const WhyChooseAvora = () => {
                     return (
                         <div
                             key={feature.title}
-                            className="group relative flex flex-col items-start gap-4 rounded-[2rem] bg-white p-8 sm:p-10 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-15px_rgba(30,58,138,0.15)] border border-slate-100 hover:border-blue-100 overflow-hidden w-full"
+                            className="group relative flex flex-col items-start gap-4 rounded-[2rem] bg-white dark:bg-slate-900/90 p-8 sm:p-10 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-15px_rgba(30,58,138,0.15)] dark:hover:shadow-[0_0_40px_rgba(99,102,241,0.25)] border border-slate-100 dark:border-slate-800 hover:border-blue-100 dark:hover:border-indigo-500/50 overflow-hidden w-full"
                         >
                             {/* Hover Glow Effect */}
-                            <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-gradient-to-br from-blue-100/50 to-indigo-100/50 blur-3xl transition-opacity duration-500 opacity-0 group-hover:opacity-100 pointer-events-none" />
+                            <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-gradient-to-br from-blue-100/50 to-indigo-100/50 dark:from-indigo-600/20 dark:to-blue-600/20 blur-3xl transition-opacity duration-500 opacity-0 group-hover:opacity-100 pointer-events-none" />
 
                             {/* Feature Icon Badge */}
-                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.25rem] bg-slate-50 border border-slate-100 transition-all duration-500 group-hover:bg-[#1E3A8A] group-hover:border-[#1E3A8A] group-hover:shadow-[0_10px_20px_rgba(30,58,138,0.2)]">
-                                <Icon className="h-6 w-6 text-slate-700 transition-colors duration-500 group-hover:text-white" />
+                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.25rem] bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 transition-all duration-500 group-hover:bg-[#1E3A8A] dark:group-hover:bg-indigo-600 group-hover:border-[#1E3A8A] dark:group-hover:border-indigo-600 group-hover:shadow-[0_10px_20px_rgba(30,58,138,0.2)]">
+                                <Icon className="h-6 w-6 text-slate-700 dark:text-slate-200 transition-colors duration-500 group-hover:text-white" />
                             </div>
 
                             {/* Feature Text Content */}
                             <div className="mt-2 w-full min-w-0">
-                                <h3 className="text-xl font-bold text-slate-900 tracking-tight">
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
                                     {feature.title}
                                 </h3>
-                                <p className="mt-3 text-sm leading-relaxed text-slate-500 sm:text-base">
+                                <p className="mt-3 text-sm leading-relaxed text-slate-500 dark:text-slate-300 sm:text-base">
                                     {feature.description}
                                 </p>
                             </div>

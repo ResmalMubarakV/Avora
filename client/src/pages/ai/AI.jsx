@@ -44,13 +44,13 @@ const AI = () => {
   }, [loading]);
 
   return (
-    <main className="relative flex h-full flex-col overflow-hidden bg-slate-50/50">
+    <main className="relative flex h-full flex-col overflow-hidden bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-300">
       <PageTitle title={conversationTitle ? `${conversationTitle} — AI Assistant` : "AI Travel Assistant"} />
 
       {/* Immersive Decorative Background Glows */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-32 -top-32 h-[30rem] w-[30rem] rounded-full bg-blue-400/10 blur-[120px]" />
-        <div className="absolute -right-32 bottom-0 h-[32rem] w-[32rem] rounded-full bg-indigo-400/10 blur-[120px]" />
+        <div className="absolute -left-32 -top-32 h-[30rem] w-[30rem] rounded-full bg-blue-400/10 dark:bg-indigo-600/15 blur-[120px]" />
+        <div className="absolute -right-32 bottom-0 h-[32rem] w-[32rem] rounded-full bg-indigo-400/10 dark:bg-blue-500/15 blur-[120px]" />
       </div>
 
       {/* Main Chat Interface Layout */}

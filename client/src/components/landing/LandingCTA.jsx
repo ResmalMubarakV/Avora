@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 const LandingCTA = () => {
     return (
         <section className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-24 w-full">
-            <div className="relative overflow-hidden rounded-[2.5rem] bg-[#0A1128] px-6 py-20 text-center sm:px-10 sm:py-24 lg:rounded-[3rem] lg:px-12 lg:py-32 2xl:py-36 shadow-[0_30px_80px_rgba(15,23,42,0.4)] border border-blue-900/30 w-full">
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-[#0A1128] dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 px-6 py-20 text-center sm:px-10 sm:py-24 lg:rounded-[3rem] lg:px-12 lg:py-32 2xl:py-36 shadow-[0_30px_80px_rgba(15,23,42,0.4)] dark:shadow-[0_0_60px_rgba(99,102,241,0.2)] border border-blue-900/30 dark:border-indigo-500/40 w-full transition-colors duration-300">
                 
                 {/* Immersive Deep Space Ambient Glows */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-[#1E3A8A]/40 blur-[120px] rounded-full pointer-events-none" />

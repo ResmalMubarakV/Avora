@@ -21,6 +21,7 @@ const AllMemories = () => {
   const currentPage = parseInt(searchParams.get("page")) || 1;
   const sortBy = searchParams.get("sort") || "newest";
   const filterParam = searchParams.get("filter") || "";
+  const selectedYear = searchParams.get("year") || "all";
   const selectedFilters = filterParam ? filterParam.split(",") : [];
 
   const memories = Array.isArray(apiResponse) ? apiResponse : (apiResponse?.memories || []);
@@ -34,7 +35,7 @@ const AllMemories = () => {
       left: 0,
       behavior: "instant",
     });
-  }, [location.pathname, currentPage, sortBy, filterParam]);
+  }, [location.pathname, currentPage, sortBy, filterParam, selectedYear]);
 
   // Handle multi-select filter toggle
   const toggleFilter = (filterValue) => {
@@ -67,6 +68,17 @@ const AllMemories = () => {
   // Handle Sort change
   const handleSortChange = (newSort) => {
     searchParams.set("sort", newSort);
+    searchParams.delete("page");
+    setSearchParams(searchParams, { replace: true });
+  };
+
+  // Handle Year change
+  const handleYearChange = (newYear) => {
+    if (newYear && newYear !== "all") {
+      searchParams.set("year", newYear);
+    } else {
+      searchParams.delete("year");
+    }
     searchParams.delete("page");
     setSearchParams(searchParams, { replace: true });
   };
@@ -124,6 +136,8 @@ const AllMemories = () => {
           toggleFilter={toggleFilter}
           sortBy={sortBy}
           setSortBy={handleSortChange}
+          selectedYear={selectedYear}
+          setYear={handleYearChange}
         />
       </div>
 
