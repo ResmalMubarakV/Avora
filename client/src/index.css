@@ -18,45 +18,64 @@ html.dark body {
 }
 
 /* ==========================================
-   GLOBAL DARK MODE TEXT & SURFACE INVERSION
+   GLOBAL DARK MODE TEXT & SURFACE CONTRAST INVERSION
    ========================================== */
-html.dark .text-slate-900,
-html.dark .text-slate-950 {
-  color: #f8fafc;
-}
 
-html.dark .text-slate-800 {
-  color: #f1f5f9;
-}
-
-html.dark .text-slate-700 {
-  color: #e2e8f0;
-}
-
-html.dark .text-slate-600 {
-  color: #cbd5e1;
-}
-
-html.dark .text-slate-500 {
-  color: #94a3b8;
-}
-
-/* Invert default white card containers and light grey slate panels */
-html.dark .bg-white:not(.keep-white) {
+/* Invert light surface backgrounds to dark surfaces in dark mode */
+html.dark .bg-white:not(.keep-white):not(.keep-light) {
   background-color: #1e293b;
   color: #f8fafc;
 }
 
-html.dark .bg-slate-50 {
+html.dark .bg-slate-50:not(.keep-light) {
   background-color: #0f172a;
 }
 
-html.dark .bg-slate-100 {
+html.dark .bg-slate-100:not(.keep-light) {
+  background-color: #1e293b;
+}
+
+html.dark .bg-slate-200:not(.keep-light) {
   background-color: #334155;
 }
 
 html.dark .bg-white\/80 {
   background-color: rgba(30, 41, 59, 0.85);
+}
+
+html.dark .bg-slate-50\/80,
+html.dark .bg-slate-50\/50 {
+  background-color: rgba(15, 23, 42, 0.85);
+}
+
+/* Invert dark text colors to bright slate colors in dark mode */
+html.dark .text-slate-900:not(.keep-dark-text),
+html.dark .text-slate-950:not(.keep-dark-text) {
+  color: #f8fafc;
+}
+
+html.dark .text-slate-800:not(.keep-dark-text) {
+  color: #f1f5f9;
+}
+
+html.dark .text-slate-700:not(.keep-dark-text) {
+  color: #e2e8f0;
+}
+
+html.dark .text-slate-600:not(.keep-dark-text) {
+  color: #cbd5e1;
+}
+
+html.dark .text-slate-500:not(.keep-dark-text) {
+  color: #94a3b8;
+}
+
+/* Safeguard: Elements inside light containers MUST retain dark text for readability */
+html.dark .keep-light,
+html.dark .keep-white,
+html.dark .keep-light *,
+html.dark .keep-white * {
+  color: #0f172a !important;
 }
 
 html.dark .border-slate-100,
@@ -66,10 +85,10 @@ html.dark .border-slate-200\/80 {
   border-color: #334155;
 }
 
-/* Invert form inputs and textareas in dark mode */
-html.dark input:not([type="checkbox"]):not([type="radio"]),
-html.dark textarea,
-html.dark select {
+/* Form controls & inputs in dark mode */
+html.dark input:not([type="checkbox"]):not([type="radio"]):not(.keep-light),
+html.dark textarea:not(.keep-light),
+html.dark select:not(.keep-light) {
   background-color: #1e293b;
   color: #f8fafc;
   border-color: #475569;
@@ -79,6 +98,7 @@ html.dark input::placeholder,
 html.dark textarea::placeholder {
   color: #94a3b8;
 }
+
 
 
 
