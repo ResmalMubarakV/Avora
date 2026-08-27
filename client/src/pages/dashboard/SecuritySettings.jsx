@@ -71,7 +71,7 @@ const SecuritySettings = () => {
         <button
           type="button"
           onClick={() => navigate("/dashboard")}
-          className="group inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 cursor-pointer"
+          className="group inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
         >
           <ArrowLeft size={16} className="transition-transform duration-300 group-hover:-translate-x-1" />
           <span>Back to Dashboard</span>
@@ -103,18 +103,18 @@ const SecuritySettings = () => {
       </div>
 
       {/* Main Form Card Container */}
-      <div className="rounded-[28px] sm:rounded-[32px] border border-slate-200 bg-white p-6 sm:p-10 shadow-sm">
+      <div className="rounded-[28px] sm:rounded-[32px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-6 sm:p-10 shadow-sm transition-colors">
         
         {success && (
-          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-xs sm:text-sm font-semibold text-emerald-700 animate-in fade-in">
-            <CheckCircle2 size={20} className="shrink-0 text-emerald-600" />
+          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/80 px-4 py-4 text-xs sm:text-sm font-semibold text-emerald-700 dark:text-emerald-300 animate-in fade-in">
+            <CheckCircle2 size={20} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
             <span>{success}</span>
           </div>
         )}
 
         {error && (
-          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-xs sm:text-sm font-semibold text-red-600 animate-in fade-in">
-            <ShieldAlert size={20} className="shrink-0 text-red-500" />
+          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/80 px-4 py-4 text-xs sm:text-sm font-semibold text-red-600 dark:text-red-300 animate-in fade-in">
+            <ShieldAlert size={20} className="shrink-0 text-red-500 dark:text-red-400" />
             <span>{error}</span>
           </div>
         )}
@@ -123,7 +123,7 @@ const SecuritySettings = () => {
           
           {/* Current Password Field */}
           <div className="space-y-2">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">Current Password</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">Current Password</label>
             <div className="relative">
               <input
                 type={showCurrent ? "text" : "password"}
@@ -131,13 +131,13 @@ const SecuritySettings = () => {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 py-3.5 pl-4 pr-12 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100 shadow-sm"
+                className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/50 py-3.5 pl-4 pr-12 text-sm text-slate-800 dark:text-slate-100 outline-none transition focus:border-[#3559D4] dark:focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-100 dark:focus:ring-indigo-950/50 shadow-sm"
               />
               <button
                 type="button"
                 onClick={() => setShowCurrent(!showCurrent)}
                 aria-label="Toggle Current Password Visibility"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-1"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer p-1"
               >
                 {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -148,7 +148,7 @@ const SecuritySettings = () => {
             
             {/* New Password Field */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">New Password</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">New Password</label>
               <div className="relative">
                 <input
                   type={showNew ? "text" : "password"}
@@ -156,13 +156,13 @@ const SecuritySettings = () => {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 py-3.5 pl-4 pr-12 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100 shadow-sm"
+                  className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/50 py-3.5 pl-4 pr-12 text-sm text-slate-800 dark:text-slate-100 outline-none transition focus:border-[#3559D4] dark:focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-100 dark:focus:ring-indigo-950/50 shadow-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNew(!showNew)}
                   aria-label="Toggle New Password Visibility"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-1"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer p-1"
                 >
                   {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -171,7 +171,7 @@ const SecuritySettings = () => {
 
             {/* Confirm New Password Field */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">Confirm New Password</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">Confirm New Password</label>
               <div className="relative">
                 <input
                   type={showConfirm ? "text" : "password"}
@@ -179,13 +179,13 @@ const SecuritySettings = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 py-3.5 pl-4 pr-12 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100 shadow-sm"
+                  className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/50 py-3.5 pl-4 pr-12 text-sm text-slate-800 dark:text-slate-100 outline-none transition focus:border-[#3559D4] dark:focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-100 dark:focus:ring-indigo-950/50 shadow-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirm(!showConfirm)}
                   aria-label="Toggle Confirm Password Visibility"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-1"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer p-1"
                 >
                   {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -196,35 +196,35 @@ const SecuritySettings = () => {
 
           {/* Password Security Checklist Box */}
           {newPassword && (
-            <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-700">Password Security Checklist:</p>
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Password Security Checklist:</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className={`flex items-center gap-2 font-semibold transition-colors ${validations.length ? "text-emerald-600" : "text-slate-400"}`}>
-                  <span className={`flex h-5 w-5 items-center justify-center rounded-full ${validations.length ? "bg-emerald-100 text-emerald-600" : "bg-slate-200 text-slate-500"}`}>
+                <div className={`flex items-center gap-2 font-semibold transition-colors ${validations.length ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"}`}>
+                  <span className={`flex h-5 w-5 items-center justify-center rounded-full ${validations.length ? "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400" : "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400"}`}>
                     {validations.length ? <Check size={12} /> : <X size={12} />}
                   </span>
                   At least 8 characters long
                 </div>
-                <div className={`flex items-center gap-2 font-semibold transition-colors ${validations.uppercase ? "text-emerald-600" : "text-slate-400"}`}>
-                  <span className={`flex h-5 w-5 items-center justify-center rounded-full ${validations.uppercase ? "bg-emerald-100 text-emerald-600" : "bg-slate-200 text-slate-500"}`}>
+                <div className={`flex items-center gap-2 font-semibold transition-colors ${validations.uppercase ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"}`}>
+                  <span className={`flex h-5 w-5 items-center justify-center rounded-full ${validations.uppercase ? "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400" : "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400"}`}>
                     {validations.uppercase ? <Check size={12} /> : <X size={12} />}
                   </span>
                   One uppercase letter (A-Z)
                 </div>
-                <div className={`flex items-center gap-2 font-semibold transition-colors ${validations.lowercase ? "text-emerald-600" : "text-slate-400"}`}>
-                  <span className={`flex h-5 w-5 items-center justify-center rounded-full ${validations.lowercase ? "bg-emerald-100 text-emerald-600" : "bg-slate-200 text-slate-500"}`}>
+                <div className={`flex items-center gap-2 font-semibold transition-colors ${validations.lowercase ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"}`}>
+                  <span className={`flex h-5 w-5 items-center justify-center rounded-full ${validations.lowercase ? "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400" : "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400"}`}>
                     {validations.lowercase ? <Check size={12} /> : <X size={12} />}
                   </span>
                   One lowercase letter (a-z)
                 </div>
-                <div className={`flex items-center gap-2 font-semibold transition-colors ${validations.number ? "text-emerald-600" : "text-slate-400"}`}>
-                  <span className={`flex h-5 w-5 items-center justify-center rounded-full ${validations.number ? "bg-emerald-100 text-emerald-600" : "bg-slate-200 text-slate-500"}`}>
+                <div className={`flex items-center gap-2 font-semibold transition-colors ${validations.number ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"}`}>
+                  <span className={`flex h-5 w-5 items-center justify-center rounded-full ${validations.number ? "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400" : "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400"}`}>
                     {validations.number ? <Check size={12} /> : <X size={12} />}
                   </span>
                   One numeric digit (0-9)
                 </div>
-                <div className={`flex items-center gap-2 font-semibold transition-colors ${validations.special ? "text-emerald-600" : "text-slate-400"}`}>
-                  <span className={`flex h-5 w-5 items-center justify-center rounded-full ${validations.special ? "bg-emerald-100 text-emerald-600" : "bg-slate-200 text-slate-500"}`}>
+                <div className={`flex items-center gap-2 font-semibold transition-colors ${validations.special ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"}`}>
+                  <span className={`flex h-5 w-5 items-center justify-center rounded-full ${validations.special ? "bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400" : "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400"}`}>
                     {validations.special ? <Check size={12} /> : <X size={12} />}
                   </span>
                   One special symbol (@$!%*?&)
@@ -234,11 +234,11 @@ const SecuritySettings = () => {
           )}
 
           {/* Form Action Button Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-slate-100">
+          <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
             <button
               type="submit"
               disabled={loading || !isPasswordStrong}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-2xl bg-[#1E3A8A] px-8 py-4 text-xs sm:text-sm font-extrabold text-white shadow-[0_10px_25px_-5px_rgba(30,58,138,0.3)] transition-all duration-300 hover:bg-[#3559D4] active:scale-95 cursor-pointer disabled:opacity-50"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-2xl bg-[#1E3A8A] dark:bg-gradient-to-r dark:from-indigo-600 dark:to-blue-600 px-8 py-4 text-xs sm:text-sm font-extrabold text-white shadow-[0_10px_25px_-5px_rgba(30,58,138,0.3)] dark:shadow-[0_0_20px_rgba(99,102,241,0.35)] transition-all duration-300 hover:bg-[#3559D4] active:scale-95 cursor-pointer disabled:opacity-50"
             >
               {loading ? (
                 <>

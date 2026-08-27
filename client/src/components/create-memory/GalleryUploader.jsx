@@ -82,12 +82,12 @@ const GalleryUploader = ({
   }, [gallery]);
 
   return (
-    <div className="rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-white p-4 sm:p-6 lg:p-8 shadow-sm">
+    <div className="rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-4 sm:p-6 lg:p-8 shadow-sm transition-colors">
       {/* Header & Add More Action */}
       <div className="mb-5 sm:mb-6 flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-base sm:text-lg lg:text-xl font-bold text-slate-900">Gallery</h2>
-          <p className="mt-0.5 text-xs sm:text-sm text-slate-500">
+          <h2 className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 dark:text-white">Gallery</h2>
+          <p className="mt-0.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
             Upload your travel photos and videos.
           </p>
         </div>
@@ -96,7 +96,7 @@ const GalleryUploader = ({
           <button
             type="button"
             onClick={handleBrowse}
-            className="flex items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white transition hover:bg-slate-800 shrink-0"
+            className="flex items-center gap-1.5 rounded-xl bg-slate-900 dark:bg-gradient-to-r dark:from-indigo-600 dark:to-blue-600 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white transition hover:bg-slate-800 dark:shadow-[0_0_15px_rgba(99,102,241,0.3)] shrink-0"
           >
             <Plus size={16} />
             <span>Add More</span>
@@ -116,21 +116,21 @@ const GalleryUploader = ({
       {existingGallery.length === 0 && gallery.length === 0 ? (
         <div
           onClick={handleBrowse}
-          className="group flex min-h-[200px] sm:min-h-[240px] cursor-pointer flex-col items-center justify-center rounded-xl sm:rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-6 text-center transition-all duration-300 hover:border-[#3559D4] hover:bg-blue-50/30"
+          className="group flex min-h-[200px] sm:min-h-[240px] cursor-pointer flex-col items-center justify-center rounded-xl sm:rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 p-6 text-center transition-all duration-300 hover:border-[#3559D4] dark:hover:border-indigo-500/60 hover:bg-blue-50/30 dark:hover:bg-indigo-950/20"
         >
-          <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-blue-50 text-[#3559D4] transition-all duration-300 group-hover:scale-110">
+          <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-blue-50 dark:bg-indigo-950/80 text-[#3559D4] dark:text-indigo-400 border border-transparent dark:border-indigo-800/50 transition-all duration-300 group-hover:scale-110">
             <Images size={28} className="sm:w-8 sm:h-8" />
           </div>
-          <h3 className="mt-4 text-sm sm:text-base font-bold text-slate-900">
+          <h3 className="mt-4 text-sm sm:text-base font-bold text-slate-900 dark:text-white">
             Upload Gallery
           </h3>
-          <p className="mt-1 text-xs sm:text-sm text-slate-500">
+          <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
             Choose multiple photos and videos.
           </p>
 
           <button
             type="button"
-            className="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-xs sm:text-sm font-semibold text-white"
+            className="mt-4 rounded-xl bg-slate-900 dark:bg-gradient-to-r dark:from-indigo-600 dark:to-blue-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white dark:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
           >
             Choose Files
           </button>
@@ -138,7 +138,7 @@ const GalleryUploader = ({
       ) : (
         <>
           <div className="mb-4">
-            <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-[#3559D4]">
+            <span className="inline-flex rounded-full bg-blue-50 dark:bg-sky-950/80 border border-blue-100 dark:border-sky-800/50 px-3 py-1 text-xs font-semibold text-[#3559D4] dark:text-sky-300">
               {existingGallery.length + gallery.length} Files Selected
             </span>
           </div>
@@ -146,7 +146,7 @@ const GalleryUploader = ({
           {/* Existing Media Section */}
           {existingGallery.length > 0 && (
             <>
-              <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">
+              <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 Existing Media
               </h3>
               <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
@@ -155,7 +155,7 @@ const GalleryUploader = ({
                   return (
                     <div
                       key={file.publicId}
-                      className="group overflow-hidden rounded-xl sm:rounded-2xl border border-slate-200/80 bg-white shadow-sm"
+                      className="group overflow-hidden rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800 shadow-sm"
                     >
                       <div className="relative aspect-square">
                         {isImage ? (
@@ -191,7 +191,7 @@ const GalleryUploader = ({
           {/* New Uploads Section */}
           {gallery.length > 0 && (
             <>
-              <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">
+              <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 New Uploads
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
@@ -200,9 +200,9 @@ const GalleryUploader = ({
                   return (
                     <div
                       key={item.id}
-                      className="group overflow-hidden rounded-xl sm:rounded-2xl border border-slate-200/80 bg-white shadow-sm flex flex-col justify-between"
+                      className="group overflow-hidden rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800 shadow-sm flex flex-col justify-between"
                     >
-                      <div className="relative aspect-square overflow-hidden bg-slate-100">
+                      <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-900">
                         {isImage ? (
                           <img
                             src={item.preview}
@@ -227,13 +227,13 @@ const GalleryUploader = ({
                         </button>
                       </div>
 
-                      <div className="flex items-center gap-1.5 p-2 sm:p-2.5 bg-slate-50/50">
+                      <div className="flex items-center gap-1.5 p-2 sm:p-2.5 bg-slate-50/50 dark:bg-slate-800/80">
                         {isImage ? (
-                          <ImageIcon size={14} className="text-slate-400 shrink-0" />
+                          <ImageIcon size={14} className="text-slate-400 dark:text-slate-500 shrink-0" />
                         ) : (
-                          <Video size={14} className="text-slate-400 shrink-0" />
+                          <Video size={14} className="text-slate-400 dark:text-slate-500 shrink-0" />
                         )}
-                        <p className="truncate text-[11px] sm:text-xs font-medium text-slate-600">
+                        <p className="truncate text-[11px] sm:text-xs font-medium text-slate-600 dark:text-slate-300">
                           {item.name}
                         </p>
                       </div>

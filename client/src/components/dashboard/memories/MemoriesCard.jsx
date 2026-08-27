@@ -157,13 +157,13 @@ const MemoriesCard = ({
             {(isOwner || !memory.isPublic) && (
               <div>
                 {memory.isPublic ? (
-                  <div className="flex items-center gap-1 sm:gap-2 rounded-full bg-white/95 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-slate-700 backdrop-blur shadow">
-                    <Globe size={12} className="sm:w-3.5 sm:h-3.5" />
+                  <div className="flex items-center gap-1 sm:gap-2 rounded-full bg-white/95 dark:bg-sky-950/90 dark:border dark:border-sky-500/40 dark:text-sky-300 dark:shadow-[0_0_12px_rgba(56,189,248,0.25)] px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-slate-700 backdrop-blur shadow transition-all">
+                    <Globe size={12} className="sm:w-3.5 sm:h-3.5 dark:text-sky-400" />
                     <span className="hidden xs:inline">Public</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1 sm:gap-2 rounded-full bg-white/95 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-slate-700 backdrop-blur shadow">
-                    <Lock size={12} className="sm:w-3.5 sm:h-3.5" />
+                  <div className="flex items-center gap-1 sm:gap-2 rounded-full bg-white/95 dark:bg-indigo-950/90 dark:border dark:border-indigo-500/40 dark:text-indigo-300 dark:shadow-[0_0_12px_rgba(99,102,241,0.25)] px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-slate-700 backdrop-blur shadow transition-all">
+                    <Lock size={12} className="sm:w-3.5 sm:h-3.5 dark:text-indigo-400" />
                     <span className="hidden xs:inline">Private</span>
                   </div>
                 )}

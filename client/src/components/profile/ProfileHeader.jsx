@@ -20,10 +20,10 @@ const ProfileHeader = ({ user, memoryCount }) => {
             </div>
 
             {/* Profile Details Section */}
-            <div className="max-w-5xl mx-auto px-6 keep-light keep-white">
+            <div className="max-w-5xl mx-auto px-6">
                 <div className="-mt-16 flex flex-col sm:flex-row items-start sm:items-end gap-5">
                     {/* Overlapping Profile Avatar */}
-                    <div className="w-32 h-32 rounded-full border-4 border-white bg-slate-200 overflow-hidden shrink-0 shadow-md">
+                    <div className="w-32 h-32 rounded-full border-4 border-white dark:border-slate-800 bg-slate-200 dark:bg-slate-800 overflow-hidden shrink-0 shadow-md">
                         {user.profileImage ? (
                             <img
                                 src={user.profileImage}
@@ -39,28 +39,28 @@ const ProfileHeader = ({ user, memoryCount }) => {
 
                     {/* User Metadata & Information */}
                     <div className="pb-3">
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                             {user.name}
                         </h1>
 
-                        <p className="text-sm font-medium text-slate-500">
+                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
                             @{user.username}
                         </p>
 
                         {user.bio && (
-                            <p className="mt-2 text-sm sm:text-base leading-relaxed text-slate-700 max-w-2xl">
+                            <p className="mt-2 text-sm sm:text-base leading-relaxed text-slate-700 dark:text-slate-300 max-w-2xl">
                                 {user.bio}
                             </p>
                         )}
 
-                        <div className="mt-3 flex flex-wrap items-center gap-4 text-sm font-medium text-slate-600">
+                        <div className="mt-3 flex flex-wrap items-center gap-4 text-sm font-medium text-slate-600 dark:text-slate-300">
                             {user.location && (
                                 <span className="flex items-center gap-1">
                                     📍 {user.location}
                                 </span>
                             )}
 
-                            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 border border-slate-200">
+                            <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
                                 🗓 {memoryCount} {memoryCount === 1 ? "Memory" : "Memories"}
                             </span>
                         </div>

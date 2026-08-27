@@ -8,6 +8,7 @@ import { FiMail } from 'react-icons/fi';
 import api from '../../api/axios';
 import AuthLayout from '../../layouts/AuthLayout';
 import avoraLogo from '../../assets/images/avoraLogo.png';
+import avoraLogoDark from '../../assets/images/avoraLogoDark.png';
 import PageTitle from '../../components/common/PageTitle';
 
 import InputField from '../../components/ui/InputField';
@@ -66,10 +67,16 @@ const Login = () => {
           <img
             src={avoraLogo}
             alt="Avora"
-            className="mb-4 h-14 sm:h-16 w-auto select-none drop-shadow-sm transition-transform duration-500 hover:scale-105"
+            className="mb-4 h-14 sm:h-16 w-auto select-none drop-shadow-sm transition-transform duration-500 hover:scale-105 dark:hidden"
             draggable={false}
           />
-          <h1 className="bg-gradient-to-br from-slate-900 to-[#1E3A8A] bg-clip-text text-2xl font-extrabold tracking-tight text-transparent sm:text-3xl">
+          <img
+            src={avoraLogoDark}
+            alt="Avora Dark"
+            className="mb-4 h-14 sm:h-16 w-auto select-none drop-shadow-sm transition-transform duration-500 hover:scale-105 hidden dark:block"
+            draggable={false}
+          />
+          <h1 className="bg-gradient-to-br from-slate-900 to-[#1E3A8A] dark:from-white dark:to-indigo-300 bg-clip-text text-2xl font-extrabold tracking-tight text-transparent sm:text-3xl">
             Welcome Back
           </h1>
           <p className="mt-2 text-sm font-medium text-slate-500 text-center">

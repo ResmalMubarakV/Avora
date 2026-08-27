@@ -11,11 +11,11 @@ const PageHeader = ({
 }) => {
   return (
     <div className="mb-2 sm:mb-4">
-      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900">
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
         {title}
       </h1>
 
-      <p className="mt-1 text-xs sm:text-sm lg:text-base text-slate-500">
+      <p className="mt-1 text-xs sm:text-sm lg:text-base text-slate-500 dark:text-slate-400">
         {subtitle}
       </p>
     </div>

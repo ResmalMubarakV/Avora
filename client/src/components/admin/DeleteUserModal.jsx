@@ -24,7 +24,7 @@ const DeleteUserModal = ({ selectedUser, onClose, onConfirm, deleteLoading, dele
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
-            <div className="w-full max-w-md rounded-3xl border border-red-200 bg-white shadow-[0_20px_50px_rgba(239,68,68,0.15)] overflow-hidden">
+            <div className="w-full max-w-md rounded-3xl border border-red-200 dark:border-red-900/50 bg-white dark:bg-slate-900 shadow-[0_20px_50px_rgba(239,68,68,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
                 
                 {/* Thin Red Accent Top Border */}
                 <div className="h-1.5 w-full bg-gradient-to-r from-red-500 via-rose-500 to-red-600" />
@@ -32,30 +32,30 @@ const DeleteUserModal = ({ selectedUser, onClose, onConfirm, deleteLoading, dele
                 <div className="p-7">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-5">
-                        <div className="flex items-center gap-3 text-red-600">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 border border-red-100 shadow-inner">
+                        <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/60 border border-red-100 dark:border-red-900/50 shadow-inner">
                                 <ShieldAlert size={22} />
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900">Confirm User Deletion</h3>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Confirm User Deletion</h3>
                         </div>
                         <button
                             type="button"
                             onClick={onClose}
                             disabled={deleteLoading}
-                            className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer transition disabled:opacity-50"
+                            className="rounded-xl p-1.5 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer transition disabled:opacity-50"
                         >
                             <X size={20} />
                         </button>
                     </div>
 
                     {/* Strong Warning Text */}
-                    <p className="text-sm text-slate-700 mb-5 leading-relaxed font-medium">
-                        This action cannot be undone. Permanently delete user <span className="font-extrabold text-slate-900">"{selectedUser.name || selectedUser.username}"</span> (@{selectedUser.username}) and all associated records?
+                    <p className="text-sm text-slate-700 dark:text-slate-300 mb-5 leading-relaxed font-medium">
+                        This action cannot be undone. Permanently delete user <span className="font-extrabold text-slate-900 dark:text-white">"{selectedUser.name || selectedUser.username}"</span> (@{selectedUser.username}) and all associated records?
                     </p>
 
                     {/* Error Banner */}
                     {deleteError && (
-                        <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-3.5 text-xs font-semibold text-red-700">
+                        <div className="mb-5 rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/60 p-3.5 text-xs font-semibold text-red-700 dark:text-red-300">
                             {deleteError}
                         </div>
                     )}
@@ -63,7 +63,7 @@ const DeleteUserModal = ({ selectedUser, onClose, onConfirm, deleteLoading, dele
                     {/* Password Form */}
                     <form onSubmit={handleFormSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
                                 Admin Password
                             </label>
                             <div className="relative">
@@ -76,12 +76,12 @@ const DeleteUserModal = ({ selectedUser, onClose, onConfirm, deleteLoading, dele
                                     required
                                     autoFocus
                                     disabled={deleteLoading}
-                                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3.5 pl-4 pr-12 text-sm text-slate-800 outline-none transition focus:border-red-500 focus:bg-white focus:ring-4 focus:ring-red-100 disabled:opacity-50"
+                                    className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 py-3.5 pl-4 pr-12 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 outline-none transition focus:border-red-500 dark:focus:border-red-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-red-100 dark:focus:ring-red-950/50 disabled:opacity-50"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-600 cursor-pointer"
+                                    className="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
                                     tabIndex={-1}
                                 >
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -95,7 +95,7 @@ const DeleteUserModal = ({ selectedUser, onClose, onConfirm, deleteLoading, dele
                                 type="button"
                                 onClick={onClose}
                                 disabled={deleteLoading}
-                                className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 cursor-pointer active:scale-95 disabled:opacity-50"
+                                className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 px-5 py-3 text-xs font-semibold text-slate-700 dark:text-slate-200 transition hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer active:scale-95 disabled:opacity-50"
                             >
                                 Cancel
                             </button>

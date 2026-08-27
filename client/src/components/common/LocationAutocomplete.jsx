@@ -117,33 +117,33 @@ const LocationAutocomplete = ({ value, onChange, name = "location" }) => {
           onChange={handleInputChange}
           onFocus={() => value && setIsOpen(true)}
           placeholder="e.g., Goa, India"
-          className="w-full rounded-xl border border-slate-200/80 bg-slate-50/50 px-4 py-3 pl-10 text-sm text-slate-800 outline-none transition focus:border-[#3559D4] focus:bg-white focus:ring-4 focus:ring-blue-100 placeholder:text-slate-400"
+          className="w-full rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 px-4 py-3 pl-10 text-sm text-slate-800 dark:text-slate-100 outline-none transition focus:border-[#3559D4] dark:focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-100 dark:focus:ring-indigo-950/50 placeholder:text-slate-400 dark:placeholder:text-slate-500"
           autoComplete="off"
         />
         <MapPin
           size={18}
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500"
         />
         {loading && (
           <Loader2 
             size={16} 
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#3559D4] animate-spin" 
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#3559D4] dark:text-indigo-400 animate-spin" 
           />
         )}
       </div>
 
       {/* Suggestions Dropdown */}
       {isOpen && suggestions.length > 0 && (
-        <div className="absolute left-0 top-full z-50 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+        <div className="absolute left-0 top-full z-50 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
           <ul className="max-h-60 overflow-y-auto py-2 scrollbar-hide">
             {suggestions.map((suggestion) => (
               <li
                 key={suggestion.place_id}
                 onClick={() => handleSelectSuggestion(suggestion)}
-                className="flex cursor-pointer items-start gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors"
+                className="flex cursor-pointer items-start gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               >
-                <MapPin size={16} className="mt-0.5 shrink-0 text-[#3559D4]" />
-                <span className="text-sm text-slate-700 line-clamp-2">
+                <MapPin size={16} className="mt-0.5 shrink-0 text-[#3559D4] dark:text-indigo-400" />
+                <span className="text-sm text-slate-700 dark:text-slate-200 line-clamp-2">
                   {suggestion.display_name}
                 </span>
               </li>

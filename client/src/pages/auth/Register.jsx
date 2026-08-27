@@ -9,6 +9,7 @@ import api from '../../api/axios';
 import AuthLayout from '../../layouts/AuthLayout';
 import PasswordStrength from '../../components/auth/PasswordStrength';
 import avoraLogo from '../../assets/images/avoraLogo.png';
+import avoraLogoDark from '../../assets/images/avoraLogoDark.png';
 import PageTitle from '../../components/common/PageTitle';
 
 import InputField from '../../components/ui/InputField';
@@ -118,10 +119,16 @@ const Register = () => {
           <img
             src={avoraLogo}
             alt="Avora"
-            className="mb-3 h-12 sm:h-14 w-auto select-none drop-shadow-sm transition-transform duration-500 hover:scale-105"
+            className="mb-3 h-12 sm:h-14 w-auto select-none drop-shadow-sm transition-transform duration-500 hover:scale-105 dark:hidden"
             draggable={false}
           />
-          <h1 className="bg-gradient-to-br from-slate-900 to-[#1E3A8A] bg-clip-text text-xl font-extrabold tracking-tight text-transparent sm:text-2xl">
+          <img
+            src={avoraLogoDark}
+            alt="Avora Dark"
+            className="mb-3 h-12 sm:h-14 w-auto select-none drop-shadow-sm transition-transform duration-500 hover:scale-105 hidden dark:block"
+            draggable={false}
+          />
+          <h1 className="bg-gradient-to-br from-slate-900 to-[#1E3A8A] dark:from-white dark:to-indigo-300 bg-clip-text text-xl font-extrabold tracking-tight text-transparent sm:text-2xl">
             Create Account
           </h1>
           <p className="mt-1.5 text-xs font-medium text-slate-500 text-center">

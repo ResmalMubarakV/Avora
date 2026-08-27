@@ -38,17 +38,17 @@ const LivePreview = ({ formData }) => {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="mb-3 shrink-0">
-        <h3 className="text-base sm:text-lg font-bold text-slate-900">Live Preview</h3>
-        <p className="mt-0.5 text-xs text-slate-500">
+        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Live Preview</h3>
+        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
           Your memory updates as you type.
         </p>
       </div>
 
       {/* Memory Preview Card */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm flex-1 flex flex-col justify-between">
+      <div className="overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] flex-1 flex flex-col justify-between transition-colors">
         <div>
           {/* Cover Image Container */}
-          <div className="aspect-video overflow-hidden bg-slate-100 relative">
+          <div className="aspect-video overflow-hidden bg-slate-100 dark:bg-slate-800 relative">
             {coverPreview ? (
               <img
                 src={coverPreview}
@@ -59,7 +59,7 @@ const LivePreview = ({ formData }) => {
                 className="h-full w-full object-cover origin-center absolute inset-0"
               />
             ) : (
-              <div className="flex h-full items-center justify-center text-xs font-medium text-slate-400">
+              <div className="flex h-full items-center justify-center text-xs font-medium text-slate-400 dark:text-slate-500">
                 Cover Image
               </div>
             )}
@@ -67,19 +67,19 @@ const LivePreview = ({ formData }) => {
 
           {/* Card Body & Details */}
           <div className="space-y-3 p-4">
-            <h4 className="text-sm sm:text-base font-bold text-slate-900 line-clamp-1">
+            <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white line-clamp-1">
               {formData.title || "Memory Title"}
             </h4>
 
             {/* Metadata List */}
-            <div className="space-y-1.5 text-xs text-slate-600">
+            <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
               <div className="flex items-center gap-2">
-                <MapPin size={14} className="text-slate-400 shrink-0" />
+                <MapPin size={14} className="text-slate-400 dark:text-slate-500 shrink-0" />
                 <span className="truncate">{formData.location || "Location"}</span>
               </div>
 
               <div className="flex items-center gap-2">
-                <CalendarDays size={14} className="text-slate-400 shrink-0" />
+                <CalendarDays size={14} className="text-slate-400 dark:text-slate-500 shrink-0" />
                 <span>
                   {formData.startDate || "Start Date"}
                   {" • "}
@@ -88,14 +88,14 @@ const LivePreview = ({ formData }) => {
               </div>
 
               <div className="flex items-center gap-2">
-                <Plane size={14} className="text-slate-400 shrink-0" />
+                <Plane size={14} className="text-slate-400 dark:text-slate-500 shrink-0" />
                 <span>{formData.modeOfTravel || "Mode of Travel"}</span>
               </div>
             </div>
 
             {/* Description Excerpt */}
             {formData.description && (
-              <p className="text-xs leading-relaxed text-slate-500 line-clamp-3">
+              <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400 line-clamp-3">
                 {formData.description}
               </p>
             )}
@@ -103,12 +103,12 @@ const LivePreview = ({ formData }) => {
             {/* Gallery Thumbnails Grid (Up to 4 files) */}
             {formData.gallery && formData.gallery.length > 0 && (
               <div>
-                <h5 className="mb-2 text-xs font-semibold text-slate-700">Gallery</h5>
+                <h5 className="mb-2 text-xs font-semibold text-slate-700 dark:text-slate-300">Gallery</h5>
                 <div className="grid grid-cols-4 gap-1.5">
                   {formData.gallery.slice(0, 4).map((item) => (
                     <div
                       key={item.id}
-                      className="aspect-square overflow-hidden rounded-lg bg-slate-100"
+                      className="aspect-square overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800"
                     >
                       {item.type.startsWith("image") ? (
                         <img
@@ -129,7 +129,7 @@ const LivePreview = ({ formData }) => {
                 </div>
 
                 {formData.gallery.length > 4 && (
-                  <p className="mt-2 text-[11px] text-slate-500">
+                  <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
                     +{formData.gallery.length - 4} more files
                   </p>
                 )}
@@ -140,8 +140,8 @@ const LivePreview = ({ formData }) => {
             <div
               className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                 formData.isPublic
-                  ? "bg-blue-50 text-blue-700"
-                  : "bg-slate-100 text-slate-700"
+                  ? "bg-blue-50 dark:bg-sky-950/80 text-blue-700 dark:text-sky-300 border border-blue-100 dark:border-sky-800/50"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
               }`}
             >
               {formData.isPublic ? (

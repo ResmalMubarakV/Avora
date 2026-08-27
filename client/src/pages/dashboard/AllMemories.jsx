@@ -91,7 +91,7 @@ const AllMemories = () => {
         <button
           type="button"
           onClick={() => navigate("/dashboard")}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 cursor-pointer"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
         >
           <ArrowLeft size={16} />
           <span>Back</span>
@@ -100,7 +100,7 @@ const AllMemories = () => {
         <button
           type="button"
           onClick={() => navigate("/dashboard/create-memory")}
-          className="group inline-flex cursor-pointer items-center justify-center gap-1.5 sm:gap-2 rounded-xl bg-slate-900 px-3.5 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-800 active:scale-[0.98]"
+          className="group inline-flex cursor-pointer items-center justify-center gap-1.5 sm:gap-2 rounded-xl bg-slate-900 dark:bg-gradient-to-r dark:from-indigo-600 dark:to-blue-600 dark:hover:from-indigo-500 dark:hover:to-blue-500 px-3.5 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm dark:shadow-[0_0_20px_rgba(99,102,241,0.35)] dark:border dark:border-indigo-400/30 transition-all duration-200 hover:bg-slate-800 active:scale-[0.98]"
         >
           <Plus
             size={16}

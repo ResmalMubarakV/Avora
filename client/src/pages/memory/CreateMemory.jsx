@@ -182,7 +182,7 @@ const CreateMemory = () => {
         <button
           type="button"
           onClick={handleCancel}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 cursor-pointer"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
         >
           <ArrowLeft size={16} />
           <span>Back</span>
@@ -225,7 +225,7 @@ const CreateMemory = () => {
           />
 
           {/* Mobile & Tablet Action Buttons */}
-          <div className="xl:hidden bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 mt-4">
+          <div className="xl:hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-4 mt-4">
             <ActionButtons
               loading={loading}
               onSubmit={handleSubmit}
@@ -237,10 +237,10 @@ const CreateMemory = () => {
 
         {/* Right Desktop Sidebar (Live Preview & Sticky Publish Button) */}
         <div className="hidden xl:block xl:col-span-1 sticky top-6 space-y-4">
-          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4 space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm p-4 space-y-4">
             <LivePreview formData={formData} />
 
-            <div className="pt-2 border-t border-slate-100">
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
               <ActionButtons
                 loading={loading}
                 onSubmit={handleSubmit}

@@ -165,6 +165,11 @@ const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false,
                                 gap-1.5
                                 rounded-full
                                 bg-white/95
+                                dark:bg-sky-950/90
+                                dark:border
+                                dark:border-sky-500/40
+                                dark:text-sky-300
+                                dark:shadow-[0_0_12px_rgba(56,189,248,0.25)]
                                 px-3.5
                                 py-1.5
                                 text-xs
@@ -172,9 +177,10 @@ const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false,
                                 text-slate-700
                                 shadow-md
                                 backdrop-blur-md
+                                transition-all
                             "
                         >
-                            <Globe size={13} className="text-blue-600" />
+                            <Globe size={13} className="text-blue-600 dark:text-sky-400" />
                             Public
                         </div>
                     ) : (
@@ -185,6 +191,11 @@ const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false,
                                 gap-1.5
                                 rounded-full
                                 bg-white/95
+                                dark:bg-indigo-950/90
+                                dark:border
+                                dark:border-indigo-500/40
+                                dark:text-indigo-300
+                                dark:shadow-[0_0_12px_rgba(99,102,241,0.25)]
                                 px-3.5
                                 py-1.5
                                 text-xs
@@ -192,9 +203,10 @@ const MemoryCard = ({ memory, onLikeToggle, isOwner = false, isLoggedIn = false,
                                 text-slate-700
                                 shadow-md
                                 backdrop-blur-md
+                                transition-all
                             "
                         >
-                            <Lock size={13} className="text-slate-500" />
+                            <Lock size={13} className="text-slate-500 dark:text-indigo-400" />
                             Private
                         </div>
                     )}

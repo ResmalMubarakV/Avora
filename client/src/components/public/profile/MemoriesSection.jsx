@@ -150,6 +150,7 @@ const MemoriesSection = ({ username, isOwner }) => {
                             lg:text-3xl
                             font-bold
                             text-slate-900
+                            dark:text-white
                             tracking-tight
                         "
                     >
@@ -164,6 +165,7 @@ const MemoriesSection = ({ username, isOwner }) => {
                                 sm:text-sm
                                 font-medium
                                 text-slate-500
+                                dark:text-slate-400
                                 tracking-wider
                                 [word-spacing:0.25rem]
                             "
@@ -193,14 +195,18 @@ const MemoriesSection = ({ username, isOwner }) => {
                                 rounded-xl
                                 border
                                 border-slate-200
+                                dark:border-slate-800
                                 bg-white
+                                dark:bg-slate-900
                                 px-3
                                 text-xs
                                 sm:text-sm
                                 font-medium
                                 text-slate-700
+                                dark:text-slate-200
                                 shadow-sm
                                 focus:border-blue-500
+                                dark:focus:border-indigo-500
                                 focus:outline-none
                                 cursor-pointer
                             "
@@ -232,12 +238,12 @@ const MemoriesSection = ({ username, isOwner }) => {
                     {[...Array(8)].map((_, index) => (
                         <div
                             key={index}
-                            className="w-full rounded-2xl sm:rounded-3xl border border-slate-200/60 bg-white p-3 space-y-3 animate-pulse shadow-xs"
+                            className="w-full rounded-2xl sm:rounded-3xl border border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-3 space-y-3 animate-pulse shadow-xs"
                         >
-                            <div className="h-40 sm:h-52 w-full bg-slate-200/80 rounded-xl sm:rounded-2xl" />
+                            <div className="h-40 sm:h-52 w-full bg-slate-200/80 dark:bg-slate-800 rounded-xl sm:rounded-2xl" />
                             <div className="space-y-2 py-1">
-                                <div className="h-4 bg-slate-200/80 rounded-md w-3/4" />
-                                <div className="h-3 bg-slate-200/80 rounded-md w-1/2" />
+                                <div className="h-4 bg-slate-200/80 dark:bg-slate-800 rounded-md w-3/4" />
+                                <div className="h-3 bg-slate-200/80 dark:bg-slate-800 rounded-md w-1/2" />
                             </div>
                         </div>
                     ))}
@@ -250,7 +256,9 @@ const MemoriesSection = ({ username, isOwner }) => {
                         border
                         border-dashed
                         border-slate-300
+                        dark:border-slate-800
                         bg-white
+                        dark:bg-slate-900/90
                         px-6
                         py-16
                         text-center
@@ -263,6 +271,7 @@ const MemoriesSection = ({ username, isOwner }) => {
                             sm:text-xl
                             font-semibold
                             text-slate-900
+                            dark:text-white
                         "
                     >
                         {isOwner
@@ -276,6 +285,7 @@ const MemoriesSection = ({ username, isOwner }) => {
                             text-xs
                             sm:text-sm
                             text-slate-500
+                            dark:text-slate-400
                             max-w-md
                             mx-auto
                         "

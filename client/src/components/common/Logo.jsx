@@ -1,12 +1,13 @@
 import { Link } from "react-router-dom";
 import avoraLogo from "../../assets/images/avoraLogo.png";
+import avoraLogoDark from "../../assets/images/avoraLogoDark.png";
 
 // ==========================================
 // LOGO COMPONENT
 // ==========================================
 /**
  * Renders the Avora brand logo with configurable size variants (sm, md, lg) 
- * and an optional navigation link destination.
+ * and an optional navigation link destination. Supports Dark Mode logo switching.
  */
 const Logo = ({ to = "/", size = "md" }) => {
   // Size configuration map
@@ -35,11 +36,19 @@ const Logo = ({ to = "/", size = "md" }) => {
       to={to}
       className={`flex items-center ${current.gap}`}
     >
-      {/* Brand Mark Icon */}
+      {/* Brand Mark Icon - Light Mode */}
       <img
         src={avoraLogo}
         alt="Avora Logo"
-        className={`${current.image} w-auto select-none`}
+        className={`${current.image} w-auto select-none dark:hidden`}
+        draggable={false}
+      />
+
+      {/* Brand Mark Icon - Dark Mode */}
+      <img
+        src={avoraLogoDark}
+        alt="Avora Logo Dark"
+        className={`${current.image} w-auto select-none hidden dark:block`}
         draggable={false}
       />
 
@@ -49,6 +58,7 @@ const Logo = ({ to = "/", size = "md" }) => {
           font-light
           uppercase
           text-slate-900
+          dark:text-white
           ${current.text}
         `}
       >

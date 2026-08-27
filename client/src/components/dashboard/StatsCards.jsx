@@ -3,12 +3,12 @@ import { Globe2, Images, Lock, Heart, ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 // ==========================================
-// STATS CARDS COMPONENT
+// STATS CARDS COMPONENT (PREMIUM LIGHT & DARK THEMES)
 // ==========================================
 /**
  * Renders summary statistic cards on the dashboard.
- * - Light Mode: Clean minimal light design.
- * - Dark Mode: Premium high-end dark slate cards with rich glowing borders & badges.
+ * - Light Mode: Elegant, soft-gradient cards with micro-shadows, subtle borders, and vivid brand accents.
+ * - Dark Mode: Premium dark slate cards with rich glowing borders, glowing badges & neon indicators.
  */
 const StatsCards = ({
   totalMemories = 0,
@@ -24,11 +24,13 @@ const StatsCards = ({
       value: totalMemories,
       description: "Total journeys preserved.",
       icon: Images,
-      iconBg: "bg-slate-50 dark:bg-slate-800/80",
-      iconBorder: "border-slate-200/60 dark:border-slate-700/60",
-      iconColor: "text-slate-700 dark:text-slate-200",
-      dotColor: "bg-slate-400 dark:bg-slate-300",
-      glowColor: "group-hover:bg-slate-200/40 dark:group-hover:bg-slate-700/30",
+      cardGradient: "from-white via-[#FAFBFD] to-slate-100/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900/95",
+      iconBg: "bg-slate-100/80 dark:bg-slate-800/90",
+      iconBorder: "border-slate-200/80 dark:border-slate-700/60",
+      iconColor: "text-slate-800 dark:text-slate-200",
+      accentBorder: "hover:border-slate-400/80 dark:hover:border-slate-600/80",
+      dotColor: "bg-slate-500 dark:bg-slate-300",
+      glowColor: "group-hover:bg-slate-200/50 dark:group-hover:bg-slate-700/30",
       path: "/dashboard/memories?filter=all",
     },
     {
@@ -36,11 +38,13 @@ const StatsCards = ({
       value: publicMemories,
       description: "Shared with global network.",
       icon: Globe2,
-      iconBg: "bg-sky-50/60 dark:bg-sky-950/60",
-      iconBorder: "border-sky-100/80 dark:border-sky-800/50",
+      cardGradient: "from-white via-sky-50/20 to-sky-100/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900/95",
+      iconBg: "bg-sky-50 dark:bg-sky-950/60",
+      iconBorder: "border-sky-200/80 dark:border-sky-800/50",
       iconColor: "text-sky-600 dark:text-sky-400",
+      accentBorder: "hover:border-sky-300/80 dark:hover:border-sky-500/50",
       dotColor: "bg-sky-500 dark:bg-sky-400",
-      glowColor: "group-hover:bg-sky-200/30 dark:group-hover:bg-sky-900/30",
+      glowColor: "group-hover:bg-sky-200/40 dark:group-hover:bg-sky-900/30",
       path: "/dashboard/memories?filter=public",
     },
     {
@@ -48,11 +52,13 @@ const StatsCards = ({
       value: privateMemories,
       description: "Secured with encryption.",
       icon: Lock,
-      iconBg: "bg-[#1E3A8A]/5 dark:bg-indigo-950/60",
-      iconBorder: "border-[#1E3A8A]/10 dark:border-indigo-800/50",
+      cardGradient: "from-white via-indigo-50/20 to-indigo-100/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900/95",
+      iconBg: "bg-indigo-50/80 dark:bg-indigo-950/60",
+      iconBorder: "border-indigo-200/80 dark:border-indigo-800/50",
       iconColor: "text-[#1E3A8A] dark:text-indigo-400",
+      accentBorder: "hover:border-indigo-300/80 dark:hover:border-indigo-500/50",
       dotColor: "bg-[#1E3A8A] dark:bg-indigo-400",
-      glowColor: "group-hover:bg-[#1E3A8A]/10 dark:group-hover:bg-indigo-900/30",
+      glowColor: "group-hover:bg-indigo-200/40 dark:group-hover:bg-indigo-900/30",
       path: "/dashboard/memories?filter=private",
     },
     {
@@ -60,9 +66,11 @@ const StatsCards = ({
       value: likedMemories,
       description: "Curated favorite moments.",
       icon: Heart,
-      iconBg: "bg-blue-50/80 dark:bg-blue-950/60",
-      iconBorder: "border-blue-100/80 dark:border-blue-800/50",
+      cardGradient: "from-white via-blue-50/20 to-blue-100/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900/95",
+      iconBg: "bg-blue-50/90 dark:bg-blue-950/60",
+      iconBorder: "border-blue-200/80 dark:border-blue-800/50",
       iconColor: "text-[#3559D4] dark:text-blue-400",
+      accentBorder: "hover:border-blue-300/80 dark:hover:border-blue-500/50",
       dotColor: "bg-[#3559D4] dark:bg-blue-400",
       glowColor: "group-hover:bg-blue-200/40 dark:group-hover:bg-blue-900/30",
       path: "/dashboard/memories?filter=liked",
@@ -72,42 +80,42 @@ const StatsCards = ({
   return (
     <section className="mb-5 lg:mb-6">
       {/* 1. MOBILE VIEW: Compact Single-Line Stats Pill Bar */}
-      <div className="block sm:hidden bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 px-3 py-2.5 rounded-2xl flex items-center justify-between text-[11px] font-medium text-slate-600 dark:text-slate-300 shadow-[0_2px_10px_rgb(0,0,0,0.02)] mb-2 transition-colors">
+      <div className="block sm:hidden bg-gradient-to-r from-white via-slate-50 to-indigo-50/30 dark:bg-none dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-[11px] font-medium text-slate-700 dark:text-slate-300 shadow-[0_2px_12px_rgba(30,58,138,0.04)] dark:shadow-none mb-2 transition-all">
         <button 
           type="button" 
           onClick={() => navigate(stats[0].path)} 
           className="flex items-center gap-1 active:opacity-70 transition-opacity"
         >
-          <span>📊</span> <b className="dark:text-white">{totalMemories}</b> <span className="text-[9px] uppercase tracking-wider text-slate-400 dark:text-slate-400">Archives</span>
+          <span>📊</span> <b className="text-slate-900 dark:text-white font-extrabold">{totalMemories}</b> <span className="text-[9px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">Archives</span>
         </button>
-        <span className="text-slate-200 dark:text-slate-800 font-light">|</span>
+        <span className="text-slate-300 dark:text-slate-800 font-light">|</span>
         <button 
           type="button" 
           onClick={() => navigate(stats[1].path)} 
           className="flex items-center gap-1 active:opacity-70 transition-opacity"
         >
-          <span>🌍</span> <b className="dark:text-white">{publicMemories}</b> <span className="text-[9px] uppercase tracking-wider text-slate-400 dark:text-slate-400">Public</span>
+          <span>🌍</span> <b className="text-slate-900 dark:text-white font-extrabold">{publicMemories}</b> <span className="text-[9px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">Public</span>
         </button>
-        <span className="text-slate-200 dark:text-slate-800 font-light">|</span>
+        <span className="text-slate-300 dark:text-slate-800 font-light">|</span>
         <button 
           type="button" 
           onClick={() => navigate(stats[2].path)} 
           className="flex items-center gap-1 active:opacity-70 transition-opacity"
         >
-          <span>🔒</span> <b className="dark:text-white">{privateMemories}</b> <span className="text-[9px] uppercase tracking-wider text-slate-400 dark:text-slate-400">Private</span>
+          <span>🔒</span> <b className="text-slate-900 dark:text-white font-extrabold">{privateMemories}</b> <span className="text-[9px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">Private</span>
         </button>
-        <span className="text-slate-200 dark:text-slate-800 font-light">|</span>
+        <span className="text-slate-300 dark:text-slate-800 font-light">|</span>
         <button 
           type="button" 
           onClick={() => navigate(stats[3].path)} 
           className="flex items-center gap-1 active:opacity-70 transition-opacity"
         >
-          <span>❤️</span> <b className="dark:text-white">{likedMemories}</b> <span className="text-[9px] uppercase tracking-wider text-slate-400 dark:text-slate-400">Likes</span>
+          <span>❤️</span> <b className="text-slate-900 dark:text-white font-extrabold">{likedMemories}</b> <span className="text-[9px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold">Likes</span>
         </button>
       </div>
 
       {/* 2. TABLET & IPAD PRO VIEW: Compact 2x2 grid */}
-      <div className="hidden sm:grid lg:hidden grid-cols-2 gap-3">
+      <div className="hidden sm:grid lg:hidden grid-cols-2 gap-3.5">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -115,24 +123,24 @@ const StatsCards = ({
               key={stat.title}
               type="button"
               onClick={() => navigate(stat.path)}
-              className="group relative flex items-center justify-between overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/90 px-3.5 py-3 text-left shadow-2xs transition-all hover:border-blue-200 dark:hover:border-indigo-500/50 hover:shadow-sm cursor-pointer"
+              className={`group relative flex items-center justify-between overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br ${stat.cardGradient} px-4 py-3.5 text-left shadow-[0_2px_10px_rgba(30,58,138,0.03)] dark:shadow-none transition-all duration-300 ${stat.accentBorder} hover:shadow-md cursor-pointer`}
             >
               <div>
-                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-[0.15em]">{stat.title}</p>
+                <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em]">{stat.title}</p>
                 <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white mt-0.5 transition-colors group-hover:text-[#1E3A8A] dark:group-hover:text-indigo-300">
                   {stat.value}
                 </h3>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium line-clamp-1">{stat.description}</p>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 font-medium line-clamp-1">{stat.description}</p>
               </div>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-lg border ${stat.iconBorder} ${stat.iconBg} shadow-2xs transition-transform group-hover:scale-105 shrink-0`}>
-                <Icon className={`h-4 w-4 ${stat.iconColor}`} />
+              <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${stat.iconBorder} ${stat.iconBg} shadow-2xs transition-transform duration-300 group-hover:scale-105 shrink-0`}>
+                <Icon className={`h-4.5 w-4.5 ${stat.iconColor}`} />
               </div>
             </button>
           );
         })}
       </div>
 
-      {/* 3. DESKTOP VIEW: Premium Dark Mode Micro-Grid Cards */}
+      {/* 3. DESKTOP VIEW: Sleek 4-Column Micro-Grid Layout */}
       <div className="hidden lg:grid lg:grid-cols-4 gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
@@ -142,10 +150,10 @@ const StatsCards = ({
               key={stat.title}
               type="button"
               onClick={() => navigate(stat.path)}
-              className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/70 dark:border-slate-800/80 bg-white dark:bg-slate-900/90 p-4 text-left shadow-[0_2px_12px_rgb(0,0,0,0.02)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] transition-all duration-300 hover:-translate-y-1 hover:border-blue-200/80 dark:hover:border-indigo-500/50 hover:shadow-[0_12px_30px_-10px_rgba(30,58,138,0.08)] dark:hover:shadow-[0_12px_30px_-5px_rgba(99,102,241,0.15)] cursor-pointer"
+              className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-gradient-to-br ${stat.cardGradient} p-4 text-left shadow-[0_4px_20px_rgba(30,58,138,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] transition-all duration-300 hover:-translate-y-1 ${stat.accentBorder} hover:shadow-[0_14px_32px_-8px_rgba(30,58,138,0.12)] dark:hover:shadow-[0_12px_30px_-5px_rgba(99,102,241,0.15)] cursor-pointer`}
             >
-              {/* Premium Micro-Grid Pattern */}
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e3a8a04_1px,transparent_1px),linear-gradient(to_bottom,#1e3a8a04_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#6366f108_1px,transparent_1px),linear-gradient(to_bottom,#6366f108_1px,transparent_1px)] bg-[size:0.85rem_0.85rem] opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />
+              {/* Micro-Grid Pattern */}
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e3a8a05_1px,transparent_1px),linear-gradient(to_bottom,#1e3a8a05_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#6366f108_1px,transparent_1px),linear-gradient(to_bottom,#6366f108_1px,transparent_1px)] bg-[size:0.85rem_0.85rem] opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />
 
               {/* Ambient Radial Glow */}
               <div className={`absolute -right-6 -top-6 h-24 w-24 rounded-full blur-2xl transition-all duration-500 group-hover:scale-125 ${stat.glowColor} pointer-events-none`} />
@@ -153,15 +161,15 @@ const StatsCards = ({
               {/* Top Row: Icon & Status Indicator */}
               <div className="relative z-10 flex items-start justify-between w-full mb-3">
                 <div
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl border ${stat.iconBorder} ${stat.iconBg} shadow-2xs transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3`}
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl border ${stat.iconBorder} ${stat.iconBg} shadow-2xs transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3`}
                 >
-                  <Icon className={`h-4.5 w-4.5 ${stat.iconColor}`} />
+                  <Icon className={`h-5 w-5 ${stat.iconColor}`} />
                 </div>
                 
                 {/* Tech Status Node */}
-                <div className="flex items-center gap-1.5 rounded-full border border-slate-100 dark:border-slate-700/60 bg-slate-50/80 dark:bg-slate-800/80 px-2.5 py-0.5 shadow-2xs backdrop-blur-md">
+                <div className="flex items-center gap-1.5 rounded-full border border-slate-200/80 dark:border-slate-700/60 bg-white/80 dark:bg-slate-800/80 px-2.5 py-0.5 shadow-2xs backdrop-blur-md">
                   <span className={`h-1.5 w-1.5 rounded-full ${stat.dotColor} animate-pulse`} />
-                  <span className="text-[8px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Live</span>
+                  <span className="text-[8px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400">Live</span>
                 </div>
               </div>
 
@@ -170,22 +178,22 @@ const StatsCards = ({
                 <div className="flex items-end justify-between">
                   <div>
                     {/* Numerical Value */}
-                    <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white transition-colors duration-300 group-hover:text-[#1E3A8A] dark:group-hover:text-indigo-300">
+                    <h2 className="text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white transition-colors duration-300 group-hover:text-[#1E3A8A] dark:group-hover:text-indigo-300">
                       {stat.value}
                     </h2>
-                    <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-400 transition-colors duration-300 group-hover:text-[#3559D4] dark:group-hover:text-indigo-400">
+                    <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500 dark:text-slate-400 transition-colors duration-300 group-hover:text-[#3559D4] dark:group-hover:text-indigo-400">
                       {stat.title}
                     </p>
                   </div>
 
                   {/* Hover Action Arrow */}
-                  <div className="mb-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-400 transition-all duration-300 group-hover:bg-blue-50 dark:group-hover:bg-indigo-950/80 group-hover:border-blue-200 dark:group-hover:border-indigo-800 group-hover:text-[#1E3A8A] dark:group-hover:text-indigo-300">
-                    <ArrowUpRight size={13} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  <div className="mb-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-500 dark:text-slate-400 shadow-2xs transition-all duration-300 group-hover:bg-[#1E3A8A] dark:group-hover:bg-indigo-950/80 group-hover:border-transparent group-hover:text-white dark:group-hover:text-indigo-300">
+                    <ArrowUpRight size={14} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                   </div>
                 </div>
 
                 {/* Subtle Description */}
-                <p className="mt-2.5 hidden text-[10px] lg:block font-medium text-slate-500/80 dark:text-slate-400/80 truncate border-t border-slate-100 dark:border-slate-800 pt-2 transition-colors group-hover:border-blue-100 dark:group-hover:border-indigo-900/50">
+                <p className="mt-2.5 hidden text-[10px] lg:block font-medium text-slate-600/90 dark:text-slate-400/80 truncate border-t border-slate-200/60 dark:border-slate-800 pt-2 transition-colors group-hover:border-indigo-200/60 dark:group-hover:border-indigo-900/50">
                   {stat.description}
                 </p>
               </div>
