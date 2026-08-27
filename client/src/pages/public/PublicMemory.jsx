@@ -964,11 +964,12 @@ export default function PublicMemory() {
         style.id = styleId;
         style.innerHTML = `
           @media print {
-            @page { size: 800px 1131px !important; margin: 0 !important; }
-            html, body { margin: 0 !important; padding: 0 !important; width: 800px !important; height: 1131px !important; background-color: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            @page { size: portrait !important; margin: 0mm !important; }
+            html, body { margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; background-color: white !important; overflow: hidden !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             .print-hidden-outlines * { outline: none !important; border: none !important; }
-            .print-only-container { position: absolute !important; top: 0 !important; left: 0 !important; display: block !important; visibility: visible !important; }
+            .print-only-container { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; max-width: 100% !important; max-height: 100% !important; margin: 0 !important; padding: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; visibility: visible !important; background-color: white !important; z-index: 99999 !important; }
+            .print-only-container > div { width: 100% !important; height: 100% !important; max-width: 100% !important; max-height: 100% !important; margin: 0 !important; padding: 0 !important; box-shadow: none !important; }
           }
           @media screen {
             .print-only-container { position: absolute; left: -9999px; top: -9999px; visibility: hidden; }
@@ -1097,7 +1098,7 @@ export default function PublicMemory() {
     return (
       <>
         {/* Hidden Export Wrapper - ONLY FOR PRINTING */}
-        <div className="print-only-container bg-white" style={{ width: "800px", height: "1131px" }}>
+        <div className="print-only-container bg-white w-[800px] h-[1131px] print:w-full print:h-full print:max-w-none print:m-0 print:p-0">
             <PrintableView memory={memory} layoutIndex={layoutIndex} mediaConfig={mediaConfig} isEditing={false} />
         </div>
 

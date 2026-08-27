@@ -1,11 +1,11 @@
 import { Check, LayoutGrid, Rows3, Calendar } from "lucide-react";
 
 // ==========================================
-// PROFILE FILTERS COMPONENT (Single Line Horizontal Layout)
+// PROFILE FILTERS COMPONENT (Clean Fixed Layout)
 // ==========================================
 /**
  * Renders compact multi-select filter controls, year filter dropdown, and mobile layout toggles
- * guaranteed to stay strictly in a single horizontal line across all viewports.
+ * in a clean fixed layout without horizontal scrolling on mobile viewports.
  */
 const ProfileFilters = ({
     isOwner,
@@ -38,12 +38,10 @@ const ProfileFilters = ({
     ];
 
     return (
-        <div className="relative z-10 flex items-center justify-between gap-2 bg-white dark:bg-slate-900/90 p-2 sm:p-3 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs overflow-x-auto whitespace-nowrap scrollbar-none transition-colors">
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 bg-white dark:bg-slate-900/90 p-2.5 sm:p-3 rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs transition-colors">
             
-            {/* Filter Buttons & Year Dropdown Forced in Single Line */}
-            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-                <span className="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0">Filter:</span>
-                
+            {/* Filter Buttons & Year Dropdown */}
+            <div className="flex items-center gap-1.5 sm:gap-2.5 flex-wrap">
                 {/* Filter Chips */}
                 {filterOptions.map((item) => {
                     const isActive = selectedFilters.includes(item.value);
@@ -56,7 +54,7 @@ const ProfileFilters = ({
                                 e.stopPropagation();
                                 if (toggleFilter) toggleFilter(item.value);
                             }}
-                            className={`pointer-events-auto inline-flex items-center gap-1 rounded-lg sm:rounded-xl px-2.5 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold transition-all duration-200 cursor-pointer select-none shrink-0 ${
+                            className={`pointer-events-auto inline-flex items-center gap-1 rounded-lg sm:rounded-xl px-2.5 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold transition-all duration-200 cursor-pointer select-none ${
                                 isActive
                                     ? "bg-slate-900 dark:bg-gradient-to-r dark:from-indigo-600 dark:to-blue-600 text-white shadow-sm dark:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
                                     : "bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white"
@@ -70,7 +68,7 @@ const ProfileFilters = ({
 
                 {/* Year Filter Dropdown */}
                 {setYear && (
-                    <div className="relative inline-block shrink-0">
+                    <div className="relative inline-block">
                         <Calendar
                             size={14}
                             className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none"
@@ -91,7 +89,7 @@ const ProfileFilters = ({
             </div>
 
             {/* Layout Toggles - Visible ONLY on Mobile screens (sm:hidden) */}
-            <div className="flex sm:hidden items-center gap-1 shrink-0 ml-auto">
+            <div className="flex sm:hidden items-center gap-1 ml-auto">
                 <button
                     type="button"
                     onClick={() => setViewMode("grid")}
