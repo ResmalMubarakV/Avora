@@ -35,13 +35,24 @@ export const fetchMemoryWeatherComparison = async (locationStr, startDateStr) =>
   try {
     if (!locationStr) return null;
 
-    // 1. Geocode location via Open-Meteo Geocoding
-    const geoRes = await fetch(
+    // 1. Geocode location via Open-Meteo Geocoding (Try full query first, fallback to first city segment)
+    let geoRes = await fetch(
       `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
         locationStr
       )}&count=1&language=en&format=json`
     );
-    const geoData = await geoRes.json();
+    let geoData = await geoRes.json();
+
+    // Fallback: If full string fails (e.g. "Kochi, Kerala, India"), search using first city word "Kochi"
+    if ((!geoData.results || geoData.results.length === 0) && locationStr.includes(",")) {
+      const citySegment = locationStr.split(",")[0].trim();
+      geoRes = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+          citySegment
+        )}&count=1&language=en&format=json`
+      );
+      geoData = await geoRes.json();
+    }
 
     if (!geoData.results || geoData.results.length === 0) return null;
 
