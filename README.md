@@ -1,118 +1,314 @@
 <div align="center">
+
   <h1>🌍 AVORA</h1>
-  <p><b>A Secure & Feature-Rich Travel Diary Application</b></p>
-  
-  ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-  ![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)
-  ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-  ![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
-  ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
+  <p><b>Your Ultimate Intelligent Travel Diary & Experience Platform</b></p>
+  <p><i>Capture, map, refine, and preserve your journey memories with AI-powered storytelling and interactive mapping.</i></p>
+
+  <br />
+
+  [![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
+  [![Vite](https://img.shields.io/badge/Vite_8-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+  [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+  [![Express](https://img.shields.io/badge/Express.js_5-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+  [![MongoDB](https://img.shields.io/badge/MongoDB_Atlas-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+  [![Google Gemini](https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
+  [![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white)](https://cloudinary.com/)
+  [![Resend API](https://img.shields.io/badge/Resend_Email-000000?style=for-the-badge&logo=resend&logoColor=white)](https://resend.com/)
+
+  <br />
+
+  [Key Features](#-key-features) •
+  [Tech Stack](#-technology-stack) •
+  [Architecture](#-system-architecture) •
+  [Getting Started](#-getting-started) •
+  [Environment Variables](#-environment-variables) •
+  [API Reference](#-api-endpoints-reference) •
+  [Project Structure](#-project-structure)
+
 </div>
 
 <br />
 
-**Avora** is a comprehensive MERN stack web application designed for users to securely store, organize, and share their travel experiences and memories. Built with a heavy focus on backend security, access control, and robust media management.
+---
+
+## 📖 Overview
+
+**Avora** is a state-of-the-art MERN stack travel journaling platform designed for travelers, creators, and adventurers to record, organize, and share their journey memories. Built with **React 19**, **Tailwind CSS v4**, **Node.js Express 5**, and **MongoDB Atlas**, Avora seamlessly blends interactive map visualization with AI-driven travel story polishing, enterprise-grade authentication, cloud media storage, and native PDF exporting.
+
+> [!NOTE]
+> **Why Avora?** Traditional journals lose media context, while simple social media lacks privacy and long-form narrative structure. Avora provides a secure, private, and intelligent digital canvas for your life's greatest journeys.
 
 ---
 
 ## ✨ Key Features
 
-### 🔐 Advanced Security & Authentication
-* **Robust Auth Flow:** Secure JWT-based authentication with encrypted password hashing (`bcryptjs`).
-* **Global Session Invalidation:** Changing or resetting a password automatically updates `passwordChangedAt`, instantly invalidating all active sessions across every device.
-* **Strict Rate Limiting:** Built-in protection against brute-force attacks with a strict 24-hour rate limiter on password reset requests.
-* **Reliable Email Delivery:** Integrated with the **Resend API** (communicating over HTTPS Port 443) to guarantee reliable password reset delivery without cloud SMTP port blocks.
+### 🗺️ Interactive Travel Maps & Journals
+* **Location Pinning:** Map your memories geographically using **Leaflet & React-Leaflet**.
+* **Rich Memory Stories:** Full CRUD capabilities for travel memories with rich text markdown, custom cover photos, visit dates, and multi-media support.
+* **Interactive Media Gallery:** Store up to 20 media assets per journal entry, powered by Cloudinary CDN.
 
-### 📸 Memory Management & UI
-* **Travel Journals:** Full CRUD operations for creating, reading, updating, and deleting travel memories.
-* **Cloud Media Uploads:** Seamless image uploads and scalable media handling powered by **Multer** and **Cloudinary**.
-* **Responsive Design:** A sleek, modern user interface optimized for all devices.
+### 🤖 AI-Powered Travel Assistant
+* **Smart Story Refinement:** Integrated with **Google Gemini AI** and **Groq / OpenAI SDKs** to assist travelers in expanding notes into captivating travel narratives.
+* **Itinerary & Advice Generation:** Interactive AI assistant endpoint to suggest local attractions, packing lists, and hidden gems.
 
-### 🛡️ Administrative Control
-* **Admin Approval Workflow:** New accounts require administrator approval before login, supporting account status management (`pending`, `approved`, `suspended`).
-* **Role-Based Access Control (RBAC):** Distinct permissions, route guards, and restrictions for standard users vs. administrators.
+### 🔒 Enterprise-Grade Auth & Security
+* **JWT & Password Encryption:** Secure authentication with JSON Web Tokens and `bcryptjs` hashing algorithms.
+* **Global Session Invalidation:** Password updates immediately trigger `passwordChangedAt` recalculation, instantly revoking active sessions across all devices.
+* **Brute-Force Rate Limiting:** 24-hour rate limiting on sensitive password reset endpoints (`express-rate-limit`).
+* **Google OAuth Integration:** Instant, seamless social login using `@react-oauth/google`.
+
+### 📧 Reliable Email Delivery
+* **Resend API Integration:** Password reset and notification emails dispatched via **Resend API over HTTPS Port 443**, bypassing cloud provider SMTP port blockages (Ports 25/587).
+
+### 🛡️ Administrative Control & RBAC
+* **Admin Approval Workflow:** Mandatory account approval workflow supporting `pending`, `approved`, and `suspended` statuses.
+* **Role-Based Guards:** Strict API route guards and UI state controls distinguishing standard travelers from system administrators.
+
+### 📄 Exporting & Document Sharing
+* **PDF & Image Journal Exports:** Export full memories and travel logs as high-resolution PDFs or images using `jspdf`, `html2pdf.js`, and `html2canvas`.
+
+---
+
+## 📐 System Architecture
+
+```mermaid
+graph TD
+    User([🌐 Traveler / User]) -->|HTTPS / React 19| Client[Client SPA - Vite + Tailwind CSS]
+    Client -->|REST API Requests| Server[Server API - Node.js + Express 5]
+    
+    subgraph Core Backend Service
+        Server -->|Auth Middleware & Rate Limiter| AuthGuard[JWT Guard & Rate Limiter]
+        AuthGuard -->|Controllers & Business Logic| Controllers[API Controllers]
+    end
+    
+    subgraph Data & Cloud Infrastructure
+        Controllers -->|Read / Write Documents| Mongo[(MongoDB Atlas)]
+        Controllers -->|Upload Media Assets| Cloudinary[Cloudinary CDN]
+        Controllers -->|HTTPS Port 443 Mail| Resend[Resend Email API]
+        Controllers -->|Generate Stories / Advice| Gemini[Google Gemini AI / Groq]
+    end
+```
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Frontend | Backend |
-| :--- | :--- |
-| React & Vite | Node.js & Express.js |
-| Modern CSS / Responsive Design | MongoDB Atlas & Mongoose ODM |
-| Hosted on **Vercel** | JSON Web Tokens (JWT) & bcryptjs |
-| | Resend API (HTTP email service) |
-| | Multer & Cloudinary |
-| | Hosted on **Render** |
+| Domain | Technology | Description |
+| :--- | :--- | :--- |
+| **Frontend Framework** | **React 19** & **Vite 8** | Modern, ultra-fast client single-page application |
+| **Styling & Icons** | **Tailwind CSS v4** & **Lucide React** | Utility-first styling with sleek typography (`Outfit`) |
+| **Maps & Interactive** | **Leaflet** & **React-Leaflet** | Interactive vector mapping and custom pin markers |
+| **Export Engines** | **jspdf**, **html2pdf.js**, **html2canvas** | High-fidelity PDF generation & DOM image capture |
+| **Backend Runtime** | **Node.js** & **Express.js 5** | Scalable RESTful API architecture |
+| **Database & ODM** | **MongoDB Atlas** & **Mongoose** | Cloud NoSQL database with schema validation |
+| **Authentication** | **JWT**, **bcryptjs**, **Google OAuth** | Token security, password hashing, and social login |
+| **AI Intelligence** | **Google Gemini AI** & **Groq SDK** | AI narrative expansion and intelligent assistance |
+| **Media Engine** | **Cloudinary** & **Multer** | Scalable image uploads, cloud CDN transformations |
+| **Email Service** | **Resend API** | Reliable transactional email over HTTPS Port 443 |
+| **Deployment** | **Vercel** (Client) & **Render** (Server) | Continuous deployment infrastructure |
 
 ---
 
 ## 🚀 Getting Started
 
-### Prerequisites
-Make sure you have [Node.js](https://nodejs.org/) and [Git](https://git-scm.com/) installed. You will also need accounts for [MongoDB Atlas](https://www.mongodb.com/), [Cloudinary](https://cloudinary.com/), and [Resend](https://resend.com/).
+Follow these step-by-step instructions to get a local development instance of **Avora** up and running.
 
-### 1. Clone the repository
+### 📋 Prerequisites
+
+Make sure you have the following installed on your machine:
+* [Node.js](https://nodejs.org/) (v18.x or higher)
+* [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+* [Git](https://git-scm.com/)
+
+You will also need credentials for:
+* [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) (Database Connection String)
+* [Cloudinary](https://cloudinary.com/) (Cloud Name, API Key & Secret)
+* [Resend](https://resend.com/) (API Key for transactional emails)
+* [Google Gemini API Key](https://ai.google.dev/) (For AI travel assistant features)
+
+---
+
+### 📥 1. Clone the Repository
+
 ```bash
-git clone [https://github.com/ResmalMubarakV/Avora.git](https://github.com/ResmalMubarakV/Avora.git)
+git clone https://github.com/ResmalMubarakV/Avora.git
 cd Avora
+```
 
-2. Install Dependencies
-Backend:
+---
 
-Bash
+### 📦 2. Install Dependencies
+
+#### Backend Server:
+```bash
 cd server
 npm install
-Frontend:
+```
 
-Bash
+#### Frontend Client:
+```bash
 cd ../client
 npm install
-3. Environment Variables
-Create a .env file in the server/ directory and configure the following variables:
+```
 
-Code snippet
+---
+
+### 🔑 3. Environment Variables Configuration
+
+Create a `.env` file in the `server/` directory:
+
+```bash
+touch server/.env
+```
+
+Add the following environment variables to `server/.env`:
+
+```env
+# Server Configuration
 PORT=8000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret_key
 CLIENT_URL=http://localhost:5173
+NODE_ENV=development
 
-# Email Service
-RESEND_API_KEY=your_resend_api_key
+# Database & Security
+MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/avora?retryWrites=true&w=majority
+JWT_SECRET=your_super_secret_jwt_key_here
 
-# Media Storage
-CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+# Transactional Email Service (Resend)
+RESEND_API_KEY=re_123456789_your_resend_key
+
+# Cloud Media Storage (Cloudinary)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-4. Running the Application
-Start the Backend Server:
-Open a terminal in the root directory and run:
 
-Bash
+# AI Assistant Service
+GEMINI_API_KEY=your_google_gemini_api_key
+```
+
+*(Optionally configure Google OAuth variables in `client/` if using Google Sign-In).*
+
+---
+
+### 💻 4. Running the Development Application
+
+#### Start Backend API Server:
+```bash
 cd server
 npm run dev
-Start the Frontend Client:
-Open a new terminal and run:
+```
+> Server will start listening at `http://localhost:8000`
 
-Bash
+#### Start Frontend Client:
+Open a second terminal window:
+```bash
 cd client
 npm run dev
+```
+> Client application will open at `http://localhost:5173`
 
+---
 
-📂 Project Structure
+## ⚙️ Environment Variables Reference
 
+| Variable Name | Required | Description |
+| :--- | :---: | :--- |
+| `PORT` | Yes | Port for Express server (Default: `8000`) |
+| `MONGO_URI` | Yes | MongoDB Atlas connection URI |
+| `JWT_SECRET` | Yes | Secret key for signing JWT tokens |
+| `CLIENT_URL` | Yes | Frontend application URL for CORS rules |
+| `RESEND_API_KEY` | Yes | API key for Resend email service |
+| `CLOUDINARY_CLOUD_NAME` | Yes | Cloudinary Cloud Name |
+| `CLOUDINARY_API_KEY` | Yes | Cloudinary API Key |
+| `CLOUDINARY_API_SECRET` | Yes | Cloudinary API Secret |
+| `GEMINI_API_KEY` | Optional | Google Gemini API key for AI features |
+
+---
+
+## 🔌 API Endpoints Reference
+
+### 🔐 Authentication Routes (`/api/auth`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/register` | Public | Register a new traveler account |
+| `POST` | `/login` | Public | Authenticate user & return JWT token |
+| `POST` | `/forgot-password` | Public (Rate Limited) | Send password reset email via Resend |
+| `POST` | `/reset-password/:token` | Public | Reset password with valid token |
+
+### 📸 Travel Memories (`/api/memories`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/` | Private | Fetch all user travel memories |
+| `GET` | `/dashboard-overview` | Private | Fetch dashboard metrics & recent journals |
+| `POST` | `/` | Private | Create new memory with cover & media files |
+| `GET` | `/:id` | Private | Fetch single memory details |
+| `PUT` | `/:id` | Private | Update memory contents and media |
+| `PATCH` | `/:id/like` | Private | Toggle favorite / like status |
+| `PATCH` | `/:id/pin` | Private | Toggle pinned memory status |
+| `DELETE` | `/:id` | Private | Delete memory entry and cloud assets |
+
+### 🤖 AI Assistant (`/api/ai`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/` | Private | Generate AI narrative expansions & advice |
+
+### 🛡️ Admin Management (`/api/admin`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/users` | Admin | List all registered accounts |
+| `PATCH` | `/users/:id/status` | Admin | Update account status (`approved`, `suspended`) |
+
+---
+
+## 📁 Project Structure
+
+```
 Avora/
-├── client/                 # Frontend React application
-│   ├── src/
-│   └── package.json
-└── server/                 # Backend Express application
-    ├── config/             # Database configuration (MongoDB)
-    ├── constants/          # Reserved usernames and app constants
-    ├── controllers/        # Route business logic (auth, memories, admin)
-    ├── middleware/         # Security, rate limiters, and authentication guards
-    ├── models/             # Mongoose schemas (User, Memory, etc.)
-    ├── routes/             # API endpoint definitions
-    ├── templates/          # HTML email templates
-    ├── utils/              # Helper utilities (Resend email, validators)
-    ├── server.js           # Express app entry point
-    └── package.json
+├── 📁 client/                    # Frontend React SPA
+│   ├── 📁 public/                # Static assets & favicons
+│   ├── 📁 src/
+│   │   ├── 📁 components/        # UI components & map widgets
+│   │   ├── 📁 pages/             # Application route views
+│   │   ├── 📁 utils/             # Helper utilities & API clients
+│   │   ├── 📄 App.jsx            # Main app entry & routing
+│   │   └── 📄 main.jsx           # React DOM root
+│   ├── 📄 package.json           # Frontend dependencies
+│   └── 📄 vite.config.js         # Vite bundler configuration
+│
+└── 📁 server/                    # Backend Express API Server
+    ├── 📁 config/                # Database connection setup
+    ├── 📁 constants/             # Application constants & reserved names
+    ├── 📁 controllers/           # Route business logic handlers
+    ├── 📁 middleware/            # Auth guard, rate limiters, upload uploaders
+    ├── 📁 models/                # Mongoose schemas (User, Memory)
+    ├── 📁 routes/                # Express API endpoint definitions
+    ├── 📁 templates/             # Responsive HTML email templates
+    ├── 📁 utils/                 # Resend mailer & helper utilities
+    ├── 📄 server.js              # Express app server entry point
+    └── 📄 package.json           # Server dependencies
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions make the open-source community an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+Distributed under the **ISC License**. See `LICENSE` for more information.
+
+---
+
+<div align="center">
+  <p>Crafted with ❤️ by <b><a href="https://github.com/ResmalMubarakV">Resmal Mubarak V</a></b></p>
+  <p>© 2026 Avora Platform. All rights reserved.</p>
+</div>
