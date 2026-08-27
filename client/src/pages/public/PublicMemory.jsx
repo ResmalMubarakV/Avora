@@ -980,11 +980,63 @@ export default function PublicMemory() {
     return () => { const style = document.getElementById(styleId); if (style) document.head.removeChild(style); };
   }, [isPreviewMode]);
 
-  const handleNativePrint = () => {
+  const handleNativePrint = async () => {
     setShowImagePickerModal(false);
-    const prevTitle = document.title;
-    document.title = `${memory?.slug || 'memory'}-diary`;
-    setTimeout(() => { window.print(); document.title = prevTitle; }, 200);
+    const toastId = toast.loading("Generating high-resolution memory PDF...");
+    
+    try {
+      const element = document.querySelector(".print-only-container");
+      if (element) {
+        // Temporarily reveal element for html2pdf canvas render
+        const origPos = element.style.position;
+        const origLeft = element.style.left;
+        const origTop = element.style.top;
+        const origVis = element.style.visibility;
+        const origDisplay = element.style.display;
+
+        element.style.position = "fixed";
+        element.style.left = "0";
+        element.style.top = "0";
+        element.style.visibility = "visible";
+        element.style.display = "block";
+        element.style.zIndex = "999999";
+
+        const html2pdfModule = (await import("html2pdf.js")).default;
+        const opt = {
+          margin: 0,
+          filename: `${memory?.slug || 'memory'}-diary.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            allowTaint: true,
+            windowWidth: 800,
+            windowHeight: 1131
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        await html2pdfModule().set(opt).from(element).save();
+
+        // Restore original hidden state
+        element.style.position = origPos || "absolute";
+        element.style.left = origLeft || "-9999px";
+        element.style.top = origTop || "-9999px";
+        element.style.visibility = origVis || "hidden";
+        element.style.display = origDisplay || "";
+
+        toast.success("PDF diary downloaded successfully!", { id: toastId });
+      } else {
+        throw new Error("Container not found");
+      }
+    } catch (err) {
+      console.warn("Direct PDF render fallback to native print:", err);
+      toast.dismiss(toastId);
+      const prevTitle = document.title;
+      document.title = `${memory?.slug || 'memory'}-diary`;
+      setTimeout(() => { window.print(); document.title = prevTitle; }, 200);
+    }
   };
 
   useEffect(() => {
