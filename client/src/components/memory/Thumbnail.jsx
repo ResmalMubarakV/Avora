@@ -28,6 +28,13 @@ const Thumbnail = ({ item, onClick }) => {
                 bg-slate-900
                 w-full
                 h-full
+                border
+                border-slate-200/80
+                dark:border-slate-800
+                ring-1
+                ring-slate-900/5
+                dark:ring-white/10
+                shadow-2xs
             "
         >
             {isVideo ? (

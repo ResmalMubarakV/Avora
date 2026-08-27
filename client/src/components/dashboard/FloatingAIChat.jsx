@@ -4,18 +4,18 @@ import useAI from "../../hooks/useAI";
 import MarkdownRenderer from "../ai/MarkdownRenderer";
 
 // ==========================================
-// FLOATING AI CHAT COMPONENT (Draggable & Responsive)
+// FLOATING AI CHAT COMPONENT (Fixed FAB & Draggable Chatbox)
 // ==========================================
 /**
- * Draggable Floating Action Button (FAB) widget anchored to the dashboard.
- * Supports smooth mouse/touch dragging, mobile scaling, and dark theme styling.
+ * Fixed Floating Action Button (FAB) anchored to bottom-right corner of viewport.
+ * Features an isolated draggable AI chat window that can be moved anywhere on screen.
  */
 const FloatingAIChat = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef(null);
 
-  // Position state for drag & drop
+  // Position state for chatbox drag & drop
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef({ startX: 0, startY: 0, initialX: 0, initialY: 0 });
@@ -41,7 +41,7 @@ const FloatingAIChat = () => {
     setInputMessage("");
   };
 
-  // --- Drag & Drop Handlers (Mouse & Touch) ---
+  // --- Chatbox Header Drag & Drop Handlers (Mouse & Touch) ---
   const handleStart = (clientX, clientY) => {
     setIsDragging(true);
     dragRef.current = {
@@ -89,15 +89,15 @@ const FloatingAIChat = () => {
   }, [isDragging]);
 
   return (
-    <div
-      style={{
-        transform: `translate(${position.x}px, ${position.y}px)`,
-      }}
-      className="fixed bottom-6 right-5 sm:bottom-10 sm:right-10 z-50 transition-transform duration-75 select-none"
-    >
-      {/* Pop-up Chat Window */}
+    <div className="fixed bottom-6 right-5 sm:bottom-10 sm:right-10 z-50 select-none">
+      {/* Draggable Pop-up Chat Window */}
       {isOpen && (
-        <div className="mb-3 flex flex-col h-[28rem] sm:h-[32rem] w-[88vw] sm:w-[24rem] max-w-sm rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
+        <div
+          style={{
+            transform: `translate(${position.x}px, ${position.y}px)`,
+          }}
+          className="mb-3 flex flex-col h-[28rem] sm:h-[32rem] w-[88vw] sm:w-[24rem] max-w-sm rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300 transition-transform duration-75"
+        >
           {/* Header & Drag Handle */}
           <div
             onMouseDown={(e) => handleStart(e.clientX, e.clientY)}
@@ -204,14 +204,12 @@ const FloatingAIChat = () => {
         </div>
       )}
 
-      {/* Responsive Floating Action Button (FAB) - Compact on Mobile */}
+      {/* Fixed Floating Action Button (FAB) - Always Anchored in Corner */}
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        onMouseDown={(e) => handleStart(e.clientX, e.clientY)}
-        onTouchStart={(e) => handleStart(e.touches[0].clientX, e.touches[0].clientY)}
         aria-label="Open AI Assistant"
-        className="group relative flex h-11 w-11 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#3559D4] via-[#4166E0] to-[#1E3A8A] dark:from-indigo-600 dark:to-blue-700 text-white shadow-lg sm:shadow-xl shadow-blue-600/30 dark:shadow-indigo-900/50 transition-all duration-300 hover:scale-110 active:scale-95 cursor-grab active:cursor-grabbing ml-auto"
+        className="group relative flex h-11 w-11 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#3559D4] via-[#4166E0] to-[#1E3A8A] dark:from-indigo-600 dark:to-blue-700 text-white shadow-lg sm:shadow-xl shadow-blue-600/30 dark:shadow-indigo-900/50 transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer ml-auto"
       >
         <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-300 group-hover:rotate-12" />
         

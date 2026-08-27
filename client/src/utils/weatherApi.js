@@ -60,6 +60,7 @@ export const fetchMemoryWeatherComparison = async (locationStr, startDateStr) =>
         temp: Math.round(liveData.current_weather.temperature),
         condition: codeInfo.label,
         icon: codeInfo.icon,
+        windspeed: Math.round(liveData.current_weather.windspeed),
       };
     }
 

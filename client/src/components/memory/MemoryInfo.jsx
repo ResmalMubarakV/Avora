@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import api from "../../api/axios";
-import DestinationGuideCard from "../common/DestinationGuideCard";
 import WeatherComparisonCard from "./WeatherComparisonCard";
 
 // ==========================================
@@ -146,14 +145,9 @@ const MemoryInfo = ({ memory, isOwner = false, isLoggedIn = false }) => {
                     </div>
                 </div>
 
-                {/* Destination Etiquette & Emergency Guide */}
-                {memory.location && (
-                  <DestinationGuideCard location={memory.location} className="mt-4" />
-                )}
-
                 {/* Destination Weather Comparison (Historical Travel Date vs Live Today) */}
                 {memory.location && (
-                  <WeatherComparisonCard location={memory.location} startDate={memory.startDate} className="mt-3" />
+                  <WeatherComparisonCard location={memory.location} startDate={memory.startDate} className="mt-4" />
                 )}
             </div>
           </div>

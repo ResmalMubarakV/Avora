@@ -34,6 +34,13 @@ const ViewGalleryCard = ({ cover, remaining, onClick }) => {
                 focus:outline-none
                 cursor-pointer
                 bg-slate-900
+                border
+                border-slate-200/80
+                dark:border-slate-800
+                ring-1
+                ring-slate-900/5
+                dark:ring-white/10
+                shadow-2xs
             "
         >
             {/* Background Image (Only rendered if it's a valid photo cover) */}

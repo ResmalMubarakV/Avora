@@ -24,6 +24,13 @@ const CoverImage = ({ image, onClick }) => {
                 rounded-3xl
                 focus:outline-none
                 cursor-pointer
+                border
+                border-slate-200/80
+                dark:border-slate-800
+                ring-1
+                ring-slate-900/5
+                dark:ring-white/10
+                shadow-xs
             "
         >
             {/* Cover Image */}
