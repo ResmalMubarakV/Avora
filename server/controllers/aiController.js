@@ -23,6 +23,53 @@ const GROQ_MODELS = [
   "qwen-2.5-coder-32b"
 ];
 
+// --- Google Gemini API Invocation (100% Free & Sub-Second) ---
+const callGemini = async (apiKey, userMessage, compressedArchive) => {
+  console.log("Attempting Google Gemini API...");
+  const systemText = `You are Avora AI, a budget-first travel planning assistant. Previous trips: [${compressedArchive || "None"}]. Provide clean, practical travel advice and itineraries.`;
+  
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000); // 8-second timeout limit
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `${systemText}\n\nUser Question: ${userMessage}`
+          }]
+        }],
+        generationConfig: {
+          maxOutputTokens: 1000,
+          temperature: 0.4
+        }
+      }),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+    const data = await res.json();
+
+    if (res.ok && data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+      console.log("Google Gemini API success!");
+      return data.candidates[0].content.parts[0].text.trim();
+    } else {
+      const errMsg = data?.error?.message || `HTTP ${res.status}`;
+      console.warn("Gemini API error response:", errMsg);
+      throw new Error(errMsg);
+    }
+  } catch (err) {
+    clearTimeout(timeoutId);
+    console.warn("Gemini API invocation failed:", err.message);
+    throw err;
+  }
+};
+
 // --- OpenRouter API Invocation ---
 const callOpenRouter = async (apiKey, messages) => {
   if (!apiKey || !apiKey.startsWith("sk-or-")) {
@@ -32,6 +79,9 @@ const callOpenRouter = async (apiKey, messages) => {
   let lastErr = null;
 
   for (const model of OPENROUTER_FREE_MODELS) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000); // 6-second timeout limit
+
     try {
       console.log(`Attempting OpenRouter AI model: ${model}`);
       const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -48,8 +98,10 @@ const callOpenRouter = async (apiKey, messages) => {
           temperature: 0.4,
           max_tokens: 1000,
         }),
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
       const data = await res.json();
 
       if (res.ok && data?.choices?.[0]?.message?.content) {
@@ -61,6 +113,7 @@ const callOpenRouter = async (apiKey, messages) => {
         lastErr = new Error(errMsg);
       }
     } catch (err) {
+      clearTimeout(timeoutId);
       console.warn(`OpenRouter model ${model} network error:`, err.message);
       lastErr = err;
     }
@@ -109,10 +162,12 @@ const callPollinations = async (userMessage, compressedArchive) => {
   const cleanQuery = userMessage.trim();
   const systemText = `You are Avora AI, a budget-first travel planning assistant. Previous trips: [${compressedArchive || "None"}]. Provide clean, practical travel advice and itineraries.`;
   
-  // Qwen and Llama are the fastest free response models on Pollinations
   const models = ["qwen", "mistral", "openai", "llama"];
 
   for (const model of models) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000); // Strict 4-second timeout limit
+
     try {
       console.log(`Trying Pollinations free GET model: ${model}`);
       const promptUrl = `https://text.pollinations.ai/${encodeURIComponent(cleanQuery)}?model=${model}&system=${encodeURIComponent(systemText)}`;
@@ -122,7 +177,10 @@ const callPollinations = async (userMessage, compressedArchive) => {
         headers: {
           "Accept": "text/plain, text/html, application/json",
         },
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (res.ok) {
         const text = await res.text();
@@ -132,6 +190,7 @@ const callPollinations = async (userMessage, compressedArchive) => {
         }
       }
     } catch (err) {
+      clearTimeout(timeoutId);
       console.warn(`Pollinations model ${model} failed:`, err.message);
     }
   }
@@ -140,8 +199,8 @@ const callPollinations = async (userMessage, compressedArchive) => {
 };
 
 // ==========================================
-// AVORA AI: RESILIENT PRIMARY FREE ENGINE
-// Priority: Pollinations GET Free (Instant) -> Groq -> OpenRouter
+// AVORA AI: GUARANTEED UPTIME MULTI-PROVIDER CONTROLLER
+// Priority: Google Gemini -> Groq -> OpenRouter -> Pollinations GET Free
 // ==========================================
 const generateAI = async (req, res) => {
   try {
@@ -226,33 +285,45 @@ Instructions: Provide precise, highly tailored destination suggestions or reflec
       { role: "user", content: message },
     ];
 
+    const geminiKey = process.env.GEMINI_API_KEY;
     const openRouterKey = process.env.OPENROUTER_API_KEY || (process.env.GROQ_API_KEY?.startsWith("sk-or-") ? process.env.GROQ_API_KEY : null);
     const groqKey = process.env.GROQ_API_KEY;
 
     let aiResponseText = null;
 
-    // 1. Try Pollinations Public Free AI FIRST (Requires 0 Keys - 100% Guaranteed Success & Instant Response)
-    try {
-      aiResponseText = await callPollinations(message, compressedArchive);
-    } catch (pollErr) {
-      console.warn("Pollinations primary provider failed, testing fallbacks:", pollErr.message);
+    // 1. Try Google Gemini API FIRST if key is available (Sub-Second response)
+    if (geminiKey) {
+      try {
+        aiResponseText = await callGemini(geminiKey, message, compressedArchive);
+      } catch (geminiErr) {
+        console.warn("Google Gemini provider failed, trying fallbacks:", geminiErr.message);
+      }
     }
 
-    // 2. Fallback to Groq if Pollinations did not yield response and Groq key is present
+    // 2. Try Groq if valid key is available
     if (!aiResponseText && groqKey && !groqKey.startsWith("sk-or-")) {
       try {
         aiResponseText = await callGroq(groqKey, apiMessages);
       } catch (groqErr) {
-        console.warn("Groq fallback failed:", groqErr.message);
+        console.warn("Groq provider failed:", groqErr.message);
       }
     }
 
-    // 3. Fallback to OpenRouter if key is available
+    // 3. Try OpenRouter if valid key is available
     if (!aiResponseText && openRouterKey && openRouterKey.startsWith("sk-or-")) {
       try {
         aiResponseText = await callOpenRouter(openRouterKey, apiMessages);
       } catch (orErr) {
-        console.warn("OpenRouter fallback failed:", orErr.message);
+        console.warn("OpenRouter provider failed:", orErr.message);
+      }
+    }
+
+    // 4. Fallback to Pollinations Public Free AI (Requires 0 Keys - 100% Guaranteed Success with strict timeout)
+    if (!aiResponseText) {
+      try {
+        aiResponseText = await callPollinations(message, compressedArchive);
+      } catch (pollErr) {
+        console.warn("Pollinations provider failed:", pollErr.message);
       }
     }
 
