@@ -14,23 +14,24 @@ const OPENROUTER_FREE_MODELS = [
 ];
 
 // ==========================================
-// GROQ CURRENT ACTIVE PRODUCTION MODELS
+// GROQ ACTIVE PRODUCTION MODELS (2026)
 // ==========================================
 const GROQ_MODELS = [
   "llama-3.3-70b-versatile",
   "llama-3.1-8b-instant",
-  "deepseek-r1-distill-llama-70b",
-  "qwen-2.5-coder-32b"
+  "openai/gpt-oss-120b",
+  "openai/gpt-oss-20b"
 ];
 
-// --- Google Gemini API Invocation (100% Free & Sub-Second) ---
+// --- Google Gemini API Invocation (Updated to Gemini 3.6 Flash) ---
 const callGemini = async (apiKey, userMessage, compressedArchive) => {
   console.log("Attempting Google Gemini API...");
   const systemText = `You are Avora AI, a budget-first travel planning assistant. Previous trips: [${compressedArchive || "None"}]. Provide clean, practical travel advice and itineraries.`;
   
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  // Updated endpoint to use current gemini-3.6-flash model
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000); // 8-second timeout limit
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
 
   try {
     const res = await fetch(url, {
@@ -80,7 +81,7 @@ const callOpenRouter = async (apiKey, messages) => {
 
   for (const model of OPENROUTER_FREE_MODELS) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000); // 6-second timeout limit
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
 
     try {
       console.log(`Attempting OpenRouter AI model: ${model}`);
@@ -155,18 +156,18 @@ const callGroq = async (apiKey, messages) => {
   throw lastErr || new Error("All Groq models failed");
 };
 
-// --- Pollinations Free AI Engine (Unconditional Public GET Endpoint - 100% Free - Zero Keys Required) ---
+// --- Pollinations Free AI Engine (Expanded Timeout & Model List) ---
 const callPollinations = async (userMessage, compressedArchive) => {
   console.log("Attempting Pollinations Public Free AI Engine...");
 
   const cleanQuery = userMessage.trim();
   const systemText = `You are Avora AI, a budget-first travel planning assistant. Previous trips: [${compressedArchive || "None"}]. Provide clean, practical travel advice and itineraries.`;
   
-  const models = ["qwen", "mistral", "openai", "llama"];
+  const models = ["openai", "llama", "mistral"];
 
   for (const model of models) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000); // Strict 4-second timeout limit
+    const timeoutId = setTimeout(() => controller.abort(), 6000); // Expanded to 6 seconds
 
     try {
       console.log(`Trying Pollinations free GET model: ${model}`);
@@ -200,7 +201,6 @@ const callPollinations = async (userMessage, compressedArchive) => {
 
 // ==========================================
 // AVORA AI: GUARANTEED UPTIME MULTI-PROVIDER CONTROLLER
-// Priority: Google Gemini -> Groq -> OpenRouter -> Pollinations GET Free
 // ==========================================
 const generateAI = async (req, res) => {
   try {
@@ -213,7 +213,6 @@ const generateAI = async (req, res) => {
       return res.status(400).json({ message: "Message is required" });
     }
 
-    // Fetch user with minimal required footprint
     const user = await User.findById(req.user._id).select("name username location bio");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -221,7 +220,6 @@ const generateAI = async (req, res) => {
 
     const query = message.toLowerCase();
 
-    // Intent detection flags to control context activation
     const isGreeting = ["hi", "hello", "hey", "good morning", "good evening", "good afternoon"].some(
       (word) => query === word
     );
@@ -234,7 +232,6 @@ const generateAI = async (req, res) => {
 
     let compressedArchive = "";
 
-    // TOKEN OPTIMIZATION MODELING: Compress all historical trips into a micro-string layout
     if (isTravelQuery || isDetailedItinerary) {
       const allMemories = await Memory.find({ user: req.user._id })
         .sort({ startDate: -1 })
@@ -251,11 +248,10 @@ const generateAI = async (req, res) => {
       }
     }
 
-    // RIGID SYSTEM PROMPT ARCHITECTURE (Enforcing strict constraint modeling)
     let systemPrompt = `You are Avora AI, a high-precision travel planning assistant. 
     
 CORE CONSTRAINTS:
-1. GEOGRAPHICAL & LOGISTICAL ACCURACY: Calculate true real-world transit times and distances (e.g., Palakkad to Pondicherry is ~350 km taking 7-9 hours by train/bus). Never hallucinate false or short transit windows. Respect regional rules (e.g., vehicle-free zones like Matheran where cars stop at Dasturi Point).
+1. GEOGRAPHICAL & LOGISTICAL ACCURACY: Calculate true real-world transit times and distances. Never hallucinate false or short transit windows. Respect regional rules.
 2. BUDGET-FIRST MANDATE: Prioritize extreme budget/backpacker travel. Suggest hostels, homestays, public transport, trains, and affordable local food. Avoid luxury or mid-range resorts.
 3. PERSONALIZATION: Analyze the user's travel history to completely avoid recommending destinations they have already visited.`;
 
@@ -264,7 +260,7 @@ CORE CONSTRAINTS:
     } else if (isDetailedItinerary) {
       systemPrompt += `\nContext: Detailed Itinerary Request.
 User Archive: [${compressedArchive || "None"}]
-Instructions: Generate a clean, structured day-by-day schedule (Morning, Afternoon, Evening) with low-cost activities, realistic transit schedules, and an economical budget breakdown.`;
+Instructions: Generate a clean, structured day-by-day schedule (Morning, Afternoon, Evening) with low-code/low-cost activities, realistic transit schedules, and an economical budget breakdown.`;
     } else if (isTravelQuery) {
       systemPrompt += `\nContext: Travel Planning or Memory Query.
 User Archive: [${compressedArchive || "None"}]
@@ -273,7 +269,6 @@ Instructions: Provide precise, highly tailored destination suggestions or reflec
       systemPrompt += `\nContext: General Inquiry. Keep answers crisp, structured, and practical.`;
     }
 
-    // TOKEN RATE-LIMIT PROTECTION: Truncate conversation history to the last 3 turns
     const sanitizedHistory = history.slice(-3).map((msg) => ({
       role: msg.role,
       content: msg.content,
@@ -291,7 +286,6 @@ Instructions: Provide precise, highly tailored destination suggestions or reflec
 
     let aiResponseText = null;
 
-    // 1. Try Google Gemini API FIRST if key is available (Sub-Second response)
     if (geminiKey) {
       try {
         aiResponseText = await callGemini(geminiKey, message, compressedArchive);
@@ -300,7 +294,6 @@ Instructions: Provide precise, highly tailored destination suggestions or reflec
       }
     }
 
-    // 2. Try Groq if valid key is available
     if (!aiResponseText && groqKey && !groqKey.startsWith("sk-or-")) {
       try {
         aiResponseText = await callGroq(groqKey, apiMessages);
@@ -309,7 +302,6 @@ Instructions: Provide precise, highly tailored destination suggestions or reflec
       }
     }
 
-    // 3. Try OpenRouter if valid key is available
     if (!aiResponseText && openRouterKey && openRouterKey.startsWith("sk-or-")) {
       try {
         aiResponseText = await callOpenRouter(openRouterKey, apiMessages);
@@ -318,7 +310,6 @@ Instructions: Provide precise, highly tailored destination suggestions or reflec
       }
     }
 
-    // 4. Fallback to Pollinations Public Free AI (Requires 0 Keys - 100% Guaranteed Success with strict timeout)
     if (!aiResponseText) {
       try {
         aiResponseText = await callPollinations(message, compressedArchive);
