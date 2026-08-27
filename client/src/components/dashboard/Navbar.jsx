@@ -35,7 +35,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 dark:border-slate-800/80 dark:bg-slate-900/95 backdrop-blur-md shrink-0 overflow-visible transition-colors duration-300">
-      <div className="mx-auto flex h-16 sm:h-20 max-w-7xl items-center justify-between px-3 sm:px-6 gap-2 relative overflow-visible">
+      <div className="mx-auto flex h-16 sm:h-20 max-w-[1600px] items-center justify-between px-4 sm:px-6 lg:px-8 gap-2 relative overflow-visible">
         
         {/* Expanded Mobile Search Overlay Drawer */}
         {mobileSearchOpen && (

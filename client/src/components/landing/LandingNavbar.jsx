@@ -17,17 +17,15 @@ const Navbar = () => {
                 className="
                     mx-auto
                     flex
-                    max-w-7xl
+                    max-w-[1600px]
                     w-full
                     items-center
                     justify-between
-
                     px-4
+                    sm:px-6
+                    lg:px-8
                     py-4
-
-                    sm:px-5
-                    md:px-8
-                    md:py-6
+                    md:py-5
                 "
             >
                 {/* Brand Logo Section */}
