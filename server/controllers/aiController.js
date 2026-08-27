@@ -104,27 +104,40 @@ const callGroq = async (apiKey, messages) => {
   throw lastErr || new Error("All Groq models failed");
 };
 
-// --- Pollinations Free AI Engine (Unconditional Public Backup - Zero Keys Required) ---
+// --- Pollinations Free AI Engine (Unconditional Public GET Endpoint - 100% Free - Zero Keys Required) ---
 const callPollinations = async (messages) => {
-  console.log("Attempting Pollinations Public Free AI Engine");
-  const res = await fetch("https://text.pollinations.ai/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      messages: messages,
-      model: "openai",
-      seed: Math.floor(Math.random() * 100000),
-    }),
-  });
+  console.log("Attempting Pollinations Public Free AI Engine...");
 
-  const text = await res.text();
-  if (res.ok && text && text.trim().length > 0) {
-    console.log("Pollinations Public Free AI success");
-    return text.trim();
+  const userMsg = messages.find((m) => m.role === "user")?.content || "";
+  const sysMsg = messages.find((m) => m.role === "system")?.content || "";
+  const fullPrompt = `${sysMsg}\n\nUser Question: ${userMsg}\n\nDetailed Answer:`;
+  const encodedPrompt = encodeURIComponent(fullPrompt.slice(0, 1500));
+
+  const models = ["mistral", "qwen", "openai-large", "karma"];
+
+  for (const model of models) {
+    try {
+      console.log(`Trying Pollinations free GET model: ${model}`);
+      const res = await fetch(`https://text.pollinations.ai/${encodedPrompt}?model=${model}&cache=true`, {
+        method: "GET",
+        headers: {
+          "Accept": "text/plain, text/html, application/json",
+        },
+      });
+
+      if (res.ok) {
+        const text = await res.text();
+        if (text && text.trim().length > 10 && !text.includes("402 Payment Required")) {
+          console.log(`Pollinations Public Free AI success using model: ${model}`);
+          return text.trim();
+        }
+      }
+    } catch (err) {
+      console.warn(`Pollinations model ${model} failed:`, err.message);
+    }
   }
-  throw new Error(`Pollinations AI failed: HTTP ${res.status}`);
+
+  throw new Error("Pollinations free GET models unavailable");
 };
 
 // ==========================================
