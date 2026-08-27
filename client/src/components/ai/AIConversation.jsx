@@ -31,7 +31,7 @@ const AIConversation = ({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-2 py-8 pb-40 sm:px-4">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-1 py-4 sm:px-4">
       {messages.map((message, index) => {
         const isLastAssistantMessage =
           message.role === "assistant" &&

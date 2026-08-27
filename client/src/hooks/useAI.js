@@ -63,12 +63,18 @@ export default function useAI() {
           timestamp: new Date().toISOString(),
         },
       ]);
-    } catch {
+    } catch (err) {
+      console.error("AI Generation Error:", err);
+      const serverMessage = err.response?.data?.message || err.message;
+      const displayContent = serverMessage && !serverMessage.includes("404")
+        ? `I encountered an issue: ${serverMessage}. Please try again.`
+        : "I couldn't reach the AI service right now. Please check server connectivity or try again.";
+
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "I couldn't reach the AI service right now. Please try again.",
+          content: displayContent,
           timestamp: new Date().toISOString(),
         },
       ]);

@@ -109,45 +109,45 @@ const MemoryInfo = ({ memory, isOwner = false, isLoggedIn = false }) => {
                 )}
             </div>
 
-            <div className="mt-4 sm:mt-6 h-px bg-slate-200 dark:bg-slate-800" />
+            <div className="mt-3 sm:mt-4 h-px bg-slate-200 dark:bg-slate-800" />
 
-            <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-5">
+            <div className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
                 {/* Destination Location */}
-                <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-slate-800/90 text-[#1E3A8A] dark:text-indigo-400 border border-blue-100/60 dark:border-slate-700/80 shadow-2xs">
-                        <MapPin size={16} className="sm:w-[18px] sm:h-[18px]" />
+                <div className="flex items-start gap-2.5 sm:gap-3">
+                    <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-slate-800/90 text-[#1E3A8A] dark:text-indigo-400 border border-blue-100/60 dark:border-slate-700/80 shadow-2xs">
+                        <MapPin size={15} className="sm:w-[16px] sm:h-[16px]" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-400">Destination</p>
-                        <p className="mt-0.5 text-xs sm:text-base font-semibold text-slate-900 dark:text-slate-100 truncate">{memory.location}</p>
+                        <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-400">Destination</p>
+                        <p className="mt-0.5 text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{memory.location}</p>
                     </div>
                 </div>
 
                 {/* Travel Dates */}
-                <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-slate-800/90 text-[#1E3A8A] dark:text-indigo-400 border border-blue-100/60 dark:border-slate-700/80 shadow-2xs">
-                        <CalendarDays size={16} className="sm:w-[18px] sm:h-[18px]" />
+                <div className="flex items-start gap-2.5 sm:gap-3">
+                    <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-slate-800/90 text-[#1E3A8A] dark:text-indigo-400 border border-blue-100/60 dark:border-slate-700/80 shadow-2xs">
+                        <CalendarDays size={15} className="sm:w-[16px] sm:h-[16px]" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-400">Travel Dates</p>
-                        <p className="mt-0.5 text-xs sm:text-base font-semibold text-slate-900 dark:text-slate-100 truncate">{startDate} — {endDate}</p>
+                        <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-400">Travel Dates</p>
+                        <p className="mt-0.5 text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{startDate} — {endDate}</p>
                     </div>
                 </div>
 
                 {/* Mode of Travel */}
-                <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-slate-800/90 text-[#1E3A8A] dark:text-indigo-400 border border-blue-100/60 dark:border-slate-700/80 shadow-2xs">
-                        <TravelIcon size={16} className="sm:w-[18px] sm:h-[18px]" />
+                <div className="flex items-start gap-2.5 sm:gap-3">
+                    <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-slate-800/90 text-[#1E3A8A] dark:text-indigo-400 border border-blue-100/60 dark:border-slate-700/80 shadow-2xs">
+                        <TravelIcon size={15} className="sm:w-[16px] sm:h-[16px]" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-400">Mode of Travel</p>
-                        <p className="mt-0.5 text-xs sm:text-base font-semibold capitalize text-slate-900 dark:text-slate-100 truncate">{memory.modeOfTravel}</p>
+                        <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-400">Mode of Travel</p>
+                        <p className="mt-0.5 text-xs sm:text-sm font-semibold capitalize text-slate-900 dark:text-slate-100 truncate">{memory.modeOfTravel}</p>
                     </div>
                 </div>
 
                 {/* Destination Weather Comparison (Historical Travel Date vs Live Today) */}
                 {memory.location && (
-                  <WeatherComparisonCard location={memory.location} startDate={memory.startDate} className="mt-4" />
+                  <WeatherComparisonCard location={memory.location} startDate={memory.startDate} className="mt-3" />
                 )}
             </div>
           </div>

@@ -9,11 +9,11 @@ import useAI from "../../hooks/useAI";
 import PageTitle from "../../components/common/PageTitle";
 
 // ==========================================
-// AI PAGE COMPONENT
+// AI PAGE COMPONENT (100% FIT NO-SCROLL ON LANDING)
 // ==========================================
 /**
  * Main AI Assistant page component. Manages conversational chat state,
- * decorative background gradients, auto-focus behavior, and layout composition.
+ * decorative background gradients, auto-focus behavior, and 100dvh layout composition.
  */
 const AI = () => {
   const location = useLocation();
@@ -44,7 +44,7 @@ const AI = () => {
   }, [loading]);
 
   return (
-    <main className="relative flex h-full flex-col overflow-hidden bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-300">
+    <main className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-300">
       <PageTitle title={conversationTitle ? `${conversationTitle} — AI Assistant` : "AI Travel Assistant"} />
 
       {/* Immersive Decorative Background Glows */}
@@ -54,12 +54,12 @@ const AI = () => {
       </div>
 
       {/* Main Chat Interface Layout */}
-      <div className="relative z-10 flex h-full flex-col">
+      <div className="relative z-10 flex h-full w-full flex-col overflow-hidden justify-between">
         {/* Header with Title and New Chat Control */}
         <AIHeader title={conversationTitle} onNewChat={newChat} />
 
-        {/* Scrollable Conversation Stream */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6">
+        {/* Scrollable Conversation Stream / Vertically Centered Landing Empty State */}
+        <div className="flex-1 min-h-0 overflow-y-auto px-2 sm:px-6 flex flex-col justify-center">
           <AIConversation
             messages={messages}
             loading={loading}

@@ -2,13 +2,102 @@ const Groq = require("groq-sdk");
 const Memory = require("../models/Memory");
 const User = require("../models/User");
 
-const client = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+// ==========================================
+// OPENROUTER FREE HIGH-LIMIT MODELS CASCADE
+// ==========================================
+const OPENROUTER_FREE_MODELS = [
+  "google/gemini-2.0-flash-lite-preview-02-05:free",
+  "meta-llama/llama-3.3-70b-instruct:free",
+  "deepseek/deepseek-r1-distill-llama-70b:free",
+  "qwen/qwen-2.5-coder-32b-instruct:free",
+  "meta-llama/llama-3.1-8b-instruct:free",
+  "google/gemini-2.0-pro-exp-02-05:free"
+];
 
 // ==========================================
-// AVORA AI: PRODUCTION-GRADE OPTIMIZED CONTROLLER
-// Advanced Token Compression, Strict Guardrails & Geographical Modeling
+// GROQ MODELS CASCADE
+// ==========================================
+const GROQ_MODELS = [
+  "llama-3.3-70b-versatile",
+  "llama-3.1-8b-instant",
+  "mixtral-8x7b-32768",
+  "gemma2-9b-it"
+];
+
+// --- OpenRouter API Invocation (Dependency-Free Native Fetch) ---
+const callOpenRouter = async (apiKey, messages) => {
+  let lastErr = null;
+
+  for (const model of OPENROUTER_FREE_MODELS) {
+    try {
+      console.log(`Attempting OpenRouter AI model: ${model}`);
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "HTTP-Referer": "https://avorawayfarer.vercel.app",
+          "X-Title": "Avora AI Travel Assistant",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: messages,
+          temperature: 0.4,
+          max_tokens: 1000,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data?.choices?.[0]?.message?.content) {
+        console.log(`OpenRouter AI success using model: ${model}`);
+        return data.choices[0].message.content;
+      } else {
+        const errMsg = data?.error?.message || `HTTP ${res.status}`;
+        console.warn(`OpenRouter model ${model} response error:`, errMsg);
+        lastErr = new Error(errMsg);
+      }
+    } catch (err) {
+      console.warn(`OpenRouter model ${model} network error:`, err.message);
+      lastErr = err;
+    }
+  }
+
+  throw lastErr || new Error("All OpenRouter free models failed");
+};
+
+// --- Groq API Invocation ---
+const callGroq = async (apiKey, messages) => {
+  const client = new Groq({ apiKey });
+  let lastErr = null;
+
+  for (const model of GROQ_MODELS) {
+    try {
+      console.log(`Attempting Groq AI model: ${model}`);
+      const completion = await client.chat.completions.create({
+        model: model,
+        messages: messages,
+        temperature: 0.4,
+        max_tokens: 1000,
+      });
+
+      const responseText = completion.choices?.[0]?.message?.content;
+      if (responseText) {
+        console.log(`Groq AI success using model: ${model}`);
+        return responseText;
+      }
+    } catch (err) {
+      console.warn(`Groq model ${model} failed:`, err.message);
+      lastErr = err;
+    }
+  }
+
+  throw lastErr || new Error("All Groq models failed");
+};
+
+// ==========================================
+// AVORA AI: RESILIENT MULTI-PROVIDER CONTROLLER
+// Supports OpenRouter Free Models & Groq Automatic Fallback Cascades
 // ==========================================
 const generateAI = async (req, res) => {
   try {
@@ -87,20 +176,50 @@ Instructions: Provide precise, highly tailored destination suggestions or reflec
       content: msg.content,
     }));
 
-    // API INVOCATION WITH BOUNDED TOKENS
-    const completion = await client.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        { role: "system", content: systemPrompt },
-        ...sanitizedHistory,
-        { role: "user", content: message },
-      ],
-      temperature: 0.4, // Low temperature ensures deterministic, hallucination-free compliance
-      max_tokens: 1000,   // Strict output ceiling to avoid compute/rate spikes
-    });
+    const apiMessages = [
+      { role: "system", content: systemPrompt },
+      ...sanitizedHistory,
+      { role: "user", content: message },
+    ];
+
+    const openRouterKey = process.env.OPENROUTER_API_KEY || (process.env.GROQ_API_KEY?.startsWith("sk-or-") ? process.env.GROQ_API_KEY : null);
+    const groqKey = process.env.GROQ_API_KEY;
+
+    let aiResponseText = null;
+
+    // 1. Try OpenRouter if key is available
+    if (openRouterKey) {
+      try {
+        aiResponseText = await callOpenRouter(openRouterKey, apiMessages);
+      } catch (orErr) {
+        console.warn("OpenRouter invocation failed, checking Groq fallback:", orErr.message);
+      }
+    }
+
+    // 2. Fallback to Groq if OpenRouter did not yield response and Groq key is present
+    if (!aiResponseText && groqKey && !groqKey.startsWith("sk-or-")) {
+      try {
+        aiResponseText = await callGroq(groqKey, apiMessages);
+      } catch (groqErr) {
+        console.warn("Groq invocation failed:", groqErr.message);
+      }
+    }
+
+    // 3. Fallback to OpenRouter using GROQ_API_KEY if key was passed to OpenRouter format
+    if (!aiResponseText && groqKey) {
+      try {
+        aiResponseText = await callOpenRouter(groqKey, apiMessages);
+      } catch (err) {
+        console.warn("Direct OpenRouter call with GROQ_API_KEY failed:", err.message);
+      }
+    }
+
+    if (!aiResponseText) {
+      throw new Error("Unable to connect to AI provider. Please verify API keys on server.");
+    }
 
     return res.status(200).json({
-      response: completion.choices[0].message.content,
+      response: aiResponseText,
     });
   } catch (error) {
     console.error("AI Controller Error:", error.message);

@@ -1,7 +1,7 @@
 // ==========================================
 // AVORA SERVICE WORKER (`client/public/sw.js`)
 // ==========================================
-const CACHE_NAME = "avora-cache-v1";
+const CACHE_NAME = "avora-cache-v2";
 const ASSETS_TO_CACHE = [
   "/",
   "/index.html",
@@ -34,7 +34,7 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// --- Fetch Event (Network-first with Cache Fallback) ---
+// --- Fetch Event (Network-first with Safe Cache Fallback) ---
 self.addEventListener("fetch", (event) => {
   // Only intercept GET requests
   if (event.request.method !== "GET") return;
@@ -54,16 +54,28 @@ self.addEventListener("fetch", (event) => {
         }
         return networkResponse;
       })
-      .catch(() => {
-        // Offline fallback to cache
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
+      .catch(async () => {
+        // Offline fallback to cache safely returning valid Response object
+        const cachedResponse = await caches.match(event.request);
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        if (event.request.headers.get("accept")?.includes("text/html")) {
+          const indexPage = await caches.match("/index.html");
+          if (indexPage) {
+            return indexPage;
           }
-          if (event.request.headers.get("accept")?.includes("text/html")) {
-            return caches.match("/index.html");
+        }
+
+        // Return a valid JSON fallback Response object so Chrome never throws TypeError
+        return new Response(
+          JSON.stringify({ message: "Network unavailable" }),
+          {
+            status: 503,
+            headers: { "Content-Type": "application/json" },
           }
-        });
+        );
       })
   );
 });
