@@ -3,11 +3,11 @@ import { Globe2, Images, Lock, Heart, ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 // ==========================================
-// STATS CARDS COMPONENT (PREMIUM LIGHT & DARK THEMES)
+// STATS CARDS COMPONENT (MILD GRADIENT LIGHT & DARK THEMES)
 // ==========================================
 /**
  * Renders summary statistic cards on the dashboard.
- * - Light Mode: Elegant, soft-gradient cards with micro-shadows, subtle borders, and vivid brand accents.
+ * - Light Mode: Elegant, mild luxury color gradients with soft borders and vivid brand accents.
  * - Dark Mode: Premium dark slate cards with rich glowing borders, glowing badges & neon indicators.
  */
 const StatsCards = ({
@@ -24,13 +24,14 @@ const StatsCards = ({
       value: totalMemories,
       description: "Total journeys preserved.",
       icon: Images,
-      cardGradient: "from-white via-slate-50/90 to-blue-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950",
-      iconBg: "bg-white dark:bg-slate-800/90",
-      iconBorder: "border-slate-200 dark:border-slate-700/80",
-      iconColor: "text-[#1E3A8A] dark:text-indigo-400",
-      accentBorder: "hover:border-[#3559D4]/40 dark:hover:border-indigo-500/60",
-      dotColor: "bg-[#1E3A8A] dark:bg-indigo-400",
-      glowColor: "group-hover:bg-blue-100/50 dark:group-hover:bg-indigo-950/30",
+      cardGradient: "from-slate-50/90 via-white to-blue-50/70 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950",
+      cardBorder: "border-blue-100/90 dark:border-slate-800",
+      iconBg: "bg-blue-50/80 dark:bg-slate-800/90",
+      iconBorder: "border-blue-200/60 dark:border-slate-700/80",
+      iconColor: "text-blue-600 dark:text-indigo-400",
+      accentBorder: "hover:border-blue-400/60 dark:hover:border-indigo-500/60",
+      dotColor: "bg-blue-600 dark:bg-indigo-400",
+      glowColor: "group-hover:bg-blue-200/40 dark:group-hover:bg-indigo-950/30",
       path: "/dashboard/memories?filter=all",
     },
     {
@@ -38,13 +39,14 @@ const StatsCards = ({
       value: publicMemories,
       description: "Shared with global network.",
       icon: Globe2,
-      cardGradient: "from-white via-slate-50/90 to-blue-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950",
-      iconBg: "bg-white dark:bg-slate-800/90",
-      iconBorder: "border-slate-200 dark:border-slate-700/80",
-      iconColor: "text-[#1E3A8A] dark:text-indigo-400",
-      accentBorder: "hover:border-[#3559D4]/40 dark:hover:border-indigo-500/60",
-      dotColor: "bg-[#1E3A8A] dark:bg-indigo-400",
-      glowColor: "group-hover:bg-blue-100/50 dark:group-hover:bg-indigo-950/30",
+      cardGradient: "from-slate-50/90 via-white to-emerald-50/60 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950",
+      cardBorder: "border-emerald-100/80 dark:border-slate-800",
+      iconBg: "bg-emerald-50/80 dark:bg-slate-800/90",
+      iconBorder: "border-emerald-200/60 dark:border-slate-700/80",
+      iconColor: "text-emerald-600 dark:text-emerald-400",
+      accentBorder: "hover:border-emerald-400/60 dark:hover:border-emerald-500/60",
+      dotColor: "bg-emerald-500 dark:bg-emerald-400",
+      glowColor: "group-hover:bg-emerald-200/40 dark:group-hover:bg-emerald-950/30",
       path: "/dashboard/memories?filter=public",
     },
     {
@@ -52,13 +54,14 @@ const StatsCards = ({
       value: privateMemories,
       description: "Secured with encryption.",
       icon: Lock,
-      cardGradient: "from-white via-slate-50/90 to-blue-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950",
-      iconBg: "bg-white dark:bg-slate-800/90",
-      iconBorder: "border-slate-200 dark:border-slate-700/80",
-      iconColor: "text-[#1E3A8A] dark:text-indigo-400",
-      accentBorder: "hover:border-[#3559D4]/40 dark:hover:border-indigo-500/60",
-      dotColor: "bg-[#1E3A8A] dark:bg-indigo-400",
-      glowColor: "group-hover:bg-blue-100/50 dark:group-hover:bg-indigo-950/30",
+      cardGradient: "from-slate-50/90 via-white to-violet-50/60 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950",
+      cardBorder: "border-violet-100/80 dark:border-slate-800",
+      iconBg: "bg-violet-50/80 dark:bg-slate-800/90",
+      iconBorder: "border-violet-200/60 dark:border-slate-700/80",
+      iconColor: "text-violet-600 dark:text-violet-400",
+      accentBorder: "hover:border-violet-400/60 dark:hover:border-violet-500/60",
+      dotColor: "bg-violet-500 dark:bg-violet-400",
+      glowColor: "group-hover:bg-violet-200/40 dark:group-hover:bg-violet-950/30",
       path: "/dashboard/memories?filter=private",
     },
     {
@@ -66,21 +69,22 @@ const StatsCards = ({
       value: likedMemories,
       description: "Curated favorite moments.",
       icon: Heart,
-      cardGradient: "from-white via-slate-50/90 to-blue-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950",
-      iconBg: "bg-white dark:bg-slate-800/90",
-      iconBorder: "border-slate-200 dark:border-slate-700/80",
-      iconColor: "text-[#1E3A8A] dark:text-indigo-400",
-      accentBorder: "hover:border-[#3559D4]/40 dark:hover:border-indigo-500/60",
-      dotColor: "bg-[#1E3A8A] dark:bg-indigo-400",
-      glowColor: "group-hover:bg-blue-100/50 dark:group-hover:bg-indigo-950/30",
+      cardGradient: "from-slate-50/90 via-white to-rose-50/60 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950",
+      cardBorder: "border-rose-100/80 dark:border-slate-800",
+      iconBg: "bg-rose-50/80 dark:bg-slate-800/90",
+      iconBorder: "border-rose-200/60 dark:border-slate-700/80",
+      iconColor: "text-rose-600 dark:text-rose-400",
+      accentBorder: "hover:border-rose-400/60 dark:hover:border-rose-500/60",
+      dotColor: "bg-rose-500 dark:bg-rose-400",
+      glowColor: "group-hover:bg-rose-200/40 dark:group-hover:bg-rose-950/30",
       path: "/dashboard/memories?filter=liked",
     },
   ];
 
   return (
     <section className="mb-5 lg:mb-6">
-      {/* 1. MOBILE VIEW: Compact Single-Line Stats Pill Bar */}
-      <div className="block sm:hidden bg-gradient-to-r from-white via-slate-50 to-indigo-50/30 dark:bg-none dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-[11px] font-medium text-slate-700 dark:text-slate-300 shadow-[0_2px_12px_rgba(30,58,138,0.04)] dark:shadow-none mb-2 transition-all">
+      {/* 1. MOBILE VIEW: Compact Mild Gradient Single-Line Stats Pill Bar */}
+      <div className="block sm:hidden bg-gradient-to-r from-blue-50/80 via-white to-indigo-50/70 dark:bg-none dark:bg-slate-900 border border-blue-100/90 dark:border-slate-800 px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-[11px] font-medium text-slate-700 dark:text-slate-300 shadow-[0_2px_12px_rgba(30,58,138,0.04)] dark:shadow-none mb-2 transition-all">
         <button 
           type="button" 
           onClick={() => navigate(stats[0].path)} 
@@ -114,7 +118,7 @@ const StatsCards = ({
         </button>
       </div>
 
-      {/* 2. TABLET & IPAD PRO VIEW: Compact 2x2 grid */}
+      {/* 2. TABLET & IPAD PRO VIEW: Mild Gradient 2x2 Grid */}
       <div className="hidden sm:grid lg:hidden grid-cols-2 gap-3.5">
         {stats.map((stat) => {
           const Icon = stat.icon;
@@ -123,7 +127,7 @@ const StatsCards = ({
               key={stat.title}
               type="button"
               onClick={() => navigate(stat.path)}
-              className={`group relative flex items-center justify-between overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br ${stat.cardGradient} px-4 py-3.5 text-left shadow-[0_2px_10px_rgba(30,58,138,0.03)] dark:shadow-none transition-all duration-300 ${stat.accentBorder} hover:shadow-md cursor-pointer`}
+              className={`group relative flex items-center justify-between overflow-hidden rounded-2xl border ${stat.cardBorder} bg-gradient-to-br ${stat.cardGradient} px-4 py-3.5 text-left shadow-[0_2px_12px_rgba(30,58,138,0.03)] dark:shadow-none transition-all duration-300 ${stat.accentBorder} hover:shadow-md cursor-pointer`}
             >
               <div>
                 <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em]">{stat.title}</p>
@@ -140,7 +144,7 @@ const StatsCards = ({
         })}
       </div>
 
-      {/* 3. DESKTOP VIEW: Sleek 4-Column Micro-Grid Layout */}
+      {/* 3. DESKTOP VIEW: Mild Luxury Gradient 4-Column Grid Layout */}
       <div className="hidden lg:grid lg:grid-cols-4 gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
@@ -150,7 +154,7 @@ const StatsCards = ({
               key={stat.title}
               type="button"
               onClick={() => navigate(stat.path)}
-              className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/70 dark:border-slate-800/80 bg-gradient-to-br ${stat.cardGradient} p-4 text-left shadow-[0_2px_14px_rgba(30,58,138,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] transition-all duration-300 hover:-translate-y-1 ${stat.accentBorder} hover:shadow-[0_10px_25px_-5px_rgba(30,58,138,0.08)] dark:hover:shadow-[0_12px_30px_-5px_rgba(99,102,241,0.15)] cursor-pointer`}
+              className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl border ${stat.cardBorder} bg-gradient-to-br ${stat.cardGradient} p-4 text-left shadow-[0_4px_16px_rgba(30,58,138,0.04)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] transition-all duration-300 hover:-translate-y-1 ${stat.accentBorder} hover:shadow-[0_12px_28px_-6px_rgba(30,58,138,0.09)] dark:hover:shadow-[0_12px_30px_-5px_rgba(99,102,241,0.15)] cursor-pointer`}
             >
               {/* Micro-Grid Pattern */}
               <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e3a8a05_1px,transparent_1px),linear-gradient(to_bottom,#1e3a8a05_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#6366f108_1px,transparent_1px),linear-gradient(to_bottom,#6366f108_1px,transparent_1px)] bg-[size:0.85rem_0.85rem] opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />

@@ -153,44 +153,43 @@ const MemoryInfo = ({ memory, isOwner = false, isLoggedIn = false }) => {
           </div>
 
           <div>
-            <div className="my-4 sm:my-6 h-px bg-slate-200 dark:bg-slate-800" />
+            <div className="my-3 sm:my-4 h-px bg-slate-200 dark:bg-slate-800" />
 
-            <div className="grid grid-cols-4 lg:flex lg:flex-col items-center lg:items-stretch gap-2 lg:gap-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 p-2.5 sm:px-4 sm:py-3 lg:py-4">
-                {/* Photos */}
-                <div className="flex items-center justify-center lg:justify-between gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900/90 lg:bg-transparent dark:lg:bg-transparent rounded-xl lg:rounded-none p-2 lg:p-0 border border-slate-200/60 dark:border-slate-800 lg:border-none shadow-xs lg:shadow-none">
-                    <div className="flex items-center gap-1.5">
-                        <Camera size={15} className="text-slate-400 dark:text-indigo-400 shrink-0" />
-                        <span className="hidden lg:inline text-slate-500 dark:text-slate-400 font-medium text-xs">Photos</span>
-                    </div>
-                    <span>{totalPhotos}</span>
-                </div>
+            {/* Compact 4-Column Stats Grid Matching Right-Side Media Layout */}
+            <div className="grid grid-cols-4 gap-1.5 sm:gap-2 text-center">
+              {/* Photos */}
+              <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/80 p-2 sm:p-2.5 transition-colors">
+                <Camera size={14} className="text-blue-600 dark:text-indigo-400 mb-1" />
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Photos</span>
+                <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white mt-0.5">{totalPhotos}</span>
+              </div>
 
-                {/* Videos */}
-                <div className="flex items-center justify-center lg:justify-between gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900/90 lg:bg-transparent dark:lg:bg-transparent rounded-xl lg:rounded-none p-2 lg:p-0 border border-slate-200/60 dark:border-slate-800 lg:border-none shadow-xs lg:shadow-none">
-                    <div className="flex items-center gap-1.5">
-                        <Video size={15} className="text-slate-400 dark:text-indigo-400 shrink-0" />
-                        <span className="hidden lg:inline text-slate-500 dark:text-slate-400 font-medium text-xs">Videos</span>
-                    </div>
-                    <span>{totalVideos}</span>
-                </div>
+              {/* Videos */}
+              <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/80 p-2 sm:p-2.5 transition-colors">
+                <Video size={14} className="text-purple-600 dark:text-purple-400 mb-1" />
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Videos</span>
+                <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white mt-0.5">{totalVideos}</span>
+              </div>
 
-                {/* Duration */}
-                <div className="flex items-center justify-center lg:justify-between gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900/90 lg:bg-transparent dark:lg:bg-transparent rounded-xl lg:rounded-none p-2 lg:p-0 border border-slate-200/60 dark:border-slate-800 lg:border-none shadow-xs lg:shadow-none">
-                    <div className="flex items-center gap-1.5">
-                        <Clock size={15} className="text-slate-400 dark:text-indigo-400 shrink-0" />
-                        <span className="hidden lg:inline text-slate-500 dark:text-slate-400 font-medium text-xs">Duration</span>
-                    </div>
-                    <span>{totalDays}D</span>
-                </div>
+              {/* Duration */}
+              <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/80 p-2 sm:p-2.5 transition-colors">
+                <Clock size={14} className="text-amber-500 dark:text-amber-400 mb-1" />
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Duration</span>
+                <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white mt-0.5">{totalDays}D</span>
+              </div>
 
-                {/* Visibility */}
-                <div className={`flex items-center justify-center lg:justify-between gap-1.5 text-xs font-semibold bg-white dark:bg-slate-900/90 lg:bg-transparent dark:lg:bg-transparent rounded-xl lg:rounded-none p-2 lg:p-0 border border-slate-200/60 dark:border-slate-800 lg:border-none shadow-xs lg:shadow-none ${memory.isPublic ? "text-emerald-700 dark:text-sky-400" : "text-slate-700 dark:text-indigo-300"}`}>
-                    <div className="flex items-center gap-1.5">
-                        {memory.isPublic ? <Globe size={15} className="text-emerald-500 dark:text-sky-400 shrink-0" /> : <Lock size={15} className="text-slate-500 dark:text-indigo-400 shrink-0" />}
-                        <span className="hidden lg:inline text-slate-500 dark:text-slate-400 font-medium text-xs">Status</span>
-                    </div>
-                    <span>{memory.isPublic ? "Public" : "Private"}</span>
-                </div>
+              {/* Status */}
+              <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/80 p-2 sm:p-2.5 transition-colors">
+                {memory.isPublic ? (
+                  <Globe size={14} className="text-emerald-500 dark:text-emerald-400 mb-1" />
+                ) : (
+                  <Lock size={14} className="text-slate-400 dark:text-slate-500 mb-1" />
+                )}
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Status</span>
+                <span className={`text-xs sm:text-sm font-extrabold mt-0.5 ${memory.isPublic ? "text-emerald-600 dark:text-emerald-400" : "text-slate-700 dark:text-slate-300"}`}>
+                  {memory.isPublic ? "Public" : "Private"}
+                </span>
+              </div>
             </div>
           </div>
         </div>

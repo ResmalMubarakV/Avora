@@ -59,7 +59,7 @@ const Logo = ({ to = "/", size = "md", className = "" }) => {
       {/* Brand Title Text */}
       <span
         className={`
-          font-extrabold
+          font-light
           uppercase
           tracking-wider
           text-slate-900
