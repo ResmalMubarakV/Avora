@@ -8,10 +8,78 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+html.dark {
+  color-scheme: dark;
+}
+
 html.dark body {
-  background-color: #0f172a;
+  background-color: #0b0f19;
   color: #f8fafc;
 }
+
+/* ==========================================
+   GLOBAL DARK MODE TEXT & SURFACE INVERSION
+   ========================================== */
+html.dark .text-slate-900,
+html.dark .text-slate-950 {
+  color: #f8fafc;
+}
+
+html.dark .text-slate-800 {
+  color: #f1f5f9;
+}
+
+html.dark .text-slate-700 {
+  color: #e2e8f0;
+}
+
+html.dark .text-slate-600 {
+  color: #cbd5e1;
+}
+
+html.dark .text-slate-500 {
+  color: #94a3b8;
+}
+
+/* Invert default white card containers and light grey slate panels */
+html.dark .bg-white:not(.keep-white) {
+  background-color: #1e293b;
+  color: #f8fafc;
+}
+
+html.dark .bg-slate-50 {
+  background-color: #0f172a;
+}
+
+html.dark .bg-slate-100 {
+  background-color: #334155;
+}
+
+html.dark .bg-white\/80 {
+  background-color: rgba(30, 41, 59, 0.85);
+}
+
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .border-slate-300,
+html.dark .border-slate-200\/80 {
+  border-color: #334155;
+}
+
+/* Invert form inputs and textareas in dark mode */
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark textarea,
+html.dark select {
+  background-color: #1e293b;
+  color: #f8fafc;
+  border-color: #475569;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #94a3b8;
+}
+
 
 
 .no-scrollbar::-webkit-scrollbar,
