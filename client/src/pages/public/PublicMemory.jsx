@@ -964,15 +964,54 @@ export default function PublicMemory() {
         style.id = styleId;
         style.innerHTML = `
           @media print {
-            @page { size: portrait !important; margin: 0mm !important; }
-            html, body { margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; background-color: white !important; overflow: hidden !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box !important; }
-            .print-hidden-outlines * { outline: none !important; border: none !important; }
-            .print-only-container { position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; max-width: 100vw !important; max-height: 100vh !important; margin: 0 !important; padding: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; visibility: visible !important; background-color: white !important; z-index: 99999 !important; overflow: hidden !important; }
-            .print-only-container > div { width: 100% !important; height: 100% !important; max-width: 100% !important; max-height: 100% !important; margin: 0 !important; padding: 0 !important; box-shadow: none !important; transform: scale(0.98) !important; transform-origin: center center !important; }
+            @page {
+              size: portrait;
+              margin: 0mm !important;
+            }
+            html, body {
+              margin: 0 !important;
+              padding: 0 !important;
+              background-color: white !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            body * {
+              visibility: hidden !important;
+            }
+            .print-only-container,
+            .print-only-container * {
+              visibility: visible !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            .print-only-container {
+              position: fixed !important;
+              top: 0 !important;
+              left: 0 !important;
+              width: 100% !important;
+              height: 100% !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              background-color: white !important;
+              z-index: 999999 !important;
+            }
+            .print-only-container > div {
+              width: 100% !important;
+              height: 100% !important;
+              box-shadow: none !important;
+            }
           }
           @media screen {
-            .print-only-container { position: absolute; left: -9999px; top: -9999px; visibility: hidden; }
+            .print-only-container {
+              position: fixed;
+              left: -9999px;
+              top: -9999px;
+              visibility: hidden;
+              pointer-events: none;
+            }
           }
         `;
         document.head.appendChild(style);
@@ -980,63 +1019,12 @@ export default function PublicMemory() {
     return () => { const style = document.getElementById(styleId); if (style) document.head.removeChild(style); };
   }, [isPreviewMode]);
 
-  const handleNativePrint = async () => {
+  const handleNativePrint = () => {
     setShowImagePickerModal(false);
-    const toastId = toast.loading("Generating high-resolution memory PDF...");
-    
-    try {
-      const element = document.querySelector(".print-only-container");
-      if (element) {
-        // Temporarily reveal element for html2pdf canvas render
-        const origPos = element.style.position;
-        const origLeft = element.style.left;
-        const origTop = element.style.top;
-        const origVis = element.style.visibility;
-        const origDisplay = element.style.display;
-
-        element.style.position = "fixed";
-        element.style.left = "0";
-        element.style.top = "0";
-        element.style.visibility = "visible";
-        element.style.display = "block";
-        element.style.zIndex = "999999";
-
-        const html2pdfModule = (await import("html2pdf.js")).default;
-        const opt = {
-          margin: 0,
-          filename: `${memory?.slug || 'memory'}-diary.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: {
-            scale: 2,
-            useCORS: true,
-            logging: false,
-            allowTaint: true,
-            windowWidth: 800,
-            windowHeight: 1131
-          },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        await html2pdfModule().set(opt).from(element).save();
-
-        // Restore original hidden state
-        element.style.position = origPos || "absolute";
-        element.style.left = origLeft || "-9999px";
-        element.style.top = origTop || "-9999px";
-        element.style.visibility = origVis || "hidden";
-        element.style.display = origDisplay || "";
-
-        toast.success("PDF diary downloaded successfully!", { id: toastId });
-      } else {
-        throw new Error("Container not found");
-      }
-    } catch (err) {
-      console.warn("Direct PDF render fallback to native print:", err);
-      toast.dismiss(toastId);
-      const prevTitle = document.title;
-      document.title = `${memory?.slug || 'memory'}-diary`;
-      setTimeout(() => { window.print(); document.title = prevTitle; }, 200);
-    }
+    const prevTitle = document.title;
+    document.title = `${memory?.slug || 'memory'}-diary`;
+    window.print();
+    document.title = prevTitle;
   };
 
   useEffect(() => {
