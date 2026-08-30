@@ -104,7 +104,7 @@ const FloatingAIChat = () => {
   }, [isDragging, handleMove, handleEnd]);
 
   return (
-    <div className="fixed bottom-6 right-5 sm:bottom-10 sm:right-10 z-50 select-none">
+    <div className="fixed bottom-12 right-6 sm:bottom-16 sm:right-10 z-50 select-none">
       {/* Draggable Pop-up Chat Window */}
       {isOpen && (
         <div
@@ -226,7 +226,7 @@ const FloatingAIChat = () => {
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label="Open AI Assistant"
-        className="group relative flex h-11 w-11 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#3559D4] via-[#4166E0] to-[#1E3A8A] dark:from-indigo-600 dark:to-blue-700 text-white shadow-lg sm:shadow-xl shadow-blue-600/30 dark:shadow-indigo-900/50 transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer ml-auto"
+        className="group relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#3559D4] via-[#4166E0] to-[#1E3A8A] dark:from-indigo-600 dark:to-blue-700 text-white shadow-lg sm:shadow-xl shadow-blue-600/30 dark:shadow-indigo-900/50 transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer ml-auto"
       >
         <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 transition-transform duration-300 group-hover:rotate-12" />
         

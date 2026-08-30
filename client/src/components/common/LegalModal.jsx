@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import { ShieldCheck, Scale, FileText, X, AlertTriangle, Lock, Printer, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, Scale, FileText, X, AlertTriangle, Lock, CheckCircle2 } from "lucide-react";
 
 // ==========================================
 // LEGAL MODAL (PRIVACY POLICY & TERMS LIGHTBOX)
@@ -38,10 +38,6 @@ const LegalModal = ({ isOpen, onClose, initialTab = "privacy" }) => {
     }, [isOpen, onClose]);
 
     if (!isOpen || !mounted) return null;
-
-    const handlePrint = () => {
-        window.print();
-    };
 
     return ReactDOM.createPortal(
         <div 
@@ -295,15 +291,6 @@ const LegalModal = ({ isOpen, onClose, initialTab = "privacy" }) => {
                     </div>
 
                     <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-                        <button
-                            type="button"
-                            onClick={handlePrint}
-                            className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer"
-                        >
-                            <Printer size={14} />
-                            <span>Print</span>
-                        </button>
-                        
                         <button
                             type="button"
                             onClick={onClose}
