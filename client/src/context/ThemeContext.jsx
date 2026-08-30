@@ -33,14 +33,15 @@ export const ThemeProvider = ({ children }) => {
 
   // Dynamic Favicon system theme detector (Decoupled from Avora page theme)
   useEffect(() => {
-    const favicon = document.getElementById("favicon");
-    if (!favicon) return;
-
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     
     const updateFavicon = (e) => {
+      const favicon = document.getElementById("favicon");
+      if (!favicon) return;
       const isSystemDark = e ? e.matches : mediaQuery.matches;
-      favicon.setAttribute("href", isSystemDark ? "/avoraLogoLight.png" : "/avoraLogoDark.png");
+      // Append a cache-buster to force the browser to refresh favicon cache immediately
+      const cacheBuster = Date.now();
+      favicon.setAttribute("href", isSystemDark ? `/avoraLogoLight.png?v=${cacheBuster}` : `/avoraLogoDark.png?v=${cacheBuster}`);
       favicon.setAttribute("type", "image/png");
     };
 
