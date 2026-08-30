@@ -2,13 +2,10 @@ const Groq = require("groq-sdk");
 const Memory = require("../models/Memory");
 const User = require("../models/User");
 
-// ==========================================
-// OPENROUTER FREE HIGH-LIMIT MODELS CASCADE
-// ==========================================
 const OPENROUTER_FREE_MODELS = [
-  "google/gemini-2.0-flash-lite-preview-02-05:free",
+  "openrouter/free",
+  "google/gemma-2-9b-it:free",
   "meta-llama/llama-3.3-70b-instruct:free",
-  "deepseek/deepseek-r1-distill-llama-70b:free",
   "qwen/qwen-2.5-coder-32b-instruct:free",
   "meta-llama/llama-3.1-8b-instruct:free"
 ];
@@ -17,10 +14,10 @@ const OPENROUTER_FREE_MODELS = [
 // GROQ ACTIVE PRODUCTION MODELS (2026)
 // ==========================================
 const GROQ_MODELS = [
-  "llama-3.3-70b-versatile",
-  "llama-3.1-8b-instant",
   "openai/gpt-oss-120b",
-  "openai/gpt-oss-20b"
+  "openai/gpt-oss-20b",
+  "llama-3.3-70b-versatile",
+  "llama-3.1-8b-instant"
 ];
 
 // --- Google Gemini API Invocation (Updated to Gemini 3.6 Flash) ---
@@ -163,11 +160,11 @@ const callPollinations = async (userMessage, compressedArchive) => {
   const cleanQuery = userMessage.trim();
   const systemText = `You are Avora AI, a budget-first travel planning assistant. Previous trips: [${compressedArchive || "None"}]. Provide clean, practical travel advice and itineraries.`;
   
-  const models = ["openai", "llama", "mistral"];
+  const models = ["openai-fast"];
 
   for (const model of models) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000); // Expanded to 6 seconds
+    const timeoutId = setTimeout(() => controller.abort(), 2000); // Fast 2-second timeout
 
     try {
       console.log(`Trying Pollinations free GET model: ${model}`);
@@ -286,7 +283,26 @@ Instructions: Provide precise, highly tailored destination suggestions or reflec
 
     let aiResponseText = null;
 
-    if (geminiKey) {
+    // 1. Groq (Fastest sub-second production models)
+    if (groqKey && !groqKey.startsWith("sk-or-")) {
+      try {
+        aiResponseText = await callGroq(groqKey, apiMessages);
+      } catch (groqErr) {
+        console.warn("Groq provider failed, trying fallbacks:", groqErr.message);
+      }
+    }
+
+    // 2. OpenRouter (Free models router)
+    if (!aiResponseText && openRouterKey && openRouterKey.startsWith("sk-or-")) {
+      try {
+        aiResponseText = await callOpenRouter(openRouterKey, apiMessages);
+      } catch (orErr) {
+        console.warn("OpenRouter provider failed, trying fallbacks:", orErr.message);
+      }
+    }
+
+    // 3. Gemini (Reasoning backup)
+    if (!aiResponseText && geminiKey) {
       try {
         aiResponseText = await callGemini(geminiKey, message, compressedArchive);
       } catch (geminiErr) {
@@ -294,22 +310,7 @@ Instructions: Provide precise, highly tailored destination suggestions or reflec
       }
     }
 
-    if (!aiResponseText && groqKey && !groqKey.startsWith("sk-or-")) {
-      try {
-        aiResponseText = await callGroq(groqKey, apiMessages);
-      } catch (groqErr) {
-        console.warn("Groq provider failed:", groqErr.message);
-      }
-    }
-
-    if (!aiResponseText && openRouterKey && openRouterKey.startsWith("sk-or-")) {
-      try {
-        aiResponseText = await callOpenRouter(openRouterKey, apiMessages);
-      } catch (orErr) {
-        console.warn("OpenRouter provider failed:", orErr.message);
-      }
-    }
-
+    // 4. Pollinations (Emergency fallback)
     if (!aiResponseText) {
       try {
         aiResponseText = await callPollinations(message, compressedArchive);
