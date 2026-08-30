@@ -35,6 +35,20 @@ export const fetchMemoryWeatherComparison = async (locationStr, startDateStr) =>
   try {
     if (!locationStr) return null;
 
+    // Check LocalStorage cache first (Valid for 30 minutes)
+    const cacheKey = `avora_weather_${locationStr.replace(/\s+/g, "_")}_${startDateStr}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const { timestamp, data } = JSON.parse(cached);
+        if (Date.now() - timestamp < 30 * 60 * 1000) {
+          return data;
+        }
+      } catch {
+        // Cache parse error, proceed to fetch
+      }
+    }
+
     // 1. Geocode location via Open-Meteo Geocoding (Try full query first, fallback to first city segment)
     let geoRes = await fetch(
       `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
@@ -58,14 +72,25 @@ export const fetchMemoryWeatherComparison = async (locationStr, startDateStr) =>
 
     const { latitude: lat, longitude: lon, name, country } = geoData.results[0];
 
-    // 2. Fetch Live Current Weather
-    const liveRes = await fetch(
+    // 2. Fetch Live and Historical Weather in parallel using Promise.all
+    const livePromise = fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
-    );
-    const liveData = await liveRes.json();
+    ).then((res) => res.json());
+
+    let historicalPromise = Promise.resolve(null);
+    let formattedDate = "";
+    if (startDateStr) {
+      const dateObj = new Date(startDateStr);
+      formattedDate = dateObj.toISOString().split("T")[0];
+      historicalPromise = fetch(
+        `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${formattedDate}&end_date=${formattedDate}&daily=temperature_2m_max,weathercode&timezone=auto`
+      ).then((res) => res.json());
+    }
+
+    const [liveData, histData] = await Promise.all([livePromise, historicalPromise]);
 
     let liveWeather = null;
-    if (liveData.current_weather) {
+    if (liveData && liveData.current_weather) {
       const codeInfo = getWeatherCodeInfo(liveData.current_weather.weathercode);
       liveWeather = {
         temp: Math.round(liveData.current_weather.temperature),
@@ -75,37 +100,41 @@ export const fetchMemoryWeatherComparison = async (locationStr, startDateStr) =>
       };
     }
 
-    // 3. Fetch Historical Weather on Travel Start Date
     let historicalWeather = null;
-    if (startDateStr) {
-      const dateObj = new Date(startDateStr);
-      const formattedDate = dateObj.toISOString().split("T")[0];
+    if (histData && histData.daily && histData.daily.temperature_2m_max?.[0] !== undefined) {
+      const tempMax = Math.round(histData.daily.temperature_2m_max[0]);
+      const weatherCode = histData.daily.weathercode?.[0] || 0;
+      const codeInfo = getWeatherCodeInfo(weatherCode);
 
-      const histRes = await fetch(
-        `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${formattedDate}&end_date=${formattedDate}&daily=temperature_2m_max,weathercode&timezone=auto`
-      );
-      const histData = await histRes.json();
-
-      if (histData.daily && histData.daily.temperature_2m_max?.[0] !== undefined) {
-        const tempMax = Math.round(histData.daily.temperature_2m_max[0]);
-        const weatherCode = histData.daily.weathercode?.[0] || 0;
-        const codeInfo = getWeatherCodeInfo(weatherCode);
-
-        historicalWeather = {
-          temp: tempMax,
-          condition: codeInfo.label,
-          icon: codeInfo.icon,
-          date: formattedDate,
-        };
-      }
+      historicalWeather = {
+        temp: tempMax,
+        condition: codeInfo.label,
+        icon: codeInfo.icon,
+        date: formattedDate,
+      };
     }
 
-    return {
+    const result = {
       cityName: name,
       countryName: country,
       live: liveWeather,
       historical: historicalWeather,
     };
+
+    // Store in Cache
+    try {
+      localStorage.setItem(
+        cacheKey,
+        JSON.stringify({
+          timestamp: Date.now(),
+          data: result,
+        })
+      );
+    } catch {
+      // Ignore quota storage errors
+    }
+
+    return result;
   } catch (err) {
     console.error("Weather comparison fetch failed:", err);
     return null;

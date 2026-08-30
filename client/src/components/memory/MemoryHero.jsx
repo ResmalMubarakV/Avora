@@ -161,7 +161,7 @@ const MemoryHero = ({
                 "
             >
                 <div className="xl:col-span-5 flex flex-col">
-                    <div className="rounded-[32px] border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-white via-slate-50/90 to-blue-50/40 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 shadow-xl shadow-sky-950/[0.03] dark:shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden flex-1 flex flex-col transition-colors duration-300">
+                    <div className="rounded-[32px] border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-white via-blue-50/20 to-indigo-50/40 dark:from-slate-900 dark:via-slate-950 dark:to-indigo-950/40 shadow-xl shadow-sky-950/[0.03] dark:shadow-[0_20px_50px_rgba(0,0,0,0.6)] overflow-hidden flex-1 flex flex-col transition-colors duration-300">
                         <div className="p-5 sm:p-6 lg:p-7 flex-1 flex flex-col justify-between">
                             <MemoryInfo memory={memory} isOwner={isOwner} isLoggedIn={isLoggedIn} />
                         </div>

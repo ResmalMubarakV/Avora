@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
 // Layouts & Guards
 import DashboardLayout from "./layouts/DashboardLayout";
@@ -46,6 +46,15 @@ import OfflineBanner from "./components/common/OfflineBanner";
 // APP ROUTING CONFIGURATION
 // ==========================================
 function App() {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const swipeIndicatorRef = useRef(null);
+
+  // Force scroll restoration to top of page on every route navigation
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   useEffect(() => {
     const handleGlobalSync = (e) => {
       if (e.key === "avora_memory_updated" || e.key === "avora_profile_updated") {
@@ -68,8 +77,137 @@ function App() {
     };
   }, []);
 
+  // Global Left-Edge Swipe to Navigate Back (iOS/Android Native Style)
+  useEffect(() => {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isSwipeBackEligible = false;
+
+    const handleTouchStart = (e) => {
+      if (e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+
+      // Only trigger if swipe starts from the extreme left edge (first 30px)
+      isSwipeBackEligible = touchStartX < 30;
+
+      if (swipeIndicatorRef.current) {
+        swipeIndicatorRef.current.style.transition = "none";
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (!isSwipeBackEligible || e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      const dx = touch.clientX - touchStartX;
+      const dy = touch.clientY - touchStartY;
+
+      // If they swipe vertically more than horizontally, cancel the swipe back action
+      if (Math.abs(dy) > Math.abs(dx)) {
+        isSwipeBackEligible = false;
+        if (swipeIndicatorRef.current) {
+          swipeIndicatorRef.current.style.transition = "all 0.3s ease";
+          swipeIndicatorRef.current.style.left = "-50px";
+          swipeIndicatorRef.current.style.opacity = "0";
+        }
+        return;
+      }
+
+      if (dx > 0) {
+        const progress = Math.min(dx / 90, 1); // Clamp progression between 0 and 1
+        if (swipeIndicatorRef.current) {
+          swipeIndicatorRef.current.style.left = `${-50 + progress * 70}px`;
+          swipeIndicatorRef.current.style.opacity = `${progress}`;
+          swipeIndicatorRef.current.style.transform = `translateY(-50%) scale(${0.8 + progress * 0.2})`;
+        }
+      }
+    };
+
+    const handleTouchEnd = (e) => {
+      if (!isSwipeBackEligible) return;
+
+      const changeTouch = e.changedTouches[0];
+      if (changeTouch) {
+        const dx = changeTouch.clientX - touchStartX;
+        const SWIPE_BACK_THRESHOLD = 80; // Trigger back navigation on 80px swipe
+
+        if (dx > SWIPE_BACK_THRESHOLD) {
+          // Play interactive trigger animation
+          if (swipeIndicatorRef.current) {
+            swipeIndicatorRef.current.style.transition = "all 0.2s ease";
+            swipeIndicatorRef.current.style.left = "30px";
+            swipeIndicatorRef.current.style.transform = "translateY(-50%) scale(1.2)";
+            swipeIndicatorRef.current.style.opacity = "0";
+          }
+          // Navigate back
+          setTimeout(() => {
+            navigate(-1);
+          }, 100);
+        }
+      }
+
+      isSwipeBackEligible = false;
+      setTimeout(() => {
+        if (swipeIndicatorRef.current) {
+          swipeIndicatorRef.current.style.transition = "all 0.3s ease";
+          swipeIndicatorRef.current.style.left = "-50px";
+          swipeIndicatorRef.current.style.opacity = "0";
+          swipeIndicatorRef.current.style.transform = "translateY(-50%) scale(0.8)";
+        }
+      }, 150);
+    };
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [navigate]);
+
   return (
     <>
+      {/* Edge Swipe Back Navigation Indicator Overlay */}
+      <div
+        ref={swipeIndicatorRef}
+        style={{
+          position: "fixed",
+          left: "-50px",
+          top: "50%",
+          transform: "translateY(-50%) scale(0.8)",
+          zIndex: 99999,
+          width: "44px",
+          height: "44px",
+          borderRadius: "50%",
+          backgroundColor: "rgba(15, 23, 42, 0.75)",
+          backdropFilter: "blur(8px)",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.3)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#ffffff",
+          pointerEvents: "none",
+          opacity: 0,
+        }}
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </div>
       <OfflineBanner />
       <Routes>
         {/* ========================================== */}

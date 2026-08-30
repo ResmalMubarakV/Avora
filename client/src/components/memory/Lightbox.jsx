@@ -6,9 +6,12 @@ import {
     Maximize2,
     Minimize2,
     Play,
+    Pause,
+    Volume2,
+    VolumeX,
 } from "lucide-react";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 // ==========================================
 // LIGHTBOX COMPONENT
@@ -48,6 +51,8 @@ const Lightbox = ({
     // Drag & Swipe tracking state
     const isDragging = useRef(false);
     const isSwipeTracking = useRef(false);
+    const [isDraggingState, setIsDraggingState] = useState(false);
+    const [isSwipeTrackingState, setIsSwipeTrackingState] = useState(false);
     const dragStartX = useRef(0);
     const dragEndX = useRef(0);
 
@@ -68,6 +73,51 @@ const Lightbox = ({
 
     // One-time swipe hint for first-time mobile users
     const [showSwipeHint, setShowSwipeHint] = useState(false);
+
+    // Toggle-able UI overlays controls state
+    const [showControls, setShowControls] = useState(true);
+    const tapTimer = useRef(null);
+
+    // Custom video playback states
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [isMuted, setIsMuted] = useState(false);
+
+    // Auto-hide controls timer (3s) when video is playing
+    const controlsTimeoutRef = useRef(null);
+
+    const resetControlsTimeout = useCallback(() => {
+        if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+        if (isVideoItem(selectedMedia) && isPlaying) {
+            controlsTimeoutRef.current = setTimeout(() => {
+                setShowControls(false);
+            }, 3000);
+        }
+    }, [selectedMedia, isPlaying]);
+
+    useEffect(() => {
+        resetControlsTimeout();
+        return () => {
+            if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+        };
+    }, [isPlaying, selectedIndex, resetControlsTimeout]);
+
+    const formatTime = (seconds) => {
+        if (isNaN(seconds)) return "0:00";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+    };
+
+    const togglePlay = () => {
+        if (!videoRef.current) return;
+        if (isPlaying) {
+            videoRef.current.pause();
+        } else {
+            videoRef.current.play().catch((err) => console.log(err));
+        }
+    };
 
     const MIN_SCALE = 1;
     const MAX_SCALE = 4;
@@ -107,6 +157,7 @@ const Lightbox = ({
             }
 
             isSwipeTracking.current = false;
+            setIsSwipeTrackingState(false);
             touchStartX.current = event.touches[0].clientX;
             touchStartY.current = event.touches[0].clientY;
             touchEndX.current = event.touches[0].clientX;
@@ -147,6 +198,7 @@ const Lightbox = ({
 
             if (!isSwipeTracking.current && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) {
                 isSwipeTracking.current = true;
+                setIsSwipeTrackingState(true);
             }
 
             if (isSwipeTracking.current) {
@@ -190,6 +242,7 @@ const Lightbox = ({
         isPanning.current = false;
         setIsInteractingZoom(false);
 
+        // Tap handling (single tap to toggle controls, double tap to zoom)
         if (!hadMultiTouch.current && !wasPinching) {
             const endTouch = event.changedTouches && event.changedTouches[0];
 
@@ -200,9 +253,11 @@ const Lightbox = ({
 
                 if (movedX < TAP_MOVE_THRESHOLD && movedY < TAP_MOVE_THRESHOLD) {
                     const now = Date.now();
-                    const DOUBLE_TAP_WINDOW = 350;
+                    const DOUBLE_TAP_WINDOW = 300;
 
                     if (now - lastTapTime.current < DOUBLE_TAP_WINDOW) {
+                        // Double tap: clear single-tap timer and zoom
+                        if (tapTimer.current) clearTimeout(tapTimer.current);
                         lastTapTime.current = 0;
 
                         if (scale > 1) {
@@ -212,8 +267,15 @@ const Lightbox = ({
                             setScale(DOUBLE_TAP_ZOOM);
                         }
                         return;
+                    } else {
+                        // Potential single tap: schedule toggle with delay
+                        lastTapTime.current = now;
+                        if (tapTimer.current) clearTimeout(tapTimer.current);
+                        tapTimer.current = setTimeout(() => {
+                            setShowControls(prev => !prev);
+                            resetControlsTimeout();
+                        }, DOUBLE_TAP_WINDOW);
                     }
-                    lastTapTime.current = now;
                 }
             }
         }
@@ -230,31 +292,23 @@ const Lightbox = ({
 
         if (isSwipeTracking.current) {
             const deltaX = touchStartX.current - touchEndX.current;
-            const SWIPE_THRESHOLD = 45;
+            const SWIPE_THRESHOLD = 50;
 
             if (deltaX > SWIPE_THRESHOLD && selectedIndex < media.length - 1) {
-                setTranslate({ x: -window.innerWidth, y: 0 });
-                setTimeout(() => {
-                    setTranslate({ x: 0, y: 0 });
-                    nextImage();
-                }, 150);
+                nextImage();
             } else if (deltaX < -SWIPE_THRESHOLD && selectedIndex > 0) {
-                setTranslate({ x: window.innerWidth, y: 0 });
-                setTimeout(() => {
-                    setTranslate({ x: 0, y: 0 });
-                    previousImage();
-                }, 150);
-            } else {
-                setTranslate({ x: 0, y: 0 });
+                previousImage();
             }
             
+            setTranslate({ x: 0, y: 0 });
             isSwipeTracking.current = false;
+            setIsSwipeTrackingState(false);
             return;
         }
 
         const deltaX = touchStartX.current - touchEndX.current;
         const deltaY = touchStartY.current - touchEndY.current;
-        const MIN_SWIPE_DISTANCE = 45;
+        const MIN_SWIPE_DISTANCE = 50;
 
         if (Math.abs(deltaY) < Math.abs(deltaX) && Math.abs(deltaX) > MIN_SWIPE_DISTANCE) {
             if (deltaX > 0 && selectedIndex < media.length - 1) {
@@ -322,7 +376,9 @@ const Lightbox = ({
         if (scale > 1) return;
 
         isDragging.current = true;
+        setIsDraggingState(true);
         isSwipeTracking.current = false;
+        setIsSwipeTrackingState(false);
         dragStartX.current = e.clientX;
         dragEndX.current = e.clientX;
     };
@@ -335,6 +391,7 @@ const Lightbox = ({
         
         if (!isSwipeTracking.current && Math.abs(dx) > 5) {
             isSwipeTracking.current = true;
+            setIsSwipeTrackingState(true);
         }
 
         if (isSwipeTracking.current) {
@@ -349,6 +406,7 @@ const Lightbox = ({
     const handleMouseUp = () => {
         if (!isDragging.current) return;
         isDragging.current = false;
+        setIsDraggingState(false);
 
         if (isSwipeTracking.current) {
             const deltaX = dragStartX.current - dragEndX.current;
@@ -358,10 +416,11 @@ const Lightbox = ({
                 nextImage();
             } else if (deltaX < -DRAG_DISTANCE && selectedIndex > 0) {
                 previousImage();
-            } else {
-                setTranslate({ x: 0, y: 0 });
             }
+            
+            setTranslate({ x: 0, y: 0 });
             isSwipeTracking.current = false;
+            setIsSwipeTrackingState(false);
         }
     };
 
@@ -397,24 +456,34 @@ const Lightbox = ({
 
         if (!isTouchDevice || media.length <= 1) return;
 
-        setShowSwipeHint(true);
-        const timer = setTimeout(() => setShowSwipeHint(false), 1400);
+        const hintTimer = setTimeout(() => {
+            setShowSwipeHint(true);
+        }, 50);
+        const timer = setTimeout(() => setShowSwipeHint(false), 1450);
 
-        return () => clearTimeout(timer);
+        return () => {
+            clearTimeout(hintTimer);
+            clearTimeout(timer);
+        };
     }, [media.length]);
 
     useEffect(() => {
-        setImageLoading(true);
+        const timer = setTimeout(() => {
+            if (!selectedMedia || isVideoItem(selectedMedia)) {
+                setImageLoading(false);
+            } else {
+                setImageLoading(true);
+            }
+        }, 0);
 
-        if (!selectedMedia || isVideoItem(selectedMedia)) {
-            setImageLoading(false);
-            return;
+        if (selectedMedia && !isVideoItem(selectedMedia)) {
+            const img = new Image();
+            img.onload = () => setImageLoading(false);
+            img.onerror = () => setImageLoading(false);
+            img.src = selectedMedia.url;
         }
 
-        const img = new Image();
-        img.onload = () => setImageLoading(false);
-        img.onerror = () => setImageLoading(false);
-        img.src = selectedMedia.url;
+        return () => clearTimeout(timer);
     }, [selectedMedia]);
 
     useEffect(() => {
@@ -498,16 +567,49 @@ const Lightbox = ({
 
     // Reset scale/translate when changing index, and auto-play unmuted if it's a video
     useEffect(() => {
-        setScale(1);
-        setTranslate({ x: 0, y: 0 });
+        const timer = setTimeout(() => {
+            setScale(1);
+            setTranslate({ x: 0, y: 0 });
+            setShowControls(true); // Always reveal controls when page changes
+        }, 0);
 
-        if (videoRef.current && isVideoItem(selectedMedia)) {
-            videoRef.current.currentTime = 0;
-            videoRef.current.muted = false; // Play unmuted
-            videoRef.current.play().catch((err) => {
+        const video = videoRef.current;
+        if (video && isVideoItem(selectedMedia)) {
+            video.currentTime = 0;
+            video.muted = false; // Play unmuted
+            video.play().catch((err) => {
                 console.log("Autoplay prevented by browser:", err);
             });
+
+            const handlePlay = () => setIsPlaying(true);
+            const handlePause = () => setIsPlaying(false);
+            const handleTimeUpdate = () => setCurrentTime(video.currentTime);
+            const handleDurationChange = () => setDuration(video.duration);
+            const handleVolumeChange = () => setIsMuted(video.muted);
+
+            video.addEventListener("play", handlePlay);
+            video.addEventListener("pause", handlePause);
+            video.addEventListener("timeupdate", handleTimeUpdate);
+            video.addEventListener("durationchange", handleDurationChange);
+            video.addEventListener("volumechange", handleVolumeChange);
+
+            // Set initial state
+            setIsPlaying(!video.paused);
+            setCurrentTime(video.currentTime);
+            setDuration(video.duration || 0);
+            setIsMuted(video.muted);
+
+            return () => {
+                clearTimeout(timer);
+                video.removeEventListener("play", handlePlay);
+                video.removeEventListener("pause", handlePause);
+                video.removeEventListener("timeupdate", handleTimeUpdate);
+                video.removeEventListener("durationchange", handleDurationChange);
+                video.removeEventListener("volumechange", handleVolumeChange);
+            };
         }
+
+        return () => clearTimeout(timer);
     }, [selectedIndex, selectedMedia]);
 
     useEffect(() => {
@@ -550,7 +652,13 @@ const Lightbox = ({
             "
         >
             {/* Top Control Bar */}
-            <div className="flex justify-end items-center gap-4 px-4 sm:px-6 py-3 pointer-events-auto relative z-50 shrink-0">
+            <div 
+                className={`
+                    flex justify-end items-center gap-4 px-4 sm:px-6 py-3 pointer-events-auto relative z-50 shrink-0
+                    transition-all duration-300 ease-in-out
+                    ${showControls ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"}
+                `}
+            >
                 {canDownload && (
                     <button
                         type="button"
@@ -661,7 +769,7 @@ const Lightbox = ({
                     {/* Desktop Thumbnail Rail */}
                     {!isFullscreen && (
                         <div
-                            className="
+                            className={`
                                 hidden
                                 xl:flex
                                 flex-col
@@ -671,7 +779,9 @@ const Lightbox = ({
                                 py-2
                                 h-[calc(100vh-120px)]
                                 relative z-50
-                            "
+                                transition-all duration-300 ease-in-out
+                                ${showControls ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-12 pointer-events-none"}
+                            `}
                             onClick={(e) => e.stopPropagation()}
                         >
                             {/* Scrollable Thumbnails List */}
@@ -801,15 +911,16 @@ const Lightbox = ({
                             sm:pb-12
                         "
                     >
-                        {/* Media Viewport */}
+                        {/* Media Viewport (Carousel Track) */}
                         <div
                             className={`
                                 relative
+                                w-full
+                                h-full
+                                overflow-hidden
                                 flex
                                 items-center
                                 justify-center
-                                w-full
-                                overflow-hidden
                                 ${
                                     showSwipeHint
                                         ? "animate-[lightboxSwipeHint_1.3s_ease-in-out_1]"
@@ -817,6 +928,11 @@ const Lightbox = ({
                                 }
                             `}
                             style={{ touchAction: "none" }}
+                            onClick={() => {
+                                // Tapping background toggles controls
+                                setShowControls(prev => !prev);
+                                resetControlsTimeout();
+                            }}
                         >
                             {showSwipeHint && (
                                 <style>{`
@@ -830,96 +946,194 @@ const Lightbox = ({
                                 `}</style>
                             )}
 
-                            {imageLoading && (
-                                <div
-                                    className="
-                                        absolute
-                                        inset-0
-                                        flex
-                                        items-center
-                                        justify-center
-                                    "
-                                >
-                                    <div
-                                        className="
-                                            h-10
-                                            w-10
-                                            animate-spin
-                                            rounded-full
-                                            border-4
-                                            border-white/30
-                                            border-t-white
-                                        "
-                                    />
-                                </div>
-                            )}
-
                             <div
+                                className="w-full h-full flex flex-row"
                                 style={{
-                                    transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
-                                    transition: (isInteractingZoom || isSwipeTracking.current || isDragging.current)
+                                    transform: `translateX(calc(-${selectedIndex * 100}% + ${translate.x}px))`,
+                                    transition: (isDraggingState || isSwipeTrackingState || isInteractingZoom)
                                         ? "none"
-                                        : "transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                                        : "transform 0.33s cubic-bezier(0.2, 0.8, 0.2, 1)",
                                     touchAction: "none",
                                 }}
                             >
-                                {!isVideoItem(selectedMedia) ? (
-                                    <img
-                                        key={selectedMedia.url}
-                                        src={selectedMedia.url}
-                                        alt={
-                                            memoryTitle
-                                                ? `${memoryTitle} — photo ${selectedIndex + 1} of ${media.length}`
-                                                : `Photo ${selectedIndex + 1} of ${media.length}`
-                                        }
-                                        decoding="async"
-                                        onDoubleClick={toggleFullscreen}
-                                        onLoad={() => setImageLoading(false)}
-                                        onError={() => setImageLoading(false)}
-                                        draggable={false}
-                                        className={`
-                                            max-h-[calc(100vh-210px)]
-                                            max-w-full
-                                            object-contain
-                                            transition-opacity
-                                            duration-300
-                                            ${
-                                                imageLoading
-                                                    ? "opacity-0"
-                                                    : "opacity-100"
-                                            }
-                                        `}
-                                    />
-                                ) : (
-                                    <video
-                                        ref={videoRef}
-                                        key={selectedMedia.url}
-                                        src={selectedMedia.url}
-                                        controls
-                                        controlsList="nodownload"
-                                        autoPlay
-                                        playsInline
-                                        preload="metadata"
-                                        onLoadedData={() => setImageLoading(false)}
-                                        onWaiting={() => setImageLoading(true)}
-                                        onPlaying={() => setImageLoading(false)}
-                                        onError={() => setImageLoading(false)}
-                                        className="
-                                            max-h-[calc(100vh-210px)]
-                                            max-w-full
-                                            object-contain
-                                            rounded-lg
-                                            pointer-events-auto
-                                        "
-                                    />
-                                )}
+                                {media.map((item, index) => {
+                                    // Lazy-render adjacent media items to avoid loading all images/videos at once
+                                    const isRendered = Math.abs(index - selectedIndex) <= 1;
+                                    const isVideo = isVideoItem(item);
+
+                                    return (
+                                        <div
+                                            key={index}
+                                            className="w-full h-full shrink-0 flex items-center justify-center relative select-none"
+                                        >
+                                            {isRendered ? (
+                                                <div
+                                                    style={index === selectedIndex ? {
+                                                        transform: `scale(${scale}) translate(${translate.x / scale}px, ${translate.y / scale}px)`,
+                                                        transition: isInteractingZoom ? "none" : "transform 0.25s ease",
+                                                        touchAction: "none",
+                                                    } : {}}
+                                                    onClick={(e) => {
+                                                        // Prevent clicks on the media itself from bubbling and toggling UI
+                                                        e.stopPropagation();
+                                                    }}
+                                                >
+                                                    {imageLoading && index === selectedIndex && (
+                                                        <div className="absolute inset-0 flex items-center justify-center z-10">
+                                                            <div className="h-10 w-10 animate-spin rounded-full border-4 border-white/30 border-t-white" />
+                                                        </div>
+                                                    )}
+
+                                                    {!isVideo ? (
+                                                        <img
+                                                            src={item.url}
+                                                            alt={memoryTitle ? `${memoryTitle} — photo ${index + 1}` : ""}
+                                                            decoding="async"
+                                                            onDoubleClick={toggleFullscreen}
+                                                            onLoad={() => {
+                                                                if (index === selectedIndex) setImageLoading(false);
+                                                            }}
+                                                            onError={() => {
+                                                                if (index === selectedIndex) setImageLoading(false);
+                                                            }}
+                                                            draggable={false}
+                                                            className={`
+                                                                max-w-full
+                                                                object-contain
+                                                                transition-opacity
+                                                                duration-300
+                                                                select-none
+                                                                ${isFullscreen 
+                                                                    ? "max-h-screen max-w-screen w-screen h-screen" 
+                                                                    : "max-h-[calc(100vh-140px)]"
+                                                                }
+                                                                ${imageLoading && index === selectedIndex ? "opacity-0" : "opacity-100"}
+                                                            `}
+                                                        />
+                                                    ) : (
+                                                        <div className="relative flex items-center justify-center max-w-full">
+                                                            <video
+                                                                ref={index === selectedIndex ? videoRef : null}
+                                                                src={item.url}
+                                                                playsInline
+                                                                preload="metadata"
+                                                                onLoadedData={() => {
+                                                                    if (index === selectedIndex) setImageLoading(false);
+                                                                }}
+                                                                onWaiting={() => {
+                                                                    if (index === selectedIndex) setImageLoading(true);
+                                                                }}
+                                                                onPlaying={() => {
+                                                                    if (index === selectedIndex) setImageLoading(false);
+                                                                }}
+                                                                onError={() => {
+                                                                    if (index === selectedIndex) setImageLoading(false);
+                                                                }}
+                                                                className={`
+                                                                    object-contain
+                                                                    rounded-lg
+                                                                    max-w-full
+                                                                    ${isFullscreen 
+                                                                        ? "max-h-screen max-w-screen w-screen h-screen" 
+                                                                        : "max-h-[calc(100vh-140px)]"
+                                                                    }
+                                                                `}
+                                                            />
+
+                                                            {/* Custom Video Controls Overlay (Selected Item Only) */}
+                                                            {index === selectedIndex && (
+                                                                <>
+                                                                    {/* Center Play/Pause Indicator Button */}
+                                                                    <div 
+                                                                        className={`
+                                                                            absolute inset-0 flex items-center justify-center bg-black/10 pointer-events-none transition-opacity duration-300
+                                                                            ${showControls ? "opacity-100" : "opacity-0"}
+                                                                        `}
+                                                                    >
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                togglePlay();
+                                                                                resetControlsTimeout();
+                                                                            }}
+                                                                            className="pointer-events-auto p-4 rounded-full bg-black/50 text-white backdrop-blur-md hover:scale-110 active:scale-95 transition"
+                                                                        >
+                                                                            {isPlaying ? <Pause size={32} /> : <Play size={32} className="ml-1" />}
+                                                                        </button>
+                                                                    </div>
+
+                                                                    {/* Bottom Custom Playback Bar */}
+                                                                    <div 
+                                                                        className={`
+                                                                            absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md rounded-xl p-3 flex flex-col gap-2 pointer-events-auto border border-white/10 transition-all duration-300
+                                                                            ${showControls ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none"}
+                                                                        `}
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                    >
+                                                                        <div className="flex items-center gap-3 w-full">
+                                                                            <input
+                                                                                type="range"
+                                                                                min={0}
+                                                                                max={duration || 100}
+                                                                                value={currentTime}
+                                                                                onChange={(e) => {
+                                                                                    const time = parseFloat(e.target.value);
+                                                                                    if (videoRef.current) {
+                                                                                        videoRef.current.currentTime = time;
+                                                                                    }
+                                                                                    setCurrentTime(time);
+                                                                                    resetControlsTimeout();
+                                                                                }}
+                                                                                className="flex-1 accent-white h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                                                                            />
+                                                                        </div>
+                                                                        <div className="flex justify-between items-center text-white text-xs">
+                                                                            <div className="flex items-center gap-4">
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => {
+                                                                                        togglePlay();
+                                                                                        resetControlsTimeout();
+                                                                                    }}
+                                                                                    className="hover:opacity-80 transition"
+                                                                                >
+                                                                                    {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+                                                                                </button>
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => {
+                                                                                        if (videoRef.current) {
+                                                                                            videoRef.current.muted = !videoRef.current.muted;
+                                                                                        }
+                                                                                        resetControlsTimeout();
+                                                                                    }}
+                                                                                    className="hover:opacity-80 transition"
+                                                                                >
+                                                                                    {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                                                                                </button>
+                                                                                <span>
+                                                                                    {formatTime(currentTime)} / {formatTime(duration)}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : null}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
 
                         {/* Bottom Navigation & Counter */}
                         {!isFullscreen && (
                             <div
-                                className="
+                                className={`
                                     absolute
                                     bottom-2
                                     left-0
@@ -930,7 +1144,9 @@ const Lightbox = ({
                                     items-center
                                     gap-2
                                     pointer-events-none
-                                "
+                                    transition-all duration-300 ease-in-out
+                                    ${showControls ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none"}
+                                `}
                             >
                                 {!isVideoItem(selectedMedia) && (
                                     <div className="flex items-center justify-center gap-10 sm:gap-16 md:gap-20 pointer-events-auto relative z-50">

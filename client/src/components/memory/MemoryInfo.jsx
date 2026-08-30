@@ -158,28 +158,28 @@ const MemoryInfo = ({ memory, isOwner = false, isLoggedIn = false }) => {
             {/* Compact 4-Column Stats Grid Matching Right-Side Media Layout */}
             <div className="grid grid-cols-4 gap-1.5 sm:gap-2 text-center">
               {/* Photos */}
-              <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/80 p-2 sm:p-2.5 transition-colors">
+              <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-slate-50/80 to-blue-50/30 dark:from-slate-900/90 dark:to-indigo-950/30 p-2 sm:p-2.5 transition-colors">
                 <Camera size={14} className="text-blue-600 dark:text-indigo-400 mb-1" />
                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Photos</span>
                 <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white mt-0.5">{totalPhotos}</span>
               </div>
 
               {/* Videos */}
-              <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/80 p-2 sm:p-2.5 transition-colors">
+              <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-slate-50/80 to-blue-50/30 dark:from-slate-900/90 dark:to-indigo-950/30 p-2 sm:p-2.5 transition-colors">
                 <Video size={14} className="text-purple-600 dark:text-purple-400 mb-1" />
                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Videos</span>
                 <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white mt-0.5">{totalVideos}</span>
               </div>
 
               {/* Duration */}
-              <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/80 p-2 sm:p-2.5 transition-colors">
+              <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-slate-50/80 to-blue-50/30 dark:from-slate-900/90 dark:to-indigo-950/30 p-2 sm:p-2.5 transition-colors">
                 <Clock size={14} className="text-amber-500 dark:text-amber-400 mb-1" />
                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Duration</span>
                 <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white mt-0.5">{totalDays}D</span>
               </div>
 
               {/* Status */}
-              <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/80 p-2 sm:p-2.5 transition-colors">
+              <div className="flex flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-slate-50/80 to-blue-50/30 dark:from-slate-900/90 dark:to-indigo-950/30 p-2 sm:p-2.5 transition-colors">
                 {memory.isPublic ? (
                   <Globe size={14} className="text-emerald-500 dark:text-emerald-400 mb-1" />
                 ) : (

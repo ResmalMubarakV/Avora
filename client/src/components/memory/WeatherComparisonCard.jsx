@@ -48,7 +48,7 @@ const WeatherComparisonCard = ({ location, startDate, className = "" }) => {
 
   if (loading) {
     return (
-      <div className={`rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 p-2.5 flex items-center justify-center gap-2 text-[11px] font-semibold text-slate-500 dark:text-slate-400 backdrop-blur-md ${className}`}>
+      <div className={`rounded-xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-white to-blue-50/50 dark:from-slate-900 dark:to-indigo-950/40 p-2.5 flex items-center justify-center gap-2 text-[11px] font-semibold text-slate-500 dark:text-slate-400 backdrop-blur-md ${className}`}>
         <Loader2 size={14} className="animate-spin text-[#3559D4] dark:text-indigo-400 shrink-0" />
         <span>Fetching live weather...</span>
       </div>
@@ -77,7 +77,7 @@ const WeatherComparisonCard = ({ location, startDate, className = "" }) => {
   };
 
   return (
-    <div className={`rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-3 shadow-2xs space-y-2.5 transition-colors ${className}`}>
+    <div className={`rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-white to-blue-50/50 dark:from-slate-900 dark:to-indigo-950/40 backdrop-blur-xl p-3 shadow-2xs space-y-2.5 transition-colors ${className}`}>
       
       {/* Live Destination Header */}
       <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-slate-800/80">

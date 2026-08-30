@@ -106,7 +106,10 @@ const SafeImage = React.memo((props) => {
 
   // 2. Clear Natural Size on URL Change
   useEffect(() => {
-    setNaturalSize({ w: 0, h: 0 });
+    const timer = setTimeout(() => {
+      setNaturalSize({ w: 0, h: 0 });
+    }, 0);
+    return () => clearTimeout(timer);
   }, [url]);
 
   const handleImgLoad = useCallback((e) => {
@@ -130,8 +133,8 @@ const SafeImage = React.memo((props) => {
     maxPxX = Math.max(0, (cW - containerSize.w) / 2);
     maxPxY = Math.max(0, (cH - containerSize.h) / 2);
 
-    const renderX = isDraggingRef.current ? panState.current.x : x;
-    const renderY = isDraggingRef.current ? panState.current.y : y;
+    const renderX = x;
+    const renderY = y;
 
     const cX = Math.max(-100, Math.min(100, renderX));
     const cY = Math.max(-100, Math.min(100, renderY));
@@ -182,6 +185,11 @@ const SafeImage = React.memo((props) => {
       panState.current = { x, y };
     }
   }, [x, y]);
+
+  const cW = containerSize.w;
+  const cH = containerSize.h;
+  const nW = naturalSize.w;
+  const nH = naturalSize.h;
 
   // 6. Touch/Drag Interaction System
   useEffect(() => {
@@ -282,7 +290,7 @@ const SafeImage = React.memo((props) => {
     const handleTouchEnd = () => {
       if (initialPinchDist && typeof onUpdateConfig === 'function') {
         const distStr = imgRef.current.style.width; 
-        const curScale = parseFloat(distStr) / (naturalSize.w * Math.max(containerSize.w / naturalSize.w, containerSize.h / naturalSize.h));
+        const curScale = parseFloat(distStr) / (nW * Math.max(cW / nW, cH / nH));
         onUpdateConfig(slotId, 'zoom', Math.max(1, Math.min(6, curScale || zoom)));
       }
       onPointerUp();
@@ -308,7 +316,7 @@ const SafeImage = React.memo((props) => {
       el.removeEventListener('touchend', handleTouchEnd);
       el.removeEventListener('touchcancel', handleTouchEnd);
     };
-  }, [isEditing, ready, zoom, maxPxX, maxPxY, slotId, onUpdateConfig, onSlotClick, applyTransform]);
+  }, [isEditing, ready, zoom, maxPxX, maxPxY, slotId, onUpdateConfig, onSlotClick, applyTransform, cW, cH, nW, nH]);
 
   if (!url) return <div className={className} style={{ width: '100%', height: '100%', backgroundColor: '#e2e8f0', ...style }} />;
 
@@ -396,7 +404,7 @@ const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null,
   
   const slotConfigs = useMemo(() => {
     return Array.from({ length: 9 }).map((_, i) => mediaConfig?.slots?.[i]?.url ? mediaConfig.slots[i] : { url: defaultImages[i % defaultImages.length]?.url || "", zoom: 1, x: 0, y: 0 });
-  }, [mediaConfig?.slots, defaultImages]);
+  }, [mediaConfig, defaultImages]);
   
   const title = memory?.title || "Untitled Journey";
   const location = memory?.location || "Unknown Location";
@@ -921,7 +929,6 @@ export default function PublicMemory() {
   const isPreviewMode = searchParams.get("preview") === "true";
   const layoutIndex = searchParams.has("layout") ? Number(searchParams.get("layout")) : 0;
 
-  const [mapCoords, setMapCoords] = useState([20.5937, 78.9629]);
   const [previewScale, setPreviewScale] = useState(1);
   const previewContainerRef = useRef(null);
 
@@ -1027,16 +1034,6 @@ export default function PublicMemory() {
     document.title = prevTitle;
   };
 
-  useEffect(() => {
-    if (memory?.latitude && memory?.longitude) {
-        setMapCoords([memory.latitude, memory.longitude]);
-    } else if (memory?.location) {
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(memory.location)}`)
-          .then(res => res.json())
-          .then(data => { if (data && data.length > 0) setMapCoords([parseFloat(data[0].lat), parseFloat(data[0].lon)]); })
-          .catch(err => console.error("Geocoding failed:", err));
-    }
-  }, [memory]);
 
   // Set initial configs with 50% as the default center point
   useEffect(() => {
@@ -1046,7 +1043,10 @@ export default function PublicMemory() {
             const fallbackImg = allImages[i % allImages.length];
             return { url: fallbackImg?.url || '', zoom: 1, x: 50, y: 50 };
         });
-        setMediaConfig({ cover: { url: baseCover, zoom: 1, x: 50, y: 50 }, slots: initialSlots });
+        const timer = setTimeout(() => {
+            setMediaConfig({ cover: { url: baseCover, zoom: 1, x: 50, y: 50 }, slots: initialSlots });
+        }, 0);
+        return () => clearTimeout(timer);
     }
   }, [memory, mediaConfig, allImages]);
 
@@ -1087,10 +1087,10 @@ export default function PublicMemory() {
   const currentEditorConfig = activeSlot === 'cover' ? mediaConfig?.cover : (activeSlot !== null && activeSlot !== undefined ? mediaConfig?.slots[activeSlot] : null);
   const currentBounds = slotBounds[String(activeSlot)] || { maxX: 0, maxY: 0 };
 
-  const enterPreviewMode = () => setSearchParams({ preview: "true", layout: Math.floor(Math.random() * 20).toString() }, { replace: true, state: location.state });
-  const exitPreviewMode = () => setSearchParams({}, { replace: true, state: location.state });
-  const nextLayout = () => { setShowImagePickerModal(false); setSearchParams({ preview: "true", layout: ((layoutIndex + 1) % 20).toString() }, { replace: true, state: location.state }); };
-  const prevLayout = () => { setShowImagePickerModal(false); setSearchParams({ preview: "true", layout: ((layoutIndex - 1 + 20) % 20).toString() }, { replace: true, state: location.state }); };
+  const enterPreviewMode = useCallback(() => setSearchParams({ preview: "true", layout: Math.floor(Math.random() * 20).toString() }, { replace: true, state: location.state }), [location.state, setSearchParams]);
+  const exitPreviewMode = useCallback(() => setSearchParams({}, { replace: true, state: location.state }), [location.state, setSearchParams]);
+  const nextLayout = useCallback(() => { setShowImagePickerModal(false); setSearchParams({ preview: "true", layout: ((layoutIndex + 1) % 20).toString() }, { replace: true, state: location.state }); }, [layoutIndex, location.state, setSearchParams]);
+  const prevLayout = useCallback(() => { setShowImagePickerModal(false); setSearchParams({ preview: "true", layout: ((layoutIndex - 1 + 20) % 20).toString() }, { replace: true, state: location.state }); }, [layoutIndex, location.state, setSearchParams]);
 
   useEffect(() => {
     if (!isPreviewMode) return;
@@ -1101,7 +1101,7 @@ export default function PublicMemory() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isPreviewMode, layoutIndex, showImagePickerModal]);
+  }, [isPreviewMode, showImagePickerModal, prevLayout, nextLayout, exitPreviewMode]);
 
   const openGallery = (index) => { setSelectedIndex(index); setIsOpen(true); setSearchParams({ image: index.toString() }, { replace: false, state: location.state }); };
   const goToImage = (index) => { setSelectedIndex(index); setSearchParams({ image: index.toString() }, { replace: false, state: location.state }); };
@@ -1274,7 +1274,7 @@ export default function PublicMemory() {
       </section>
 
       <section className="relative z-10 mx-auto max-w-[1500px] px-5 sm:px-8 lg:px-10 xl:px-14 pb-24">
-        <div className="relative overflow-hidden rounded-[36px] border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-xl shadow-sky-950/[0.03] dark:shadow-black/50 p-6 sm:p-14 transition-colors">
+        <div className="relative overflow-hidden rounded-[36px] border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-white via-blue-50/15 to-indigo-50/25 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/30 shadow-xl shadow-sky-950/[0.03] dark:shadow-black/50 p-6 sm:p-14 transition-colors">
             <div className="flex items-center gap-4">
               <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-[#1E3A8A] dark:from-indigo-600 dark:to-blue-700 text-white shadow-lg shadow-blue-500/20 dark:shadow-indigo-900/40 overflow-hidden group"><Compass size={24} className="transition-transform duration-700 animate-[spin_12s_linear_infinite]" /></div>
               <div><p className="text-xs font-bold uppercase tracking-[0.25em] text-[#3559D4] dark:text-indigo-400">Travel Journal</p><h2 className="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">Journey Story</h2></div>

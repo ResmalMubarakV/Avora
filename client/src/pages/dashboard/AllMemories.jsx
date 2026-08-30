@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Plus, Loader2, Sparkles } from "lucide-react";
 
@@ -28,14 +28,6 @@ const AllMemories = () => {
   const totalPages = apiResponse?.totalPages || 1;
   const totalCount = apiResponse?.totalMemories || memories.length;
 
-  // Scroll to top on page/filter change
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "instant",
-    });
-  }, [location.pathname, currentPage, sortBy, filterParam, selectedYear]);
 
   // Handle multi-select filter toggle
   const toggleFilter = (filterValue) => {

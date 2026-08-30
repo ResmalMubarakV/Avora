@@ -4,13 +4,13 @@
   "description": "Preserve every journey with photos, videos, stories, and interactive maps in your digital travel vault.",
   "icons": [
     {
-      "src": "/avoraLogoDark.png",
+      "src": "/avoraLogoLight.png",
       "type": "image/png",
       "sizes": "192x192 512x512",
       "purpose": "any maskable"
     },
     {
-      "src": "/avoraLogoLight.png",
+      "src": "/avoraLogoDark.png",
       "type": "image/png",
       "sizes": "192x192 512x512",
       "purpose": "any maskable"

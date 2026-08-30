@@ -290,7 +290,7 @@ const ProfileHero = ({
                         {/* Avatar with Mild Blue/Indigo Glow Highlight */}
                         <div className="relative -mt-20 sm:-mt-28 shrink-0">
                             <div className="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-blue-500/30 via-sky-400/20 to-indigo-500/30 opacity-40 dark:opacity-50 blur-md pointer-events-none"></div>
-                            <div className="relative h-32 w-32 sm:h-44 sm:w-44 overflow-hidden rounded-full border-4 sm:border-[6px] border-white dark:border-slate-800 dark:ring-2 dark:ring-blue-500/30 bg-slate-200 dark:bg-slate-800 shadow-xl dark:shadow-[0_0_22px_rgba(53,89,212,0.25)] transition-all duration-300">
+                            <div className="relative h-32 w-32 sm:h-44 sm:w-44 overflow-hidden rounded-full border-4 sm:border-[6px] border-white dark:border-slate-800 ring-2 ring-blue-500/20 dark:ring-blue-500/40 bg-slate-200 dark:bg-slate-800 shadow-[0_0_24px_rgba(53,89,212,0.22)] dark:shadow-[0_0_30px_rgba(99,102,241,0.45)] transition-all duration-300">
                                 {user?.profileImage ? (
                                     <img
                                         src={user.profileImage}
