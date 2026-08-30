@@ -26,14 +26,12 @@ export const ThemeProvider = ({ children }) => {
     const favicon = document.getElementById("favicon");
     if (theme === "dark") {
       root.classList.add("dark");
-      if (favicon) {
-        favicon.setAttribute("href", "/avoraLogoLight.png");
-      }
     } else {
       root.classList.remove("dark");
-      if (favicon) {
-        favicon.setAttribute("href", "/avoraLogoDark.png");
-      }
+    }
+    if (favicon) {
+      favicon.setAttribute("href", "/favicon.svg");
+      favicon.setAttribute("type", "image/svg+xml");
     }
     localStorage.setItem("avora_theme", theme);
   }, [theme]);
