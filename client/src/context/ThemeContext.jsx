@@ -30,8 +30,8 @@ export const ThemeProvider = ({ children }) => {
       root.classList.remove("dark");
     }
     if (favicon) {
-      favicon.setAttribute("href", "/favicon.svg");
-      favicon.setAttribute("type", "image/svg+xml");
+      favicon.setAttribute("href", theme === "dark" ? "/avoraLogoLight.png" : "/avoraLogoDark.png");
+      favicon.setAttribute("type", "image/png");
     }
     localStorage.setItem("avora_theme", theme);
   }, [theme]);

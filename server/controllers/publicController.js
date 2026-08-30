@@ -80,7 +80,6 @@ const getPublicProfile = async (req, res) => {
       if (search) {
         query.$or = [
           { title: { $regex: search, $options: "i" } },
-          { description: { $regex: search, $options: "i" } },
           { location: { $regex: search, $options: "i" } },
         ];
       }

@@ -57,7 +57,7 @@ export const fetchMemoryWeatherComparison = async (locationStr, startDateStr) =>
     );
     let geoData = await geoRes.json();
 
-    // Fallback: If full string fails (e.g. "Kochi, Kerala, India"), search using first city word "Kochi"
+    // Fallback A: If full string fails, search using first city word split by comma
     if ((!geoData.results || geoData.results.length === 0) && locationStr.includes(",")) {
       const citySegment = locationStr.split(",")[0].trim();
       geoRes = await fetch(
@@ -66,6 +66,55 @@ export const fetchMemoryWeatherComparison = async (locationStr, startDateStr) =>
         )}&count=1&language=en&format=json`
       );
       geoData = await geoRes.json();
+    }
+
+    // Fallback B: If Open-Meteo Geocoding still fails (e.g. landmarks like "Eiffel Tower"), query Nominatim OpenStreetMap API
+    if (!geoData.results || geoData.results.length === 0) {
+      try {
+        const nomiRes = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            locationStr
+          )}&limit=1`
+        );
+        const nomiData = await nomiRes.json();
+        if (nomiData && nomiData[0]) {
+          geoData = {
+            results: [{
+              latitude: parseFloat(nomiData[0].lat),
+              longitude: parseFloat(nomiData[0].lon),
+              name: nomiData[0].display_name.split(",")[0],
+              country: nomiData[0].display_name.split(",").slice(-1)[0].trim(),
+            }]
+          };
+        }
+      } catch {
+        // Ignore Nominatim search failures
+      }
+    }
+
+    // Fallback C: If Nominatim full query fails, try Nominatim with first city word segment
+    if ((!geoData.results || geoData.results.length === 0) && locationStr.includes(",")) {
+      try {
+        const citySegment = locationStr.split(",")[0].trim();
+        const nomiRes = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            citySegment
+          )}&limit=1`
+        );
+        const nomiData = await nomiRes.json();
+        if (nomiData && nomiData[0]) {
+          geoData = {
+            results: [{
+              latitude: parseFloat(nomiData[0].lat),
+              longitude: parseFloat(nomiData[0].lon),
+              name: nomiData[0].display_name.split(",")[0],
+              country: nomiData[0].display_name.split(",").slice(-1)[0].trim(),
+            }]
+          };
+        }
+      } catch {
+        // Ignore
+      }
     }
 
     if (!geoData.results || geoData.results.length === 0) return null;
