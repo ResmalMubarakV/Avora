@@ -23,15 +23,10 @@ export const ThemeProvider = ({ children }) => {
 
   useEffect(() => {
     const root = document.documentElement;
-    const favicon = document.getElementById("favicon");
     if (theme === "dark") {
       root.classList.add("dark");
     } else {
       root.classList.remove("dark");
-    }
-    if (favicon) {
-      favicon.setAttribute("href", theme === "dark" ? "/avoraLogoLight.png" : "/avoraLogoDark.png");
-      favicon.setAttribute("type", "image/png");
     }
     localStorage.setItem("avora_theme", theme);
   }, [theme]);
