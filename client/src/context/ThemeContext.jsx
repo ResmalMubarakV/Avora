@@ -41,7 +41,7 @@ export const ThemeProvider = ({ children }) => {
       const isSystemDark = e ? e.matches : mediaQuery.matches;
       // Append a cache-buster to force the browser to refresh favicon cache immediately
       const cacheBuster = Date.now();
-      favicon.setAttribute("href", isSystemDark ? `/avoraLogoLight.png?v=${cacheBuster}` : `/avoraLogoDark.png?v=${cacheBuster}`);
+      favicon.setAttribute("href", isSystemDark ? `/avoraLogoDark.png?v=${cacheBuster}` : `/avoraLogoLight.png?v=${cacheBuster}`);
       favicon.setAttribute("type", "image/png");
     };
 
