@@ -1,4 +1,4 @@
-import { Eye, Trash2, ArrowUpRight, Globe, Lock } from "lucide-react";
+import { Eye, Trash2, Globe, Lock } from "lucide-react";
 
 // ==========================================
 // RECENT MEMORIES COMPONENT

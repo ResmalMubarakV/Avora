@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { KeyRound, ShieldCheck, Loader2, CheckCircle2, Eye, EyeOff, ShieldAlert, Check, X, HelpCircle, Lock, ArrowLeft } from "lucide-react";
+import { ShieldCheck, Loader2, CheckCircle2, Eye, EyeOff, ShieldAlert, Check, X, HelpCircle, Lock, ArrowLeft } from "lucide-react";
 import { updateUserPassword } from "../../api/userApi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";

@@ -1,11 +1,18 @@
-// ==========================================
-// LANDING FOOTER COMPONENT (PREMIUM DARK MODE DESIGN)
-// ==========================================
+import { useState } from "react";
 import { ShieldCheck, Sparkles } from "lucide-react";
 import avoraLogo from "../../assets/images/avoraLogo.png";
 import avoraLogoDark from "../../assets/images/avoraLogoDark.png";
+import LegalModal from "../common/LegalModal";
 
 const LandingFooter = () => {
+    const [legalModalOpen, setLegalModalOpen] = useState(false);
+    const [legalTab, setLegalTab] = useState("privacy");
+
+    const openLegal = (tab) => {
+        setLegalTab(tab);
+        setLegalModalOpen(true);
+    };
+
     return (
         <footer className="relative overflow-hidden border-t border-slate-200/60 dark:border-slate-800/80 bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pt-12 pb-8 w-full transition-colors duration-300">
             
@@ -71,13 +78,31 @@ const LandingFooter = () => {
                     </p>
 
                     <div className="flex items-center gap-6 text-xs font-medium text-slate-400 dark:text-slate-400">
-                        <a href="/privacy" className="hover:text-[#1E3A8A] dark:hover:text-indigo-300 transition-colors">Privacy</a>
-                        <a href="/terms" className="hover:text-[#1E3A8A] dark:hover:text-indigo-300 transition-colors">Terms</a>
-                        <a href="/contact" className="hover:text-[#1E3A8A] dark:hover:text-indigo-300 transition-colors">Contact</a>
+                        <button
+                            type="button"
+                            onClick={() => openLegal("privacy")}
+                            className="hover:text-[#1E3A8A] dark:hover:text-indigo-300 transition-colors cursor-pointer"
+                        >
+                            Privacy Policy
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => openLegal("terms")}
+                            className="hover:text-[#1E3A8A] dark:hover:text-indigo-300 transition-colors cursor-pointer"
+                        >
+                            Terms & Conditions
+                        </button>
                     </div>
 
                 </div>
             </div>
+
+            {/* Legal Lightbox Modal */}
+            <LegalModal
+                isOpen={legalModalOpen}
+                onClose={() => setLegalModalOpen(false)}
+                initialTab={legalTab}
+            />
         </footer>
     );
 };

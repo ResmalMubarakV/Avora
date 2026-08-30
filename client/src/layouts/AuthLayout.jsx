@@ -1,9 +1,10 @@
 // ==========================================
 // AUTH LAYOUT COMPONENT (`client/src/layouts/AuthLayout.jsx`)
 // ==========================================
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Plane, Camera, MapPin, ShieldCheck, Quote, Sparkles } from 'lucide-react';
 import Logo from '../components/common/Logo';
+import LegalModal from '../components/common/LegalModal';
 
 const quotes = [
   { quote: "The best memories are collected along the way.", author: "Avora Traveler" },
@@ -11,8 +12,15 @@ const quotes = [
   { quote: "Every destination becomes a story worth preserving.", author: "Memory Vault" }
 ];
 
-const AuthLayout = ({ children, type = 'login' }) => {
+const AuthLayout = ({ children }) => {
   const [currentQuote, setCurrentQuote] = useState(0);
+  const [legalModalOpen, setLegalModalOpen] = useState(false);
+  const [legalTab, setLegalTab] = useState("privacy");
+
+  const openLegal = (tab) => {
+    setLegalTab(tab);
+    setLegalModalOpen(true);
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -162,14 +170,38 @@ const AuthLayout = ({ children, type = 'login' }) => {
             </div>
           </div>
 
-          <footer className="mt-10 text-center lg:hidden">
-            <p className="text-xs font-medium text-slate-400 dark:text-slate-500">
+          <footer className="mt-8 text-center">
+            <div className="flex items-center justify-center gap-4 text-xs font-medium text-slate-400 dark:text-slate-500 mb-2">
+              <button
+                type="button"
+                onClick={() => openLegal("privacy")}
+                className="hover:text-blue-600 dark:hover:text-indigo-300 transition-colors cursor-pointer"
+              >
+                Privacy Policy
+              </button>
+              <span>•</span>
+              <button
+                type="button"
+                onClick={() => openLegal("terms")}
+                className="hover:text-blue-600 dark:hover:text-indigo-300 transition-colors cursor-pointer"
+              >
+                Terms & Conditions
+              </button>
+            </div>
+            <p className="text-[11px] font-medium text-slate-400/80 dark:text-slate-600">
               Avora Global Travel Platform &copy; {new Date().getFullYear()}
             </p>
           </footer>
         </section>
 
       </div>
+
+      {/* Legal Lightbox Modal */}
+      <LegalModal
+        isOpen={legalModalOpen}
+        onClose={() => setLegalModalOpen(false)}
+        initialTab={legalTab}
+      />
     </main>
   );
 };
