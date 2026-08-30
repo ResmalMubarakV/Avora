@@ -11,6 +11,16 @@ const LandingFooter = () => {
     const openLegal = (tab) => {
         setLegalTab(tab);
         setLegalModalOpen(true);
+        if (window.location.pathname !== `/${tab}`) {
+            window.history.pushState(null, "", `/${tab}`);
+        }
+    };
+
+    const closeLegal = () => {
+        setLegalModalOpen(false);
+        if (window.location.pathname === "/privacy" || window.location.pathname === "/terms") {
+            window.history.pushState(null, "", "/");
+        }
     };
 
     return (
@@ -100,7 +110,7 @@ const LandingFooter = () => {
             {/* Legal Lightbox Modal */}
             <LegalModal
                 isOpen={legalModalOpen}
-                onClose={() => setLegalModalOpen(false)}
+                onClose={closeLegal}
                 initialTab={legalTab}
             />
         </footer>

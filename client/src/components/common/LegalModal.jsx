@@ -51,7 +51,7 @@ const LegalModal = ({ isOpen, onClose, initialTab = "privacy" }) => {
             }}
         >
             <div 
-                className="relative flex flex-col w-full max-w-4xl max-h-[90vh] rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden transition-all duration-300"
+                className="relative flex flex-col w-full max-w-4xl max-h-[90vh] rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35)] dark:shadow-[0_0_60px_rgba(0,0,0,0.85)] overflow-hidden transition-all duration-300 animate-in fade-in zoom-in-95"
                 onClick={(e) => e.stopPropagation()}
             >
                 
