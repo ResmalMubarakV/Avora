@@ -1,13 +1,16 @@
 // ==========================================
 // AVORA SERVICE WORKER (`client/public/sw.js`)
 // ==========================================
-const CACHE_NAME = "avora-cache-v2";
+const CACHE_NAME = "avora-cache-v4";
 const ASSETS_TO_CACHE = [
   "/",
   "/index.html",
   "/manifest.json",
+  "/manifest.json?v=3",
   "/avoraLogoDark.png",
-  "/avoraLogoLight.png"
+  "/avoraLogoLight.png",
+  "/pwa-icon-192.png?v=3",
+  "/pwa-icon-512.png?v=3"
 ];
 
 // --- Install Service Worker & Cache Core Shell ---
