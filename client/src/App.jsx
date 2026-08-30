@@ -11,6 +11,7 @@ import AdminRoute from "./components/auth/AdminRoute";
 import Landing from "./pages/public/Landing";
 import Profile from "./pages/profile/Profile";
 import PublicMemory from "./pages/public/PublicMemory";
+import LegalPage from "./pages/public/LegalPage";
 
 // Auth & Onboarding Pages
 import Login from "./pages/auth/Login";
@@ -214,6 +215,8 @@ function App() {
         {/* 1. STATIC PUBLIC & AUTH ROUTES (Must be first) */}
         {/* ========================================== */}
         <Route path="/" element={<Landing />} />
+        <Route path="/privacy" element={<LegalPage defaultTab="privacy" />} />
+        <Route path="/terms" element={<LegalPage defaultTab="terms" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
