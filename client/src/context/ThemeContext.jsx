@@ -31,6 +31,32 @@ export const ThemeProvider = ({ children }) => {
     localStorage.setItem("avora_theme", theme);
   }, [theme]);
 
+  // Dynamic Favicon system theme detector (Decoupled from Avora page theme)
+  useEffect(() => {
+    const favicon = document.getElementById("favicon");
+    if (!favicon) return;
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    
+    const updateFavicon = (e) => {
+      const isSystemDark = e ? e.matches : mediaQuery.matches;
+      favicon.setAttribute("href", isSystemDark ? "/avoraLogoLight.png" : "/avoraLogoDark.png");
+      favicon.setAttribute("type", "image/png");
+    };
+
+    // Initial update
+    updateFavicon();
+
+    // Listen for system/browser prefers-color-scheme theme changes
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener("change", updateFavicon);
+      return () => mediaQuery.removeEventListener("change", updateFavicon);
+    } else {
+      mediaQuery.addListener(updateFavicon);
+      return () => mediaQuery.removeListener(updateFavicon);
+    }
+  }, []);
+
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark"));
   };

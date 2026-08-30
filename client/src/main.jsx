@@ -8,6 +8,8 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "sonner";
 
 // Fonts
+import "@fontsource/outfit/100.css";
+import "@fontsource/outfit/200.css";
 import "@fontsource/outfit/300.css";
 import "@fontsource/outfit/400.css";
 import "@fontsource/outfit/500.css";

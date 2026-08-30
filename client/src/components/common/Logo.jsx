@@ -58,7 +58,7 @@ const Logo = ({ to = "/", size = "md", className = "" }) => {
 
       {/* Brand Title Text */}
       <span
-        style={{ fontWeight: 300 }}
+        style={{ fontWeight: 100 }}
         className={`
           uppercase
           tracking-wider
