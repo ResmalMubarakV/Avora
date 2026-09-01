@@ -1,7 +1,7 @@
 // ==========================================
 // LOGIN PAGE COMPONENT (`client/src/pages/auth/Login.jsx`)
 // ==========================================
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiMail } from 'react-icons/fi';
 

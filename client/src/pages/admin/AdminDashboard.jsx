@@ -6,7 +6,16 @@ import PendingUsers from "../../components/admin/PendingUsers";
 import RecentUsers from "../../components/admin/RecentUsers";
 import RecentMemories from "../../components/admin/RecentMemories";
 import PageTitle from "../../components/common/PageTitle";
-import { ShieldAlert, Loader2, X, Sparkles, Activity, Users, Images, Clock, Eye, EyeOff } from "lucide-react";
+import DeleteMemoryModal from "../../components/admin/DeleteMemoryModal";
+import {
+    Loader2,
+    Users,
+    Images,
+    KeyRound,
+    ArrowRight,
+    Shield,
+    Sparkles,
+} from "lucide-react";
 
 // ==========================================
 // ADMIN DASHBOARD PAGE
@@ -17,8 +26,6 @@ const AdminDashboard = () => {
     const [loading, setLoading] = useState(true);
 
     const [selectedMemory, setSelectedMemory] = useState(null);
-    const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [deleteError, setDeleteError] = useState("");
 
@@ -30,25 +37,10 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         const hour = new Date().getHours();
-        if (hour < 12) setGreeting("Good Morning");
-        else if (hour < 17) setGreeting("Good Afternoon");
-        else setGreeting("Good Evening");
+        if (hour < 12) setGreeting("Good morning");
+        else if (hour < 17) setGreeting("Good afternoon");
+        else setGreeting("Good evening");
     }, []);
-
-    const [coreStatusIndex, setCoreStatusIndex] = useState(0);
-    const coreStatuses = [
-        { label: "Operational Online", color: "text-emerald-300", dot: "bg-emerald-400" },
-        { label: "Syncing DB Shards", color: "text-cyan-300", dot: "bg-cyan-400" },
-        { label: "Indexing Memories", color: "text-blue-300", dot: "bg-blue-400" },
-        { label: "Verifying Sessions", color: "text-indigo-300", dot: "bg-indigo-400" },
-    ];
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCoreStatusIndex((prev) => (prev + 1) % coreStatuses.length);
-        }, 4000);
-        return () => clearInterval(interval);
-    }, [coreStatuses.length]);
 
     const fetchDashboardData = async () => {
         try {
@@ -73,22 +65,34 @@ const AdminDashboard = () => {
     };
 
     const handleApprove = async (id) => {
-        try { await approveUser(id); await fetchDashboardData(); } catch (e) { console.error(e); }
+        try { 
+            await approveUser(id); 
+            await fetchDashboardData(); 
+        } catch (e) { 
+            console.error(e); 
+        }
     };
 
     const handleSuspend = async (id) => {
-        try { await suspendUser(id); await fetchDashboardData(); } catch (e) { console.error(e); }
+        try { 
+            await suspendUser(id); 
+            await fetchDashboardData(); 
+        } catch (e) { 
+            console.error(e); 
+        }
     };
 
     const handleViewMemory = (memory) => {
         const username = memory.user?.username;
         const slug = memory.slug || memory._id;
-        if (username) window.open(`/${username}/${slug}`, "_blank");
+        if (username) window.open(`/${username}/${slug}`, "_blank", "noopener,noreferrer");
     };
 
-    const confirmAndDeleteMemory = async (e) => {
-        e.preventDefault();
-        if (!password) { setDeleteError("Password is required."); return; }
+    const confirmAndDeleteMemory = async (password) => {
+        if (!password) {
+            setDeleteError("Password is required to confirm deletion.");
+            return;
+        }
 
         try {
             setDeleteLoading(true);
@@ -96,10 +100,8 @@ const AdminDashboard = () => {
             await deleteMemory(selectedMemory._id);
             await fetchDashboardData();
             setSelectedMemory(null);
-            setPassword("");
-            setShowPassword(false);
         } catch (err) {
-            setDeleteError(err.response?.data?.message || "Deletion failed.");
+            setDeleteError(err.response?.data?.message || "Deletion failed. Please try again.");
         } finally {
             setDeleteLoading(false);
         }
@@ -107,176 +109,166 @@ const AdminDashboard = () => {
 
     if (loading) {
         return (
-            <div className="flex h-[70vh] items-center justify-center w-full">
+            <div className="flex h-[60vh] flex-col items-center justify-center gap-3 w-full">
                 <PageTitle title="Loading Admin Dashboard" />
                 <Loader2 size={32} className="animate-spin text-[#3559D4]" />
+                <p className="text-xs font-semibold text-slate-400">Loading control center...</p>
             </div>
         );
     }
 
-    const currentCore = coreStatuses[coreStatusIndex];
     const totalUsers = dashboard?.stats?.totalUsers || 0;
     const totalMemories = dashboard?.stats?.totalMemories || 0;
     const pendingReviews = dashboard?.stats?.pendingUsers || 0;
+    const approvedUsers = dashboard?.stats?.approvedUsers || 0;
 
     return (
-        /* w-full and space-y ensure clean structural flow across all viewports */
-        <div className="space-y-4 sm:space-y-6 pb-16 w-full overflow-x-hidden">
+        <div className="space-y-6 sm:space-y-8 pb-16 w-full animate-in fade-in duration-300">
             <PageTitle title="Admin Dashboard" />
             
-            {/* Streamlined Mobile-Friendly Hero Header */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#3559D4] p-5 sm:p-8 2xl:p-10 text-white shadow-md w-full">
-                <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div className="min-w-0">
-                        <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-0.5 text-[10px] font-semibold backdrop-blur-md mb-2 border border-white/10">
-                            <Sparkles size={11} className="text-blue-200 shrink-0" />
-                            <span>Enterprise Control Center</span>
-                        </div>
-                        <h1 className="text-xl sm:text-3xl 2xl:text-4xl font-black tracking-tight truncate">
-                            {greeting}, Administrator
-                        </h1>
-                        
-                        <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] sm:text-xs text-blue-100/90 font-medium">
-                            <span className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-md border border-white/10">
-                                <Users size={12} className="text-blue-200 shrink-0" />
-                                <strong>{totalUsers}</strong> Users
-                            </span>
-                            <span className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-md border border-white/10">
-                                <Images size={12} className="text-blue-200 shrink-0" />
-                                <strong>{totalMemories}</strong> Memories
-                            </span>
-                            <span className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-md border border-white/10">
-                                <Clock size={12} className="text-amber-300 shrink-0" />
-                                <strong>{pendingReviews}</strong> Pending
-                            </span>
-                        </div>
+            {/* Clean Avora Executive Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-[#3559D4] dark:text-indigo-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 rounded-full border border-blue-100 dark:border-blue-800/40">
+                            <Sparkles size={10} /> Enterprise Command
+                        </span>
                     </div>
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+                        {greeting}, Administrator 👋
+                    </h1>
+                    <p className="mt-1 text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">
+                        Platform metrics, user approvals, and memory moderation overview.
+                    </p>
+                </div>
 
-                    <div className="flex items-center gap-2.5 bg-white/10 border border-white/15 rounded-xl px-3.5 py-2 backdrop-blur-md self-start md:self-auto shrink-0">
-                        <Activity size={16} className="animate-pulse text-blue-200 shrink-0" />
-                        <div className="min-w-0">
-                            <p className={`text-[11px] sm:text-xs font-bold ${currentCore.color} flex items-center gap-1.5 truncate`}>
-                                <span className={`h-1.5 w-1.5 rounded-full ${currentCore.dot} animate-ping shrink-0`} />
-                                <span className="truncate">{currentCore.label}</span>
-                            </p>
-                        </div>
-                    </div>
+                {/* Quick Shortcuts */}
+                <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                    <button
+                        type="button"
+                        onClick={() => navigate("/admin/users")}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200/80 dark:border-slate-700 bg-white/90 dark:bg-slate-900 px-3 sm:px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800 transition active:scale-95 cursor-pointer"
+                    >
+                        <Users size={14} />
+                        <span>Manage Users</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => navigate("/admin/memories")}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 dark:bg-gradient-to-r dark:from-indigo-600 dark:to-blue-600 px-3.5 sm:px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800 dark:hover:from-indigo-500 dark:hover:to-blue-500 active:scale-95 cursor-pointer"
+                    >
+                        <Images size={14} />
+                        <span>Moderate Stories</span>
+                    </button>
                 </div>
             </div>
 
-            {/* Compact Metric Stats Cards */}
+            {/* KPI Metric Strip */}
             <DashboardStats
                 totalUsers={totalUsers}
                 pendingUsers={pendingReviews}
-                approvedUsers={dashboard?.stats?.approvedUsers || 0}
+                approvedUsers={approvedUsers}
                 totalMemories={totalMemories}
                 onCardClick={handleCardClick}
             />
 
-            {/* Pending Approvals Queue */}
-            <div className="w-full">
-                <PendingUsers
-                    users={dashboard?.pendingUsers || []}
-                    onApprove={handleApprove}
-                    onSuspend={handleSuspend}
-                />
-            </div>
-
-            {/* Recent Activity Grid */}
-            <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-2 w-full">
-                <div className="w-full min-w-0">
-                    <RecentUsers
-                        users={dashboard?.recentUsers || []}
-                        onView={(user) => window.open(`/${user.username}`, "_blank")}
+            {/* Split Command Grid: Primary Moderation Stream (Left) + Activity & Quick Nav (Right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full">
+                
+                {/* Left Column: Primary Moderation Queues (7 cols on lg, 8 cols on xl) */}
+                <div className="lg:col-span-7 xl:col-span-8 space-y-6 w-full">
+                    {/* 1. Pending Approvals Queue */}
+                    <PendingUsers
+                        users={dashboard?.pendingUsers || []}
+                        onApprove={handleApprove}
+                        onSuspend={handleSuspend}
                     />
-                </div>
-                <div className="w-full min-w-0">
+
+                    {/* 2. Recent Travel Memories Feed */}
                     <RecentMemories
                         memories={dashboard?.recentMemories || []}
                         onView={handleViewMemory}
                         onDelete={(id) => {
-                            const memoryToDelete = dashboard.recentMemories.find((m) => m._id === id);
+                            const memoryToDelete = dashboard?.recentMemories?.find((m) => m._id === id);
                             setSelectedMemory(memoryToDelete);
                         }}
                     />
                 </div>
-            </div>
 
-            {/* Secure Password Confirmation Modal */}
-            {selectedMemory && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
-                    <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl border border-red-200 bg-white shadow-xl">
-                        <div className="h-1.5 w-full bg-red-600 shrink-0" />
-                        <div className="p-5 sm:p-7">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-2.5 text-red-600 min-w-0">
-                                    <ShieldAlert size={20} className="shrink-0" />
-                                    <h3 className="text-base font-bold text-slate-900 truncate">Confirm Deletion</h3>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => { setSelectedMemory(null); setPassword(""); setShowPassword(false); setDeleteError(""); }}
-                                    aria-label="Close modal"
-                                    className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer shrink-0"
-                                >
-                                    <X size={18} />
-                                </button>
+                {/* Right Column: Recent Users & Platform Quick Actions (5 cols on lg, 4 cols on xl) */}
+                <div className="lg:col-span-5 xl:col-span-4 space-y-6 w-full">
+                    {/* 1. Recent Signups Feed */}
+                    <RecentUsers
+                        users={dashboard?.recentUsers || []}
+                    />
+
+                    {/* 2. Quick Navigation & Security Overview Card */}
+                    <div className="rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-5 sm:p-6 shadow-xs">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 dark:bg-purple-950/60 border border-purple-100 dark:border-purple-800/40 text-purple-600 dark:text-purple-400 shrink-0">
+                                <Shield size={20} />
                             </div>
+                            <div>
+                                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                                    Admin Security Hub
+                                </h3>
+                                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                                    Quick administrative shortcuts
+                                </p>
+                            </div>
+                        </div>
 
-                            <p className="text-xs sm:text-sm text-slate-600 mb-4 font-medium leading-relaxed">
-                                Permanently delete <span className="font-bold text-slate-900">"{selectedMemory.title}"</span>?
-                            </p>
-
-                            {deleteError && (
-                                <div className="mb-4 rounded-xl bg-red-50 p-3 text-xs font-semibold text-red-700">
-                                    {deleteError}
+                        <div className="space-y-2">
+                            <button
+                                type="button"
+                                onClick={() => navigate("/admin/users?status=pending")}
+                                className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 transition cursor-pointer group"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="h-2 w-2 rounded-full bg-amber-500" />
+                                    <span>Pending User Approvals</span>
                                 </div>
-                            )}
+                                <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-full border border-amber-200/60 dark:border-amber-800/40">
+                                    {pendingReviews}
+                                </span>
+                            </button>
 
-                            <form onSubmit={confirmAndDeleteMemory} className="space-y-3">
-                                <div className="relative">
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        placeholder="Admin password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                        autoFocus
-                                        disabled={deleteLoading}
-                                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3.5 pl-3.5 pr-12 text-xs sm:text-sm text-slate-800 outline-none focus:border-red-500 focus:bg-white"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        aria-label={showPassword ? "Hide password" : "Show password"}
-                                        className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 cursor-pointer"
-                                    >
-                                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                    </button>
+                            <button
+                                type="button"
+                                onClick={() => navigate("/admin/memories")}
+                                className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 transition cursor-pointer group"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Images size={14} className="text-slate-400 dark:text-slate-500" />
+                                    <span>All Community Stories</span>
                                 </div>
+                                <ArrowRight size={14} className="text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                            </button>
 
-                                <div className="flex items-center justify-end gap-2 pt-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => { setSelectedMemory(null); setPassword(""); setShowPassword(false); setDeleteError(""); }}
-                                        disabled={deleteLoading}
-                                        className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 cursor-pointer hover:bg-slate-50"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={deleteLoading || !password}
-                                        className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm cursor-pointer disabled:opacity-50 hover:bg-red-700"
-                                    >
-                                        {deleteLoading ? <Loader2 size={14} className="animate-spin" /> : <span>Delete</span>}
-                                    </button>
+                            <button
+                                type="button"
+                                onClick={() => navigate("/admin/settings")}
+                                className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 transition cursor-pointer group"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <KeyRound size={14} className="text-slate-400 dark:text-slate-500" />
+                                    <span>Update Master Password</span>
                                 </div>
-                            </form>
+                                <ArrowRight size={14} className="text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                            </button>
                         </div>
                     </div>
                 </div>
-            )}
+            </div>
+
+            {/* Secure Delete Memory Modal */}
+            <DeleteMemoryModal
+                selectedMemory={selectedMemory}
+                onClose={() => { setSelectedMemory(null); setDeleteError(""); }}
+                onConfirm={confirmAndDeleteMemory}
+                deleteLoading={deleteLoading}
+                deleteError={deleteError}
+            />
         </div>
     );
 };

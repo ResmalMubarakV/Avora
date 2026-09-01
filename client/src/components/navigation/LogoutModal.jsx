@@ -1,22 +1,27 @@
-import { useEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { LogOut, ShieldAlert, X } from "lucide-react";
 
 // ==========================================
 // PORTAL-BASED UNIFORM CENTERED LOGOUT MODAL
 // ==========================================
 const LogoutModal = ({ isOpen, open, onClose, onConfirm, isAdmin = false, loading = false }) => {
-    const isModalVisible = isOpen ?? open;
-    const [mounted, setMounted] = useState(false);
+    const isModalVisible = Boolean(isOpen || open);
 
     useEffect(() => {
-        setMounted(true);
-        return () => setMounted(false);
-    }, []);
+        if (!isModalVisible) return;
+        const handleKeyDown = (e) => {
+            if (e.key === "Escape" && onClose && !loading) {
+                onClose();
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isModalVisible, onClose, loading]);
 
-    if (!isModalVisible || !mounted) return null;
+    if (!isModalVisible || typeof document === "undefined") return null;
 
-    return ReactDOM.createPortal(
+    return createPortal(
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-slate-950/75 backdrop-blur-md p-4 animate-in fade-in duration-200">
             <div className={`w-full max-w-md rounded-3xl border bg-white shadow-2xl overflow-hidden ${
                 isAdmin ? "border-red-200 shadow-[0_20px_60px_rgba(239,68,68,0.2)]" : "border-slate-200 shadow-[0_20px_60px_rgba(0,0,0,0.2)]"

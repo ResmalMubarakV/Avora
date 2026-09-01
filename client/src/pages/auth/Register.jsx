@@ -1,7 +1,7 @@
 // ==========================================
 // REGISTER PAGE COMPONENT (`client/src/pages/auth/Register.jsx`)
 // ==========================================
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiUser, FiMail, FiAtSign } from 'react-icons/fi';
 

@@ -18,10 +18,10 @@ const DashboardHero = () => {
       <div className="flex items-center justify-between gap-4">
         {/* Compact Title & Personalized Greeting */}
         <div>
-          <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
             Dashboard
           </h1>
-          <p className="mt-1 text-xs sm:text-base font-medium text-slate-500">
+          <p className="mt-1 text-xs sm:text-base font-medium text-slate-500 dark:text-slate-400">
             Welcome back, {loading ? "Traveler" : user?.name || "Traveler"} 👋
           </p>
         </div>

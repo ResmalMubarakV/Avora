@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import ReactDOM from "react-dom";
+import { createPortal } from "react-dom";
 import { ShieldCheck, Scale, FileText, X, AlertTriangle, Lock, CheckCircle2 } from "lucide-react";
 
 // ==========================================
@@ -39,7 +39,7 @@ const LegalModal = ({ isOpen, onClose, initialTab = "privacy" }) => {
 
     if (!isOpen || !mounted) return null;
 
-    return ReactDOM.createPortal(
+    return createPortal(
         <div 
             className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-4 md:p-6 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200"
             onClick={(e) => {

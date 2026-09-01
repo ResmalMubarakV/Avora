@@ -4,13 +4,13 @@
   "description": "Preserve every journey with photos, videos, stories, and interactive maps in your digital travel vault.",
   "icons": [
     {
-      "src": "/pwa-icon-192.png?v=3",
+      "src": "/pwa-icon-192.png?v=4",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "/pwa-icon-512.png?v=3",
+      "src": "/pwa-icon-512.png?v=4",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"

@@ -4,8 +4,9 @@ import {
     LayoutDashboard,
     Users,
     Images,
-    LogOut,
     Shield,
+    KeyRound,
+    LogOut,
     Menu,
     X,
 } from "lucide-react";
@@ -45,6 +46,11 @@ const AdminSidebar = ({ sidebarOpen, setSidebarOpen, isMobile }) => {
             to: "/admin/memories",
             icon: Images,
         },
+        {
+            label: "Security Settings",
+            to: "/admin/settings",
+            icon: KeyRound,
+        },
     ];
 
     const isOpen = sidebarOpen;
@@ -52,106 +58,122 @@ const AdminSidebar = ({ sidebarOpen, setSidebarOpen, isMobile }) => {
     return (
         <>
             {/* Mobile / Drawer Backdrop */}
-            {sidebarOpen && isMobile && (
+            {sidebarOpen && (
                 <div
                     onClick={() => setSidebarOpen(false)}
-                    className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+                    className="fixed inset-0 z-40 bg-slate-950/20 dark:bg-slate-950/60 backdrop-blur-md transition-opacity duration-300 md:hidden"
                 />
             )}
 
             <aside
                 className={`
-                    fixed inset-y-0 left-0 z-50 flex flex-col border-r border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900
-                    transition-all duration-300 ease-in-out shadow-sm
+                    fixed inset-y-0 left-0 z-50 flex flex-col bg-white/90 dark:bg-slate-900/95 backdrop-blur-xl border-r border-slate-200/80 dark:border-slate-800
+                    transition-all duration-300 ease-in-out shadow-[0_10px_35px_rgba(30,58,138,0.08)] overflow-hidden
                     ${isMobile 
-                        ? (sidebarOpen ? "translate-x-0 w-72" : "-translate-x-full w-72")
-                        : (sidebarOpen ? "w-72 translate-x-0" : "w-20 translate-x-0")
+                        ? (sidebarOpen ? "translate-x-0 w-72 shadow-2xl" : "-translate-x-full w-72")
+                        : (sidebarOpen ? "w-72 translate-x-0 shadow-2xl" : "w-20 translate-x-0")
                     }
                 `}
             >
-                {/* Header / Toggle Switcher */}
-                <div className="flex h-20 items-center justify-between px-4 sm:px-6 border-b border-slate-100 dark:border-slate-800 overflow-hidden">
-                    {isOpen ? (
-                        <div className="flex items-center justify-between w-full min-w-0">
-                            <div className="min-w-0 truncate">
-                                <h1 className="text-base font-bold text-slate-900 dark:text-white truncate tracking-tight">
-                                    Avora Admin
-                                </h1>
-                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/80 px-2.5 py-0.5 rounded-full truncate mt-0.5 border border-blue-100 dark:border-blue-800/50">
-                                    <Shield size={10} /> Secure Portal
-                                </span>
+                {/* Background Glass Gradient Effects */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-[#FAFBFD]/80 to-[#1E3A8A]/10 dark:from-slate-900/90 dark:via-slate-900/80 dark:to-indigo-950/20" />
+                    <div className="absolute -right-24 top-20 h-72 w-72 rounded-full bg-[#1E3A8A]/10 dark:bg-indigo-500/10 blur-3xl" />
+                </div>
+
+                {/* Sidebar Inner Content */}
+                <div className="relative z-10 flex h-full flex-col justify-between py-2">
+                    {/* Top Header / Toggle Switcher */}
+                    <div className="h-16 flex items-center px-4 shrink-0 border-b border-slate-100 dark:border-slate-800/80">
+                        {isOpen ? (
+                            <div className="flex items-center justify-between w-full min-w-0">
+                                <div className="min-w-0 truncate pl-1">
+                                    <div className="flex items-center gap-1.5">
+                                        <h1 className="text-sm font-bold text-slate-900 dark:text-white truncate tracking-tight">
+                                            Avora Admin
+                                        </h1>
+                                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/80 px-2 py-0.5 rounded-full border border-blue-100 dark:border-blue-800/50">
+                                            <Shield size={9} /> Portal
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setSidebarOpen(false)}
+                                    aria-label="Close Sidebar"
+                                    className="h-9 w-9 shrink-0 flex items-center justify-center rounded-xl transition-all duration-300 hover:bg-[#1E3A8A]/5 hover:text-[#1E3A8A] text-slate-700 dark:text-slate-200 cursor-pointer"
+                                >
+                                    <X size={20} />
+                                </button>
                             </div>
+                        ) : (
+                            <div className="mx-auto flex justify-center">
+                                <button
+                                    type="button"
+                                    onClick={() => setSidebarOpen(true)}
+                                    aria-label="Open Sidebar"
+                                    className="h-10 w-10 flex items-center justify-center rounded-xl transition-all duration-300 hover:bg-[#1E3A8A]/5 hover:text-[#1E3A8A] text-slate-700 dark:text-slate-200 cursor-pointer"
+                                >
+                                    <Menu size={22} />
+                                </button>
+                            </div>
+                        )}
+                    </div>
 
-                            <button
-                                type="button"
-                                onClick={() => setSidebarOpen(false)}
-                                aria-label="Close Sidebar"
-                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 transition hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer shadow-sm ml-2"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="mx-auto flex justify-center">
-                            <button
-                                type="button"
-                                onClick={() => setSidebarOpen(true)}
-                                aria-label="Open Sidebar"
-                                className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 transition hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer shadow-sm"
-                            >
-                                <Menu size={20} />
-                            </button>
-                        </div>
-                    )}
-                </div>
+                    {/* Navigation Links */}
+                    <div className="flex-1 px-3 py-4 space-y-2 overflow-y-auto overflow-x-hidden">
+                        {isOpen && (
+                            <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 mb-2 truncate">
+                                Control Center
+                            </p>
+                        )}
+                        {navItems.map((item) => {
+                            const Icon = item.icon;
+                            return (
+                                <NavLink
+                                    key={item.to}
+                                    to={item.to}
+                                    end={item.end}
+                                    onClick={() => isMobile && setSidebarOpen(false)}
+                                    title={!isOpen ? item.label : ""}
+                                    className={({ isActive }) => `
+                                        flex items-center h-12 rounded-xl transition-all duration-300 group
+                                        ${
+                                            isOpen
+                                                ? "justify-start gap-3.5 px-3.5"
+                                                : "justify-center"
+                                        }
+                                        ${
+                                            isActive
+                                                ? "bg-gradient-to-r from-[#1E3A8A] to-[#3559D4] text-white shadow-md shadow-[#1E3A8A]/20"
+                                                : "text-slate-600 dark:text-slate-300 hover:bg-[#1E3A8A]/5 dark:hover:bg-slate-800 hover:text-[#1E3A8A] dark:hover:text-indigo-400"
+                                        }
+                                    `}
+                                >
+                                    <Icon size={isOpen ? 20 : 22} className="shrink-0 transition-transform duration-200 group-hover:scale-105" />
+                                    {isOpen && <span className="truncate text-sm font-semibold">{item.label}</span>}
+                                </NavLink>
+                            );
+                        })}
+                    </div>
 
-                {/* Navigation Links */}
-                <div className="flex-1 px-3 sm:px-4 py-6 space-y-2 overflow-y-auto overflow-x-hidden">
-                    {isOpen && (
-                        <p className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3 truncate">
-                            Core Management
-                        </p>
-                    )}
-                    {navItems.map((item) => {
-                        const Icon = item.icon;
-                        return (
-                            <NavLink
-                                key={item.to}
-                                to={item.to}
-                                end={item.end}
-                                onClick={() => isMobile && setSidebarOpen(false)}
-                                title={!isOpen ? item.label : ""}
-                                className={({ isActive }) => `
-                                    flex items-center gap-3.5 rounded-2xl px-4 py-3.5 text-sm font-semibold transition-all duration-200 group
-                                    ${
-                                        isActive
-                                            ? "bg-gradient-to-r from-[#1E3A8A] to-[#3559D4] dark:from-indigo-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/20 dark:shadow-[0_0_20px_rgba(99,102,241,0.35)]"
-                                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white"
-                                    }
-                                    ${!isOpen ? "justify-center px-0" : ""}
-                                `}
-                            >
-                                <Icon size={20} className="shrink-0 transition-transform duration-200 group-hover:scale-110" />
-                                {isOpen && <span className="truncate">{item.label}</span>}
-                            </NavLink>
-                        );
-                    })}
-                </div>
-
-                {/* Footer Section / Logout */}
-                <div className="p-3 sm:p-4 border-t border-slate-100 dark:border-slate-800">
-                    <button
-                        type="button"
-                        onClick={() => setShowLogoutModal(true)}
-                        title={!isOpen ? "Logout Account" : ""}
-                        className={`
-                            w-full flex items-center gap-3.5 rounded-2xl px-4 py-3.5 text-sm font-semibold text-red-600 dark:text-red-400 bg-red-50/50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/50 transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/60 hover:border-red-200 dark:hover:border-red-800 cursor-pointer shadow-sm
-                            ${!isOpen ? "justify-center px-0" : ""}
-                        `}
-                    >
-                        <LogOut size={20} className="shrink-0" />
-                        {isOpen && <span className="truncate">Logout Account</span>}
-                    </button>
+                    {/* Footer Section / Logout Action */}
+                    <div className="px-3 pt-2 border-t border-slate-100 dark:border-slate-800/80 shrink-0">
+                        <button
+                            type="button"
+                            onClick={() => setShowLogoutModal(true)}
+                            title={!isOpen ? "Logout Account" : ""}
+                            className={`
+                                w-full h-12 rounded-xl cursor-pointer transition-all duration-300 flex items-center
+                                ${isOpen ? "justify-start gap-3.5 px-3.5" : "justify-center"}
+                                text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-700 dark:hover:text-red-300
+                            `}
+                        >
+                            <LogOut size={isOpen ? 20 : 22} className="shrink-0 transition-transform duration-200" />
+                            {isOpen && <span className="truncate text-sm font-semibold">Logout Account</span>}
+                        </button>
+                    </div>
                 </div>
 
                 <LogoutModal

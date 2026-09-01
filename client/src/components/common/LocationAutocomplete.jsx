@@ -1,64 +1,84 @@
 import { useState, useEffect, useRef } from "react";
 import { MapPin, Loader2 } from "lucide-react";
 
-const LocationAutocomplete = ({ value, onChange, name = "location" }) => {
+const LocationAutocomplete = ({ value = "", onChange, name = "location" }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const wrapperRef = useRef(null);
 
-  // Handle clicking outside the dropdown to close it
+  // Handle clicking outside the dropdown and ESC key to close it
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
-  // Fetch suggestions instantly as the user types
+  // Fetch suggestions with debounce and AbortController
   useEffect(() => {
-    if (!isOpen || !value || value.trim().length < 1) {
+    if (!isOpen || !value || !value.trim()) {
       setSuggestions([]);
+      setLoading(false);
       return;
     }
+
+    const controller = new AbortController();
 
     const fetchLocations = async () => {
       setLoading(true);
       try {
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-            value
-          )}&format=json&addressdetails=1&countrycodes=in&limit=6&accept-language=en`
+            value.trim()
+          )}&format=json&addressdetails=1&countrycodes=in&limit=6&accept-language=en`,
+          { signal: controller.signal }
         );
+        if (!response.ok) throw new Error("Location fetch failed");
         const data = await response.json();
-        setSuggestions(data);
+        setSuggestions(Array.isArray(data) ? data : []);
       } catch (error) {
-        console.error("Error fetching locations:", error);
+        if (error.name !== "AbortError") {
+          console.error("Error fetching locations:", error);
+          setSuggestions([]);
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    // Fast 300ms debounce for snappy suggestions
     const debounceTimer = setTimeout(() => {
       fetchLocations();
     }, 300);
 
-    return () => clearTimeout(debounceTimer);
+    return () => {
+      clearTimeout(debounceTimer);
+      controller.abort();
+    };
   }, [value, isOpen]);
 
   const handleInputChange = (e) => {
     setIsOpen(true);
-    onChange(e);
+    if (onChange) onChange(e);
   };
 
   const handleSelectSuggestion = (suggestion) => {
     const address = suggestion.address || {};
 
-    // 1. Get the exact primary name clicked (e.g., "Ooty" instead of forcing "Udhagamandalam")
     const primaryName = 
       suggestion.name ||
       address.tourism || 
@@ -70,7 +90,9 @@ const LocationAutocomplete = ({ value, onChange, name = "location" }) => {
       address.town || 
       address.city || 
       address.state_district ||
-      address.state;
+      address.state ||
+      suggestion.display_name?.split(",")[0] ||
+      "";
 
     const district = address.county || address.city || address.state_district;
     const state = address.state;
@@ -78,33 +100,26 @@ const LocationAutocomplete = ({ value, onChange, name = "location" }) => {
 
     let finalLocation = "";
 
-    // Check if the user searched/selected a State level entity
     const isStateLevel = suggestion.addresstype === "state" || (!address.city && !address.town && !address.village && !address.county && state === primaryName);
-
-    // Check if the user searched/selected a District level entity
     const isDistrictLevel = suggestion.addresstype === "county" || suggestion.addresstype === "state_district" || (district === primaryName && !["village", "town", "city", "suburb", "hamlet", "tourism", "attraction"].includes(suggestion.addresstype));
 
     if (isStateLevel) {
-      // State -> State, Country
       const parts = [primaryName, country].filter(Boolean);
       finalLocation = parts.join(", ");
     } else if (isDistrictLevel) {
-      // District -> District, State, Country
       const parts = [primaryName, state, country].filter(Boolean);
-      // Remove consecutive duplicates if state and district match
       finalLocation = [...new Set(parts)].join(", ");
     } else {
-      // Specific place/landmark/town/city -> Place, District, State
-      // Fallback district to state if district is missing
       const middleLevel = district && district !== primaryName ? district : state;
       const parts = [primaryName, middleLevel, state].filter(Boolean);
-      // Remove consecutive duplicates
       const uniqueParts = parts.filter((item, index) => index === 0 || item !== parts[index - 1]);
       finalLocation = uniqueParts.slice(0, 3).join(", ");
     }
 
     setIsOpen(false);
-    onChange({ target: { name, value: finalLocation } });
+    if (onChange) {
+      onChange({ target: { name, value: finalLocation || suggestion.display_name || "" } });
+    }
   };
 
   return (
@@ -138,7 +153,7 @@ const LocationAutocomplete = ({ value, onChange, name = "location" }) => {
           <ul className="max-h-60 overflow-y-auto py-2 scrollbar-hide">
             {suggestions.map((suggestion) => (
               <li
-                key={suggestion.place_id}
+                key={suggestion.place_id || suggestion.osm_id || Math.random()}
                 onClick={() => handleSelectSuggestion(suggestion)}
                 className="flex cursor-pointer items-start gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               >

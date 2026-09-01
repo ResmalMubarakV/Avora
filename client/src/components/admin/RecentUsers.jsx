@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Users, Mail, Sparkles, ChevronRight } from "lucide-react";
+import { Users, Mail, ChevronRight, UserPlus } from "lucide-react";
 
 // ==========================================
 // RECENT USERS COMPONENT
@@ -10,38 +10,48 @@ const RecentUsers = ({
     const navigate = useNavigate();
 
     return (
-        /* w-full ensures it fits container bounds cleanly across all screen sizes */
-        <div className="w-full rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/90 p-6 sm:p-8 2xl:p-8 shadow-sm dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] flex flex-col h-full transition-colors">
+        <div className="w-full rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-5 sm:p-6 shadow-xs flex flex-col h-full transition-colors">
             {/* Header */}
-            <div className="mb-6 flex items-center justify-between">
-                <div>
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                        Recent Users
-                    </h2>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                        Newly registered users across the platform.
-                    </p>
+            <div className="mb-5 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-800/40 text-blue-600 dark:text-blue-400 shrink-0">
+                        <UserPlus size={20} />
+                    </div>
+                    <div>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
+                            Recent Signups
+                        </h3>
+                        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                            Newly registered platform accounts
+                        </p>
+                    </div>
                 </div>
-                <div className="hidden sm:flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/50 shrink-0">
-                    <Sparkles size={16} />
-                </div>
+
+                <button
+                    type="button"
+                    onClick={() => navigate("/admin/users")}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition cursor-pointer"
+                >
+                    <span>View All</span>
+                    <ChevronRight size={14} />
+                </button>
             </div>
 
             {/* Empty State */}
             {users.length === 0 ? (
-                <div className="flex flex-1 h-64 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-center px-4">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 mb-3">
-                        <Users size={28} strokeWidth={2} />
+                <div className="flex flex-1 min-h-[180px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200/80 dark:border-slate-800 text-center px-4 bg-slate-50/50 dark:bg-slate-800/30">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 mb-2">
+                        <Users size={20} />
                     </div>
-                    <h3 className="text-base font-bold text-slate-800 dark:text-white">
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">
                         No Users Found
-                    </h3>
-                    <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-sm">
-                        There are no user accounts registered in the system yet.
+                    </h4>
+                    <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
+                        No registered users found.
                     </p>
                 </div>
             ) : (
-                <div className="space-y-3 flex-1">
+                <div className="space-y-2.5 flex-1">
                     {users.map((user) => {
                         const status = user.status?.toLowerCase();
                         const badgeStyles =
@@ -55,68 +65,56 @@ const RecentUsers = ({
                             <div
                                 key={user._id}
                                 onClick={() => navigate(`/admin/users?search=${encodeURIComponent(user.username)}`)}
-                                title="Click to view user in User Management"
-                                className="group flex items-center justify-between gap-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 p-4 transition-all hover:bg-white dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md cursor-pointer"
+                                title="Click to view in User Management"
+                                className="group flex items-center justify-between gap-3 rounded-2xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/40 dark:bg-slate-800/30 p-3 transition-all hover:bg-white dark:hover:bg-slate-800/80 hover:border-slate-200 dark:hover:border-slate-700 hover:shadow-xs cursor-pointer"
                             >
-                                <div className="flex items-center gap-3.5 min-w-0">
-                                    <img
-                                        src={
-                                            user.profileImage ||
-                                            "https://placehold.co/80x80/e2e8f0/475569?text=User"
-                                        }
-                                        alt={user.name}
-                                        className="h-11 w-11 shrink-0 rounded-full object-cover border border-slate-200 dark:border-slate-700 shadow-sm"
-                                        draggable={false}
-                                    />
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                    {user.profileImage ? (
+                                        <img
+                                            src={user.profileImage}
+                                            alt={user.name}
+                                            className="h-10 w-10 shrink-0 rounded-xl object-cover border border-slate-200/80 dark:border-slate-700 shadow-2xs"
+                                            draggable={false}
+                                        />
+                                    ) : (
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#1E3A8A] to-[#3559D4] text-white font-bold text-xs shadow-2xs">
+                                            {user.username ? user.username.charAt(0).toUpperCase() : "U"}
+                                        </div>
+                                    )}
+                                    
                                     <div className="min-w-0">
-                                        <div className="flex items-center gap-2">
-                                            <h3 className="font-bold text-slate-900 dark:text-white truncate text-sm group-hover:text-blue-600 dark:group-hover:text-indigo-400 transition">
-                                                {user.name}
-                                            </h3>
+                                        <div className="flex items-center gap-1.5">
+                                            <h4 className="font-bold text-slate-900 dark:text-white truncate text-xs group-hover:text-blue-600 dark:group-hover:text-indigo-400 transition">
+                                                {user.name || user.username}
+                                            </h4>
                                             <span
-                                                className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold capitalize shrink-0 ${badgeStyles}`}
+                                                className={`inline-flex items-center gap-1 rounded-full border px-1.5 py-0.2 text-[9px] font-semibold capitalize shrink-0 ${badgeStyles}`}
                                             >
                                                 <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                                                {user.status || "Unknown"}
+                                                {user.status || "Pending"}
                                             </span>
                                         </div>
-                                        <p className="text-xs font-semibold text-[#3559D4] dark:text-indigo-400 truncate">
+                                        <p className="text-[11px] font-semibold text-[#3559D4] dark:text-indigo-400 truncate">
                                             @{user.username}
-                                        </p>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate flex items-center gap-1 mt-0.5">
-                                            <Mail size={11} className="shrink-0 text-slate-400 dark:text-slate-500" />
-                                            {user.email}
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-3 shrink-0">
+                                <div className="flex items-center gap-2 shrink-0">
                                     <div className="text-right hidden sm:block">
-                                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Joined</p>
-                                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                        <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">
                                             {user.createdAt
                                                 ? new Date(user.createdAt).toLocaleDateString(undefined, {
                                                       month: "short",
                                                       day: "numeric",
-                                                      year: "numeric",
                                                   })
                                                 : "N/A"}
                                         </p>
                                     </div>
 
-                                    {/* Action button leading to admin users page */}
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(`/admin/users?search=${encodeURIComponent(user.username)}`);
-                                        }}
-                                        title="Manage User in Admin Panel"
-                                        className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 cursor-pointer active:scale-95 shrink-0"
-                                    >
-                                        <span className="hidden sm:inline">Manage</span>
-                                        <ChevronRight size={14} className="text-slate-400 dark:text-slate-400" />
-                                    </button>
+                                    <div className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all">
+                                        <ChevronRight size={16} />
+                                    </div>
                                 </div>
                             </div>
                         );

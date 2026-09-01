@@ -25,7 +25,7 @@ const AdminLayout = () => {
     }, []);
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 relative transition-colors duration-300">
             {/* Sidebar */}
             <AdminSidebar
                 sidebarOpen={sidebarOpen}
@@ -33,11 +33,14 @@ const AdminLayout = () => {
                 isMobile={isMobile}
             />
 
-            {/* Main Container */}
+            {/* Main Wrapper */}
             <div
                 className={`
                     transition-all
                     duration-300
+                    min-h-screen
+                    flex
+                    flex-col
                     ${
                         isMobile
                             ? "ml-0"
@@ -54,15 +57,8 @@ const AdminLayout = () => {
                     isMobile={isMobile}
                 />
 
-                {/* Page Content */}
-                <main
-                    className="
-                        min-h-[calc(100vh-80px)]
-                        p-4
-                        sm:p-6
-                        lg:p-8
-                    "
-                >
+                {/* Page Content Shell matching Avora standard */}
+                <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <Outlet />
                 </main>
             </div>

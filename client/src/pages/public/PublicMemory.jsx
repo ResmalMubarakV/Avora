@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo, memo } from "react";
 import { useNavigate, useParams, useSearchParams, useLocation } from "react-router-dom";
 import api from "../../api/axios";
 import { getMyProfile } from "../../api/userApi";
@@ -29,7 +29,7 @@ const Wrapper = ({ children, style, className = "" }) => (
 // 2. AUTOFIT TEXT ENGINE
 // Shrinks text gracefully to prevent overflow in print templates
 // ==========================================
-const AutoFitText = React.memo(({ children, style, className = "" }) => {
+const AutoFitText = memo(({ children, style, className = "" }) => {
   const containerRef = useRef(null);
 
   useLayoutEffect(() => {
@@ -74,7 +74,7 @@ AutoFitText.displayName = 'AutoFitText';
 // 3. SAFEIMAGE: TRUE NATIVE CROP & 60FPS PAN ENGINE
 // Uses synchronous rendering to PREVENT 1-frame stretching bugs
 // ==========================================
-const SafeImage = React.memo((props) => {
+const SafeImage = memo((props) => {
   const { config, className = "", slotId, isEditing, activeSlot, onSlotClick, onUpdateConfig, onBoundsChange, onOpenPicker, style = {}, imgStyle = {} } = props;
   
   const containerRef = useRef(null);
@@ -396,7 +396,7 @@ SafeImage.displayName = 'SafeImage';
 // ==========================================
 // 4. PRINTABLE TEMPLATE ENGINE
 // ==========================================
-const PrintableView = React.memo(({ memory, layoutIndex = 0, mediaConfig = null, isEditing = false, activeSlot = null, onSlotClick = null, onUpdateConfig = null, onBoundsChange = null, onOpenPicker = null }) => {
+const PrintableView = memo(({ memory, layoutIndex = 0, mediaConfig = null, isEditing = false, activeSlot = null, onSlotClick = null, onUpdateConfig = null, onBoundsChange = null, onOpenPicker = null }) => {
   const defaultImages = useMemo(() => memory?.media?.filter(m => m.type === 'image') || [], [memory?.media]);
   const baseCover = memory?.coverImage || (defaultImages.length > 0 ? defaultImages[0].url : "");
   

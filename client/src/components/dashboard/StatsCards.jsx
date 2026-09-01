@@ -1,4 +1,3 @@
-import React from "react";
 import { Globe2, Images, Lock, Heart, ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 

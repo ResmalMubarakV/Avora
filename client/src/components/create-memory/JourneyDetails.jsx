@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import { Sparkles, X, ChevronDown, Check } from "lucide-react";
 import MemoryAIModal from "./MemoryAIModal";
 import LocationAutocomplete from "../common/LocationAutocomplete";
-import DestinationGuideCard from "../common/DestinationGuideCard";
 
 const JourneyDetails = ({ formData, setFormData, handleChange }) => {
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
@@ -119,11 +118,6 @@ const JourneyDetails = ({ formData, setFormData, handleChange }) => {
           )}
         </div>
       </div>
-
-      {/* Destination Cultural Etiquette & Emergency Guide */}
-      {formData.location && (
-        <DestinationGuideCard location={formData.location} />
-      )}
 
       {/* Dates Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
