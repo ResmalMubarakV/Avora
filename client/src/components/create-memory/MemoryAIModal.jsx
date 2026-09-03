@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Sparkles, X, Wand2, Loader2 } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { askAI } from "../../api/aiApi";
+import AvoraAIIcon from "../common/AvoraAIIcon";
 
 // ==========================================
 // MEMORY AI STORY ASSISTANT MODAL
@@ -66,12 +67,12 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#3559D4] to-[#1E3A8A] dark:from-indigo-600 dark:to-blue-600 text-white shadow-md">
-              <Sparkles size={20} />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#1E3A8A] via-[#3559D4] to-[#4F46E5] text-white shadow-md border border-white/20">
+              <AvoraAIIcon size={20} variant="current" className="text-white" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">Avora AI Travel Journey</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Transform your trip notes into a detailed story</p>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Avora AI Story Generator</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Transform your trip notes into a detailed chronicle</p>
             </div>
           </div>
           <button
@@ -117,7 +118,7 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
               type="button"
               disabled={loading}
               onClick={handleGenerate}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#3559D4] to-[#1E3A8A] dark:from-indigo-600 dark:to-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md dark:shadow-[0_0_15px_rgba(99,102,241,0.3)] hover:shadow-lg transition disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#1E3A8A] via-[#3559D4] to-[#4F46E5] px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 cursor-pointer"
             >
               {loading ? (
                 <>
@@ -126,8 +127,8 @@ const MemoryAIModal = ({ open, onClose, onApply }) => {
                 </>
               ) : (
                 <>
-                  <Wand2 size={16} />
-                  <span>Generate Journey</span>
+                  <AvoraAIIcon size={16} variant="current" className="text-cyan-200" />
+                  <span>Generate Story</span>
                 </>
               )}
             </button>

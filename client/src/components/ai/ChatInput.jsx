@@ -4,7 +4,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { SendHorizontal, Sparkles, MapPin, Calendar, Wallet } from "lucide-react";
+import { SendHorizontal, MapPin, Calendar, Wallet } from "lucide-react";
+import AvoraAIIcon from "../common/AvoraAIIcon";
 
 // ==========================================
 // AI CHAT INPUT COMPONENT (MOBILE & SMALL SCREEN OPTIMIZED)
@@ -75,9 +76,9 @@ const ChatInput = forwardRef(({
           
           <div className="flex items-center gap-2 sm:gap-3.5 rounded-[14px] sm:rounded-[30px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl p-2 sm:p-3.5 transition-colors">
             
-            {/* Sparkles Icon Badge (Hidden on small mobile screens to maximize typing area) */}
-            <div className="hidden sm:flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl bg-blue-50/80 dark:bg-indigo-950/60 text-[#3559D4] dark:text-indigo-400 shrink-0 border border-blue-100/60 dark:border-indigo-900/40">
-              <Sparkles size={18} className="sm:w-[20px] sm:h-[20px] animate-[pulse_3s_ease-in-out_infinite]" />
+            {/* Avora AI Icon Badge (Hidden on small mobile screens to maximize typing area) */}
+            <div className="hidden sm:flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-indigo-950/60 text-[#3559D4] dark:text-indigo-400 shrink-0 border border-blue-100/60 dark:border-indigo-900/40">
+              <AvoraAIIcon size={20} variant="glow" className="sm:w-[22px] sm:h-[22px]" />
             </div>
 
             {/* Auto-Resizing Textarea Input */}

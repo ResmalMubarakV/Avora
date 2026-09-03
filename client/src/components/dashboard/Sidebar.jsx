@@ -2,7 +2,6 @@ import {
   LayoutDashboard,
   Images,
   PlusCircle,
-  Sparkles,
   User,
   Settings,
   Lock,
@@ -15,6 +14,7 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import LogoutModal from "../navigation/LogoutModal";
 import { useState, useEffect } from "react";
 import useCurrentUser from "../../hooks/useCurrentUser";
+import AvoraAIIcon from "../common/AvoraAIIcon";
 
 // ==========================================
 // NAVIGATION MENUS CONFIGURATION
@@ -42,7 +42,7 @@ const menus = [
   },
   {
     title: "AI Assistant",
-    icon: Sparkles,
+    icon: AvoraAIIcon,
     path: "/dashboard/ai",
   },
 ];
@@ -172,14 +172,22 @@ const Sidebar = ({
                       }
                     `}
                   >
-                    <Icon size={sidebarOpen ? 20 : 24} className="shrink-0 transition-all duration-300" />
-                    <span
-                      className={`overflow-hidden whitespace-nowrap transition-all duration-300 text-sm font-medium ${
-                        sidebarOpen ? "opacity-100 w-auto" : "opacity-0 w-0"
-                      }`}
-                    >
-                      {menu.title}
-                    </span>
+                    {({ isActive }) => (
+                      <>
+                        <Icon
+                          size={sidebarOpen ? 20 : 24}
+                          variant={menu.title === "AI Assistant" ? (isActive ? "current" : "gradient") : undefined}
+                          className="shrink-0 transition-all duration-300"
+                        />
+                        <span
+                          className={`overflow-hidden whitespace-nowrap transition-all duration-300 text-sm font-medium ${
+                            sidebarOpen ? "opacity-100 w-auto" : "opacity-0 w-0"
+                          }`}
+                        >
+                          {menu.title}
+                        </span>
+                      </>
+                    )}
                   </NavLink>
                 );
               })}

@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, X, ChevronDown, Check } from "lucide-react";
+import { X, ChevronDown, Check } from "lucide-react";
 import MemoryAIModal from "./MemoryAIModal";
 import LocationAutocomplete from "../common/LocationAutocomplete";
+import AvoraAIIcon from "../common/AvoraAIIcon";
 
 const JourneyDetails = ({ formData, setFormData, handleChange }) => {
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
@@ -254,10 +255,10 @@ const JourneyDetails = ({ formData, setFormData, handleChange }) => {
           <button
             type="button"
             onClick={() => setIsAIModalOpen(true)}
-            className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-blue-600 via-indigo-600 to-[#3559D4] dark:from-indigo-600 dark:to-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-xs transition hover:scale-[1.02] cursor-pointer"
+            className="group inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#1E3A8A] via-[#3559D4] to-[#4F46E5] dark:from-indigo-600 dark:to-blue-600 px-3 py-1 text-[11px] font-bold text-white shadow-xs transition-all hover:shadow-md hover:scale-[1.03] active:scale-95 cursor-pointer border border-white/15"
           >
-            <Sparkles size={12} className="animate-pulse text-blue-200" />
-            <span>Magic Fill</span>
+            <AvoraAIIcon size={13} variant="current" className="text-cyan-200 group-hover:rotate-12 transition-transform duration-300" />
+            <span>Avora AI Story</span>
           </button>
         </div>
 

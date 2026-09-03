@@ -1,12 +1,11 @@
 import {
-  Bot,
-  Sparkles,
   Copy,
   RotateCcw,
   Check,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import AvoraAIIcon from "../common/AvoraAIIcon";
 
 import MarkdownRenderer from "./MarkdownRenderer";
 import SuggestionChips from "./SuggestionChips";
@@ -65,11 +64,11 @@ const ChatMessage = ({
   // ==========================================
   return (
     <div className="flex items-start gap-2.5 sm:gap-4">
-      {/* AI Bot Avatar */}
-      <div className="relative flex h-8 w-8 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#3559D4] to-[#1E3A8A] text-white shadow-md shadow-blue-500/20 mt-1">
-        <Bot size={16} className="sm:w-[22px] sm:h-[22px]" />
-        <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-white dark:bg-slate-900 text-[#3559D4] dark:text-indigo-400 shadow-2xs">
-          <Sparkles size={8} className="sm:w-[10px] sm:h-[10px]" />
+      {/* Avora AI Avatar */}
+      <div className="relative flex h-8 w-8 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#1E3A8A] via-[#3559D4] to-[#4F46E5] text-white shadow-md shadow-blue-500/20 mt-1 border border-white/20">
+        <AvoraAIIcon size={18} variant="current" className="text-white sm:w-[24px] sm:h-[24px]" />
+        <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 sm:h-4 sm:w-4 items-center justify-center rounded-full bg-cyan-400 text-white shadow-2xs">
+          <span className="h-1.5 w-1.5 rounded-full bg-white" />
         </span>
       </div>
 

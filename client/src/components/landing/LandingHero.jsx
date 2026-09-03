@@ -2,7 +2,8 @@
 // LANDING HERO COMPONENT (`client/src/pages/public/LandingHero.jsx`)
 // ==========================================
 import { Link } from "react-router-dom";
-import { Sparkles, MapPin, Image as ImageIcon, ShieldCheck, Calendar, PenTool } from "lucide-react";
+import { MapPin, Image as ImageIcon, ShieldCheck, Calendar } from "lucide-react";
+import AvoraAIIcon from "../common/AvoraAIIcon";
 
 const LandingHero = () => {
     return (
@@ -138,8 +139,8 @@ const LandingHero = () => {
 
                     {/* Floating Glassmorphic Badge 1: AI Story Generator */}
                     <div className="absolute top-6 -right-2 sm:-right-8 z-30 animate-[bounce_7s_ease-in-out_infinite] rounded-[1rem] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-white dark:border-slate-800 p-3 shadow-[0_20px_40px_-10px_rgba(30,58,138,0.15)] flex items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#1E3A8A] to-[#3559D4] text-white shadow-inner">
-                            <PenTool className="h-4 w-4" />
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#1E3A8A] via-[#3559D4] to-[#4F46E5] text-white shadow-inner border border-white/20">
+                            <AvoraAIIcon size={18} variant="current" className="text-white" />
                         </div>
                         <div className="pr-2">
                             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-0.5">Avora AI</p>
@@ -160,9 +161,9 @@ const LandingHero = () => {
                         </div>
                     </div>
 
-                    {/* Floating Sparkle Decoration */}
+                    {/* Floating Avora AI Orbit Decoration */}
                     <div className="absolute top-1/4 -left-6 z-30 animate-[pulse_3s_ease-in-out_infinite] bg-white dark:bg-slate-800 rounded-full p-2 shadow-lg border border-slate-100 dark:border-slate-700">
-                        <Sparkles className="h-4 w-4 text-amber-400 fill-amber-100 dark:fill-amber-400/20" />
+                        <AvoraAIIcon size={18} variant="glow" />
                     </div>
 
                 </div>

@@ -1,10 +1,8 @@
 import {
-  Sparkles,
-  Bot,
   Plus,
   ArrowLeft,
 } from "lucide-react";
-
+import AvoraAIIcon from "../common/AvoraAIIcon";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NewChatModal from "./NewChatModal";
@@ -38,12 +36,13 @@ const AIHeader = ({
           <ArrowLeft size={18} className="sm:w-[20px] sm:h-[20px]" />
         </button>
 
-        {/* Center: Bot Branding & Title (Visible on Mobile & Desktop) */}
+        {/* Center: Avora AI Branding & Title (Visible on Mobile & Desktop) */}
         <div className="flex items-center gap-2 sm:gap-3 text-center min-w-0">
-          <div className="relative flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#3559D4] via-[#4166E0] to-[#1E3A8A] text-white shadow-md shadow-blue-500/20">
-            <Bot size={18} className="sm:w-[22px] sm:h-[22px]" />
-            <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 sm:h-4 sm:w-4 items-center justify-center rounded-full bg-white dark:bg-slate-900 text-[#3559D4] dark:text-indigo-400 shadow-2xs">
-              <Sparkles size={8} className="sm:w-[9px] sm:h-[9px]" />
+          <div className="relative flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#1E3A8A] via-[#3559D4] to-[#4F46E5] text-white shadow-md shadow-blue-500/25 border border-white/20">
+            <AvoraAIIcon size={20} variant="current" className="text-white sm:w-[24px] sm:h-[24px]" />
+            <span className="absolute -top-1 -right-1 flex h-3 w-3 sm:h-3.5 sm:w-3.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-full w-full bg-cyan-500" />
             </span>
           </div>
 
@@ -52,7 +51,7 @@ const AIHeader = ({
               {title || "New Chat"}
             </h1>
             <p className="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 truncate max-w-[120px] sm:max-w-xs">
-              Avora AI Assistant
+              Avora AI Copilot
             </p>
           </div>
         </div>

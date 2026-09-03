@@ -1,5 +1,4 @@
 import {
-  Sparkles,
   Map,
   Backpack,
   Camera,
@@ -7,6 +6,7 @@ import {
   UtensilsCrossed,
   Plane,
 } from "lucide-react";
+import AvoraAIIcon from "../common/AvoraAIIcon";
 
 // ==========================================
 // SUGGESTION PROMPTS DATA
@@ -60,13 +60,16 @@ const suggestions = [
 const EmptyState = ({ onSelect }) => {
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col items-center justify-center px-2.5 sm:px-6 py-2 sm:py-4 my-auto animate-in fade-in duration-300 overflow-hidden">
-      {/* Sparkles Hero Icon */}
-      <div className="relative flex h-8 w-8 sm:h-12 sm:w-12 items-center justify-center rounded-xl sm:rounded-3xl bg-gradient-to-br from-[#3559D4] via-[#4166E0] to-[#1E3A8A] dark:from-indigo-600 dark:to-blue-700 text-white shadow-md shadow-blue-500/20 dark:shadow-indigo-900/40">
-        <Sparkles size={16} className="sm:w-6 sm:h-6 animate-[pulse_2s_ease-in-out_infinite]" />
+      {/* Avora AI Signature Hero Icon */}
+      <div className="relative flex h-11 w-11 sm:h-16 sm:w-16 items-center justify-center rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#1E3A8A] via-[#3559D4] to-[#0284C7] text-white shadow-xl shadow-blue-500/25 dark:shadow-indigo-900/50 border border-white/20">
+        <AvoraAIIcon size={22} variant="glow" className="sm:w-[36px] sm:h-[36px]" />
+        
+        {/* Orbital Halo Ring */}
+        <span className="absolute -inset-2 rounded-2xl sm:rounded-3xl border border-cyan-400/30 animate-pulse pointer-events-none" />
       </div>
 
       {/* Heading */}
-      <h1 className="mt-1.5 sm:mt-3 text-center text-sm sm:text-xl font-black tracking-tight text-slate-900 dark:text-white">
+      <h1 className="mt-2 sm:mt-3 text-center text-sm sm:text-xl font-black tracking-tight text-slate-900 dark:text-white">
         How can Avora AI help you today?
       </h1>
 
