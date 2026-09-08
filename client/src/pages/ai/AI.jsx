@@ -59,7 +59,7 @@ const AI = () => {
         <AIHeader title={conversationTitle} onNewChat={newChat} />
 
         {/* Scrollable Conversation Stream / Vertically Centered Landing Empty State */}
-        <div className="flex-1 min-h-0 overflow-y-auto px-2 sm:px-6 flex flex-col justify-center">
+        <div className="flex-1 min-h-0 overflow-y-auto px-2 sm:px-6 flex flex-col">
           <AIConversation
             messages={messages}
             loading={loading}

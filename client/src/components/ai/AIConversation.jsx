@@ -17,21 +17,74 @@ const AIConversation = ({
   onRegenerate,
 }) => {
   const bottomRef = useRef(null);
+  const lastAssistantRef = useRef(null);
+  const isFirstRender = useRef(true);
+  const prevMessagesCount = useRef(messages.length);
+  const prevLoading = useRef(loading);
 
-  // --- Auto-scroll to bottom on message updates or loading state changes ---
+  // --- Smart auto-scroll: Scroll to top of new assistant responses so user reads from the beginning ---
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
+    if (messages.length === 0) {
+      prevMessagesCount.current = 0;
+      prevLoading.current = loading;
+      return;
+    }
+
+    const lastMessage = messages[messages.length - 1];
+    const isNewMessage = messages.length > prevMessagesCount.current;
+    const justFinishedLoading = prevLoading.current && !loading;
+
+    // 1. Initial page load with saved messages
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      if (lastMessage?.role === "assistant" && lastAssistantRef.current) {
+        lastAssistantRef.current.scrollIntoView({ behavior: "instant", block: "start" });
+      } else {
+        bottomRef.current?.scrollIntoView({ behavior: "instant" });
+      }
+      prevMessagesCount.current = messages.length;
+      prevLoading.current = loading;
+      return;
+    }
+
+    // 2. AI response just arrived -> Scroll to top of the new AI message
+    if (lastMessage?.role === "assistant" && (isNewMessage || justFinishedLoading)) {
+      const timer = setTimeout(() => {
+        if (lastAssistantRef.current) {
+          lastAssistantRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
+      }, 60);
+
+      prevMessagesCount.current = messages.length;
+      prevLoading.current = loading;
+      return () => clearTimeout(timer);
+    }
+
+    // 3. User sent a message or AI is typing -> Scroll to bottom
+    if (loading || lastMessage?.role === "user") {
+      bottomRef.current?.scrollIntoView({
+        behavior: "smooth",
+      });
+    }
+
+    prevMessagesCount.current = messages.length;
+    prevLoading.current = loading;
   }, [messages, loading]);
 
   // Render empty state placeholder if no messages exist yet
   if (messages.length === 0) {
-    return <EmptyState onSelect={onSuggestionClick} />;
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center min-h-full my-auto">
+        <EmptyState onSelect={onSuggestionClick} />
+      </div>
+    );
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-1 py-4 sm:px-4">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 sm:gap-6 px-1 py-3 sm:py-4 sm:px-4">
       {messages.map((message, index) => {
         const isLastAssistantMessage =
           message.role === "assistant" &&
@@ -40,7 +93,8 @@ const AIConversation = ({
         return (
           <div
             key={index}
-            className="animate-in fade-in slide-in-from-bottom-3 duration-300"
+            ref={isLastAssistantMessage ? lastAssistantRef : null}
+            className="animate-in fade-in slide-in-from-bottom-3 duration-300 scroll-mt-3 sm:scroll-mt-4"
           >
             <ChatMessage
               role={message.role}
@@ -59,7 +113,7 @@ const AIConversation = ({
       {loading && <TypingIndicator />}
 
       {/* Scroll Anchor */}
-      <div ref={bottomRef} />
+      <div ref={bottomRef} className="h-1" />
     </div>
   );
 };
