@@ -77,14 +77,14 @@ const AIConversation = ({
   // Render empty state placeholder if no messages exist yet
   if (messages.length === 0) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center min-h-full my-auto overflow-y-auto w-full py-2 sm:py-4">
+      <div className="flex flex-1 flex-col items-center justify-center w-full min-h-full py-2 sm:py-4 overflow-y-auto overflow-x-hidden">
         <EmptyState onSelect={onSuggestionClick} />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl flex-col gap-4 sm:gap-6 md:gap-7 px-1.5 sm:px-4 md:px-6 py-3 sm:py-5 md:py-6">
+    <div className="mx-auto flex w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl flex-col gap-4 sm:gap-6 md:gap-7 px-1.5 sm:px-4 md:px-6 py-3 sm:py-5 md:py-6 overflow-x-hidden">
       {messages.map((message, index) => {
         const isLastAssistantMessage =
           message.role === "assistant" &&

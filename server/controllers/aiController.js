@@ -3,228 +3,18 @@ const Memory = require("../models/Memory");
 const User = require("../models/User");
 
 // ==========================================
-// OPENROUTER PRODUCTION FREE MODELS
+// LIGHTSPEED HIGH-PERFORMANCE GROQ MODELS
 // ==========================================
-const OPENROUTER_FREE_MODELS = [
-  "meta-llama/llama-3.3-70b-instruct:free",
-  "google/gemini-2.0-flash-exp:free",
-  "qwen/qwen-2.5-72b-instruct:free",
-  "meta-llama/llama-3.1-70b-instruct:free",
-  "mistralai/mistral-small-24b-instruct-2501:free",
-  "google/gemma-2-9b-it:free",
-  "openrouter/free"
+// Primary: openai/gpt-oss-120b (Deep ChatGPT-level reasoning & rich paragraphs)
+// Fast Fallback: openai/gpt-oss-20b & qwen/qwen3.8-27b (Sub-500ms lightning speed)
+const LIGHTSPEED_GROQ_MODELS = [
+  "openai/gpt-oss-120b",
+  "openai/gpt-oss-20b",
+  "qwen/qwen3.8-27b",
 ];
 
 // ==========================================
-// GROQ PRODUCTION HIGH-PERFORMANCE MODELS
-// ==========================================
-const GROQ_MODELS = [
-  "llama-3.3-70b-versatile",
-  "llama-3.1-8b-instant",
-  "mixtral-8x7b-32768",
-  "gemma2-9b-it"
-];
-
-// --- Google Gemini API Invocation (Gemini 2.0 Flash & 1.5 Flash Support) ---
-const callGemini = async (apiKey, systemInstruction, messages) => {
-  console.log("Attempting Google Gemini API...");
-
-  const models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
-  let lastErr = null;
-
-  for (const model of models) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    try {
-      const formattedContents = messages
-        .filter((m) => m.role !== "system")
-        .map((m) => ({
-          role: m.role === "assistant" ? "model" : "user",
-          parts: [{ text: m.content }],
-        }));
-
-      const payload = {
-        contents: formattedContents,
-        generationConfig: {
-          maxOutputTokens: 2500,
-          temperature: 0.7,
-        },
-      };
-
-      if (systemInstruction) {
-        payload.systemInstruction = {
-          parts: [{ text: systemInstruction }],
-        };
-      }
-
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-      const data = await res.json();
-
-      if (res.ok && data?.candidates?.[0]?.content?.parts?.[0]?.text) {
-        console.log(`Google Gemini API success using model: ${model}`);
-        return data.candidates[0].content.parts[0].text.trim();
-      } else {
-        const errMsg = data?.error?.message || `HTTP ${res.status}`;
-        console.warn(`Gemini model ${model} error response:`, errMsg);
-        lastErr = new Error(errMsg);
-      }
-    } catch (err) {
-      clearTimeout(timeoutId);
-      console.warn(`Gemini model ${model} failed:`, err.message);
-      lastErr = err;
-    }
-  }
-
-  throw lastErr || new Error("Google Gemini API invocation failed");
-};
-
-// --- OpenRouter API Invocation ---
-const callOpenRouter = async (apiKey, messages) => {
-  if (!apiKey || !apiKey.startsWith("sk-or-")) {
-    throw new Error("Invalid or missing OpenRouter API key");
-  }
-
-  let lastErr = null;
-
-  for (const model of OPENROUTER_FREE_MODELS) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    try {
-      console.log(`Attempting OpenRouter AI model: ${model}`);
-      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "HTTP-Referer": "https://avorawayfarer.vercel.app",
-          "X-Title": "Avora AI Travel Assistant",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: messages,
-          temperature: 0.7,
-          max_tokens: 2500,
-        }),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-      const data = await res.json();
-
-      if (res.ok && data?.choices?.[0]?.message?.content) {
-        console.log(`OpenRouter AI success using model: ${model}`);
-        return data.choices[0].message.content;
-      } else {
-        const errMsg = data?.error?.message || `HTTP ${res.status}`;
-        console.warn(`OpenRouter model ${model} response error:`, errMsg);
-        lastErr = new Error(errMsg);
-      }
-    } catch (err) {
-      clearTimeout(timeoutId);
-      console.warn(`OpenRouter model ${model} network error:`, err.message);
-      lastErr = err;
-    }
-  }
-
-  throw lastErr || new Error("All OpenRouter free models failed");
-};
-
-// --- Groq API Invocation ---
-const callGroq = async (apiKey, messages) => {
-  if (!apiKey || apiKey.startsWith("sk-or-")) {
-    throw new Error("Invalid Groq API key format");
-  }
-
-  const client = new Groq({ apiKey });
-  let lastErr = null;
-
-  for (const model of GROQ_MODELS) {
-    try {
-      console.log(`Attempting Groq AI model: ${model}`);
-      const completion = await client.chat.completions.create({
-        model: model,
-        messages: messages,
-        temperature: 0.7,
-        max_tokens: 2500,
-      });
-
-      const responseText = completion.choices?.[0]?.message?.content;
-      if (responseText) {
-        console.log(`Groq AI success using model: ${model}`);
-        return responseText;
-      }
-    } catch (err) {
-      console.warn(`Groq model ${model} failed:`, err.message);
-      lastErr = err;
-    }
-  }
-
-  throw lastErr || new Error("All Groq models failed");
-};
-
-// --- Pollinations Free AI Engine (Public Fallback) ---
-const callPollinations = async (messages) => {
-  console.log("Attempting Pollinations Free AI Engine...");
-
-  const models = ["openai", "qwen", "mistral", "searchgpt"];
-
-  for (const model of models) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
-
-    try {
-      console.log(`Trying Pollinations model: ${model}`);
-      const res = await fetch("https://text.pollinations.ai/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "text/plain, application/json",
-        },
-        body: JSON.stringify({
-          messages: messages,
-          model: model,
-          temperature: 0.7,
-        }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (res.ok) {
-        const text = await res.text();
-        if (
-          text &&
-          text.trim().length > 5 &&
-          !text.includes("402 Payment Required") &&
-          !text.includes("Error")
-        ) {
-          console.log(`Pollinations Free AI success using model: ${model}`);
-          return text.trim();
-        }
-      }
-    } catch (err) {
-      clearTimeout(timeoutId);
-      console.warn(`Pollinations model ${model} failed:`, err.message);
-    }
-  }
-
-  throw new Error("Pollinations free engine unavailable");
-};
-
-// ==========================================
-// AVORA AI: ADAPTIVE MULTI-PROVIDER CONTROLLER
+// AVORA AI: LIGHTSPEED DIRECT AI CONTROLLER
 // ==========================================
 const generateAI = async (req, res) => {
   try {
@@ -314,55 +104,38 @@ ${userMemoriesContext}
       { role: "user", content: message },
     ];
 
-    const geminiKey = process.env.GEMINI_API_KEY;
-    const openRouterKey =
-      process.env.OPENROUTER_API_KEY ||
-      (process.env.GROQ_API_KEY?.startsWith("sk-or-") ? process.env.GROQ_API_KEY : null);
     const groqKey = process.env.GROQ_API_KEY;
+    if (!groqKey) {
+      throw new Error("GROQ_API_KEY is not configured in environment variables.");
+    }
 
+    const client = new Groq({ apiKey: groqKey });
     let aiResponseText = null;
+    let lastErr = null;
 
-    // 1. Groq (Fastest sub-second production models with Llama-3.3-70b-versatile)
-    if (groqKey && !groqKey.startsWith("sk-or-")) {
+    // Direct, ultra-fast execution through Groq hardware acceleration
+    for (const model of LIGHTSPEED_GROQ_MODELS) {
       try {
-        aiResponseText = await callGroq(groqKey, apiMessages);
-      } catch (groqErr) {
-        console.warn("Groq provider failed, trying fallbacks:", groqErr.message);
-      }
-    }
+        const completion = await client.chat.completions.create({
+          model: model,
+          messages: apiMessages,
+          temperature: 0.7,
+          max_tokens: 2000,
+        });
 
-    // 2. OpenRouter (Free models router)
-    if (!aiResponseText && openRouterKey && openRouterKey.startsWith("sk-or-")) {
-      try {
-        aiResponseText = await callOpenRouter(openRouterKey, apiMessages);
-      } catch (orErr) {
-        console.warn("OpenRouter provider failed, trying fallbacks:", orErr.message);
-      }
-    }
-
-    // 3. Gemini (Advanced reasoning backup)
-    if (!aiResponseText && geminiKey) {
-      try {
-        aiResponseText = await callGemini(geminiKey, systemPrompt, [
-          ...sanitizedHistory,
-          { role: "user", content: message },
-        ]);
-      } catch (geminiErr) {
-        console.warn("Google Gemini provider failed, trying fallbacks:", geminiErr.message);
-      }
-    }
-
-    // 4. Pollinations (Emergency fallback)
-    if (!aiResponseText) {
-      try {
-        aiResponseText = await callPollinations(apiMessages);
-      } catch (pollErr) {
-        console.warn("Pollinations provider failed:", pollErr.message);
+        const responseText = completion.choices?.[0]?.message?.content;
+        if (responseText && responseText.trim().length > 0) {
+          aiResponseText = responseText.trim();
+          break;
+        }
+      } catch (err) {
+        console.warn(`Groq model ${model} error:`, err.message);
+        lastErr = err;
       }
     }
 
     if (!aiResponseText) {
-      throw new Error("All AI providers temporarily unavailable. Please try again in a moment.");
+      throw lastErr || new Error("Failed to generate response. Please try again.");
     }
 
     return res.status(200).json({

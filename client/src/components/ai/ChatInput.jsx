@@ -4,7 +4,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { SendHorizontal, MapPin, Calendar, Wallet, Compass } from "lucide-react";
+import { SendHorizontal } from "lucide-react";
 import AvoraAIIcon from "../common/AvoraAIIcon";
 
 // ==========================================
@@ -12,7 +12,7 @@ import AvoraAIIcon from "../common/AvoraAIIcon";
 // ==========================================
 /**
  * Floating glassmorphic search input component for Avora AI.
- * Features ambient gradient glow borders, quick prompt shortcut chips, and responsive auto-resizing.
+ * Features ambient gradient glow borders and responsive auto-resizing.
  */
 const ChatInput = forwardRef(({
   loading,
@@ -43,34 +43,9 @@ const ChatInput = forwardRef(({
     }
   };
 
-  const quickPrompts = [
-    { icon: <Calendar size={13} />, label: "5-Day Itinerary", prompt: "Create a 5-day trip itinerary for my next adventure." },
-    { icon: <MapPin size={13} />, label: "Hidden Gems", prompt: "Suggest top hidden gem spots to explore." },
-    { icon: <Wallet size={13} />, label: "Budget Plan", prompt: "Estimate daily travel expenses and budget breakdown." },
-    { icon: <Compass size={13} />, label: "Best Season", prompt: "When is the best time and season to visit?" },
-  ];
-
   return (
     <div className="sticky bottom-0 z-30 bg-gradient-to-t from-slate-50/95 via-slate-50/90 to-transparent dark:from-slate-950/95 dark:via-slate-950/90 dark:to-transparent px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 sm:px-6 sm:pb-5 sm:pt-3 md:px-8 transition-colors duration-300">
-      <div className="mx-auto max-w-4xl lg:max-w-5xl xl:max-w-6xl space-y-2">
-        
-        {/* Quick Shortcut Pills Bar */}
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto whitespace-nowrap scrollbar-none px-0.5 py-0.5">
-          <span className="hidden sm:inline-flex items-center text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0 mr-1">
-            Quick Prompts:
-          </span>
-          {quickPrompts.map((chip, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => handleSubmit(chip.prompt)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 py-1.5 text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 shadow-2xs hover:border-[#3559D4] dark:hover:border-indigo-500 hover:text-[#3559D4] dark:hover:text-indigo-400 hover:bg-blue-50/50 dark:hover:bg-slate-800 transition-all cursor-pointer shrink-0 active:scale-95"
-            >
-              <span className="text-[#3559D4] dark:text-indigo-400">{chip.icon}</span>
-              <span>{chip.label}</span>
-            </button>
-          ))}
-        </div>
+      <div className="mx-auto max-w-4xl lg:max-w-5xl xl:max-w-6xl space-y-1.5 sm:space-y-2">
 
         {/* Floating Ambient Glowing Outer Container */}
         <div className="relative group rounded-2xl sm:rounded-3xl p-0.5 bg-gradient-to-r from-slate-200/80 via-blue-200/50 to-slate-200/80 dark:from-slate-800 dark:via-indigo-950 dark:to-slate-800 focus-within:from-[#3559D4] focus-within:via-indigo-500 focus-within:to-[#1E3A8A] dark:focus-within:from-indigo-500 dark:focus-within:via-blue-600 dark:focus-within:to-indigo-700 shadow-lg shadow-slate-900/5 dark:shadow-[0_10px_40px_rgba(0,0,0,0.7)] transition-all duration-300">
