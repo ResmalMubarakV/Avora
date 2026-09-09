@@ -77,14 +77,14 @@ const AIConversation = ({
   // Render empty state placeholder if no messages exist yet
   if (messages.length === 0) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center min-h-full my-auto">
+      <div className="flex flex-1 flex-col items-center justify-center min-h-full my-auto overflow-y-auto w-full py-2 sm:py-4">
         <EmptyState onSelect={onSuggestionClick} />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 sm:gap-6 px-1 py-3 sm:py-4 sm:px-4">
+    <div className="mx-auto flex w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl flex-col gap-4 sm:gap-6 md:gap-7 px-1.5 sm:px-4 md:px-6 py-3 sm:py-5 md:py-6">
       {messages.map((message, index) => {
         const isLastAssistantMessage =
           message.role === "assistant" &&
@@ -94,7 +94,7 @@ const AIConversation = ({
           <div
             key={index}
             ref={isLastAssistantMessage ? lastAssistantRef : null}
-            className="animate-in fade-in slide-in-from-bottom-3 duration-300 scroll-mt-3 sm:scroll-mt-4"
+            className="animate-in fade-in slide-in-from-bottom-3 duration-300 scroll-mt-4 sm:scroll-mt-6"
           >
             <ChatMessage
               role={message.role}
@@ -113,7 +113,7 @@ const AIConversation = ({
       {loading && <TypingIndicator />}
 
       {/* Scroll Anchor */}
-      <div ref={bottomRef} className="h-1" />
+      <div ref={bottomRef} className="h-2" />
     </div>
   );
 };

@@ -44,13 +44,13 @@ const AI = () => {
   }, [loading]);
 
   return (
-    <main className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-300">
+    <main className="relative flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden bg-slate-50/60 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
       <PageTitle title={conversationTitle ? `${conversationTitle} — AI Assistant` : "AI Travel Assistant"} />
 
-      {/* Immersive Decorative Background Glows */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-32 -top-32 h-[30rem] w-[30rem] rounded-full bg-blue-400/10 dark:bg-indigo-600/15 blur-[120px]" />
-        <div className="absolute -right-32 bottom-0 h-[32rem] w-[32rem] rounded-full bg-indigo-400/10 dark:bg-blue-500/15 blur-[120px]" />
+      {/* Immersive Decorative Background Glows (GPU Accelerated & Viewport Adaptive) */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden select-none">
+        <div className="absolute -left-20 -top-20 sm:-left-32 sm:-top-32 h-64 w-64 sm:h-[32rem] sm:w-[32rem] lg:h-[42rem] lg:w-[42rem] rounded-full bg-blue-400/10 dark:bg-indigo-600/15 blur-[80px] sm:blur-[130px] transform-gpu" />
+        <div className="absolute -right-20 bottom-0 sm:-right-32 sm:bottom-0 h-64 w-64 sm:h-[34rem] sm:w-[34rem] lg:h-[46rem] lg:w-[46rem] rounded-full bg-indigo-400/10 dark:bg-blue-500/15 blur-[80px] sm:blur-[130px] transform-gpu" />
       </div>
 
       {/* Main Chat Interface Layout */}
@@ -59,7 +59,7 @@ const AI = () => {
         <AIHeader title={conversationTitle} onNewChat={newChat} />
 
         {/* Scrollable Conversation Stream / Vertically Centered Landing Empty State */}
-        <div className="flex-1 min-h-0 overflow-y-auto px-2 sm:px-6 flex flex-col">
+        <div className="flex-1 min-h-0 overflow-y-auto px-2 sm:px-6 md:px-8 lg:px-12 flex flex-col">
           <AIConversation
             messages={messages}
             loading={loading}
@@ -68,7 +68,7 @@ const AI = () => {
           />
         </div>
 
-        {/* Bottom Input Bar */}
+        {/* Bottom Input Bar with Safe Area Support */}
         <ChatInput
           ref={inputRef}
           loading={loading}

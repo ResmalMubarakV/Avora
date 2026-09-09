@@ -4,11 +4,11 @@ import {
   useRef,
   useState,
 } from "react";
-import { SendHorizontal, MapPin, Calendar, Wallet } from "lucide-react";
+import { SendHorizontal, MapPin, Calendar, Wallet, Compass } from "lucide-react";
 import AvoraAIIcon from "../common/AvoraAIIcon";
 
 // ==========================================
-// AI CHAT INPUT COMPONENT (MOBILE & SMALL SCREEN OPTIMIZED)
+// AI CHAT INPUT COMPONENT (RESPONSIVE)
 // ==========================================
 /**
  * Floating glassmorphic search input component for Avora AI.
@@ -26,7 +26,7 @@ const ChatInput = forwardRef(({
     if (!textarea) return;
 
     textarea.style.height = "0px";
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 140)}px`;
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
   }, [message]);
 
   const handleSubmit = (textToSend) => {
@@ -44,18 +44,19 @@ const ChatInput = forwardRef(({
   };
 
   const quickPrompts = [
-    { icon: <Calendar size={12} />, label: "Trip Plan", prompt: "Create a 5-day trip itinerary for my next adventure." },
-    { icon: <MapPin size={12} />, label: "Explore Spots", prompt: "Suggest top hidden gem spots to explore." },
-    { icon: <Wallet size={12} />, label: "Budget", prompt: "Estimate daily travel expenses and budget breakdown." },
+    { icon: <Calendar size={13} />, label: "5-Day Itinerary", prompt: "Create a 5-day trip itinerary for my next adventure." },
+    { icon: <MapPin size={13} />, label: "Hidden Gems", prompt: "Suggest top hidden gem spots to explore." },
+    { icon: <Wallet size={13} />, label: "Budget Plan", prompt: "Estimate daily travel expenses and budget breakdown." },
+    { icon: <Compass size={13} />, label: "Best Season", prompt: "When is the best time and season to visit?" },
   ];
 
   return (
-    <div className="sticky bottom-0 z-30 bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent dark:from-slate-950 dark:via-slate-950/95 dark:to-transparent px-2.5 pb-2.5 pt-1.5 sm:px-6 sm:pb-6 sm:pt-4 transition-colors duration-300">
-      <div className="mx-auto max-w-4xl space-y-1.5 sm:space-y-2">
+    <div className="sticky bottom-0 z-30 bg-gradient-to-t from-slate-50/95 via-slate-50/90 to-transparent dark:from-slate-950/95 dark:via-slate-950/90 dark:to-transparent px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 sm:px-6 sm:pb-5 sm:pt-3 md:px-8 transition-colors duration-300">
+      <div className="mx-auto max-w-4xl lg:max-w-5xl xl:max-w-6xl space-y-2">
         
         {/* Quick Shortcut Pills Bar */}
-        <div className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap scrollbar-none px-0.5">
-          <span className="hidden sm:inline text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0 mr-0.5">
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto whitespace-nowrap scrollbar-none px-0.5 py-0.5">
+          <span className="hidden sm:inline-flex items-center text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0 mr-1">
             Quick Prompts:
           </span>
           {quickPrompts.map((chip, idx) => (
@@ -63,25 +64,25 @@ const ChatInput = forwardRef(({
               key={idx}
               type="button"
               onClick={() => handleSubmit(chip.prompt)}
-              className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2.5 py-1 text-[10px] sm:text-[11px] font-semibold text-slate-700 dark:text-slate-300 shadow-2xs hover:border-[#3559D4] dark:hover:border-indigo-500 hover:text-[#3559D4] dark:hover:text-indigo-400 transition-all cursor-pointer shrink-0 active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 py-1.5 text-xs sm:text-[13px] font-semibold text-slate-700 dark:text-slate-200 shadow-2xs hover:border-[#3559D4] dark:hover:border-indigo-500 hover:text-[#3559D4] dark:hover:text-indigo-400 hover:bg-blue-50/50 dark:hover:bg-slate-800 transition-all cursor-pointer shrink-0 active:scale-95"
             >
-              <span className="text-blue-500 dark:text-indigo-400">{chip.icon}</span>
+              <span className="text-[#3559D4] dark:text-indigo-400">{chip.icon}</span>
               <span>{chip.label}</span>
             </button>
           ))}
         </div>
 
         {/* Floating Ambient Glowing Outer Container */}
-        <div className="relative group rounded-2xl sm:rounded-[32px] p-0.5 bg-gradient-to-r from-slate-200/80 via-blue-200/60 to-slate-200/80 dark:from-slate-800/80 dark:via-indigo-900/50 dark:to-slate-800/80 focus-within:from-[#3559D4] focus-within:via-indigo-500 focus-within:to-[#1E3A8A] dark:focus-within:from-indigo-500 dark:focus-within:via-blue-600 dark:focus-within:to-indigo-700 shadow-lg shadow-slate-900/5 dark:shadow-[0_10px_40px_rgba(0,0,0,0.7)] transition-all duration-300">
+        <div className="relative group rounded-2xl sm:rounded-3xl p-0.5 bg-gradient-to-r from-slate-200/80 via-blue-200/50 to-slate-200/80 dark:from-slate-800 dark:via-indigo-950 dark:to-slate-800 focus-within:from-[#3559D4] focus-within:via-indigo-500 focus-within:to-[#1E3A8A] dark:focus-within:from-indigo-500 dark:focus-within:via-blue-600 dark:focus-within:to-indigo-700 shadow-lg shadow-slate-900/5 dark:shadow-[0_10px_40px_rgba(0,0,0,0.7)] transition-all duration-300">
           
-          <div className="flex items-center gap-2 sm:gap-3.5 rounded-[14px] sm:rounded-[30px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl p-2 sm:p-3.5 transition-colors">
+          <div className="flex items-center gap-2 sm:gap-3 rounded-[14px] sm:rounded-[22px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl p-2 sm:p-3 md:p-3.5 transition-colors">
             
-            {/* Avora AI Icon Badge (Hidden on small mobile screens to maximize typing area) */}
-            <div className="hidden sm:flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-indigo-950/60 text-[#3559D4] dark:text-indigo-400 shrink-0 border border-blue-100/60 dark:border-indigo-900/40">
-              <AvoraAIIcon size={20} variant="glow" className="sm:w-[22px] sm:h-[22px]" />
+            {/* Avora AI Icon Badge (Hidden on mobile phones to maximize input area) */}
+            <div className="hidden sm:flex h-10 w-10 md:h-11 md:w-11 items-center justify-center rounded-xl md:rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-indigo-950/60 text-[#3559D4] dark:text-indigo-400 shrink-0 border border-blue-100/60 dark:border-indigo-900/40">
+              <AvoraAIIcon size={20} variant="glow" className="md:w-6 md:h-6" />
             </div>
 
-            {/* Auto-Resizing Textarea Input */}
+            {/* Auto-Resizing Textarea Input (text-base on mobile prevents iOS auto-zoom) */}
             <textarea
               ref={(element) => {
                 textareaRef.current = element;
@@ -96,10 +97,10 @@ const ChatInput = forwardRef(({
               rows={1}
               value={message}
               disabled={loading}
-              placeholder="Ask Avora AI about your next trip..."
+              placeholder="Ask Avora AI about your next adventure..."
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="max-h-36 flex-1 resize-none bg-transparent px-1 text-xs sm:text-sm font-medium leading-5 sm:leading-7 text-slate-800 dark:text-slate-100 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 disabled:cursor-not-allowed my-auto"
+              className="min-h-[40px] max-h-40 sm:max-h-48 flex-1 resize-none bg-transparent px-1.5 py-1 text-base sm:text-sm md:text-base font-medium leading-relaxed sm:leading-6 text-slate-800 dark:text-slate-100 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 disabled:cursor-not-allowed my-auto"
             />
 
             {/* Premium Send Button */}
@@ -107,15 +108,16 @@ const ChatInput = forwardRef(({
               type="button"
               disabled={loading || !message.trim()}
               onClick={() => handleSubmit()}
-              className="flex h-8 w-8 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-tr from-[#1E3A8A] via-[#3559D4] to-blue-500 dark:from-indigo-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/25 dark:shadow-indigo-900/50 transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 cursor-pointer"
+              aria-label="Send message"
+              className="flex h-10 w-10 sm:h-11 sm:w-11 md:h-11 md:w-11 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-tr from-[#1E3A8A] via-[#3559D4] to-blue-500 dark:from-indigo-600 dark:to-blue-600 text-white shadow-md shadow-blue-500/25 dark:shadow-indigo-900/50 transition-all duration-300 hover:scale-105 hover:shadow-xl active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100 cursor-pointer"
             >
-              <SendHorizontal size={15} className="sm:w-[19px] sm:h-[19px]" />
+              <SendHorizontal size={18} className="sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
 
         {/* Footer Caption */}
-        <p className="text-center text-[9px] sm:text-xs text-slate-400 dark:text-slate-500 flex items-center justify-center gap-1">
+        <p className="text-center text-[10px] sm:text-xs text-slate-400 dark:text-slate-500 flex items-center justify-center gap-1.5 pb-0.5">
           <span>🔒 Avora AI</span>
           <span>•</span>
           <span>Personalized from your travel archives</span>

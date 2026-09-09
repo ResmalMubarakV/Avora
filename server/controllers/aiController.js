@@ -2,70 +2,91 @@ const Groq = require("groq-sdk");
 const Memory = require("../models/Memory");
 const User = require("../models/User");
 
+// ==========================================
+// OPENROUTER PRODUCTION FREE MODELS
+// ==========================================
 const OPENROUTER_FREE_MODELS = [
-  "openrouter/free",
-  "google/gemma-2-9b-it:free",
   "meta-llama/llama-3.3-70b-instruct:free",
-  "qwen/qwen-2.5-coder-32b-instruct:free",
-  "meta-llama/llama-3.1-8b-instruct:free"
+  "google/gemini-2.0-flash-exp:free",
+  "qwen/qwen-2.5-72b-instruct:free",
+  "meta-llama/llama-3.1-70b-instruct:free",
+  "mistralai/mistral-small-24b-instruct-2501:free",
+  "google/gemma-2-9b-it:free",
+  "openrouter/free"
 ];
 
 // ==========================================
-// GROQ ACTIVE PRODUCTION MODELS (2026)
+// GROQ PRODUCTION HIGH-PERFORMANCE MODELS
 // ==========================================
 const GROQ_MODELS = [
-  "openai/gpt-oss-120b",
-  "openai/gpt-oss-20b",
   "llama-3.3-70b-versatile",
-  "llama-3.1-8b-instant"
+  "llama-3.1-8b-instant",
+  "mixtral-8x7b-32768",
+  "gemma2-9b-it"
 ];
 
-// --- Google Gemini API Invocation (Updated to Gemini 3.6 Flash) ---
-const callGemini = async (apiKey, userMessage, compressedArchive) => {
+// --- Google Gemini API Invocation (Gemini 2.0 Flash & 1.5 Flash Support) ---
+const callGemini = async (apiKey, systemInstruction, messages) => {
   console.log("Attempting Google Gemini API...");
-  const systemText = `You are Avora AI, a budget-first travel planning assistant. Previous trips: [${compressedArchive || "None"}]. Provide clean, practical travel advice and itineraries.`;
-  
-  // Updated endpoint to use current gemini-3.6-flash model
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `${systemText}\n\nUser Question: ${userMessage}`
-          }]
-        }],
+  const models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
+  let lastErr = null;
+
+  for (const model of models) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    try {
+      const formattedContents = messages
+        .filter((m) => m.role !== "system")
+        .map((m) => ({
+          role: m.role === "assistant" ? "model" : "user",
+          parts: [{ text: m.content }],
+        }));
+
+      const payload = {
+        contents: formattedContents,
         generationConfig: {
-          maxOutputTokens: 1000,
-          temperature: 0.4
-        }
-      }),
-      signal: controller.signal
-    });
+          maxOutputTokens: 2500,
+          temperature: 0.7,
+        },
+      };
 
-    clearTimeout(timeoutId);
-    const data = await res.json();
+      if (systemInstruction) {
+        payload.systemInstruction = {
+          parts: [{ text: systemInstruction }],
+        };
+      }
 
-    if (res.ok && data?.candidates?.[0]?.content?.parts?.[0]?.text) {
-      console.log("Google Gemini API success!");
-      return data.candidates[0].content.parts[0].text.trim();
-    } else {
-      const errMsg = data?.error?.message || `HTTP ${res.status}`;
-      console.warn("Gemini API error response:", errMsg);
-      throw new Error(errMsg);
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      const data = await res.json();
+
+      if (res.ok && data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+        console.log(`Google Gemini API success using model: ${model}`);
+        return data.candidates[0].content.parts[0].text.trim();
+      } else {
+        const errMsg = data?.error?.message || `HTTP ${res.status}`;
+        console.warn(`Gemini model ${model} error response:`, errMsg);
+        lastErr = new Error(errMsg);
+      }
+    } catch (err) {
+      clearTimeout(timeoutId);
+      console.warn(`Gemini model ${model} failed:`, err.message);
+      lastErr = err;
     }
-  } catch (err) {
-    clearTimeout(timeoutId);
-    console.warn("Gemini API invocation failed:", err.message);
-    throw err;
   }
+
+  throw lastErr || new Error("Google Gemini API invocation failed");
 };
 
 // --- OpenRouter API Invocation ---
@@ -78,7 +99,7 @@ const callOpenRouter = async (apiKey, messages) => {
 
   for (const model of OPENROUTER_FREE_MODELS) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     try {
       console.log(`Attempting OpenRouter AI model: ${model}`);
@@ -93,8 +114,8 @@ const callOpenRouter = async (apiKey, messages) => {
         body: JSON.stringify({
           model: model,
           messages: messages,
-          temperature: 0.4,
-          max_tokens: 1000,
+          temperature: 0.7,
+          max_tokens: 2500,
         }),
         signal: controller.signal
       });
@@ -135,8 +156,8 @@ const callGroq = async (apiKey, messages) => {
       const completion = await client.chat.completions.create({
         model: model,
         messages: messages,
-        temperature: 0.4,
-        max_tokens: 1000,
+        temperature: 0.7,
+        max_tokens: 2500,
       });
 
       const responseText = completion.choices?.[0]?.message?.content;
@@ -153,37 +174,43 @@ const callGroq = async (apiKey, messages) => {
   throw lastErr || new Error("All Groq models failed");
 };
 
-// --- Pollinations Free AI Engine (Expanded Timeout & Model List) ---
-const callPollinations = async (userMessage, compressedArchive) => {
-  console.log("Attempting Pollinations Public Free AI Engine...");
+// --- Pollinations Free AI Engine (Public Fallback) ---
+const callPollinations = async (messages) => {
+  console.log("Attempting Pollinations Free AI Engine...");
 
-  const cleanQuery = userMessage.trim();
-  const systemText = `You are Avora AI, a budget-first travel planning assistant. Previous trips: [${compressedArchive || "None"}]. Provide clean, practical travel advice and itineraries.`;
-  
-  const models = ["openai-fast"];
+  const models = ["openai", "qwen", "mistral", "searchgpt"];
 
   for (const model of models) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000); // Fast 2-second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
 
     try {
-      console.log(`Trying Pollinations free GET model: ${model}`);
-      const promptUrl = `https://text.pollinations.ai/${encodeURIComponent(cleanQuery)}?model=${model}&system=${encodeURIComponent(systemText)}`;
-
-      const res = await fetch(promptUrl, {
-        method: "GET",
+      console.log(`Trying Pollinations model: ${model}`);
+      const res = await fetch("https://text.pollinations.ai/", {
+        method: "POST",
         headers: {
-          "Accept": "text/plain, text/html, application/json",
+          "Content-Type": "application/json",
+          "Accept": "text/plain, application/json",
         },
-        signal: controller.signal
+        body: JSON.stringify({
+          messages: messages,
+          model: model,
+          temperature: 0.7,
+        }),
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
 
       if (res.ok) {
         const text = await res.text();
-        if (text && text.trim().length > 5 && !text.includes("402 Payment Required") && !text.includes("Error")) {
-          console.log(`Pollinations Public Free AI success using model: ${model}`);
+        if (
+          text &&
+          text.trim().length > 5 &&
+          !text.includes("402 Payment Required") &&
+          !text.includes("Error")
+        ) {
+          console.log(`Pollinations Free AI success using model: ${model}`);
           return text.trim();
         }
       }
@@ -193,11 +220,11 @@ const callPollinations = async (userMessage, compressedArchive) => {
     }
   }
 
-  throw new Error("Pollinations free GET models unavailable");
+  throw new Error("Pollinations free engine unavailable");
 };
 
 // ==========================================
-// AVORA AI: GUARANTEED UPTIME MULTI-PROVIDER CONTROLLER
+// AVORA AI: ADAPTIVE MULTI-PROVIDER CONTROLLER
 // ==========================================
 const generateAI = async (req, res) => {
   try {
@@ -206,7 +233,7 @@ const generateAI = async (req, res) => {
     }
 
     const { message, history = [] } = req.body;
-    if (!message) {
+    if (!message || !message.trim()) {
       return res.status(400).json({ message: "Message is required" });
     }
 
@@ -215,59 +242,69 @@ const generateAI = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const query = message.toLowerCase();
+    // Fetch user's recorded memories to supply rich personalized context
+    const allMemories = await Memory.find({ user: req.user._id })
+      .sort({ startDate: -1 })
+      .select("title description location startDate endDate modeOfTravel isLiked isPinned");
 
-    const isGreeting = ["hi", "hello", "hey", "good morning", "good evening", "good afternoon"].some(
-      (word) => query === word
-    );
-    const isDetailedItinerary = query.includes("itinerary") || query.includes("detailed");
-    const isTravelQuery = [
-      "trip", "travel", "destination", "recommend", "plan",
-      "budget", "visit", "vacation", "holiday", "remember", 
-      "memory", "previous", "last", "history"
-    ].some((word) => query.includes(word));
-
-    let compressedArchive = "";
-
-    if (isTravelQuery || isDetailedItinerary) {
-      const allMemories = await Memory.find({ user: req.user._id })
-        .sort({ startDate: -1 })
-        .select("location modeOfTravel startDate");
-
-      if (allMemories.length > 0) {
-        compressedArchive = allMemories
-          .map((m) => {
-            const yr = m.startDate ? new Date(m.startDate).getFullYear() : "";
-            const mode = m.modeOfTravel ? `[${m.modeOfTravel}]` : "";
-            return `${m.location}${yr ? `(${yr})` : ""}${mode}`;
-          })
-          .join(", ");
-      }
+    let userMemoriesContext = "User has no recorded travel memories in Avora yet.";
+    if (allMemories.length > 0) {
+      userMemoriesContext = allMemories
+        .map((m, idx) => {
+          const dateStr = m.startDate
+            ? new Date(m.startDate).toLocaleDateString("en-US", {
+                month: "short",
+                year: "numeric",
+              })
+            : "Unknown date";
+          const mode = m.modeOfTravel ? `via ${m.modeOfTravel}` : "";
+          const tags = [m.isPinned ? "📌 Pinned" : "", m.isLiked ? "❤️ Favorite" : ""]
+            .filter(Boolean)
+            .join(" ");
+          const desc = m.description ? `\n   Notes: "${m.description.slice(0, 300)}"` : "";
+          return `${idx + 1}. [${m.title || m.location}] - Location: ${m.location} (${dateStr}${mode ? ` ${mode}` : ""}) ${tags}${desc}`;
+        })
+        .join("\n");
     }
 
-    let systemPrompt = `You are Avora AI, a high-precision travel planning assistant. 
-    
-CORE CONSTRAINTS:
-1. GEOGRAPHICAL & LOGISTICAL ACCURACY: Calculate true real-world transit times and distances. Never hallucinate false or short transit windows. Respect regional rules.
-2. BUDGET-FIRST MANDATE: Prioritize extreme budget/backpacker travel. Suggest hostels, homestays, public transport, trains, and affordable local food. Avoid luxury or mid-range resorts.
-3. PERSONALIZATION: Analyze the user's travel history to completely avoid recommending destinations they have already visited.`;
+    const systemPrompt = `You are Avora AI, an intelligent, perceptive, and highly articulate AI travel companion and world-class travel strategist (built with the conversational sophistication, natural prose, and deep reasoning of ChatGPT and Google Gemini).
 
-    if (isGreeting) {
-      systemPrompt += `\nContext: User greeting. Reply naturally in under 2 sentences.`;
-    } else if (isDetailedItinerary) {
-      systemPrompt += `\nContext: Detailed Itinerary Request.
-User Archive: [${compressedArchive || "None"}]
-Instructions: Generate a clean, structured day-by-day schedule (Morning, Afternoon, Evening) with low-code/low-cost activities, realistic transit schedules, and an economical budget breakdown.`;
-    } else if (isTravelQuery) {
-      systemPrompt += `\nContext: Travel Planning or Memory Query.
-User Archive: [${compressedArchive || "None"}]
-Instructions: Provide precise, highly tailored destination suggestions or reflections based on their history while strictly obeying the budget and geographical constraints.`;
-    } else {
-      systemPrompt += `\nContext: General Inquiry. Keep answers crisp, structured, and practical.`;
-    }
+# USER PROFILE:
+- Name: ${user.name || user.username || "Traveler"}
+- Location: ${user.location || "Not specified"}
+- Bio: ${user.bio || "Avora travel community member"}
 
-    const sanitizedHistory = history.slice(-3).map((msg) => ({
-      role: msg.role,
+# USER'S RECORDED AVORA TRAVEL MEMORIES:
+${userMemoriesContext}
+
+# CORE PRINCIPLES & RESPONSE GUIDELINES:
+1. DEEPLY ANALYZE THE USER'S PROMPT & INTENT:
+   - Thoroughly comprehend the user's complete prompt, exact question, tone, and intended outcome.
+   - Tailor the format, structure, and depth to PRECISELY match what the user is asking for:
+     • REFLECTIONS / IMPRESSIONS / FEELINGS (e.g. "how are my travel locations", "what do you feel about my trips", "analyze my travel style"):
+       -> Write thoughtful, rich, and cohesive prose paragraphs. Appreciate the character, contrast, and rhythm of their destinations (e.g., serene mountain retreats, vibrant cultural towns, scenic road trips). Share perceptive commentary on what their journey choices reflect about their travel personality, rather than outputting dry year-by-year bulleted lists.
+     • TRIP PLANNING & ITINERARIES (e.g. "plan a 4-day trip to Manali", "give me an itinerary"):
+       -> Provide structured, immersive day-by-day schedules (Morning, Afternoon, Evening) with realistic transit, highlight sights, local food spots, and practical budget tips.
+     • TRAVEL ADVICE & INQUIRIES (e.g. "best time to visit", "what should I pack", "hidden gems"):
+       -> Provide rich, practical, and well-researched advice with clear explanations and insider wisdom.
+     • CONVERSATIONAL DIALOGUE & CHAT:
+       -> Respond with natural, friendly, warm, and engaging paragraphs.
+     • LISTS OR COMPARISONS:
+       -> Use bulleted lists or comparison tables ONLY when specifically requested or when structuring complex logistics. Never reduce qualitative questions into mechanical bulleted timelines.
+
+2. SEAMLESS PERSONALIZATION:
+   - When the user asks about their travel history, past destinations, or impressions, reference their actual recorded Avora memories and notes thoughtfully and authentically.
+   - When recommending new destinations, suggest fresh, exciting places tailored to their travel tastes, avoiding places they have already visited unless they ask for revisits or nearby extensions.
+
+3. ACCURACY & LOGISTICS:
+   - Ensure real-world geographical consistency, realistic travel times, and practical advice.
+
+4. TONE & WRITING STYLE:
+   - Warm, perceptive, articulate, imaginative, and helpful.
+   - Write in beautiful, natural markdown with clear paragraph breaks and bold text for key highlights.`;
+
+    const sanitizedHistory = history.slice(-10).map((msg) => ({
+      role: msg.role === "assistant" ? "assistant" : "user",
       content: msg.content,
     }));
 
@@ -278,12 +315,14 @@ Instructions: Provide precise, highly tailored destination suggestions or reflec
     ];
 
     const geminiKey = process.env.GEMINI_API_KEY;
-    const openRouterKey = process.env.OPENROUTER_API_KEY || (process.env.GROQ_API_KEY?.startsWith("sk-or-") ? process.env.GROQ_API_KEY : null);
+    const openRouterKey =
+      process.env.OPENROUTER_API_KEY ||
+      (process.env.GROQ_API_KEY?.startsWith("sk-or-") ? process.env.GROQ_API_KEY : null);
     const groqKey = process.env.GROQ_API_KEY;
 
     let aiResponseText = null;
 
-    // 1. Groq (Fastest sub-second production models)
+    // 1. Groq (Fastest sub-second production models with Llama-3.3-70b-versatile)
     if (groqKey && !groqKey.startsWith("sk-or-")) {
       try {
         aiResponseText = await callGroq(groqKey, apiMessages);
@@ -301,10 +340,13 @@ Instructions: Provide precise, highly tailored destination suggestions or reflec
       }
     }
 
-    // 3. Gemini (Reasoning backup)
+    // 3. Gemini (Advanced reasoning backup)
     if (!aiResponseText && geminiKey) {
       try {
-        aiResponseText = await callGemini(geminiKey, message, compressedArchive);
+        aiResponseText = await callGemini(geminiKey, systemPrompt, [
+          ...sanitizedHistory,
+          { role: "user", content: message },
+        ]);
       } catch (geminiErr) {
         console.warn("Google Gemini provider failed, trying fallbacks:", geminiErr.message);
       }
@@ -313,7 +355,7 @@ Instructions: Provide precise, highly tailored destination suggestions or reflec
     // 4. Pollinations (Emergency fallback)
     if (!aiResponseText) {
       try {
-        aiResponseText = await callPollinations(message, compressedArchive);
+        aiResponseText = await callPollinations(apiMessages);
       } catch (pollErr) {
         console.warn("Pollinations provider failed:", pollErr.message);
       }
