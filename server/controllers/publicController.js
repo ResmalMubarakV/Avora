@@ -52,10 +52,12 @@ const getPublicProfile = async (req, res) => {
     const yearParam = req.query.year || "";
     const skip = (page - 1) * limit;
 
+    const isAdmin = req.user && req.user.role === "admin";
+
     const user = await User.findOne({
       username,
       role: "user",
-      status: "approved",
+      ...(isAdmin ? {} : { status: "approved" }),
     }).select("-password");
 
     if (!user) {
@@ -71,10 +73,10 @@ const getPublicProfile = async (req, res) => {
     let privateCount = 0;
     let filteredTotal = 0;
 
-    if (!user.isLocked || isOwner) {
+    if (!user.isLocked || isOwner || isAdmin) {
       const query = {
         user: user._id,
-        ...(isOwner ? {} : { isPublic: true }),
+        ...(isOwner || isAdmin ? {} : { isPublic: true }),
       };
 
       if (search) {
@@ -86,7 +88,7 @@ const getPublicProfile = async (req, res) => {
 
       if (filterQuery) {
         const filters = filterQuery.split(",");
-        const validFilters = isOwner ? filters : filters.filter(f => f !== "private");
+        const validFilters = isOwner || isAdmin ? filters : filters.filter(f => f !== "private");
 
         if (validFilters.length > 0) {
           const conditions = [];
@@ -175,10 +177,12 @@ const getPublicMemory = async (req, res) => {
   try {
     const { username, slug } = req.params;
 
+    const isAdmin = req.user && req.user.role === "admin";
+
     const user = await User.findOne({
       username,
       role: "user",
-      status: "approved",
+      ...(isAdmin ? {} : { status: "approved" }),
     });
 
     if (!user) {
@@ -187,14 +191,14 @@ const getPublicMemory = async (req, res) => {
 
     const isOwner = req.user && req.user._id.toString() === user._id.toString();
 
-    if (user.isLocked && !isOwner) {
+    if (user.isLocked && !isOwner && !isAdmin) {
       return res.status(403).json({ message: "This profile is locked." });
     }
 
     const memory = await Memory.findOne({
       user: user._id,
       slug,
-      ...(isOwner ? {} : { isPublic: true }),
+      ...(isOwner || isAdmin ? {} : { isPublic: true }),
     }).populate("user", "username");
 
     if (!memory) {

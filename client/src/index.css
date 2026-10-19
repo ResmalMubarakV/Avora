@@ -39,6 +39,19 @@ html.dark .bg-slate-200:not(.keep-light) {
   background-color: #334155;
 }
 
+/* Invert light surface hover states to dark surfaces in dark mode */
+html.dark .hover\:bg-white:hover:not(.keep-white):not(.keep-light) {
+  background-color: #1e293b;
+}
+
+html.dark .hover\:bg-slate-50:hover:not(.keep-light) {
+  background-color: #1e293b;
+}
+
+html.dark .hover\:bg-slate-100:hover:not(.keep-light) {
+  background-color: #1e293b;
+}
+
 html.dark .bg-white\/80 {
   background-color: rgba(30, 41, 59, 0.85);
 }

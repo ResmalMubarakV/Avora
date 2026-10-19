@@ -2,8 +2,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { getUsers, approveUser, suspendUser, deleteUser } from "../../api/adminApi";
 import { getMyProfile } from "../../api/userApi";
-import { Search, Loader2, UserCheck, ShieldAlert, Trash2, X, ExternalLink, ArrowLeft, ArrowUpDown, Users, Shield } from "lucide-react";
+import { Search, Loader2, UserCheck, ShieldAlert, Trash2, X, ExternalLink, ArrowLeft, ArrowUpDown, Users, Shield, Eye } from "lucide-react";
 import DeleteUserModal from "../../components/admin/DeleteUserModal";
+import UserDetailsModal from "../../components/admin/UserDetailsModal";
 import PageTitle from "../../components/common/PageTitle";
 
 // ==========================================
@@ -20,6 +21,7 @@ const AdminUsers = () => {
     const [searchTerm, setSearchTerm] = useState(urlSearchQuery);
     
     const [selectedUser, setSelectedUser] = useState(null);
+    const [reviewUser, setReviewUser] = useState(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [deleteError, setDeleteError] = useState("");
 
@@ -265,21 +267,33 @@ const AdminUsers = () => {
                                         <tr key={user._id} className="group hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
                                             {/* User Details */}
                                             <td className="py-3.5 px-5">
-                                                <div className="flex items-center gap-3 min-w-[180px]">
+                                                <div
+                                                    onClick={user.status === "pending" ? () => setReviewUser(user) : undefined}
+                                                    className={`flex items-center gap-3 min-w-[180px] ${
+                                                        user.status === "pending" ? "cursor-pointer group/user" : ""
+                                                    }`}
+                                                    title={user.status === "pending" ? "Click to view registration details" : undefined}
+                                                >
                                                     {user.profileImage ? (
                                                         <img 
                                                             src={user.profileImage} 
                                                             alt="" 
-                                                            className="h-10 w-10 rounded-xl object-cover border border-slate-200/80 dark:border-slate-700 shadow-2xs shrink-0" 
+                                                            className={`h-10 w-10 rounded-xl object-cover border border-slate-200/80 dark:border-slate-700 shadow-2xs shrink-0 ${
+                                                                user.status === "pending" ? "group-hover/user:scale-105 transition-transform" : ""
+                                                            }`} 
                                                         />
                                                     ) : (
-                                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#1E3A8A] to-[#3559D4] text-white font-bold text-xs shadow-2xs shrink-0">
+                                                        <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#1E3A8A] to-[#3559D4] text-white font-bold text-xs shadow-2xs shrink-0 ${
+                                                            user.status === "pending" ? "group-hover/user:scale-105 transition-transform" : ""
+                                                        }`}>
                                                             {user.username?.charAt(0).toUpperCase()}
                                                         </div>
                                                     )}
                                                     <div className="min-w-0">
                                                         <div className="flex items-center gap-1.5">
-                                                            <p className="font-bold text-slate-900 dark:text-white leading-tight truncate">
+                                                            <p className={`font-bold text-slate-900 dark:text-white leading-tight truncate ${
+                                                                user.status === "pending" ? "group-hover/user:text-[#3559D4] dark:group-hover/user:text-indigo-400 transition" : ""
+                                                            }`}>
                                                                 {user.name || user.username}
                                                             </p>
                                                             {isSelf && (
@@ -343,12 +357,18 @@ const AdminUsers = () => {
                                                 <div className="inline-flex items-center gap-1.5">
                                                     <button
                                                         type="button"
-                                                        onClick={() => window.open(`/${user.username}`, "_blank", "noopener,noreferrer")}
-                                                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer active:scale-95 text-[11px] font-bold"
-                                                        title="View Profile"
+                                                        onClick={() => {
+                                                            if (user.status === "pending") {
+                                                                setReviewUser(user);
+                                                            } else {
+                                                                window.open(`/${user.username}`, "_blank", "noopener,noreferrer");
+                                                            }
+                                                        }}
+                                                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-[#3559D4] dark:hover:text-indigo-400 transition cursor-pointer active:scale-95 text-[11px] font-bold"
+                                                        title={user.status === "pending" ? "View Registration Details" : "View Profile"}
                                                     >
-                                                        <ExternalLink size={12} />
-                                                        <span className="hidden sm:inline">Profile</span>
+                                                        {user.status === "pending" ? <Eye size={12} /> : <ExternalLink size={12} />}
+                                                        <span className="hidden sm:inline">{user.status === "pending" ? "Details" : "Profile"}</span>
                                                     </button>
 
                                                     {!isApproved ? (
@@ -401,6 +421,14 @@ const AdminUsers = () => {
                 onConfirm={confirmAndDeleteUser}
                 deleteLoading={deleteLoading}
                 deleteError={deleteError}
+            />
+
+            <UserDetailsModal
+                user={reviewUser}
+                open={Boolean(reviewUser)}
+                onClose={() => setReviewUser(null)}
+                onApprove={handleApprove}
+                onSuspend={handleSuspend}
             />
         </div>
     );

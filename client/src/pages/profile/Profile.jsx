@@ -110,17 +110,17 @@ const Profile = () => {
       <PageTitle title={user ? `${user.name} (@${user.username})` : "Travel Profile"} />
 
       {isAdminViewer ? (
-        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/90 px-3 sm:px-6 py-2.5 sm:py-3.5 backdrop-blur-md shadow-xs gap-2">
+        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 px-3 sm:px-6 py-2.5 sm:py-3.5 backdrop-blur-md shadow-xs gap-2">
           <button
             type="button"
             onClick={handleBack}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-slate-700 shadow-xs transition hover:bg-slate-50 cursor-pointer active:scale-95 shrink-0"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-200 shadow-xs transition hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer active:scale-95 shrink-0"
           >
             <ArrowLeft size={14} className="sm:w-[15px] sm:h-[15px]" />
             <span>Back</span>
           </button>
 
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-2.5 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold text-purple-700 shadow-xs truncate">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/60 px-2.5 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold text-purple-700 dark:text-purple-300 shadow-xs truncate">
             <Shield size={12} className="sm:w-[13px] sm:h-[13px] shrink-0" />
             <span className="truncate">Admin Inspection Mode</span>
           </div>

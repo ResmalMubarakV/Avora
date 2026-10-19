@@ -926,7 +926,7 @@ export default function PublicMemory() {
   const [loading, setLoading] = useState(true);
 
   const isAdminViewer = currentUser?.role === "admin";
-  const isPreviewMode = searchParams.get("preview") === "true";
+  const isPreviewMode = !isAdminViewer && searchParams.get("preview") === "true";
   const layoutIndex = searchParams.has("layout") ? Number(searchParams.get("layout")) : 0;
 
   const [previewScale, setPreviewScale] = useState(1);
@@ -1127,7 +1127,13 @@ export default function PublicMemory() {
     fetchMemory();
   }, [username, slug, navigate]);
 
-  const isOwner = Boolean(currentUser?._id && typeof memory?.user === "object" ? memory.user._id : memory?.user === currentUser?._id);
+  const memoryUserId = typeof memory?.user === "object" ? memory.user?._id : memory?.user;
+  const isOwner = Boolean(
+    !isAdminViewer &&
+    currentUser?._id &&
+    memoryUserId &&
+    String(currentUser._id) === String(memoryUserId)
+  );
 
   if (loading) return <div className="flex min-h-screen items-center justify-center bg-slate-50"><PageTitle title="Loading Memory" /><p className="text-lg font-medium text-slate-500">Loading memory...</p></div>;
   if (!memory) return null;
@@ -1269,7 +1275,7 @@ export default function PublicMemory() {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none z-0"><div className="absolute inset-x-0 top-0 h-[380px] bg-gradient-to-b from-sky-100/60 via-blue-50/30 to-transparent dark:from-indigo-950/40 dark:via-blue-950/20 dark:to-transparent" /></div>
         <div className="relative z-10 mx-auto max-w-[1500px] px-5 sm:px-8 lg:px-10 xl:px-14 pt-8 lg:pt-12 pb-12">
-          <MemoryHero memory={memory} username={username} openGallery={openGallery} isOwner={isOwner} locationState={location.state} onDownloadClick={enterPreviewMode} />
+          <MemoryHero memory={memory} username={username} openGallery={openGallery} isOwner={isOwner && !isAdminViewer} isAdminViewer={isAdminViewer} locationState={location.state} onDownloadClick={enterPreviewMode} />
         </div>
       </section>
 
@@ -1322,7 +1328,7 @@ export default function PublicMemory() {
             nextImage={nextImage} 
             previousImage={previousImage} 
             goToImage={goToImage} 
-            canDownload={isOwner} 
+            canDownload={isOwner && !isAdminViewer} 
             memoryTitle={memory.title} 
             onClose={() => { 
                 setIsOpen(false); 

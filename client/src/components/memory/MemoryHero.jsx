@@ -11,6 +11,7 @@ const MemoryHero = ({
     memory,
     openGallery,
     isOwner,
+    isAdminViewer = false,
     isLoggedIn,
     locationState,
     onDownloadClick,
@@ -19,7 +20,7 @@ const MemoryHero = ({
     const location = useLocation();
 
     const incomingFrom = locationState?.from || location.state?.from || sessionStorage.getItem(RETURN_KEY);
-    const from = incomingFrom || `/${username}`;
+    const from = incomingFrom || (isAdminViewer ? "/admin" : `/${username}`);
 
     const currentMemoryPath = location.pathname + location.search;
 
@@ -59,7 +60,7 @@ const MemoryHero = ({
                     <ArrowLeft size={18} className="transition-transform duration-300 group-hover:-translate-x-1" />
                 </button>
 
-                {isOwner && (
+                {!isAdminViewer && isOwner && (
                     <div className="flex items-center gap-3">
                         <button
                             type="button"

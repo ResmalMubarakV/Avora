@@ -1,9 +1,13 @@
-import { Check, ShieldAlert, UserCheck, ExternalLink, Clock } from "lucide-react";
+import { useState } from "react";
+import { Check, ShieldAlert, UserCheck, Eye, Clock } from "lucide-react";
+import UserDetailsModal from "./UserDetailsModal";
 
 // ==========================================
 // PENDING USERS COMPONENT
 // ==========================================
 const PendingUsers = ({ users = [], onApprove, onSuspend }) => {
+    const [selectedUser, setSelectedUser] = useState(null);
+
     return (
         <div className="w-full rounded-2xl sm:rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-5 sm:p-6 shadow-xs transition-colors">
             {/* Header */}
@@ -59,19 +63,24 @@ const PendingUsers = ({ users = [], onApprove, onSuspend }) => {
                             {users.map((user) => (
                                 <tr key={user._id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
                                     <td className="py-3 pr-4">
-                                        <div className="flex items-center gap-2.5 min-w-[150px]">
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#1E3A8A] to-[#3559D4] text-white font-bold text-xs shrink-0 shadow-2xs">
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedUser(user)}
+                                            className="flex items-center gap-2.5 min-w-[150px] text-left cursor-pointer group/user"
+                                            title="Click to view signup details"
+                                        >
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#1E3A8A] to-[#3559D4] text-white font-bold text-xs shrink-0 shadow-2xs group-hover/user:scale-105 transition-transform">
                                                 {user.username ? user.username.charAt(0).toUpperCase() : "U"}
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="font-bold text-slate-900 dark:text-white leading-tight truncate">
+                                                <p className="font-bold text-slate-900 dark:text-white leading-tight truncate group-hover/user:text-[#3559D4] dark:group-hover/user:text-indigo-400 transition">
                                                     {user.name || user.username}
                                                 </p>
                                                 <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate">
                                                     @{user.username}
                                                 </p>
                                             </div>
-                                        </div>
+                                        </button>
                                     </td>
                                     <td className="py-3 pr-4 text-slate-600 dark:text-slate-300 font-medium truncate max-w-[180px]">
                                         {user.email}
@@ -86,12 +95,12 @@ const PendingUsers = ({ users = [], onApprove, onSuspend }) => {
                                         <div className="inline-flex items-center gap-1.5">
                                             <button
                                                 type="button"
-                                                onClick={() => window.open(`/${user.username}`, "_blank", "noopener,noreferrer")}
-                                                title="View Profile"
-                                                className="inline-flex items-center gap-1 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 px-2.5 py-1.5 text-[11px] font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer active:scale-95"
+                                                onClick={() => setSelectedUser(user)}
+                                                title="View Registration Details"
+                                                className="inline-flex items-center gap-1 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 px-2.5 py-1.5 text-[11px] font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-[#3559D4] dark:hover:text-indigo-400 transition cursor-pointer active:scale-95"
                                             >
-                                                <ExternalLink size={12} />
-                                                <span>Profile</span>
+                                                <Eye size={12} />
+                                                <span>Details</span>
                                             </button>
                                             <button
                                                 type="button"
@@ -117,6 +126,15 @@ const PendingUsers = ({ users = [], onApprove, onSuspend }) => {
                     </table>
                 </div>
             )}
+
+            {/* Traveler Registration Details Modal */}
+            <UserDetailsModal
+                user={selectedUser}
+                open={Boolean(selectedUser)}
+                onClose={() => setSelectedUser(null)}
+                onApprove={onApprove}
+                onSuspend={onSuspend}
+            />
         </div>
     );
 };
